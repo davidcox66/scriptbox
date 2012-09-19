@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:conditional="http://scriptbox.org/spring/conditional"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://scriptbox.org/spring/conditional http://scriptbox.org/spring/conditional.xsd">
+
+  	<bean id="runtimeConfigurer" class="org.scriptbox.util.spring.context.EvalConfigurer">
+    	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+    	<property name="ignoreUnresolvablePlaceholders" value="true" />
+  	</bean>
+  	
+ 	<conditional:switch property="#{config.enabled}" >
+		<conditional:case value="true" >
+			<bean name="testString6" class='java.lang.String'>
+				<constructor-arg value="DEF" />
+			</bean>
+		</conditional:case>
+		<conditional:default>
+			<bean name="testString6" class='java.lang.String'>
+				<constructor-arg value="ABC" />
+			</bean>
+		</conditional:default>
+	</conditional:switch>
+	<bean name="testString7" class='java.lang.String'>
+		<constructor-arg value="${config.value}" />
+	</bean>
+	
+	<bean name="testString8" class='java.lang.String'>
+		<constructor-arg value="${json.array[0].name}" />
+	</bean>
+	
+	<bean name="testString9" class='java.lang.String'>
+		<constructor-arg value="#{json.array[0].name}" />
+	</bean>
+</beans>
+

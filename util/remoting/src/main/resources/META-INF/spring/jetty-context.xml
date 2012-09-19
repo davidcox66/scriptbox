@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:conditional="http://scriptbox.org/spring/conditional"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://scriptbox.org/spring/conditional http://scriptbox.org/spring/conditional.xsd">
+	
+ 	<bean id="configurer" class="org.scriptbox.util.spring.context.EvalConfigurer">
+    	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+  	</bean>
+  
+	<conditional:test expression="${jetty.jmx}" >
+		<bean name="jettyJmx" class="org.scriptbox.util.remoting.JettyJmxInitializer" init-method="start"
+			p:server-ref="jettyServer" />
+	</conditional:test>
+	
+	<bean name="jettyServer" class="org.eclipse.jetty.server.Server" init-method="start" >
+		<!--
+		<property name="threadPool">  
+      		<bean id="ThreadPool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+        		<property name="minThreads" value="10"/>
+        		<property name="maxThreads" value="200"/>
+      		</bean>
+    	</property>
+    	<property name="stopAtShutdown" value="true"/>
+    	<property name="sendServerVersion" value="true"/>
+    	<property name="sendDateHeader" value="true"/>
+    	<property name="gracefulShutdown" value="1000"/>
+    	<property name="dumpAfterStart" value="false"/>
+    	<property name="dumpBeforeStop" value="false"/>
+    	-->
+		<property name="connectors">
+		  <list>
+			  <bean name="LocalSocket" class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+			      <property name="host" value="${jetty.hostname}"/>
+			      <property name="port" value="${jetty.port}"/>
+			  </bean>
+		  </list>
+		</property>
+		<property name="handler">
+		  <bean class="org.eclipse.jetty.server.handler.HandlerCollection" >
+		  <property name="handlers">
+		  <list>
+		    <bean class="org.eclipse.jetty.servlet.ServletContextHandler">
+		      <property name="contextPath" value="/"/>
+		      <property name="sessionHandler">
+		        <bean class="org.eclipse.jetty.server.session.SessionHandler"/>
+		      </property>
+		      <property name="resourceBase" value="/var/www"/>
+		      
+		      <property name="servletHandler">
+		        <bean class=" org.eclipse.jetty.servlet.ServletHandler">
+		          <property name="servlets"> 
+		            <list>
+		            <!-- default servlet -->
+		            <!-- 
+		            <bean class="org.eclipse.jetty.servlet.ServletHolder">
+		              <property name="name" value="DefaultServlet"/>
+		              <property name="servlet">
+		                <bean class="org.eclipse.jetty.servlet.DefaultServlet"/>
+		              </property>
+		              <property name="initParameters">
+		                <map>
+		                  <entry key="resourceBase" value="/var/www"/>
+		                </map>
+		              </property>
+		            </bean>
+		            -->
+		            <!-- remoting servlet -->
+		            <bean class="org.eclipse.jetty.servlet.ServletHolder">
+		              <property name="name" value="RemotingServlet"/>
+		              <property name="servlet">
+		                <bean class="org.springframework.web.servlet.DispatcherServlet"/>
+		              </property>
+		              <property name="initParameters">
+		                <map>
+		                  <entry key="resourceBase" value="/var/www"/>
+		                  <!-- 
+		                    The default location for the xml file is WEB-INF/<servlet-name>-servlet.xml.
+		                    We override that here to a more sensible location.
+		                   -->
+		                  <entry key="contextConfigLocation" value="${jetty.contextConfigLocation}" />
+		                </map>
+		              </property>
+		            </bean>
+		            </list> 		            
+		          </property>
+		          
+		          
+		          <property name="servletMappings">
+		            <list>
+		            <bean class="org.eclipse.jetty.servlet.ServletMapping">
+		              <property name="pathSpecs">
+		                <list><value>${jetty.servletMapping}</value></list>
+		              </property>
+		              <property name="servletName" value="RemotingServlet"/>
+		            </bean>
+		            </list>
+		          </property>
+		          
+		          
+		        </bean>
+		      </property>
+		    </bean>
+		    <!-- log handler -->
+		    <conditional:test expression="${jetty.logging}" >
+			    <bean class="org.eclipse.jetty.server.handler.RequestLogHandler">
+			      <property name="requestLog">
+			        <bean class="org.eclipse.jetty.server.NCSARequestLog">
+			          <property name="append" value="true"/>
+			          <property name="filename" value="${jetty.logDirectory}/request.log.yyyy_mm_dd"/>
+			          <property name="extended" value="true"/>
+			          <property name="retainDays" value="999"/>
+			          <property name="filenameDateFormat" value="yyyy-MM-dd"/>
+			        </bean>
+			      </property>
+			    </bean>
+			</conditional:test>
+		  </list>
+		  </property>
+		  </bean>
+		</property>
+	</bean>	
+
+</beans>

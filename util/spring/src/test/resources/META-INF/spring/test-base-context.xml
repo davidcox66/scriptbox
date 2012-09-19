@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:conditional="http://scriptbox.org/spring/conditional"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://scriptbox.org/spring/conditional http://scriptbox.org/spring/conditional.xsd">
+
+	<conditional:import property="ENV" value="local" resource="classpath*:META-INF/spring/test-local-context.xml" />	
+	<conditional:import property="ENV" value="dev" resource="classpath*:META-INF/spring/test-dev-context.xml" />	
+	
+	<!--   <conditional:test property="ENV" value="local" >	 -->
+	<conditional:test expression="${env['ENV'] == 'local'}" >	
+		<bean name="testString1" class='java.lang.String'>
+			<constructor-arg value="ABC" />
+		</bean>
+	</conditional:test>
+
+	<!-- 
+		<conditional:test property="ENV" value="dev">	
+		
+	  <conditional:test expression="${ENV == 'local' or system['ENV'] == 'dev'}" >	
+	  
+		<conditional:test>	
+			<conditional:expression><![CDATA[${ENV matches '(local|dev)'}]]></conditional:expression>
+	-->
+	<conditional:test property="ENV" value="dev">	
+		<bean name="testString1" class='java.lang.String'>
+			<constructor-arg value="DEF" />
+		</bean>
+	</conditional:test>
+
+	<conditional:switch property="ENV" >
+		<conditional:case value="local" >
+			<bean name="testString3" class='java.lang.String'>
+				<constructor-arg value="MNO" />
+			</bean>
+		</conditional:case>
+		<conditional:case>
+			<conditional:values>
+				<conditional:value>local</conditional:value>
+				<conditional:value>dev</conditional:value>
+			</conditional:values>
+			<bean name="testString3" class='java.lang.String'>
+				<constructor-arg value="PQR" />
+			</bean>
+		</conditional:case>
+	</conditional:switch>
+	
+	<conditional:switch property="ENV" >
+		<conditional:case value="foo" >
+			<bean name="testString4" class='java.lang.String'>
+				<constructor-arg value="QWE" />
+			</bean>
+		</conditional:case>
+		<conditional:default>
+			<bean name="testString4" class='java.lang.String'>
+				<constructor-arg value="ABC" />
+			</bean>
+			<bean name="testString5" class='java.lang.String'>
+				<constructor-arg value="WER" />
+			</bean>
+		</conditional:default>
+	</conditional:switch>
+	
+	<bean name="testString6" class='java.lang.String'>
+		<constructor-arg value="#{testString5}" />
+	</bean>
+</beans>
+

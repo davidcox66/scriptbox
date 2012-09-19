@@ -1,0 +1,10 @@
+*~
+.*.swp
+*.class
+target/
+bin/
+.project
+.classpath
+.settings/
+.DS_Store
+request.log*

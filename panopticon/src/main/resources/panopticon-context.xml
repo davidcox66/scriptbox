@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:conditional="http://scriptbox.org/spring/conditional"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://scriptbox.org/spring/conditional http://scriptbox.org/spring/conditional.xsd">
+	
+	<import resource="classpath:box-basic-context.xml" />
+
+	<conditional:dependency classes="groovy.lang.GroovyShell" >
+		<bean name="runGroovyInjector" class="org.scriptbox.box.plugins.run.RunGroovyInjector" 
+			p:plugin-ref="run" />
+		<bean name="quartzGroovyInjector" class="org.scriptbox.box.plugins.quartz.QuartzGroovyInjector" 
+			p:plugin-ref="quartz" />
+		<bean name="jmxGroovyInjector" class="org.scriptbox.box.plugins.jmx.JmxGroovyInjector" 
+			p:plugin-ref="jmx" />
+	</conditional:dependency>
+	
+    <bean name="run" class="org.scriptbox.box.plugins.run.RunPlugin" />
+    <bean name="quartz" class="org.scriptbox.box.plugins.quartz.QuartzPlugin" />
+    <bean name="jmx" class="org.scriptbox.box.plugins.jmx.JmxPlugin" 
+    	p:connections-ref="jmxConnections" />
+    
+    <bean name="vmJmxConnectionBuilder" class="org.scriptbox.box.plugins.jmx.VmJmxConnectionBuilder" />
+    <bean name="jmxConnections" class="org.scriptbox.box.plugins.jmx.JmxConnections"
+    	p:builder-ref="vmJmxConnectionBuilder" />
+    
+	<bean name="monitorImpl" class="org.scriptbox.panopticon.main.Monitor" init-method="start"
+		p:box-ref="box" />
+
+	<bean id="serviceErrorHandler" class="org.scriptbox.util.spring.aop.ServiceErrorHandler" />
+ 
+	<bean id="monitor" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target" ref="monitorImpl" />
+		<property name="interceptorNames">
+			<list>
+				<value>serviceErrorHandler</value>
+			</list>
+		</property>
+	</bean>
+	
+  	<bean name="/lm/" class="org.springframework.remoting.caucho.HessianServiceExporter"
+  		p:service-ref="monitor"
+  		p:serviceInterface="org.scriptbox.panopticon.main.MonitorInterface" />
+  
+</beans>
