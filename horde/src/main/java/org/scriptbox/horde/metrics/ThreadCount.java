@@ -1,6 +1,6 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
-class ThreadCount extends ScriptMetric {
+public class ThreadCount extends ScriptMetric {
 
     @Override
     public int getValue() {

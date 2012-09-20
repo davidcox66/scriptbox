@@ -3,6 +3,7 @@ package org.scriptbox.util.common.collection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class CollectionUtil {
 
@@ -18,6 +19,10 @@ public class CollectionUtil {
 		}
 		return ret;
 	}
-	
-
+	public static boolean isEmpty( Collection<?> coll ) {
+		return coll == null || coll.size() == 0;
+	}
+	public static boolean isEmpty( Map coll ) {
+		return coll == null || coll.size() == 0;
+	}
 }

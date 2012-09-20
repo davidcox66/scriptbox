@@ -146,13 +146,17 @@ public class BoxContext {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "run: executing script: " + script ); }
 		try {
 			current.set( this );
-	        callListeners( new ParameterizedRunnable<BoxContextListener>() {
-	        	public void run( BoxContextListener listener ) throws Exception {
-	        		listener.executingScript(script);
-	        	}
-	        } );
-	    	engine.put( "args", script.getArgs() );
-	    	engine.eval( script.getScriptText() );
+			BoxScript.with( script, new ParameterizedRunnable<BoxScript>() {
+				public void run( final BoxScript bscript ) throws Exception{
+			        callListeners( new ParameterizedRunnable<BoxContextListener>() {
+			        	public void run( BoxContextListener listener ) throws Exception {
+			        		listener.executingScript(bscript);
+			        	}
+			        } );
+			    	engine.put( "args", bscript.getArgs() );
+			    	engine.eval( bscript.getScriptText() );
+				}
+			} );
 		}
 		finally {
 			current.remove();

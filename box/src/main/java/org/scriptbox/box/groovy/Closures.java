@@ -23,6 +23,25 @@ public class Closures {
 		}
 		return false;
 	}
+
+	public static Runnable toRunnableWithDelegate( final Closure closure, Object delegate )  {
+		if( closure != null ) {
+			closure.setDelegate( delegate );
+			return toRunnable( closure );
+		}
+		return null;
+	}
+	
+	public static Runnable toRunnable( final Closure closure )  {
+		if( closure != null ) {
+			return new Runnable() {
+				public void run() {
+					closure.call();
+				}
+			};
+		}
+		return null;
+	}
 	
 	public static <ARG> ParameterizedRunnable<ARG> toRunnable( final Closure closure, Class<ARG> clazz )  {
 		if( closure != null ) {

@@ -1,47 +1,46 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
-import java.lang.management.ManagementFactory
+import java.lang.management.ManagementFactory;
 
-import javax.management.MBeanServer
-import javax.management.ObjectName
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.scriptbox.box.container.BoxScript;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.ihg.atp.crs.loadgen.main.LoadScript
 
+public abstract class GeneratorMetric implements GeneratorMetricMBean {
 
-abstract class GeneratorMetric implements GeneratorMetricMBean {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger( GeneratorMetric );
+    private static final Logger LOGGER = LoggerFactory.getLogger( GeneratorMetric.class );
     
-    protected LoadScript script;
+    protected BoxScript script;
     
-    abstract String getName();
+    public abstract String getName();
     
-    abstract ObjectName getObjectName(); 
+    public abstract ObjectName getObjectName(); 
     
-    void register() {
-        ObjectName objName = objectName;
-        LOGGER.debug( "register: registering mbean objectName=${objName}, class=${getClass()}");
+    public void register() throws Exception {
+        ObjectName objName = getObjectName();
+        LOGGER.debug( "register: registering mbean objectName=" + objName + ", class=" + getClass());
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.registerMBean(this, objName);
         
     }    
 
-    void unregister() {    
-        ObjectName objName = objectName;
+    public void unregister() throws Exception {    
+        ObjectName objName = getObjectName();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         if( mbs.isRegistered(objName) ) {
-            LOGGER.debug( "unregister: unregistering mbean objectName=${objName}, class=${getClass()}");
+            LOGGER.debug( "unregister: unregistering mbean objectName=" + objName + ", class=" + getClass());
 	        mbs.unregisterMBean( objName );
         }
         else {
-            LOGGER.debug( "unregister: not registered mbean objectName=${objName}, class=${getClass()}");
+            LOGGER.debug( "unregister: not registered mbean objectName=" + objName + ", class=" + getClass());
         }
     }
    
     public String toString() { 
-        return getClass().getName() + "{ objectName=${objectName} }";
+        return getClass().getName() + "{ objectName=" + getObjectName() + " }";
     }
 }

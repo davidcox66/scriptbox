@@ -1,25 +1,23 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ihg.atp.crs.loadgen.main.LoadScript
-
-class TransactionCount extends TestMetric {
+public class TransactionCount extends TestMetric {
 
     private AtomicInteger transactionCount = new AtomicInteger();
      
     TransactionCount() {
     }
  
-    String getName() {
+    public String getName() {
         return "count";
     } 
     
-    synchronized void record( boolean success, long millis ) {
+    synchronized public void record( boolean success, long millis ) {
         transactionCount.addAndGet( 1 );
     }
     
-    synchronized int getValue() {
+    synchronized public int getValue() {
         return transactionCount.getAndSet( 0 );
     }
 }

@@ -1,10 +1,7 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
-import java.util.concurrent.atomic.AtomicInteger
 
-import com.ihg.atp.crs.loadgen.main.LoadScript
-
-class TransactionsPerSecond extends TestMetric {
+public class TransactionsPerSecond extends TestMetric {
 
     private long lastChecked = Long.MIN_VALUE;
     private int transactionCount;
@@ -12,22 +9,22 @@ class TransactionsPerSecond extends TestMetric {
     TransactionsPerSecond() {
     }
  
-    String getName() {
+    public String getName() {
         return "tps";
     } 
     
-    synchronized void record( boolean success, long millis ) {
+    synchronized public void record( boolean success, long millis ) {
         if( lastChecked == Long.MIN_VALUE ) {
            lastChecked = System.currentTimeMillis(); 
         }
         transactionCount++;
     }
     
-    synchronized int getValue() {
+    synchronized public int getValue() {
         long now = System.currentTimeMillis();
         float divisor = (now - lastChecked) / 1000;
         try {
-            return divisor > 0 ? transactionCount / divisor : 0;
+            return divisor > 0 ? (int)(transactionCount / divisor) : 0;
         }
         finally {
 	        transactionCount = 0;

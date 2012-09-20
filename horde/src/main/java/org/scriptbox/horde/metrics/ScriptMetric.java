@@ -1,4 +1,4 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
 import java.lang.management.ManagementFactory
 
@@ -11,19 +11,19 @@ import org.slf4j.LoggerFactory
 import com.ihg.atp.crs.loadgen.main.LoadScript
 
 
-abstract class ScriptMetric extends GeneratorMetric {
+public abstract class ScriptMetric extends GeneratorMetric {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( ScriptMetric );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ScriptMetric.class );
     
     protected LoadScript script;
     
-    void init( LoadScript script ) {
+    public void init( LoadScript script ) {
         this.script = script;
     }
 
-    abstract String getName();
+    public abstract String getName();
     
-    ObjectName getObjectName() {
+    public ObjectName getObjectName() {
         return new ObjectName("GeneratorMetrics:context=${script.context.name},script=${script.name},name=${name}");
     }
     

@@ -1,6 +1,6 @@
-package com.ihg.atp.crs.loadgen.metrics
+package org.scriptbox.horde.metrics;
 
-interface GeneratorMetricMBean {
+public interface GeneratorMetricMBean {
 
-    int getValue();
+    public int getValue();
 }

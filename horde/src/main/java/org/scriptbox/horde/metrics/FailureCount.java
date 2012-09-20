@@ -2,7 +2,7 @@ package org.scriptbox.horde.metrics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class FailureCount extends TestMetric {
+public class FailureCount extends TestMetric {
 
     private AtomicInteger failures = new AtomicInteger();
      
