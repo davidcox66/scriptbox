@@ -1,16 +1,19 @@
 package org.scriptbox.box.remoting;
 
 
+import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.scriptbox.box.container.Box;
 import org.scriptbox.box.container.BoxContext;
+import org.scriptbox.box.container.StatusProvider;
 import org.scriptbox.box.controls.BoxService;
 import org.scriptbox.box.controls.BoxServices;
 import org.scriptbox.util.common.error.Errors;
+import org.scriptbox.util.common.error.ExceptionHelper;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BoxImpl implements BoxInterface {
 
@@ -76,6 +79,44 @@ public class BoxImpl implements BoxInterface {
 		box.run( contextName, scriptName, script, args );
 	}
 
+	public String status() throws Exception {
+		final StringBuilder builder = new StringBuilder( 1024 );
+		Set<StatusProvider> bstats = box.getBeans().getAll( StatusProvider.class );
+		if( bstats != null && bstats.size() > 0 ) {
+			builder.append( "Box\n" );
+			builder.append( "----------------------------------------------\n");
+			buildStatus( builder, bstats );
+		}
+		Map<String,BoxContext> contexts = box.getContexts();
+		for( Map.Entry<String,BoxContext> entry : contexts.entrySet() ) {
+			BoxContext.with(entry.getValue(), new ParameterizedRunnable<BoxContext>() {
+				public void run( BoxContext context ) {
+					Set<StatusProvider> cstats = context.getBeans().getAll(StatusProvider.class );
+					if( cstats != null && cstats.size() > 0 ) {
+						builder.append( "Context[" + context.getName() + "]\n" );
+						builder.append( "----------------------------------------------\n");
+						buildStatus( builder, cstats );
+					}
+				}
+			} );
+		}
+		return builder.toString();
+	}
+	
+	private void buildStatus( StringBuilder builder, Set<StatusProvider> stats ) {
+		if( stats != null && stats.size() > 0 ) {
+			for( StatusProvider stat : stats ) {
+				try {
+					builder.append( stat.status() + "\n" );
+				}
+				catch( Exception ex ) {
+					LOGGER.error( "Error getting status", ex );
+					builder.append( ExceptionHelper.toString(ex) );
+				}
+			}
+		}
+	}
+	
 	private Set<BoxService> getBoxServices() {
 		return box.getBeans().getAll(BoxService.class);
 	}

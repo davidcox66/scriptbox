@@ -22,7 +22,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 	
 	public QuartzPlugin() throws SchedulerException {
 	}
-	
+
 	public void contextCreated(BoxContext context) throws Exception {
 		
 		Properties props = new Properties();
@@ -46,7 +46,9 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 			}
 			public void stop() throws Exception {
 				scheduler.standby();
-				
+			}
+			public String status() throws Exception {
+				return scheduler.toString();
 			}
 		});
 		setInjectors( context.getBox().getInjectorsOfType(QuartzInjector.class) );

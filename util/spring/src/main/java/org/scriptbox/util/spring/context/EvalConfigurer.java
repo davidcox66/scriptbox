@@ -3,6 +3,7 @@ package org.scriptbox.util.spring.context;
 import java.util.Properties;
 
 import org.scriptbox.util.spring.context.accessor.BeanPropertyAccessor;
+import org.scriptbox.util.spring.context.accessor.ContextBeansAccessor;
 import org.scriptbox.util.spring.context.accessor.JsonPropertyAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class EvalConfigurer extends PropertyPlaceholderConfigurer {
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
 		    ctx.addPropertyAccessor( new BeanPropertyAccessor(beanFactory) );
 		    ctx.addPropertyAccessor( new JsonPropertyAccessor() );
+		    // ctx.addPropertyAccessor( new ContextBeansAccessor() );
 			String result = exp.getValue(ctx,String.class);
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "resolvePlaceholder: placeholder=" + placeholder + ", result=" + result ); }
 			return result;

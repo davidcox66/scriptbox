@@ -9,13 +9,13 @@ import java.util.List;
 import org.scriptbox.box.plugins.jmx.HostPort;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
+import org.scriptbox.util.common.error.ExceptionHelper;
 import org.scriptbox.util.common.io.IoUtil;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.spring.context.ContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class BoxCliHelper {
 
@@ -59,51 +59,48 @@ public class BoxCliHelper {
 	
 	private List<Thread> processAgents() throws Exception {
 		
-		ApplicationContext ctx = new ClassPathXmlApplicationContext( "classpath:panopticon-client-context.xml" );	
-		BoxInterface box = ctx.getBean( "monitor", BoxInterface.class );
 		if( cmd.consumeArgWithParameters("createContext", 2) ) {
 			cmd.checkUnusedArgs();
 			final String language = cmd.getParameter( 0 );
 			final String contextName = cmd.getParameter( 1 );
-			return forEachAgent( "Creating context", "Context created", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.createContext( language, contextName );
+			return forEachAgent( "Creating context", "Context created", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.createContext( language, contextName );
 				}
 			} );
 		}
 		else if( cmd.consumeArgWithParameters("startContext",1) ) {
 			cmd.checkUnusedArgs();
 			final String contextName = cmd.getParameter( 0 );
-			return forEachAgent( "Starting context", "Context started", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.startContext( contextName );
+			return forEachAgent( "Starting context", "Context started", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.startContext( contextName );
 				}
 			} );
 		}
 		else if( cmd.consumeArgWithParameters("stopContext",1) ) {
 			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 1 );
-			return forEachAgent( "Stopping context", "Context stopped", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.stopContext( contextName );
+			final String contextName = cmd.getParameter( 0 );
+			return forEachAgent( "Stopping context", "Context stopped", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.stopContext( contextName );
 				}
 			} );
 		}
 		else if( cmd.consumeArgWithParameters("shutdownContext",1) ) {
 			cmd.checkUnusedArgs();
 			final String contextName = cmd.getParameter( 1 );
-			return forEachAgent( "Shutting down context", "Context shutdown", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.shutdownContext( contextName );
+			return forEachAgent( "Shutting down context", "Context shutdown", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.shutdownContext( contextName );
 				}
 			} );
 		}
 		else if( cmd.consumeArgWithParameters("shutdownAllContext",0) ) {
 			cmd.checkUnusedArgs();
-			box.shutdownAllContexts();
-			return forEachAgent( "Creating context", "Context created", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.shutdownAllContexts();
+			return forEachAgent( "Shutting down all contexts", "All contexts shutdown", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.shutdownAllContexts();
 				}
 			} );
 		}
@@ -112,9 +109,17 @@ public class BoxCliHelper {
 			final String contextName = cmd.getParameter( 0 );
 			final String scriptName = cmd.getParameter( 1 );
 			final String fileName = cmd.getParameter( 2 );
-			return forEachAgent( "Creating context", "Context created", new ParameterizedRunnable<BoxInterface>() {
-				public void run( BoxInterface box ) throws Exception {
-					box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), new String[] {} );
+			return forEachAgent( "Loading script", "Script loaded", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), new String[] {} );
+				}
+			} );
+		}
+		else if( cmd.consumeArgWithParameters("status",0) ) {
+			cmd.checkUnusedArgs();
+			return forEachAgent( "Getting status", "Retrieved status", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					System.out.println( prefixLines(agent.hostPort,agent.box.status()) );
 				}
 			} );
 		}
@@ -127,7 +132,7 @@ public class BoxCliHelper {
 	private List<Thread> forEachAgent( 
 		String preMessage,
 		String postMessage, 
-		ParameterizedRunnable<BoxInterface> runner )
+		ParameterizedRunnable<Agent> runner )
 			throws Exception
 	{
 		final List<Thread> ret = new ArrayList<Thread>();
@@ -138,34 +143,32 @@ public class BoxCliHelper {
 	}
 	
 	private Thread invokeAgent( 
-		final HostPort agent, 
-		final ParameterizedRunnable<BoxInterface> runner, 
+		final HostPort hostPort, 
+		final ParameterizedRunnable<Agent> runner, 
 		final String preMessage,
 		final String postMessage ) 
 	{
-		final ApplicationContext ctx = ContextBuilder.create( agentBeanName, agent, contextLocations );	
+		final ApplicationContext ctx = ContextBuilder.create( agentBeanName, hostPort, contextLocations );	
 		final BoxInterface box = ctx.getBean( "monitor", BoxInterface.class );
-		return new Thread(new Runnable() {
+		final Agent agent = new Agent( hostPort, box );
+		Thread ret = new Thread(new Runnable() {
 			public void run() {
 	            try {
-			        System.out.println(agent.getHost() + ":" + agent.getPort() + " : " + preMessage + " ..." );
-			        runner.run( box );
+			        System.out.println(hostPort.getHost() + ":" + hostPort.getPort() + " : " + preMessage + " ..." );
+			        runner.run( agent );
 	                if( postMessage != null ) {
-	                	System.out.println( agent.getHost() + ":" + agent.getPort() + " : " + postMessage );
+	                	System.out.println( hostPort.getHost() + ":" + hostPort.getPort() + " : " + postMessage );
 	                }
 	            }
 	            catch( Exception ex ) {
-	                LOGGER.error( "Error from " + agent.getHost() + ":" + agent.getPort(), ex );
-	                String exstr = exceptionToString( ex );
-	                StringBuilder builder = new StringBuilder();
-	                String[] lines = exstr.split( "\n" );
-	                for( String line : lines ) {
-	                    builder.append( agent.getHost() + ":" + agent.getPort() + " : " + line + "\n" );
-	                }
-	                System.out.println( builder.toString() );
+	                LOGGER.error( "Error from " + hostPort.getHost() + ":" + hostPort.getPort(), ex );
+	                String exstr = ExceptionHelper.toString( ex );
+	                System.out.println( prefixLines(hostPort,exstr) );
 	            }
 			}
-        }, agent.getHost() + ":" + agent.getPort() );
+        }, hostPort.getHost() + ":" + hostPort.getPort() );
+		ret.start();
+		return ret;
 	}
 	
 	private static List<HostPort> getAgentHostPorts( CommandLine cmd ) throws CommandLineException {
@@ -186,14 +189,24 @@ public class BoxCliHelper {
         } 
         return ret;
 	}
-	
-	private static String exceptionToString( Exception ex ) {
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw, true);
-		ex.printStackTrace(pw);
-		pw.flush();
-		sw.flush();
-		return sw.toString();
+
+	private static String prefixLines( HostPort agent, String str ) {
+        StringBuilder builder = new StringBuilder();
+        String[] lines = str.split( "\n" );
+        for( String line : lines ) {
+            builder.append( agent.getHost() + ":" + agent.getPort() + " : " + line + "\n" );
+        }
+        return builder.toString();
 	}
-  
+	
+	private static class Agent
+	{
+		public HostPort hostPort;
+		public BoxInterface box;
+		
+		public Agent( HostPort hostPort, BoxInterface box ) {
+			this.hostPort = hostPort;
+			this.box = box;
+		}
+	}
 }
