@@ -5,18 +5,20 @@
 
 	<parent>
 		<groupId>org.scriptbox</groupId>
-		<artifactId>util.parent</artifactId>
+		<artifactId>panopticon.parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>util.remoting</artifactId>
-	<name>util-remoting</name>
-	<description>Remoting Utilities</description>
+	<artifactId>panopticon.common</artifactId>
+	<name>panopticon-common</name>
+	<description>Performance Monitor</description>
 
 	<properties>
 	</properties>
 
+	<build>
+	</build>
 
 	<dependencies>
 		<dependency>
@@ -26,27 +28,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scriptbox</groupId>
-			<artifactId>util.spring</artifactId>
+			<artifactId>util.remoting</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scriptbox</groupId>
-			<artifactId>deps.pom.jetty</artifactId>
+			<artifactId>box</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.caucho</groupId>
-			<artifactId>hessian</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

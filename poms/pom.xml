@@ -16,6 +16,7 @@
   <modules>
     <module>deps-pom</module>
     <module>deps-pom-logging</module>
+    <module>deps-pom-jetty</module>
   </modules>
 
   <properties>
