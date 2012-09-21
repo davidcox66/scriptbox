@@ -143,7 +143,7 @@ public class Action {
             long before = System.currentTimeMillis(); 
             try {
                boolean ret = closure.run( arguments );
-               ActionMetric.collectAll( met, ret ? true : false, System.currentTimeMillis() - before );
+               ActionMetric.collectAll( met, ret, System.currentTimeMillis() - before );
             }
             catch( VirtualMachineError ex ) {
                 throw ex;
