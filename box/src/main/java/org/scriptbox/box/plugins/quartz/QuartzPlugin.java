@@ -49,7 +49,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 				scheduler.standby();
 			}
 			public String status() throws Exception {
-				return scheduler.toString();
+				return "QuartzScheduler{ " + scheduler + "}";
 			}
 		});
 		setInjectors( context.getBox().getInjectorsOfType(QuartzInjector.class) );

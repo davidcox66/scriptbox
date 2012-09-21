@@ -72,7 +72,6 @@ public class JmxGroovyInjector implements JmxInjector {
 		}
 		
 		add( closure, new JmxLocalProcessProvider(plugin, name, finder) );
-		
 	}
 	
 	public void remote( String name, String host, int port, Closure closure ) throws Exception {

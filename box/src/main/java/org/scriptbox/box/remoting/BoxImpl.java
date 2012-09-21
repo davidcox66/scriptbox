@@ -84,9 +84,10 @@ public class BoxImpl implements BoxInterface {
 		final StringBuilder builder = new StringBuilder( 1024 );
 		Set<StatusProvider> bstats = box.getBeans().getAll( StatusProvider.class );
 		if( bstats != null && bstats.size() > 0 ) {
-			builder.append( "Box\n" );
-			builder.append( "----------------------------------------------\n");
+			builder.append( "Box{\n" );
 			buildStatus( builder, bstats );
+			builder.append( "}\n" );
+			
 		}
 		Map<String,BoxContext> contexts = box.getContexts();
 		for( Map.Entry<String,BoxContext> entry : contexts.entrySet() ) {
@@ -94,9 +95,9 @@ public class BoxImpl implements BoxInterface {
 				public void run( BoxContext context ) {
 					Set<StatusProvider> cstats = context.getBeans().getAll(StatusProvider.class );
 					if( cstats != null && cstats.size() > 0 ) {
-						builder.append( "Context[" + context.getName() + "]\n" );
-						builder.append( "----------------------------------------------\n");
+						builder.append( "Context[" + context.getName() + "] {\n" );
 						buildStatus( builder, cstats );
+						builder.append( "}" );
 					}
 				}
 			} );
@@ -108,7 +109,7 @@ public class BoxImpl implements BoxInterface {
 		if( stats != null && stats.size() > 0 ) {
 			for( StatusProvider stat : stats ) {
 				try {
-					builder.append( stat.status() + "\n" );
+					builder.append( "    " + stat.status() + "\n" );
 				}
 				catch( Exception ex ) {
 					LOGGER.error( "Error getting status", ex );

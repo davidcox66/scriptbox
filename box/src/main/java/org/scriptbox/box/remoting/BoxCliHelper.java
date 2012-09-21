@@ -91,7 +91,7 @@ public class BoxCliHelper {
 		}
 		else if( cmd.consumeArgWithParameters("shutdownContext",1) ) {
 			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 1 );
+			final String contextName = cmd.getParameter( 0 );
 			return forEachAgent( "Shutting down context", "Context shutdown", new ParameterizedRunnable<Agent>() {
 				public void run( Agent agent ) throws Exception {
 					agent.box.shutdownContext( contextName );

@@ -20,19 +20,17 @@ public class ActionScript {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( ActionScript.class );
  
-    private static ThreadLocal<Map<String,Object>> attributes = new ThreadLocal<Map<String,Object>>() {
-        public Map<String,Object> initialValue() {
-            return new HashMap<String,Object>();
-        }
-    };
-     
     private BoxScript boxScript;
     private List<Action> actions = new ArrayList<Action>(); 
     private List<ActionRunner> runners = new ArrayList<ActionRunner>();
     private List<Runnable> destructors = new ArrayList<Runnable>();
     
     private Map<ObjectName,ScriptMetric> scriptMetrics = new HashMap<ObjectName,ScriptMetric>();
-    
+   
+    /**
+     * Glean the classloader from calls to addAction which should have the context classloader
+     * from the scriptengine - the same classloader we want to use for other threads.
+     */
     private ClassLoader scriptClassLoader;
     
     public ActionScript( BoxScript boxScript ) {
@@ -60,7 +58,11 @@ public class ActionScript {
 		return scriptClassLoader;
 	}
 
-	void addAction( Action action ) {
+    synchronized public int getNumRunners() {
+        return runners.size();
+    }    
+    
+	public void addAction( Action action ) {
     	if( scriptClassLoader == null ) {
     		scriptClassLoader = Thread.currentThread().getContextClassLoader();
     	}
@@ -109,9 +111,6 @@ public class ActionScript {
     		}
     	}
     }
-    synchronized public int getNumRunners() {
-        return runners.size();
-    }    
     
     synchronized void start( int threadCount ) throws Exception {
     	if( actions.size() == 0 ) {
@@ -203,6 +202,6 @@ public class ActionScript {
     } 
     
     public String toString() {
-       return "name=" + getName() + ", threads=" + runners.size(); 
+       return "ActionScript{ name=" + getName() + ", threads=" + runners.size() + "}"; 
     } 
 }

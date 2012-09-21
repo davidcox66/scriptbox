@@ -89,7 +89,7 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 				actionScript.stop();
 			}
 			public String status() throws Exception {
-				return "ActionScript{ name=" + actionScript.getName() + "}";
+				return actionScript.toString();
 			}
 		});
 	}

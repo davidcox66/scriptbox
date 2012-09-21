@@ -60,11 +60,16 @@ public class ActionRunner {
     void stop() {
         running = false;
     }
-    void join() throws InterruptedException {
-        thread.join( 10 * 1000 );
-        if( thread.isAlive() ) {
-            LOGGER.warn( "join: thread did not stop in allotted time, interrupting...");
-            thread.interrupt();
-        }
+    void join() {
+    	try {
+	        thread.join( 10 * 1000 );
+	        if( thread.isAlive() ) {
+	            LOGGER.warn( "join: thread did not stop in allotted time, interrupting...");
+	            thread.interrupt();
+	        }
+    	}
+    	catch( InterruptedException ex ) {
+    		LOGGER.warn( "join: interrupted while waiting for thread to finish", ex );
+    	}
     }
 }
