@@ -153,8 +153,15 @@ public class BoxContext {
 			        		listener.executingScript(bscript);
 			        	}
 			        } );
-			    	engine.put( "args", bscript.getArgs() );
+			        
+			    	engine.put( "args", bscript.getArguments() );
 			    	engine.eval( bscript.getScriptText() );
+			    	
+			        callListeners( new ParameterizedRunnable<BoxContextListener>() {
+			        	public void run( BoxContextListener listener ) throws Exception {
+			        		listener.finishedScript(bscript);
+			        	}
+			        } );
 				}
 			} );
 		}

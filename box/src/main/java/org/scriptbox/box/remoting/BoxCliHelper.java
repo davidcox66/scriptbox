@@ -48,7 +48,7 @@ public class BoxCliHelper {
 		System.err.println( "Usage: BoxCli --agents=<host:[port]>...\n" +
 			"    {\n" +
 			"        --createContext <language> <contextName>\n" +
-			"        --startContext <name>\n" +
+			"        --startContext <name> <args...>\n" +
 			"        --stopContext <name>\n" +
 			"        --shutdownContext <name>\n" +
 			"        --shutdownAllContexts\n" +
@@ -69,12 +69,14 @@ public class BoxCliHelper {
 				}
 			} );
 		}
-		else if( cmd.consumeArgWithParameters("startContext",1) ) {
+		else if( cmd.consumeArgWithMinParameters("startContext",1) ) {
 			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 0 );
+			List<String> parameters = cmd.getParameters();
+			final String contextName = parameters.get(0);
+			final List<String> arguments = parameters.subList(1, parameters.size());
 			return forEachAgent( "Starting context", "Context started", new ParameterizedRunnable<Agent>() {
 				public void run( Agent agent ) throws Exception {
-					agent.box.startContext( contextName );
+					agent.box.startContext( contextName, arguments );
 				}
 			} );
 		}
@@ -104,14 +106,16 @@ public class BoxCliHelper {
 				}
 			} );
 		}
-		else if( cmd.consumeArgWithParameters("loadScript",2,-1) ) {
+		else if( cmd.consumeArgWithMinParameters("loadScript",3) ) {
 			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 0 );
-			final String scriptName = cmd.getParameter( 1 );
-			final String fileName = cmd.getParameter( 2 );
+			List<String> parameters = cmd.getParameters();
+			final String contextName = parameters.get(0);
+			final String scriptName = parameters.get(1);
+			final String fileName = parameters.get(2);
+			final List<String> arguments = parameters.subList(3, parameters.size());
 			return forEachAgent( "Loading script", "Script loaded", new ParameterizedRunnable<Agent>() {
 				public void run( Agent agent ) throws Exception {
-					agent.box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), new String[] {} );
+					agent.box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), arguments  );
 				}
 			} );
 		}

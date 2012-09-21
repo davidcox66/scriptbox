@@ -16,7 +16,7 @@ public class BoxScript {
     private BoxContext context; 
     private String name;
     private String scriptText;
-    private List<String> args;
+    private List<String> arguments;
     
     public static BoxScript getCurrentScript() {
     	BoxScript ret = current.get();
@@ -36,11 +36,11 @@ public class BoxScript {
 		}
 	}
 	
-    public BoxScript( BoxContext context, String name, String scriptText, List<String> args ) {
+    public BoxScript( BoxContext context, String name, String scriptText, List<String> arguments ) {
         this.context = context;
         this.name = name;
         this.scriptText = scriptText;
-        this.args = args;
+        this.arguments = arguments;
     }
     
 	public BoxContext getContext() {
@@ -55,8 +55,8 @@ public class BoxScript {
 		return scriptText;
 	}
 
-	public List<String> getArgs() {
-		return args;
+	public List<String> getArguments() {
+		return arguments;
 	}
     
     

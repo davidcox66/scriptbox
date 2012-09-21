@@ -102,9 +102,9 @@ public class Box {
         }
     }
 
-    synchronized public void run( String contextName, String name, String script, String[] args ) throws Exception {
+    synchronized public void run( String contextName, String name, String script, List arguments ) throws Exception {
     	BoxContext ctx = getContextEx( contextName );
-        ctx.run( new BoxScript(ctx,name, script, args != null ? Arrays.asList(args) : EMPTY) ) ;
+        ctx.run( new BoxScript(ctx,name, script, arguments != null ? arguments : EMPTY) ) ;
     }
     public BoxContext getContext( String name ) {
     	return contexts.get( name );

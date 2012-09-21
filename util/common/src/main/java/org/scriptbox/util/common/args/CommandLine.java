@@ -86,6 +86,10 @@ public class CommandLine {
 		return checkArg( name, value );
 	}
 	
+	public boolean consumeArgWithMinParameters( String name, int count ) throws CommandLineException {
+		return consumeArgWithParameters( name, count, -1 );
+	}
+	
 	public boolean consumeArgWithParameters( String name, int count ) throws CommandLineException {
 		if( consumeArg(name) ) {
 			checkParameters(name, count);

@@ -1,10 +1,7 @@
 package org.scriptbox.horde.metrics;
 
-import java.util.concurrent.atomic.AtomicInteger
 
-import com.ihg.atp.crs.loadgen.main.LoadScript
-
-public class MaxTransactionTime extends TestMetric {
+public class MaxTransactionTime extends ActionMetric {
 
     private int max = Integer.MIN_VALUE;
      

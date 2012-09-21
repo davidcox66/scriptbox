@@ -1,6 +1,6 @@
 package org.scriptbox.horde.metrics;
 
-public interface GeneratorMetricMBean {
+public interface AbstractMetricMBean {
 
     public int getValue();
 }

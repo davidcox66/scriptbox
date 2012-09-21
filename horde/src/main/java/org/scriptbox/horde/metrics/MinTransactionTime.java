@@ -1,10 +1,10 @@
 package org.scriptbox.horde.metrics;
 
-public class MinTransactionTime extends TestMetric {
+public class MinTransactionTime extends ActionMetric {
 
     private int min = Integer.MAX_VALUE;
      
-    MinTransactionTime() {
+    public MinTransactionTime() {
     }
  
     public String getName() {

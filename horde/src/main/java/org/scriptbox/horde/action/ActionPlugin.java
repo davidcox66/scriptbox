@@ -1,13 +1,13 @@
-package org.scriptbox.horde.main;
+package org.scriptbox.horde.action;
 
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.inject.BoxContextInjectingListener;
 
-public class LoadPlugin extends BoxContextInjectingListener {
+public class ActionPlugin extends BoxContextInjectingListener {
 
 	@Override
 	public void contextCreated(BoxContext context) throws Exception {
-		setInjectors( context.getBox().getInjectorsOfType(LoadInjector.class) );
+		setInjectors( context.getBox().getInjectorsOfType(ActionInjector.class) );
 		super.contextCreated( context );
 	}
 }

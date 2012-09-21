@@ -1,12 +1,12 @@
 package org.scriptbox.horde.metrics;
 
 
-public class TransactionsPerSecond extends TestMetric {
+public class TransactionsPerSecond extends ActionMetric {
 
     private long lastChecked = Long.MIN_VALUE;
     private int transactionCount;
      
-    TransactionsPerSecond() {
+    public TransactionsPerSecond() {
     }
  
     public String getName() {

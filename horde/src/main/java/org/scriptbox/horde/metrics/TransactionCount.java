@@ -2,11 +2,11 @@ package org.scriptbox.horde.metrics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TransactionCount extends TestMetric {
+public class TransactionCount extends ActionMetric {
 
     private AtomicInteger transactionCount = new AtomicInteger();
      
-    TransactionCount() {
+    public TransactionCount() {
     }
  
     public String getName() {

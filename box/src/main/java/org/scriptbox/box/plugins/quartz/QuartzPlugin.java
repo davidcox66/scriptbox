@@ -1,6 +1,7 @@
 package org.scriptbox.box.plugins.quartz;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,7 +39,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 		beans.put( "quartz.blocks", new HashMap<Integer,QuartzExecBlock>() );
 		beans.put( "quartz.scheduler", scheduler );
 		beans.put( "quartz.schedulerService", new BoxService() {
-			public void start() throws Exception {
+			public void start( List arguments ) throws Exception {
 				scheduler.start();
 			}
 			public void shutdown() throws Exception {

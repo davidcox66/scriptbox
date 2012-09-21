@@ -51,4 +51,6 @@ public abstract class BoxContextInjectingListener implements BoxContextListener 
 	public void executingScript(BoxScript script) {
 	}
 
+	public void finishedScript(BoxScript script) {
+	}
 }

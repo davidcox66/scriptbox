@@ -1,0 +1,46 @@
+<configuration>
+
+ <jmxConfigurator />
+
+  <appender name="CONSOLE"
+    class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern># [%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%msg]%n
+      </Pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <File>/tmp/monitor.log</File>
+    <Append>false</Append>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>[%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%method] [%msg]%n</Pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.springframework">
+    <level value="INFO" />
+  </logger>
+
+  <logger name="com.amazonaws">
+    <level value="INFO" />
+  </logger>
+  
+  <logger name="org.eclipse.jetty">
+    <level value="INFO" />
+  </logger>
+  
+  <logger name="org.scriptbox">
+    <level value="DEBUG" />
+  </logger>
+
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="CONSOLE" />
+    <!-- 
+    <appender-ref ref="FILE" />
+    -->
+  </root>
+
+</configuration>
+

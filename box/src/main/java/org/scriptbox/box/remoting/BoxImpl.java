@@ -1,6 +1,7 @@
 package org.scriptbox.box.remoting;
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class BoxImpl implements BoxInterface {
 
 	public void start() throws Exception {
 		box.start();
-		BoxServices.start(getBoxServices()).raiseException( "Error starting services");
+		BoxServices.start(getBoxServices(), null).raiseException( "Error starting services");
 	}
 	
 	public void shutdown() throws Exception {
@@ -46,8 +47,8 @@ public class BoxImpl implements BoxInterface {
 	}
 
 	@Override
-	public void startContext(String contextName ) throws Exception {
-		BoxServices.start(getContextServices(contextName)).raiseException( "Error starting services");
+	public void startContext(String contextName, List arguments ) throws Exception {
+		BoxServices.start(getContextServices(contextName), arguments).raiseException( "Error starting services");
 	}
 	
 	@Override
@@ -75,8 +76,8 @@ public class BoxImpl implements BoxInterface {
 	}
 
 	@Override
-	public void loadScript(String contextName, String scriptName, String script, String[] args) throws Exception{
-		box.run( contextName, scriptName, script, args );
+	public void loadScript(String contextName, String scriptName, String script, List arguments) throws Exception{
+		box.run( contextName, scriptName, script, arguments );
 	}
 
 	public String status() throws Exception {

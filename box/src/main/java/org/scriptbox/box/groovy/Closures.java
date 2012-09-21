@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
+import org.scriptbox.util.common.obj.RunnableWithException;
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
 
 public class Closures {
 
@@ -54,11 +56,11 @@ public class Closures {
 		return null;
 	}
 	
-	public static <RET,ARG> ParameterizedRunnableWithResult<RET,ARG> toRunnableWithResult( final Closure closure, Class<RET> retCls, Class<ARG> argCls )  {
+	public static <RET,ARG> ParameterizedRunnableWithResult<RET,ARG> toRunnable( final Closure closure, Class<RET> retCls, Class<ARG> argCls )  {
 		if( closure != null ) {
 			return new ParameterizedRunnableWithResult<RET,ARG>() {
 				public RET run( ARG arg ) {
-					return (RET)closure.call( arg );
+					return (RET)(closure.getMaximumNumberOfParameters() > 0 ? closure.call(arg) : closure.call());    
 				}
 			};
 		}
@@ -68,11 +70,50 @@ public class Closures {
 		if( closure != null ) {
 			return new ParameterizedRunnableWithResult<Boolean,ARG>() {
 				public Boolean run( ARG arg ) {
-					return coerceToBoolean( closure.call(arg) );
+					return coerceToBoolean(closure.getMaximumNumberOfParameters() > 0 ? closure.call(arg) : closure.call());    
 				}
 			};
 		}
 		return null;
 	}
 	
+	public static void callInClassLoader( ClassLoader loader, Runnable closure ) {
+        if( closure != null ) {
+            Thread thread = Thread.currentThread();
+            ClassLoader current = thread.getContextClassLoader();
+            try {
+                thread.setContextClassLoader( loader );
+                closure.run();
+            }
+            finally {
+               thread.setContextClassLoader( current );
+            }
+        }
+	}
+	public static void callInClassLoader( ClassLoader loader, RunnableWithException closure ) throws Exception {
+        if( closure != null ) {
+            Thread thread = Thread.currentThread();
+            ClassLoader current = thread.getContextClassLoader();
+            try {
+                thread.setContextClassLoader( loader );
+                closure.run();
+            }
+            finally {
+               thread.setContextClassLoader( current );
+            }
+        }
+    }    
+	public static void callInClassLoader( ClassLoader loader, RunnableWithThrowable closure ) throws Throwable {
+        if( closure != null ) {
+            Thread thread = Thread.currentThread();
+            ClassLoader current = thread.getContextClassLoader();
+            try {
+                thread.setContextClassLoader( loader );
+                closure.run();
+            }
+            finally {
+               thread.setContextClassLoader( current );
+            }
+        }
+    }    
 }
