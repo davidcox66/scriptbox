@@ -98,7 +98,7 @@ public class BoxCliHelper {
 				}
 			} );
 		}
-		else if( cmd.consumeArgWithParameters("shutdownAllContext",0) ) {
+		else if( cmd.consumeArgWithParameters("shutdownAllContexts",0) ) {
 			cmd.checkUnusedArgs();
 			return forEachAgent( "Shutting down all contexts", "All contexts shutdown", new ParameterizedRunnable<Agent>() {
 				public void run( Agent agent ) throws Exception {

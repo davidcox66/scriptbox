@@ -1,4 +1,4 @@
 root=$(dirname $0)/..
 set -x
 JAVA_OPTS="-Dlogback.configurationFile=horde-logback.xml"
-java $JAVA_OPTS -cp $root/target/horde-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.horde.main.HordeCli "$@"
+java $JAVA_OPTS -cp $root/target/horde.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.horde.main.HordeCli "$@"
