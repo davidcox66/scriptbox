@@ -8,6 +8,7 @@ public interface MetricTreeNode {
 	public String getType();
     public MetricTreeNode getParent();
 	public Map<String,? extends MetricTreeNode> getChildren();
+	public MetricTreeNode getChild( String name );
 	public MetricTreeNode getChild( String name, String type );
 	public MetricSequence getMetricSequence(); 
 	public boolean isSequenceAvailable();

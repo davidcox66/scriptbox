@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
+import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
@@ -33,45 +34,36 @@ public class CassandraMetricSequence extends MetricSequence {
 	}
 	
 	public void record( Metric metric ) {
-		long now = System.currentTimeMillis();
 		ColumnFamilyTemplate<String,Long> tmpl = node.getStore().metricSequenceTemplate;
 		for( MetricResolution res : node.tree.getResolutions() ) {
-			int resm = res.getMillis();
+			int resm = res.getSeconds() * 1000;
 			LastSaved lastSaved = lastSavedValues.get( resm );
 			boolean save = false;
 			if( lastSaved != null ) {
 				if( (lastSaved.value == Float.NaN || lastSaved.value != metric.getValue()) &&
-					(now - res.getMillis()) > lastSaved.millis ) 
+					(metric.getMillis() - resm) > lastSaved.millis ) 
 				{
 					save = true;
 				}
 			}
 			else {
 				lastSaved = new LastSaved();
+				lastSavedValues.put( resm, lastSaved );
 				save = true;
 			}
 			if( save ) {
-				tmpl.createUpdater(node.getId()+","+res.getMillis()).setFloat(new Long(metric.getMillis()), metric.getValue());
-				lastSaved.millis = now;
+				ColumnFamilyUpdater<String,Long> updater = tmpl.createUpdater(node.getId()+","+res.getSeconds());
+				updater.setFloat(new Long(metric.getMillis()), metric.getValue());
+				tmpl.update( updater );
+				lastSaved.millis = metric.getMillis();
 			}
 		}
 	}
 	
 	@Override
 	public MetricRange getRange(long start, long end, int resolution) {
-		if( !node.tree.isValidResolution(resolution) ) {
-			throw new RuntimeException( "Invalid resolution '" + resolution + "' for '" + node.getId() + "'" );
-		}
-		String compositeId = node.getId() + "," + resolution;
-		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
-		predicate.setRange(start, end, false, Integer.MAX_VALUE );
-		ColumnFamilyResult<String,Long> result = node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
-		Collection<Long> times = result.getColumnNames();
-		List<Metric> metrics = new ArrayList<Metric>( times.size() );
-		for( Long millis : result.getColumnNames() ) {
-			metrics.add( new Metric(millis, result.getFloat(millis)) );
-		}
-		return null;
+		MetricResolution res = node.tree.getResolutionEx( resolution ); 
+		return new CassandraMetricRange(this, start, end, res );
 	}
 
 	@Override

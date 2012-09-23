@@ -57,13 +57,13 @@ public class CassandraMetricRange extends MetricRange {
 			}
 		}
 		
-		String compositeId = sequence.node.getId() + "," + getResolution();
+		String compositeId = sequence.node.getId() + "," + resolution.getSeconds();
 		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
 		predicate.setRange(getStart(), getEnd(), false, Integer.MAX_VALUE );
 		ColumnFamilyResult<String,Long> result = sequence.node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
 		Collection<Long> times = result.getColumnNames();
 		List<Metric> metrics = new ArrayList<Metric>( times.size() );
-		for( Long millis : result.getColumnNames() ) {
+		for( Long millis : times ) {
 			metrics.add( new Metric(millis, result.getFloat(millis)) );
 		}
 		return metrics;

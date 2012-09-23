@@ -17,6 +17,8 @@
     <module>deps-pom</module>
     <module>deps-pom-logging</module>
     <module>deps-pom-jetty</module>
+    <module>deps-pom-cassandra</module>
+    <module>deps-pom-cassandra-embedded</module>
   </modules>
 
   <properties>

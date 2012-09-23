@@ -12,6 +12,8 @@ public abstract class MetricTree {
 		this.resolutions = resolutions;
 	}
 
+	public abstract MetricTreeNode getRoot(); 
+	
 	public String getName() {
 		return name;
 	}
@@ -20,7 +22,13 @@ public abstract class MetricTree {
 		return resolutions;
 	}
 	
-	public abstract MetricTreeNode getRoot(); 
-	
+	public MetricResolution getResolutionEx( int resolution ) {
+		for( MetricResolution res : resolutions ) {
+			if( res.getSeconds() == resolution ) {
+				return res;
+			}
+		}
+		throw new RuntimeException( "Invalid resolution '" + resolution + "' for tree '" + name + "'" );
+	}
 	
 }

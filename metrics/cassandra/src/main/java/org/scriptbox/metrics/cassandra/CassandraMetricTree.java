@@ -1,12 +1,13 @@
 package org.scriptbox.metrics.cassandra;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.service.template.SuperCfResult;
-import me.prettyprint.cassandra.service.template.SuperCfRowMapper;
+import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.SuperCfUpdater;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +17,8 @@ import org.scriptbox.metrics.model.MetricTreeNode;
 
 public class CassandraMetricTree extends MetricTree {
 
+	public static final String ROOT_NODE_NAME = "Metrics";
+	
 	CassandraMetricStore store;
 	CassandraMetricTreeNode root;
 	
@@ -24,9 +27,6 @@ public class CassandraMetricTree extends MetricTree {
 		this.store = store;
 	}
 	
-	public boolean isValidResolution( int resolution ) {
-		return resolutions.contains( resolution );
-	}
 	
 	public MetricTreeNode getRoot() {
 		if( root != null ) {
@@ -44,18 +44,20 @@ public class CassandraMetricTree extends MetricTree {
 		};
 		
 		final Map<String,NodeInfo> allNodesById = new HashMap<String,NodeInfo>();
-		store.metricTreeTemplate.querySuperColumns(name, null, new SuperCfRowMapper<String, String, String, CassandraMetricTreeNode>() {
-			 public CassandraMetricTreeNode mapRow(SuperCfResult<String, String, String> results) {
+		SuperCfResult<String,String,String> result = store.metricTreeTemplate.querySuperColumns(name);
+		if( result.hasResults() ) {
+			Collection<String> ids = result.getSuperColumns();
+			for( String id : ids ) {
+				 result.applySuperColumn(id);
 				 CassandraMetricTreeNode node = new CassandraMetricTreeNode( 
 				     CassandraMetricTree.this,
-				     results.getActiveSuperColumn(),
-				     results.getString("name"),
-				     results.getString("type") );
-				 NodeInfo info = new NodeInfo( node, results.getString("parent") );
-				 allNodesById.put( results.getActiveSuperColumn(), info );
-				 return node;
+				     id,
+				     result.getString("name"),
+				     result.getString("type") );
+				 NodeInfo info = new NodeInfo( node, result.getString("parent") );
+				 allNodesById.put( result.getActiveSuperColumn(), info );
 			 }
-		} ); 
+		}  
 		if( !allNodesById.isEmpty() ) {
 			for( Map.Entry<String,NodeInfo> entry : allNodesById.entrySet() ) {
 				String nodeId = entry.getKey();
@@ -89,7 +91,14 @@ public class CassandraMetricTree extends MetricTree {
 	}
 	
 	void persist() {
-		SuperCfUpdater<String,String,String> updater = store.metricTreeTemplate.createUpdater(CassandraMetricStore.ALL_NAMES_KEY,name);
+		if( StringUtils.isEmpty(name) ) {
+			throw new RuntimeException( "Tree name cannot be null");
+		}
+		SuperCfTemplate<String,String,String> tmpl = store.metricTreeTemplate;
+		SuperCfUpdater<String,String,String> updater = tmpl.createUpdater(CassandraMetricStore.ALL_NAMES_KEY,name);
 		updater.setByteBuffer("resolutions", ObjectSerializer.get().toByteBuffer(resolutions) );
+		tmpl.update( updater );
+		root = new CassandraMetricTreeNode(this, ROOT_NODE_NAME, ROOT_NODE_NAME, "root" );
+		root.persist();
 	}
 }

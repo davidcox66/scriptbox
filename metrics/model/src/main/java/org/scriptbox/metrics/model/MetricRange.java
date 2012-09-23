@@ -30,7 +30,7 @@ public abstract class MetricRange {
 		final List<Metric> metrics = getMetrics();
 		return new Iterator<Metric>() {
 			long cstart = start;
-			MetricResolution res = getResolution(); 
+			int res = getResolution().getSeconds() * 1000; 
 			Metric last = null;
 			Metric pending = null;
 			Iterator<Metric> iter = metrics.iterator();
@@ -39,7 +39,7 @@ public abstract class MetricRange {
 			}
 			public Metric next() {
 				Metric ret = null;
-				long cend = cstart + res.getMillis();
+				long cend = cstart + res;
 				if( last == null ) {
 					pending = last = iter.next();
 				}

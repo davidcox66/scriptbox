@@ -1,0 +1,47 @@
+# Cassandra YAML generated from previous config
+# Configuration wiki: http://wiki.apache.org/cassandra/StorageConfiguration
+auto_bootstrap: false
+
+cluster_name: Test Cluster
+column_index_size_in_kb: 4
+commitlog_directory: target/test/cassandra/commitlog
+
+commitlog_sync: batch
+commitlog_sync_batch_window_in_ms: 1.0
+
+concurrent_reads: 8
+concurrent_writes: 32
+data_file_directories:
+- target/test/cassandra/data
+disk_access_mode: mmap
+dynamic_snitch: false
+dynamic_snitch_badness_threshold: 0.0
+dynamic_snitch_reset_interval_in_ms: 600000
+dynamic_snitch_update_interval_in_ms: 100
+endpoint_snitch: org.apache.cassandra.locator.RackInferringSnitch
+hinted_handoff_enabled: true
+in_memory_compaction_limit_in_mb: 256
+index_interval: 128
+listen_address: 127.0.0.1
+partitioner: org.apache.cassandra.dht.RandomPartitioner
+# any class that implements the SeedProvider interface and has a constructor that takes a Map<String, String> of
+# parameters will do.
+seed_provider:
+    # Addresses of hosts that are deemed contact points. 
+    # Cassandra nodes use this list of hosts to find each other and learn
+    # the topology of the ring.  You must change this if you are running
+    # multiple nodes!
+    - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+      parameters:
+          # seeds is actually a comma-delimited list of addresses.
+          - seeds: "127.0.0.1"
+phi_convict_threshold: 8
+rpc_keepalive: true
+rpc_port: 9161
+rpc_timeout_in_ms: 5000
+saved_caches_directory: target/test/cassandra/savedcaches
+sliced_buffer_size_in_kb: 64
+snapshot_before_compaction: false
+storage_port: 7010
+thrift_framed_transport_size_in_mb: 15
+thrift_max_message_length_in_mb: 16

@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.SuperCfUpdater;
 
+import org.apache.commons.lang.StringUtils;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTreeNode;
 
@@ -38,6 +40,10 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 		return parent;
 	}
 
+	public MetricTreeNode getChild( String name ) {
+		return children.get( name );
+	}
+	
 	public MetricTreeNode getChild( String name, String type ) {
 		CassandraMetricTreeNode child = children.get( name );
 		if( child == null ) {
@@ -50,10 +56,16 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 	}
 	
 	void persist() {
-		SuperCfUpdater<String,String,String> updater = getStore().metricTreeTemplate.createUpdater( tree.getName(), getId() );
+		String id = getId();
+		if( StringUtils.isEmpty(id) ) {
+			throw new RuntimeException( "ID cannot be null for node: '" + name + "'" );
+		}
+		SuperCfTemplate<String, String, String> tmpl = getStore().metricTreeTemplate;
+		SuperCfUpdater<String,String,String> updater = tmpl.createUpdater( tree.getName(), id );
 		updater.setString("name", name );
-		updater.setString("parent", parent.getId() );
+		updater.setString("parent", parent != null ? parent.getId() : "" );
 		updater.setString("type", type );
+		tmpl.update( updater );
 	}
 	
 	@Override

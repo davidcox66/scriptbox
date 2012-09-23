@@ -20,5 +20,6 @@
 		<module>json</module>
 		<module>spring</module>
 		<module>remoting</module>
+		<module>cassandra</module>
 	</modules>
 </project>
