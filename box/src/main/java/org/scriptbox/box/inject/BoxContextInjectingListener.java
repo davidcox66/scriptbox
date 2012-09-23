@@ -5,6 +5,7 @@ import java.util.List;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.events.BoxContextListener;
+import org.scriptbox.box.events.BoxInvocationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +49,7 @@ public abstract class BoxContextInjectingListener implements BoxContextListener 
 	}
 
 	@Override
-	public void executingScript(BoxScript script) {
-	}
-
-	public void finishedScript(BoxScript script) {
+	public void executingScript(BoxInvocationContext invocation) throws Exception {
+		invocation.next();
 	}
 }

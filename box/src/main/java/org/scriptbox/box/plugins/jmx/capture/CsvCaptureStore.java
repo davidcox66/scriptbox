@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.events.BoxContextListener;
+import org.scriptbox.box.events.BoxInvocationContext;
 import org.springframework.beans.factory.InitializingBean;
 
 public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxContextListener  {
@@ -49,9 +50,8 @@ public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxConte
 	public void contextShutdown( BoxContext context ) throws Exception {
 		context.getBeans().remove( "store" );
 	}
-	public void executingScript( BoxScript script ) throws Exception {
-	}
-	public void finishedScript( BoxScript script ) throws Exception {
+	public void executingScript( BoxInvocationContext invocation ) throws Exception {
+		invocation.next();
 	}
 	
 	@Override

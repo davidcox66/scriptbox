@@ -1,0 +1,139 @@
+package org.scriptbox.metrics.cassandra;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import me.prettyprint.cassandra.service.template.SuperCfUpdater;
+
+import org.scriptbox.metrics.model.MetricSequence;
+import org.scriptbox.metrics.model.MetricTreeNode;
+
+public class CassandraMetricTreeNode implements MetricTreeNode {
+
+	private String name;
+	private String type;
+	private String id;
+	
+	CassandraMetricTree tree;
+	CassandraMetricTreeNode parent;
+	Map<String,CassandraMetricTreeNode> children = new HashMap<String,CassandraMetricTreeNode>();
+	
+	public CassandraMetricTreeNode( CassandraMetricTree tree, String id, String name, String type ) {
+		this.tree = tree;
+		this.name = name;
+		this.type = type;
+	}
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	public String getType() {
+		return type;
+	}
+	@Override
+	public MetricTreeNode getParent() {
+		return parent;
+	}
+
+	public MetricTreeNode getChild( String name, String type ) {
+		CassandraMetricTreeNode child = children.get( name );
+		if( child == null ) {
+			child = new CassandraMetricTreeNode( tree, null, name, type );
+			child.parent = this;
+			child.persist();
+			children.put( name, child );
+		}
+		return child;
+	}
+	
+	void persist() {
+		SuperCfUpdater<String,String,String> updater = getStore().metricTreeTemplate.createUpdater( tree.getName(), getId() );
+		updater.setString("name", name );
+		updater.setString("parent", parent.getId() );
+		updater.setString("type", type );
+	}
+	
+	@Override
+	public Map<String,? extends MetricTreeNode> getChildren() {
+		return children;
+	}
+
+	CassandraMetricStore getStore() {
+		return tree.store;
+	}
+	
+	String getId() {
+		if( id == null ) { 
+			StringBuilder builder = new StringBuilder();
+			builder.append( tree.getName() );
+			List<String> names = new ArrayList<String>();
+			for( CassandraMetricTreeNode node = this ; node != null ; node = node.parent ) {
+				names.add( node.name );
+			}
+			while( !names.isEmpty() ) {
+				builder.append( "," );
+				builder.append( names.remove(names.size()-1) );
+			}
+			id = builder.toString();
+		}
+		return id;
+	}
+	
+	public boolean isSequenceAvailable() {
+		return children.size() == 0;
+	}
+	public MetricSequence getMetricSequence() {
+		if( !isSequenceAvailable() ) {
+			throw new RuntimeException( "MetricSequences only allowed on leaf nodes: '" + getId() + "'");
+		}
+		return new CassandraMetricSequence( this );
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((children == null) ? 0 : children.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CassandraMetricTreeNode other = (CassandraMetricTreeNode) obj;
+		if (children == null) {
+			if (other.children != null)
+				return false;
+		} else if (!children.equals(other.children))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
+	
+	
+}

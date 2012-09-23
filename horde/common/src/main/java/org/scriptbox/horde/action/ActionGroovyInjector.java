@@ -10,7 +10,10 @@ import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.container.Lookup;
 import org.scriptbox.box.controls.BoxService;
+import org.scriptbox.box.events.BoxInvocationContext;
 import org.scriptbox.box.events.BoxContextListener;
+import org.scriptbox.box.exec.ExecContext;
+import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 
@@ -60,14 +63,17 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 	public void contextShutdown( BoxContext context ) throws Exception {
 	}
 	
-	public void executingScript( BoxScript script ) throws Exception {
-		Lookup beans = script.getContext().getBeans();
-		beans.put(SCRIPT_KEY + "." + script.getName(), new ActionScript(script) );
-	}
-	
-	public void finishedScript( BoxScript script ) throws Exception {
-		final ActionScript actionScript = getCurrentActionScript();
-		actionScript.initialize();
+	public void executingScript( final BoxInvocationContext invocation ) throws Exception {
+		BoxScript script = invocation.getScript();
+		final ActionScript actionScript = new ActionScript( script );
+		ExecContext.with( actionScript, new ExecRunnable() {
+			public void run() throws Exception {
+				invocation.next();
+				actionScript.initialize();
+			}
+		});
+		
+		
 		script.getContext().getBeans().put( SERVICE_KEY + "." + script.getName(), new BoxService() {
 			public void start( List arguments ) throws Exception {
 				if( arguments == null || arguments.size() < 1 ) {
@@ -93,10 +99,7 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 			}
 		});
 	}
-	public ActionScript getCurrentActionScript() {
-		BoxScript script = BoxScript.getCurrentScript();
-		Lookup beans = script.getContext().getBeans();
-		return beans.getEx(SCRIPT_KEY + "." + script.getName(), ActionScript.class );
-		
+	private ActionScript getCurrentActionScript() {
+		return ExecContext.getNearestEnclosing(ActionScript.class);
 	}
 }

@@ -10,10 +10,11 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.scriptbox.box.events.BoxContextListener;
+import org.scriptbox.box.events.BoxInvocationContext;
+import org.scriptbox.util.common.collection.Iterators;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.scriptbox.util.common.obj.ParameterizedRunnable;
-import org.scriptbox.util.common.collection.Iterators;
 
 public class BoxContext {
 
@@ -148,20 +149,12 @@ public class BoxContext {
 			current.set( this );
 			BoxScript.with( script, new ParameterizedRunnable<BoxScript>() {
 				public void run( final BoxScript bscript ) throws Exception{
-			        callListeners( new ParameterizedRunnable<BoxContextListener>() {
-			        	public void run( BoxContextListener listener ) throws Exception {
-			        		listener.executingScript(bscript);
-			        	}
-			        } );
+					BoxInvocationContext ctx = new BoxInvocationContext( engine, bscript, listeners );
+					ctx.next();
 			        
 			    	engine.put( "args", bscript.getArguments() );
 			    	engine.eval( bscript.getScriptText() );
 			    	
-			        callListeners( new ParameterizedRunnable<BoxContextListener>() {
-			        	public void run( BoxContextListener listener ) throws Exception {
-			        		listener.finishedScript(bscript);
-			        	}
-			        } );
 				}
 			} );
 		}
