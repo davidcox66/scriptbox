@@ -94,7 +94,7 @@ public class CassandraStoreTest {
 		MetricSequence seq = metric.getMetricSequence();
 		Assert.assertNotNull( "MetricSequence is null", seq );
 		
-		MetricRange range = seq.getRange( now, now+180*1000, 30 );
+		MetricRange range = seq.getRange( now, now+120*1000, 30 );
 		Assert.assertNotNull( "MetricRange is null", range );
 		
 		List<Metric> metrics = range.getMetrics();

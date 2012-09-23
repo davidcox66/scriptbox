@@ -1,14 +1,8 @@
 package org.scriptbox.metrics.cassandra;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HSlicePredicate;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 

@@ -61,14 +61,56 @@ public class CassandraMetricRange extends MetricRange {
 		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
 		predicate.setRange(getStart(), getEnd(), false, Integer.MAX_VALUE );
 		ColumnFamilyResult<String,Long> result = sequence.node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
+		
 		Collection<Long> times = result.getColumnNames();
-		List<Metric> metrics = new ArrayList<Metric>( times.size() );
-		for( Long millis : times ) {
+		List<Metric> metrics = new ArrayList<Metric>( times.size() + 2 ); // 2 for the potential of adding an earlier and later value
+		Iterator<Long> iter = times.iterator();
+	
+		Long millis = null;
+		Metric metric = null;
+		if( iter.hasNext() ) {
+			millis = iter.next();
+			metric = new Metric( millis, result.getFloat(millis) );
+			// If first metric is not near the beginning, try to find last previous value
+			if( millis >= (getStart() + getResolution().getSeconds()*1000) ) {
+				Metric before = findRangeExteriorMetric(compositeId, getStart(), null, true );
+				metrics.add( new Metric(getStart(), before != null ? before.getValue() : metric.getValue()) );
+			}
+			metrics.add( metric );
+		}
+		
+		while( iter.hasNext() ) {
+			millis = iter.next();
 			metrics.add( new Metric(millis, result.getFloat(millis)) );
+		}
+		
+		if( metrics.size() > 0 ) {
+			metric = metrics.get( metrics.size()-1 );
+			// If last value was not near the end, search beyond for the next value
+			if( metric.getMillis() <= (getEnd() - getResolution().getSeconds()*1000) ) {
+				Metric after = findRangeExteriorMetric(compositeId, getEnd(), Long.MAX_VALUE, false );
+				metrics.add( new Metric(getEnd(), after != null ? after.getValue() : metric.getValue()) );
+			}
+		}
+		
+		if( lcache != null ) {
+			lcache.put( this, metrics );
 		}
 		return metrics;
 	}
 
+	private Metric findRangeExteriorMetric( String compositeId, Long first, Long last, boolean reversed ) {
+		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
+		predicate.setRange(first, last, reversed, 1 );
+		ColumnFamilyResult<String,Long> result = sequence.node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
+		Collection<Long> times = result.getColumnNames();
+		if( times.size() > 0 ) {
+			Long millis = times.iterator().next();
+			return new Metric( millis, result.getFloat(millis) );
+		}
+		return null;
+	}
+	
 	public Iterator<Metric> getConstantResolutionIterator() {
 		return getMetrics().iterator();
 	}
