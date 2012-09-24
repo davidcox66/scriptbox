@@ -17,8 +17,10 @@ public class ServiceErrorHandler implements MethodInterceptor {
 			return methodInvocation.proceed();
 		} 
 		catch (Exception ex ) {
-			LOGGER.error( "Error from service: " + methodInvocation.getMethod() + ", arguments: " + methodInvocation.getArguments(), ex );
-			throw ExceptionHelper.makeSerializable( ex );
+			String msg = "Error from service: " + methodInvocation.getMethod() + ", arguments: " + methodInvocation.getArguments();
+			LOGGER.error( msg, ex );
+			throw new Exception( msg + "\n" + ExceptionHelper.toString(ex) );
+			// throw ExceptionHelper.makeSerializable( ex );
 		}
 	}
 }

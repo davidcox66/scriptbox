@@ -95,11 +95,9 @@ public class BoxImpl implements BoxInterface {
 			BoxContext.with(entry.getValue(), new ParameterizedRunnable<BoxContext>() {
 				public void run( BoxContext context ) {
 					Set<StatusProvider> cstats = context.getBeans().getAll(StatusProvider.class );
-					if( cstats != null && cstats.size() > 0 ) {
-						builder.append( "Context[" + context.getName() + "] {\n" );
-						buildStatus( builder, cstats );
-						builder.append( "}" );
-					}
+					builder.append( "Context[" + context.getName() + "] {\n" );
+					buildStatus( builder, cstats );
+					builder.append( "}" );
 				}
 			} );
 		}

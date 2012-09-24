@@ -151,10 +151,6 @@ public class BoxContext {
 				public void run( final BoxScript bscript ) throws Exception{
 					BoxInvocationContext ctx = new BoxInvocationContext( engine, bscript, listeners );
 					ctx.next();
-			        
-			    	engine.put( "args", bscript.getArguments() );
-			    	engine.eval( bscript.getScriptText() );
-			    	
 				}
 			} );
 		}
