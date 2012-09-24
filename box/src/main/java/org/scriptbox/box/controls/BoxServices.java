@@ -11,13 +11,7 @@ import org.scriptbox.util.common.obj.ParameterizedRunnable;
 
 public class BoxServices {
 
-	public static List getArguments() {
-		Lookup lookup = BoxContext.getCurrentContext().getBeans();
-		return lookup.get( "box.services.arguments", List.class );
-	}
-	
-	public static Errors<BoxService> start( BoxContext context, Collection<BoxService> services, final List arguments ) throws Exception {
-		context.getBeans().put( "box.services.arguments", arguments );
+	public static Errors<BoxService> start( Collection<BoxService> services, final List arguments ) throws Exception {
 		return Iterators.callAndCollectExceptions( services, new ParameterizedRunnable<BoxService>() {
 			public void run( BoxService service ) throws Exception {
 				service.start( arguments );

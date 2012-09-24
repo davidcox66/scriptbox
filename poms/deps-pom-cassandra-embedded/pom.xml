@@ -28,19 +28,21 @@
       <type>pom</type>
     </dependency>
     <!-- Added for running Cassandra embedded -->
-    <dependency>
-      <groupId>org.cliffc.high_scale_lib</groupId>
+	<dependency>
+      <groupId>com.github.stephenc.high-scale-lib</groupId>
       <artifactId>high-scale-lib</artifactId>
-      <version>1.0</version>
+      <version>1.1.2</version>
       <scope>test</scope>
     </dependency>
-    <!-- Added for running Cassandra embedded -->
+	<!-- Added for running Cassandra embedded -->
+	<!--
     <dependency>
       <groupId>com.reardencommerce</groupId>
       <artifactId>clhm-production</artifactId>
       <version>1.0</version>
       <scope>test</scope>
-    </dependency>
+	</dependency>
+	-->
   </dependencies>
 
 	<build>  

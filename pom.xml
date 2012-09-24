@@ -19,6 +19,7 @@
 		<module>poms</module>
 		<module>util</module>
 		<module>box</module>
+		<module>metrics</module>
 		<module>panopticon</module>
 		<module>horde</module>
 	</modules>
