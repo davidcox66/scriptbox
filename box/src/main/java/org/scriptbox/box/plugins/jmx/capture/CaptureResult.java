@@ -1,6 +1,7 @@
 package org.scriptbox.box.plugins.jmx.capture;
 
-import org.scriptbox.box.plugins.jmx.proc.JmxProcess;
+import org.scriptbox.box.plugins.jmx.proc.GenericProcess;
+
 
 public class CaptureResult {
 
@@ -9,7 +10,7 @@ public class CaptureResult {
 	   * It is relatively user-defined and can be customized by altering/constructing CaptureReults manually 
 	   * during statistics collection.
 	   */
-	  public JmxProcess process;
+	  public GenericProcess process;
 	  
 	  /**
 	   * The attribute name under observations
@@ -33,14 +34,14 @@ public class CaptureResult {
 	   */
 	  public long millis;
 	  
-	  public CaptureResult( JmxProcess process, String attribute, String statistic, Object value ) {
+	  public CaptureResult( GenericProcess process, String attribute, String statistic, Object value ) {
 	    this.process = process;
 	    this.attribute = attribute;
 	    this.statistic = statistic;
 	    this.value = value;
 	  }
 	  
-	  public CaptureResult( JmxProcess process, String attribute, String statistic, Object value, long millis ) {
+	  public CaptureResult( GenericProcess process, String attribute, String statistic, Object value, long millis ) {
 	    this.process = process;
 	    this.attribute = attribute;
 	    this.statistic = statistic;

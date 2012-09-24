@@ -2,18 +2,13 @@ package org.scriptbox.box.plugins.jmx.proc;
 
 import org.scriptbox.box.plugins.jmx.JmxConnection;
 
-public class JmxProcess {
+public class JmxProcess extends GenericProcess {
 
-	private String name;
 	private JmxConnection connection;
 	
 	public JmxProcess( String name, JmxConnection connection ) {
-		this.name = name;
+		super( name );
 		this.connection = connection;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public JmxConnection getConnection() {
@@ -23,10 +18,9 @@ public class JmxProcess {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result
 				+ ((connection == null) ? 0 : connection.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -34,7 +28,7 @@ public class JmxProcess {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -44,13 +38,10 @@ public class JmxProcess {
 				return false;
 		} else if (!connection.equals(other.connection))
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
 		return true;
 	}
+
+	
 
 	
 }

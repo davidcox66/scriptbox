@@ -35,7 +35,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 		
 		final Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
 		
-		Lookup beans = context.getBeans();
+		final Lookup beans = context.getBeans();
 		beans.put( "quartz.blocks", new HashMap<Integer,QuartzExecBlock>() );
 		beans.put( "quartz.scheduler", scheduler );
 		beans.put( "quartz.schedulerService", new BoxService() {

@@ -48,6 +48,7 @@ public class BoxImpl implements BoxInterface {
 
 	@Override
 	public void startContext(String contextName, List arguments ) throws Exception {
+		BoxContext ctx = box.getContextEx( contextName );
 		BoxServices.start(getContextServices(contextName), arguments).raiseException( "Error starting services");
 	}
 	

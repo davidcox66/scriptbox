@@ -4,7 +4,6 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 
 import org.scriptbox.box.container.BoxContext;
-import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.events.BoxContextListener;
 import org.scriptbox.box.events.BoxInvocationContext;
 import org.springframework.beans.factory.InitializingBean;
