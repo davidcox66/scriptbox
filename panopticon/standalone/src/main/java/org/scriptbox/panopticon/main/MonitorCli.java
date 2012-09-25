@@ -8,7 +8,7 @@ public class MonitorCli {
 	public static void main( String[] args ) {
 	
 		try {
-			BoxCliHelper helper = new BoxCliHelper( args, "agent", new String[] { "classpath:panopticon-client-context.xml" } );
+			BoxCliHelper helper = new BoxCliHelper( args, "agent", new String[] { "classpath:panopticon-client-context.xml" }, 7800 );
 			helper.process();
 		}
 		catch( CommandLineException ex ) {

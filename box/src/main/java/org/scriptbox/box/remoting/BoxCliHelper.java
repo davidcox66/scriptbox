@@ -21,18 +21,18 @@ public class BoxCliHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( BoxCliHelper.class );
 	
-	private static final int DEFAULT_PORT = 7205;
-	
 	private CommandLine cmd;
 	private String agentBeanName;
 	private String[] contextLocations;
 	private List<HostPort> agents;
+	private int defaultAgentPort;
 	
-	public BoxCliHelper( String[] args, String agentBeanName, String[] contextLocations ) throws CommandLineException {
+	public BoxCliHelper( String[] args, String agentBeanName, String[] contextLocations, int defaultAgentPort ) throws CommandLineException {
 		this.agentBeanName = agentBeanName;
 		this.contextLocations = contextLocations;
 		cmd = new CommandLine( args );
 		agents = getAgentHostPorts( cmd );
+		this.defaultAgentPort = defaultAgentPort;
 	}
 	
 	public void process() throws Exception {
@@ -45,7 +45,7 @@ public class BoxCliHelper {
 	}
 	
 	public static void usage() {
-		System.err.println( "Usage: BoxCli --agents=<host:[port]>...\n" +
+		System.err.println( "Usage: BoxCli [--port=<port>] --agents=<[host]:[port]>...\n" +
 			"    {\n" +
 			"        --createContext <language> <contextName>\n" +
 			"        --startContext <name> <args...>\n" +
@@ -175,21 +175,26 @@ public class BoxCliHelper {
 		return ret;
 	}
 	
-	private static List<HostPort> getAgentHostPorts( CommandLine cmd ) throws CommandLineException {
+	private List<HostPort> getAgentHostPorts( CommandLine cmd ) throws CommandLineException {
 		List<HostPort> ret = new ArrayList<HostPort>();
 		
 		int defaultPort = cmd.consumeArgValueAsInt("port", false);
 		if( defaultPort == 0 ) {
-			defaultPort = DEFAULT_PORT;
+			defaultPort = defaultAgentPort;
 		}
 		
 		String agents = cmd.consumeArgValue( "agents", true );
         String[] hostAndPorts = agents.split(",");
         for( String hostPort : hostAndPorts ) {
-            String[] splitted = hostPort.split(":");
-            String host = splitted[0];
-            int port = splitted.length > 1 ? Integer.parseInt(splitted[1]) : defaultPort;
-            ret.add( new HostPort(host,port) );
+        	if( hostPort.indexOf(":") == 0 ) {
+        		ret.add( new HostPort("localhost",Integer.parseInt(hostPort.substring(1))) );
+        	}
+        	else {
+	            String[] splitted = hostPort.split(":");
+	            String host = splitted[0];
+	            int port = splitted.length > 1 ? Integer.parseInt(splitted[1]) : defaultPort;
+	            ret.add( new HostPort(host,port) );
+        	}
         } 
         return ret;
 	}

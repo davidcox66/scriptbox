@@ -1,4 +1,10 @@
 root=$(dirname $0)/..
 set -x
-JAVA_OPTS="-Dlogback.configurationFile=horde-logback.xml"
+JAVA_OPTS="\
+	-Dlogback.configurationFile=horde-logback.xml \
+	-Djetty=port=7900 \
+	-Dcom.sun.management.jmxremote.port=7901 \
+    -Dcom.sun.management.jmxremote.ssl=false \
+	-Dcom.sun.management.jmxremote.authenticate=false"
+
 java $JAVA_OPTS -cp $root/target/horde.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.horde.main.HordeMain "$@"

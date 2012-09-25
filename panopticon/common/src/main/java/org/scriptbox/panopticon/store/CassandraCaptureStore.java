@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.scriptbox.util.cassandra.CassandraDownTemplate;
 
 public class CassandraCaptureStore implements BoxContextListener, CaptureStore, QuartzListener, InitializingBean {
 
@@ -35,6 +36,8 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	
 	private String instance;
 	private CassandraMetricStore cstore;
+
+	private CassandraDownTemplate down = new CassandraDownTemplate();
 	
 	public void contextCreated( BoxContext context ) throws Exception {
 		context.getBeans().put( "store", this );
@@ -63,24 +66,29 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	}
 	
 	@Override
-	public void store(CaptureResult result) throws Exception {
-		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
-		if( result.value != null && result.value instanceof Number ) {
-			float value = ((Number)result.value).floatValue();
-			BoxContext ctx = BoxContext.getCurrentContext();
-			Lookup beans = ctx.getBeans();
-			MetricTree tree = beans.get( "metric.tree", MetricTree.class );
-			if( tree == null ) {
-				tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30) );
-				beans.put( "metric.tree", tree );
+	public void store( final CaptureResult result ) throws Exception {
+		down.invoke( new Runnable() {
+			public void run() {
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
+			if( result.value != null && result.value instanceof Number ) {
+				float value = ((Number)result.value).floatValue();
+				BoxContext ctx = BoxContext.getCurrentContext();
+				Lookup beans = ctx.getBeans();
+				MetricTree tree = beans.get( "metric.tree", MetricTree.class );
+				if( tree == null ) {
+					tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30) );
+					beans.put( "metric.tree", tree );
+				}
+				MetricTreeNode root = tree.getRoot();
+				MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
+				MetricTreeNode inst = src.getChild(instance, "instance" ) ;
+				MetricTreeNode attr = inst.getChild(result.attribute, "attribute" );
+				MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
+				MetricSequence seq  = stat.getMetricSequence();
+				seq.record( new Metric(result.millis,value) );
+				
 			}
-			MetricTreeNode root = tree.getRoot();
-			MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
-			MetricTreeNode inst = src.getChild(instance, "instance" ) ;
-			MetricTreeNode attr = inst.getChild(result.attribute, "attribute" );
-			MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
-			MetricSequence seq  = stat.getMetricSequence();
-			seq.record( new Metric(result.millis,value) );
+		}
 		}
 	}
 	
