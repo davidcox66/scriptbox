@@ -30,7 +30,6 @@
 			<groupId>org.scriptbox</groupId>
 			<artifactId>util.cassandra</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 		  	<groupId>org.hectorclient</groupId>

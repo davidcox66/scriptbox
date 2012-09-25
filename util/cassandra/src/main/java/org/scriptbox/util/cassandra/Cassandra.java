@@ -68,6 +68,35 @@ public class Cassandra {
         return System.getProperty("cassandra.strategy.class");
     }
 
+    public static boolean isExistingColumnFamily( Cluster cluster, String keyspaceName, String columnFamilyName ) {
+    	List<KeyspaceDefinition> kss = cluster.describeKeyspaces();
+    	for( KeyspaceDefinition ks : kss ) {
+    		if( ks.getName().equals(keyspaceName) ) {
+    			for(  me.prettyprint.hector.api.ddl.ColumnFamilyDefinition cf : ks.getCfDefs() ) {
+    				if( cf.getName().equals(columnFamilyName) ) {
+    					return true;
+    				}
+    			}
+    		}
+        }
+		return false;
+    }
+    
+    public static boolean isExistingKeyspace( Cluster cluster, String keyspaceName ) {
+    	List<KeyspaceDefinition> kss = cluster.describeKeyspaces();
+    	for( KeyspaceDefinition ks : kss ) {
+    		if( ks.getName().equals(keyspaceName) ) {
+    			return true;
+    		}
+        }
+    	return false;
+    }
+    
+    public static void createKeyspaceIfNeeded( Cluster cluster, String keyspaceName ) {
+    	if( !isExistingKeyspace(cluster, keyspaceName) ) {
+    		createKeyspace( cluster, keyspaceName );
+    	}
+    }
     public static Map<String, String> getStrategyOptions() {
         String prop = System.getProperty("cassandra.strategy.options");
         if (StringUtils.isEmpty(prop)) {

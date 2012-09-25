@@ -48,4 +48,8 @@ public class CaptureResult {
 	    this.value = value;
 	    this.millis = millis;
 	  }
+	  
+	  public String toString() {
+		  return "CaptureResult{ process=" + process + ", attribute=" + attribute + ", statistics=" + statistic + ", value=" + value + ", millis=" + millis + " }";
+	  }
 }

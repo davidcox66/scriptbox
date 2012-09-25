@@ -10,46 +10,40 @@ import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CassandraMetricSequence extends MetricSequence {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( CassandraMetricSequence.class );
+	
 	CassandraMetricTreeNode node;
 
-	
-	static class LastSaved
-	{
-		float value = Float.NaN;
-		long millis;
-	}
-	private Map<Integer,LastSaved> lastSavedValues = new HashMap<Integer,LastSaved>();
+	private Map<Integer,Metric> lastSavedValues = new HashMap<Integer,Metric>();
 	
 	public CassandraMetricSequence( CassandraMetricTreeNode node ) {
 		this.node = node;
 	}
 	
 	public void record( Metric metric ) {
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: metric=" + metric ); }
+		
 		ColumnFamilyTemplate<String,Long> tmpl = node.getStore().metricSequenceTemplate;
 		for( MetricResolution res : node.tree.getResolutions() ) {
 			int resm = res.getSeconds() * 1000;
-			LastSaved lastSaved = lastSavedValues.get( resm );
-			boolean save = false;
-			if( lastSaved != null ) {
-				if( (lastSaved.value == Float.NaN || lastSaved.value != metric.getValue()) &&
-					(metric.getMillis() - resm) > lastSaved.millis ) 
-				{
-					save = true;
-				}
-			}
-			else {
-				lastSaved = new LastSaved();
-				lastSavedValues.put( resm, lastSaved );
-				save = true;
-			}
-			if( save ) {
+			Metric lastSaved = lastSavedValues.get( resm );
+			if( lastSaved == null || 
+				(lastSaved.getValue() != metric.getValue() &&
+				(metric.getMillis() - resm) > lastSaved.getMillis()) ) 
+			{
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: saving metric=" + metric ); }
 				ColumnFamilyUpdater<String,Long> updater = tmpl.createUpdater(node.getId()+","+res.getSeconds());
 				updater.setFloat(new Long(metric.getMillis()), metric.getValue());
 				tmpl.update( updater );
-				lastSaved.millis = metric.getMillis();
+				lastSavedValues.put( resm, metric );
+			}
+			else {
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: skipping metric=" + metric ); }
 			}
 		}
 	}

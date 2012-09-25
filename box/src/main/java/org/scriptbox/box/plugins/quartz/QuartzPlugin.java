@@ -21,8 +21,21 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 
 	private static final AtomicInteger count = new AtomicInteger();
 	
+	private List<QuartzListener> listeners;
+	
 	public QuartzPlugin() throws SchedulerException {
 	}
+
+	
+	public List<QuartzListener> getListeners() {
+		return listeners;
+	}
+
+
+	public void setListeners(List<QuartzListener> listeners) {
+		this.listeners = listeners;
+	}
+
 
 	public void contextCreated(BoxContext context) throws Exception {
 		

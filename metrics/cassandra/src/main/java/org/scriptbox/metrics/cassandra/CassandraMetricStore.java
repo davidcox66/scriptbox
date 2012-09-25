@@ -13,11 +13,15 @@ import me.prettyprint.cassandra.service.template.SuperCfRowMapper;
 import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ThriftSuperCfTemplate;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
+import org.scriptbox.util.cassandra.Cassandra;
+import org.scriptbox.util.cassandra.ColumnFamilyDefinition;
 
 public class CassandraMetricStore implements MetricStore {
 
@@ -29,6 +33,26 @@ public class CassandraMetricStore implements MetricStore {
 	SuperCfTemplate<String,String,String> metricTreeTemplate;
 	ColumnFamilyTemplate<String,Long> metricSequenceTemplate;
 	
+	public static void createSchemaIfNeeded( Cluster cluster, String keyspaceName ) {
+		
+			Cassandra.createKeyspaceIfNeeded( cluster, keyspaceName );
+
+			if( !Cassandra.isExistingColumnFamily(cluster, keyspaceName, METRIC_TREE_CF) ) {
+				ColumnFamilyDefinition tree = new ColumnFamilyDefinition();
+				tree.setColumnFamilyName(CassandraMetricStore.METRIC_TREE_CF);
+				tree.setComparator(ComparatorType.UTF8TYPE);
+				tree.setSubComparator(ComparatorType.UTF8TYPE);
+				tree.create( cluster, keyspaceName );
+			}
+				
+			if( !Cassandra.isExistingColumnFamily(cluster, keyspaceName, METRIC_SEQUENCE_CF) ) {
+				ColumnFamilyDefinition sequence = new ColumnFamilyDefinition();
+				sequence.setColumnFamilyName(CassandraMetricStore.METRIC_SEQUENCE_CF);
+				sequence.setComparator(ComparatorType.LONGTYPE);
+				sequence.create( cluster, keyspaceName );
+			}
+		
+	}
 	public CassandraMetricStore() {
 	}
 	

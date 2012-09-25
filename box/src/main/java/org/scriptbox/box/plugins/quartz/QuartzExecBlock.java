@@ -1,12 +1,13 @@
 package org.scriptbox.box.plugins.quartz;
 
 import org.quartz.Job;
-import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.exec.BasicExecBlock;
 import org.scriptbox.box.exec.ExecRunnable;
+import org.scriptbox.util.common.collection.Iterators;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 
 	private static Logger LOGGER = LoggerFactory.getLogger( QuartzExecBlock.class );
 	
+	private QuartzPlugin plugin;
 	private BoxContext context;
 	private JobDetail detail;
 
@@ -21,9 +23,15 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 	public QuartzExecBlock() {
 	}
 	
-	public QuartzExecBlock( BoxContext context ) {
+	public QuartzExecBlock( QuartzPlugin plugin, BoxContext context ) {
+		this.plugin = plugin;
 		this.context = context;
 	}
+	
+	public QuartzPlugin getPlugin() {
+		return plugin;
+	}
+
 	public JobDetail getDetail() {
 		return detail;
 	}
@@ -34,7 +42,24 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 	public void run() throws Exception {
 		BoxContext.with( context, new ParameterizedRunnable<BoxContext>() {
 			public void run( BoxContext ctx ) throws Exception {
-				QuartzExecBlock.super.run();
+				try {
+					Iterators.callAndCollectExceptions(plugin.getListeners(), new ParameterizedRunnable<QuartzListener>() {
+						public void run( QuartzListener listener ) throws Exception {
+							listener.jobStarted(context, detail);
+							
+						}
+					} ).raiseException("Failed notifying QuartzListeners of job start");
+					QuartzExecBlock.super.run();
+				}
+				finally {
+					Iterators.callAndCollectExceptions(plugin.getListeners(), new ParameterizedRunnable<QuartzListener>() {
+						public void run( QuartzListener listener ) throws Exception {
+							listener.jobCompleted(context, detail);
+							
+						}
+					} ).raiseException("Failed notifying QuartzListeners of job complete");
+					
+				}
 			}
 		} );
 	}

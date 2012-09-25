@@ -34,6 +34,10 @@
     <level value="DEBUG" />
   </logger>
 
+  <logger name="me.prettyprint.hector">
+    <level value="DEBUG" />
+  </logger>
+  
   <root>
     <level value="INFO" />
     <appender-ref ref="CONSOLE" />

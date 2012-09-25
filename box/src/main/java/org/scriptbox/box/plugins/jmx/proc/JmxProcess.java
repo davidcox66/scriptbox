@@ -15,6 +15,10 @@ public class JmxProcess extends GenericProcess {
 		return connection;
 	}
 
+	public String toString() {
+		return "JmxProcess{ name=" + getName() + " }";
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
