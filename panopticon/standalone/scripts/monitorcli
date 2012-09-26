@@ -1,4 +1,5 @@
 root=$(dirname $0)/..
 set -x
-JAVA_OPTS="-Dlogback.configurationFile=panopticon-logback.xml"
+JAVA_OPTS="\
+	-Dlogback.configurationFile=panopticon-logback.xml"
 java $JAVA_OPTS -cp $root/target/panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.panopticon.main.MonitorCli "$@"

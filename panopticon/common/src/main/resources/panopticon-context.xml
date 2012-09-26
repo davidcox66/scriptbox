@@ -14,6 +14,10 @@
 	
 	<import resource="classpath:box-basic-context.xml" />
 
+ 	<bean id="pconfigurer" class="org.scriptbox.util.spring.context.EvalConfigurer">
+    	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+  	</bean>
+  	
 	<conditional:dependency classes="groovy.lang.GroovyShell" >
 		<bean name="runGroovyInjector" class="org.scriptbox.box.plugins.run.RunGroovyInjector" 
 			p:plugin-ref="run" />
@@ -79,5 +83,17 @@
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
     	p:instance="local" />
+    	
+    <bean name="heartbeats" class="org.scriptbox.util.cassandra.heartbeat.EndpointPublishingHeartbeatGenerator"
+    	init-method="start"
+    	p:cluster-ref="cluster"
+    	p:keyspace-ref="keyspace"
+    	p:interval="60"
+    	p:ttl="120"
+    	p:group="panopticon"
+    	p:id="local"
+    	p:tags="foobar"
+    	p:host="${jetty.hostname}"
+    	p:port="${jetty.port}" />
     	
 </beans>

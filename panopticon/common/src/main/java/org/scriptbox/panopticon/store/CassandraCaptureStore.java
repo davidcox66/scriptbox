@@ -69,27 +69,26 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	public void store( final CaptureResult result ) throws Exception {
 		down.invoke( new Runnable() {
 			public void run() {
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
-			if( result.value != null && result.value instanceof Number ) {
-				float value = ((Number)result.value).floatValue();
-				BoxContext ctx = BoxContext.getCurrentContext();
-				Lookup beans = ctx.getBeans();
-				MetricTree tree = beans.get( "metric.tree", MetricTree.class );
-				if( tree == null ) {
-					tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30) );
-					beans.put( "metric.tree", tree );
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
+				if( result.value != null && result.value instanceof Number ) {
+					float value = ((Number)result.value).floatValue();
+					BoxContext ctx = BoxContext.getCurrentContext();
+					Lookup beans = ctx.getBeans();
+					MetricTree tree = beans.get( "metric.tree", MetricTree.class );
+					if( tree == null ) {
+						tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30) );
+						beans.put( "metric.tree", tree );
+					}
+					MetricTreeNode root = tree.getRoot();
+					MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
+					MetricTreeNode inst = src.getChild(instance, "instance" ) ;
+					MetricTreeNode attr = inst.getChild(result.attribute, "attribute" );
+					MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
+					MetricSequence seq  = stat.getMetricSequence();
+					seq.record( new Metric(result.millis,value) );
 				}
-				MetricTreeNode root = tree.getRoot();
-				MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
-				MetricTreeNode inst = src.getChild(instance, "instance" ) ;
-				MetricTreeNode attr = inst.getChild(result.attribute, "attribute" );
-				MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
-				MetricSequence seq  = stat.getMetricSequence();
-				seq.record( new Metric(result.millis,value) );
-				
 			}
-		}
-		}
+		} );
 	}
 	
 	
