@@ -28,32 +28,13 @@ public class CassandraMetricStore implements MetricStore {
 	public static final String METRIC_TREE_CF = "MetricTree";
 	public static final String METRIC_SEQUENCE_CF = "MetricSequence";
 	public static final String ALL_NAMES_KEY = "AllMetrics";
-	
+
+	Cluster cluster;
 	Keyspace keyspace;
 	SuperCfTemplate<String,String,String> metricTreeTemplate;
 	ColumnFamilyTemplate<String,Long> metricSequenceTemplate;
 	private boolean initialized;
 	
-	public static void createSchemaIfNeeded( Cluster cluster, String keyspaceName ) {
-		
-			Cassandra.createKeyspaceIfNeeded( cluster, keyspaceName );
-
-			if( !Cassandra.isExistingColumnFamily(cluster, keyspaceName, METRIC_TREE_CF) ) {
-				ColumnFamilyDefinition tree = new ColumnFamilyDefinition();
-				tree.setColumnFamilyName(CassandraMetricStore.METRIC_TREE_CF);
-				tree.setComparator(ComparatorType.UTF8TYPE);
-				tree.setSubComparator(ComparatorType.UTF8TYPE);
-				tree.create( cluster, keyspaceName );
-			}
-				
-			if( !Cassandra.isExistingColumnFamily(cluster, keyspaceName, METRIC_SEQUENCE_CF) ) {
-				ColumnFamilyDefinition sequence = new ColumnFamilyDefinition();
-				sequence.setColumnFamilyName(CassandraMetricStore.METRIC_SEQUENCE_CF);
-				sequence.setComparator(ComparatorType.LONGTYPE);
-				sequence.create( cluster, keyspaceName );
-			}
-		
-	}
 	public CassandraMetricStore() {
 	}
 	
@@ -65,17 +46,8 @@ public class CassandraMetricStore implements MetricStore {
 		this.keyspace = keyspace;
 	}
 
-	public void initialize() {
-		if( !initialized ) {
-			createSchemaIfNeeded( cluster, keyspace.getKeyspaceName() );
-			StringSerializer ser = StringSerializer.get();
-			metricTreeTemplate = new ThriftSuperCfTemplate<String,String,String>( keyspace, METRIC_TREE_CF, ser, ser, ser );
-			metricSequenceTemplate = new ThriftColumnFamilyTemplate<String,Long>( keyspace, METRIC_SEQUENCE_CF, ser, LongSerializer.get() );
-			initialized = true;
-		}
-	}
-
 	public void begin() {
+		initialize();
 		CassandraMetricRange.begin();
 	}
 	
@@ -100,6 +72,35 @@ public class CassandraMetricStore implements MetricStore {
 		return trees.size() > 0 ? trees.get(0) : null;
 	}
 	
+	private void initialize() {
+		if( !initialized ) {
+			createSchemaIfNeeded( cluster, keyspace.getKeyspaceName() );
+			StringSerializer ser = StringSerializer.get();
+			metricTreeTemplate = new ThriftSuperCfTemplate<String,String,String>( keyspace, METRIC_TREE_CF, ser, ser, ser );
+			metricSequenceTemplate = new ThriftColumnFamilyTemplate<String,Long>( keyspace, METRIC_SEQUENCE_CF, ser, LongSerializer.get() );
+			initialized = true;
+		}
+	}
+
+	private void createSchemaIfNeeded() {
+		Cassandra.createKeyspaceIfNeeded( cluster, keyspace.getKeyspaceName() );
+
+		if( !Cassandra.isExistingColumnFamily(cluster, keyspace.getKeyspaceName(), METRIC_TREE_CF) ) {
+			ColumnFamilyDefinition tree = new ColumnFamilyDefinition();
+			tree.setColumnFamilyName(CassandraMetricStore.METRIC_TREE_CF);
+			tree.setComparator(ComparatorType.UTF8TYPE);
+			tree.setSubComparator(ComparatorType.UTF8TYPE);
+			tree.create( cluster, keyspace.getKeyspaceName() );
+		}
+			
+		if( !Cassandra.isExistingColumnFamily(cluster, keyspace.getKeyspaceName(), METRIC_SEQUENCE_CF) ) {
+			ColumnFamilyDefinition sequence = new ColumnFamilyDefinition();
+			sequence.setColumnFamilyName(CassandraMetricStore.METRIC_SEQUENCE_CF);
+			sequence.setComparator(ComparatorType.LONGTYPE);
+			sequence.create( cluster, keyspace.getKeyspaceName() );
+		}
+		
+	}
 	private SuperCfRowMapper<String, String, String, List<MetricTree>> mapper = new SuperCfRowMapper<String, String, String, List<MetricTree>>() {
 		 public List<MetricTree> mapRow(SuperCfResult<String, String, String> result) {
 			List<MetricTree> trees = new ArrayList<MetricTree>();
