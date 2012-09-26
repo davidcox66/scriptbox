@@ -32,6 +32,7 @@ public class CassandraMetricStore implements MetricStore {
 	Keyspace keyspace;
 	SuperCfTemplate<String,String,String> metricTreeTemplate;
 	ColumnFamilyTemplate<String,Long> metricSequenceTemplate;
+	private boolean initialized;
 	
 	public static void createSchemaIfNeeded( Cluster cluster, String keyspaceName ) {
 		
@@ -65,9 +66,13 @@ public class CassandraMetricStore implements MetricStore {
 	}
 
 	public void initialize() {
-		StringSerializer ser = StringSerializer.get();
-		metricTreeTemplate = new ThriftSuperCfTemplate<String,String,String>( keyspace, METRIC_TREE_CF, ser, ser, ser );
-		metricSequenceTemplate = new ThriftColumnFamilyTemplate<String,Long>( keyspace, METRIC_SEQUENCE_CF, ser, LongSerializer.get() );
+		if( !initialized ) {
+			createSchemaIfNeeded( cluster, keyspace.getKeyspaceName() );
+			StringSerializer ser = StringSerializer.get();
+			metricTreeTemplate = new ThriftSuperCfTemplate<String,String,String>( keyspace, METRIC_TREE_CF, ser, ser, ser );
+			metricSequenceTemplate = new ThriftColumnFamilyTemplate<String,Long>( keyspace, METRIC_SEQUENCE_CF, ser, LongSerializer.get() );
+			initialized = true;
+		}
 	}
 
 	public void begin() {

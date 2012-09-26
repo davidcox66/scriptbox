@@ -168,5 +168,9 @@ public class Action {
     	AbstractMetric.unregisterAll(preMetrics);
     	AbstractMetric.unregisterAll(metrics);
     	AbstractMetric.unregisterAll(postMetrics);
-    } 
+    }
+    
+    public String toString() {
+    	return "Action{ name=" + name + " }";
+    }
 }

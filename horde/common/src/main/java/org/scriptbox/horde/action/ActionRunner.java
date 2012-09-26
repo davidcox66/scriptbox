@@ -25,18 +25,28 @@ public class ActionRunner {
 	            	Closures.callInClassLoader( script.getScriptClassLoader(), new RunnableWithThrowable() {
 	            		public void run() throws Throwable {
 			                while( running ) {
-			                	for( Action action : script.getActions() ) {
-					                try {
-					                   action.callAllAndCollectMetrics();
+			                	Action aborted = null;
+			                	try {
+				                	for( Action action : script.getActions() ) {
+						                try {
+						                   action.callAllAndCollectMetrics();
+						                }
+						                catch( ActionScriptAbortException ex ) {
+						                	aborted = action;
+						                	throw ex;
+						                }
+				                        catch( VirtualMachineError ex ) {
+				                            exitAbnormally( ex );    
+				                            return;
+				                        }
+						                catch( Throwable ex ) {
+						                   handler.handle( ex );
+						                }
 					                }
-			                        catch( VirtualMachineError ex ) {
-			                            exitAbnormally( ex );    
-			                            return;
-			                        }
-					                catch( Throwable ex ) {
-					                   handler.handle( ex );
-					                }
-				                }
+			                	}
+			                	catch( ActionScriptAbortException ex ) {
+			                		LOGGER.debug( "Action aborted script execution: " + aborted + " - " + ex.getMessage() );
+			                	}
 			                }
 			                LOGGER.info( "Runner thread exiting normally: " + Thread.currentThread().getName() );
 			            }

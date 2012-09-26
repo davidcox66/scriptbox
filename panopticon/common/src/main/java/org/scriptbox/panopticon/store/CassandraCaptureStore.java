@@ -1,11 +1,8 @@
 package org.scriptbox.panopticon.store;
 
-import me.prettyprint.cassandra.service.tx.HTransactionManager;
-import me.prettyprint.cassandra.service.tx.HTransactionTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 
-import org.quartz.JobDetail;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
 import org.scriptbox.box.events.BoxContextListener;
@@ -24,18 +21,14 @@ import org.scriptbox.util.cassandra.CassandraDownTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import me.prettyprint.cassandra.service.tx.HTransactionTemplate;
 
 public class CassandraCaptureStore implements BoxContextListener, CaptureStore, QuartzListener, InitializingBean {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( CassandraCaptureStore.class );
 	
-	@Autowired
 	private Keyspace keyspace;
-	
-	@Autowired
 	private Cluster cluster;
-	
 	private String instance;
 	private CassandraMetricStore cstore;
 
@@ -51,32 +44,31 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	public void executingScript( BoxInvocationContext invocation ) throws Exception {
 		invocation.next();
 	}
-	
-	public void jobStarted( final QuartzInvocationContext context ) {
-		LOGGER.debug( "jobStarted: starting transaction" );
-	    cstore.begin();
-	    try {
-			HTransactionTemplate.execute( new Runnable() {
-				public void run() { 
-					try {
-						context.next();
-					}
-					catch( Exception ex ) {
-						throw new RuntimeException( "Error invoking job: " + context.getDetail(), ex );
-					}
-				}
-			});
-	    }
-	    finally {
-	    	cstore.end();
-	    }
-	}
-	public void jobCompleted( BoxContext context, JobDetail detail ) {
-		LOGGER.debug( "jobStarted: flushing changes" );
-	    cstore.end();
-	    HTransactionManager.getInstance().flushAll();
-	}
-	
+
+    public void jobStarted( final QuartzInvocationContext context ) {
+        LOGGER.debug( "jobStarted: starting transaction" );
+		down.invoke( new Runnable() {
+			public void run() {
+		        cstore.begin();
+		        try {
+		            HTransactionTemplate.execute( new Runnable() {
+		                public void run() {
+		                    try {
+		                        context.next();
+		                    }
+		                    catch( Exception ex ) {
+		                        throw new RuntimeException( "Error invoking job: " + context.getDetail(), ex );
+		                    }
+		                }
+		            });
+		        }
+		        finally {
+		            cstore.end();
+		        }
+			}
+		} );
+    }
+
 	@Override
 	public void store( final CaptureResult result ) throws Exception {
 		down.invoke( new Runnable() {
@@ -98,6 +90,7 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 					MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
 					MetricSequence seq  = stat.getMetricSequence();
 					seq.record( new Metric(result.millis,value) );
+					
 				}
 			}
 		} );
@@ -131,9 +124,7 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 
 
 	public void afterPropertiesSet() throws Exception {
-		CassandraMetricStore.createSchemaIfNeeded( cluster, keyspace.getKeyspaceName() );
 		cstore = new CassandraMetricStore();
 		cstore.setKeyspace( keyspace );
-		cstore.initialize();
 	}
 }
