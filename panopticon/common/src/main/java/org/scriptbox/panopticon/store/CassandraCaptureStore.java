@@ -1,6 +1,7 @@
 package org.scriptbox.panopticon.store;
 
 import me.prettyprint.cassandra.service.tx.HTransactionManager;
+import me.prettyprint.cassandra.service.tx.HTransactionTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 
@@ -11,6 +12,7 @@ import org.scriptbox.box.events.BoxContextListener;
 import org.scriptbox.box.events.BoxInvocationContext;
 import org.scriptbox.box.plugins.jmx.capture.CaptureResult;
 import org.scriptbox.box.plugins.jmx.capture.CaptureStore;
+import org.scriptbox.box.plugins.quartz.QuartzInvocationContext;
 import org.scriptbox.box.plugins.quartz.QuartzListener;
 import org.scriptbox.metrics.cassandra.CassandraMetricStore;
 import org.scriptbox.metrics.model.Metric;
@@ -18,11 +20,11 @@ import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.util.cassandra.CassandraDownTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.scriptbox.util.cassandra.CassandraDownTemplate;
 
 public class CassandraCaptureStore implements BoxContextListener, CaptureStore, QuartzListener, InitializingBean {
 
@@ -50,14 +52,24 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 		invocation.next();
 	}
 	
-	public void jobStarted( BoxContext context, JobDetail detail ) {
+	public void jobStarted( final QuartzInvocationContext context ) {
 		LOGGER.debug( "jobStarted: starting transaction" );
-	    HTransactionManager  manager = HTransactionManager.getInstance();
-	    if( !manager.isInTransaction() ) {
-	    	manager.pushTransaction(new Object() );
-	    }
 	    cstore.begin();
- 
+	    try {
+			HTransactionTemplate.execute( new Runnable() {
+				public void run() { 
+					try {
+						context.next();
+					}
+					catch( Exception ex ) {
+						throw new RuntimeException( "Error invoking job: " + context.getDetail(), ex );
+					}
+				}
+			});
+	    }
+	    finally {
+	    	cstore.end();
+	    }
 	}
 	public void jobCompleted( BoxContext context, JobDetail detail ) {
 		LOGGER.debug( "jobStarted: flushing changes" );
