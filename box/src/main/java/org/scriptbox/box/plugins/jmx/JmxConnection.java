@@ -30,6 +30,10 @@ public class JmxConnection {
 	   environment.put(JMXConnector.CREDENTIALS, new String[] {user, password} );
 	}
 	
+	public JMXServiceURL getUrl() {
+		return url;
+	}
+	
 	public JMXConnector getConnector() throws IOException {
 		if( connector == null ) {
 			if( environment != null ) {
