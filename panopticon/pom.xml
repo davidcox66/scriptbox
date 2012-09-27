@@ -19,5 +19,6 @@
 		<module>common</module>
 		<module>library</module>
 		<module>standalone</module>
+		<module>ui</module>
 	</modules>
 </project>

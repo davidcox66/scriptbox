@@ -55,12 +55,13 @@ public class CassandraStoreTest {
 	public void testLoadAndRetrieve() {
 		final CassandraMetricStore store = new CassandraMetricStore();
 		store.setKeyspace(Cassandra.getKeyspace(KEYSPACE));
-
+		store.setCluster(Cassandra.getOrCreateCluster());
+		
 		final long now = System.currentTimeMillis();
 		
+		store.begin();
 		HTransactionTemplate.execute( new Runnable() {
 			public void run() {
-				store.initialize();
 				MetricTree tree = store.createMetricTree("Foo", MetricResolution.create(30,300,900) );
 				MetricTreeNode root = tree.getRoot();
 				MetricTreeNode source = root.getChild( "Source", "source" );

@@ -1,0 +1,36 @@
+<configuration>
+
+ <jmxConfigurator />
+
+ <!-- ERROR, INFO, DEBUG, WARN -->
+  <appender name="CONSOLE"
+    class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern># [%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%msg]%n
+      </Pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <File>/tmp/web.log</File>
+    <Append>true</Append>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>[%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%method] [%msg]%n</Pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.springframework">
+    <level value="${fine.level:-WARN}" />
+  </logger>
+
+  <logger name="org.scriptbox">
+    <level value="${root.level:-DEBUG}" />
+  </logger>
+
+  <root>
+    <level value="${root.level:-INFO}" />
+    <appender-ref ref="CONSOLE" />
+  </root>
+
+</configuration>
+  

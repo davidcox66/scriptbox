@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scriptbox</groupId>
+		<artifactId>panopticon.parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>panopticon.ui</artifactId>
+	<packaging>war</packaging>
+	<name>panopticon-ui</name>
+
+	<properties>
+		<gwt.debugPort>8000</gwt.debugPort>
+		<classes.directory>target/www/WEB-INF/classes</classes.directory>
+		<gxt.version>3.0.1</gxt.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sencha.gxt</groupId>
+			<artifactId>gxt</artifactId>
+			<version>3.0.1</version>
+   		</dependency>	
+		<dependency>
+			<groupId>org.scriptbox</groupId>
+			<artifactId>util.gwt.client</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scriptbox</groupId>
+			<artifactId>util.gwt.server</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scriptbox</groupId>
+			<artifactId>util.spring</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/scripts/*</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.properties</exclude>
+					<exclude>**/scripts/*</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+
+		<!-- Generate compiled stuff in the folder used for developing mode -->
+		<outputDirectory>${classes.directory}</outputDirectory>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>tomcat-maven-plugin</artifactId>
+				<version>1.1</version>
+				<configuration>
+					<server>tomcat</server>
+				</configuration>
+			</plugin>
+
+			<!-- GWT Maven Plugin -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<!-- JS is only needed in the package phase, this speeds up testing -->
+				<executions>
+					<execution>
+						<id>generateAsync</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>generateAsync</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>compile</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<!-- Plugin configuration. There are many available options, see gwt-maven-plugin 
+					documentation at codehaus.org -->
+				<configuration>
+					<!-- Pattern for interfaces which will get Async ones generated automatically -->
+					<servicePattern>**/*GWTInterface.java</servicePattern>
+					<!-- URL that should be automatically opened in the GWT shell (gwt:run). -->
+					<runTarget>Panopticon.html</runTarget>
+					<!-- Location of the develop-mode web application structure (gwt:run). -->
+					<hostedWebapp>target/www</hostedWebapp>
+					<!-- Ask GWT to create the Story of Your Compile (SOYC) (gwt:compile) -->
+					<compileReport>true</compileReport>
+					<debugPort>${gwt.debugPort}</debugPort>
+				</configuration>
+			</plugin>
+
+			<!-- Add source folders to test classpath in order to run gwt-tests as 
+				normal junit-tests -->
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${project.build.sourceDirectory}</additionalClasspathElement>
+						<additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+					</additionalClasspathElements>
+					<useManifestOnlyJar>false</useManifestOnlyJar>
+					<forkMode>always</forkMode>
+					<environmentVariables>
+					</environmentVariables>
+
+					<!-- Folder for generated testing stuff -->
+					<systemProperties>
+						<property>
+							<name>gwt.args</name>
+							<value>-out target/www</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+
+			<!-- Copy static web files before executing gwt:run -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/www</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/webapp</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Delete gwt generated stuff -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>src/main/java/com/lrd/ui/shared</directory>
+						</fileset>
+						<fileset>
+							<directory>src/main/webapp/lrdui</directory>
+						</fileset>
+						<fileset>
+							<directory>src/main/webapp/WEB-INF/classes</directory>
+						</fileset>
+						<fileset>
+							<directory>tomcat</directory>
+						</fileset>
+						<fileset>
+							<directory>www-test</directory>
+						</fileset>
+						<fileset>
+							<directory>.gwt-tmp</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.7</version>  <!-- Note 2.8 does not work with AspectJ aspect path -->
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<wtpversion>2.0</wtpversion>
+					<additionalBuildcommands>
+						<buildCommand>
+							<name>com.google.gwt.eclipse.core.gwtProjectValidator</name>
+						</buildCommand>
+					</additionalBuildcommands>
+					<additionalProjectnatures>
+						<projectnature>com.google.gwt.eclipse.core.gwtNature</projectnature>
+					</additionalProjectnatures>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<profiles>
+	</profiles>
+
+</project>

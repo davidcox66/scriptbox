@@ -45,6 +45,14 @@ public class CassandraMetricStore implements MetricStore {
 	public void setKeyspace(Keyspace keyspace) {
 		this.keyspace = keyspace;
 	}
+	
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
 
 	public void begin() {
 		initialize();
@@ -74,7 +82,13 @@ public class CassandraMetricStore implements MetricStore {
 	
 	private void initialize() {
 		if( !initialized ) {
-			createSchemaIfNeeded( cluster, keyspace.getKeyspaceName() );
+			if( keyspace == null ) {
+				throw new IllegalArgumentException( "Keyspace cannot be null");
+			}
+			if( cluster == null ) {
+				throw new IllegalArgumentException( "Cluster cannot be null");
+			}
+			createSchemaIfNeeded();
 			StringSerializer ser = StringSerializer.get();
 			metricTreeTemplate = new ThriftSuperCfTemplate<String,String,String>( keyspace, METRIC_TREE_CF, ser, ser, ser );
 			metricSequenceTemplate = new ThriftColumnFamilyTemplate<String,Long>( keyspace, METRIC_SEQUENCE_CF, ser, LongSerializer.get() );
