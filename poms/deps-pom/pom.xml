@@ -464,6 +464,12 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-eclipse-plugin</artifactId>
+					<!-- Note 2.8 does not work with AspectJ aspect path -->
+					<version>2.9</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
