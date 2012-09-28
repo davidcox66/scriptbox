@@ -36,24 +36,35 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 	private Map<MetricTree,Map<String,MetricTreeNode>> allNodes = new HashMap<MetricTree,Map<String,MetricTreeNode>>();
 	
 	@Override
-	public List<TreeDto> getTrees() {
-		trees = store.getAllMetricTrees();
-		List<TreeDto> ret = new ArrayList<TreeDto>();
-		for( MetricTree tree : trees ) {
-			ret.add( new TreeDto(tree.getName()) );
+	public ArrayList<TreeDto> getTrees() {
+		store.begin();
+		try {
+			trees = store.getAllMetricTrees();
+			ArrayList<TreeDto> ret = new ArrayList<TreeDto>();
+			for( MetricTree tree : trees ) {
+				ret.add( new TreeDto(tree.getName()) );
+			}
+			return ret;
 		}
-		return ret;
+		finally {
+			store.end();
+		}
 	}
-	
+
 	public TreeParentNodeDto getRoot( TreeDto treeDto ) {
-		
-		MetricTree tree = getTreeByName(treeDto.getTreeName());
-		MetricTreeNode root = tree.getRoot();
-		
-		Map<String,MetricTreeNode> nodes = new HashMap<String,MetricTreeNode>();
-		TreeParentNodeDto ret = (TreeParentNodeDto)populateNodes( nodes, tree, root );
-		allNodes.put( tree, nodes );
-		return ret;
+		store.begin();
+		try {
+			MetricTree tree = getTreeByName(treeDto.getTreeName());
+			MetricTreeNode root = tree.getRoot();
+			
+			Map<String,MetricTreeNode> nodes = new HashMap<String,MetricTreeNode>();
+			TreeParentNodeDto ret = (TreeParentNodeDto)populateNodes( nodes, tree, root );
+			allNodes.put( tree, nodes );
+			return ret;
+		}
+		finally {
+			store.end();
+		}
 	}
 	
 	private MetricTree getTreeByName( String name ) {

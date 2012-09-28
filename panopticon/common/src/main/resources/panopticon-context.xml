@@ -56,7 +56,7 @@
   
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
-                p:host="localhost"
+                p:host="${cassandra.host}"
                 p:port="9160" />
     <bean name="cluster"
         factory-bean="clusterFactory"
@@ -76,7 +76,6 @@
   	-->
   	
     <bean name="store" class="org.scriptbox.panopticon.store.CassandraCaptureStore"
-    	p:cluster-ref="cluster"
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
     	p:instance="local" />

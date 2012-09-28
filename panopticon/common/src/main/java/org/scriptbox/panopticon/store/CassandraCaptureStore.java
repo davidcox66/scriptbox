@@ -124,7 +124,14 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 
 
 	public void afterPropertiesSet() throws Exception {
+		if( cluster == null ) {
+			throw new IllegalArgumentException( "Cluster cannot be null");
+		}
+		if( keyspace == null ) {
+			throw new IllegalArgumentException( "Keyspace cannot be null");
+		}
 		cstore = new CassandraMetricStore();
+		cstore.setCluster( cluster );
 		cstore.setKeyspace( keyspace );
 	}
 }

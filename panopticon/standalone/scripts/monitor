@@ -1,9 +1,12 @@
 root=$(dirname $0)/..
 port=${1:-7800}
 jmx_port=$((port + 1))
+listen_host=${2:-"localhost"}
+cassandra_host=${3:-"localhost"}
 JAVA_OPTS="\
-	-Dlogback.configurationFile=panopticon-logback.xml 
-	-Djetty.hostname=localhost \
+	-Dlogback.configurationFile=panopticon-logback.xml \
+	-Dcassandra.host=${cassandra_host} \
+	-Djetty.hostname=${listen_host} \
 	-Djetty.port=${port} \
 	-Dcom.sun.management.jmxremote.port=$jmx_port \
     -Dcom.sun.management.jmxremote.ssl=false \

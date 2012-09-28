@@ -31,9 +31,6 @@
 		<ivy.version>2.2.0</ivy.version>
 		<groovy.runtime.version>1.7</groovy.runtime.version>
 		<gwt.version>2.4.0</gwt.version>
-		<!-- 
-		<gwt.version>2.5.0-rc1</gwt.version>
-		-->
 	</properties>
 
 	<!-- ===================== -->

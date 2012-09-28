@@ -20,6 +20,7 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
+import org.scriptbox.metrics.model.MetricTreeNode;
 import org.scriptbox.util.cassandra.Cassandra;
 import org.scriptbox.util.cassandra.ColumnFamilyDefinition;
 
@@ -34,6 +35,16 @@ public class CassandraMetricStore implements MetricStore {
 	SuperCfTemplate<String,String,String> metricTreeTemplate;
 	ColumnFamilyTemplate<String,Long> metricSequenceTemplate;
 	private boolean initialized;
+
+	public void with( Runnable closure ) {
+		begin();
+		try {
+			closure.run();
+		}
+		finally {
+			end();
+		}
+	}
 	
 	public CassandraMetricStore() {
 	}
@@ -70,7 +81,17 @@ public class CassandraMetricStore implements MetricStore {
 	}
 	
 	public List<MetricTree> getAllMetricTrees() {
-		return metricTreeTemplate.querySuperColumns(ALL_NAMES_KEY, null, mapper );
+		List<MetricTree> ret = new ArrayList<MetricTree>();
+		SuperCfResult<String,String,String> result = metricTreeTemplate.querySuperColumns(ALL_NAMES_KEY);
+		if( result.hasResults() ) {
+			Collection<String> names = result.getSuperColumns();
+			for( String name : names ) {
+				List<MetricResolution> resolutions = (List<MetricResolution>)ObjectSerializer.get().fromByteBuffer(result.getByteBuffer(name, "resolutions"));
+				MetricTree tree = new CassandraMetricTree( this, name, resolutions );
+				ret.add( tree );
+			}
+		}
+		return ret;
 	}
 	
 	public MetricTree getMetricTree( String name ) {

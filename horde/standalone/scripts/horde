@@ -1,7 +1,8 @@
 root=$(dirname $0)/..
 set -x
 port=${1:-7900}
-jmx_port=((port + 1))
+jmx_port=$((port + 1))
+
 JAVA_OPTS="\
 	-Dlogback.configurationFile=horde-logback.xml 
 	-Djetty.port=${port} \

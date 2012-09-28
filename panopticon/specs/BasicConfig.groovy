@@ -1,6 +1,6 @@
 every(30*1000) {
 	
-	  remote( 'ProcessName', 'localhost', 7500 ) {
+	  remote( 'ProcessName', 'localhost', 7901 ) {
 		mbeans('java.lang:type=Memory') {
 		  capture('.*');
 		}
@@ -11,6 +11,9 @@ every(30*1000) {
 				  'ThreadCount',
 				  'TotalStartedThreadCount'
 			  ] );
+		}
+		mbeans('ActionMetrics:*') {
+			capture( '.*' );
 		}
 	  }
 	}
