@@ -4,6 +4,7 @@ import java.util.Map;
 
 public interface MetricTreeNode {
 
+	public String getId();
 	public String getName();
 	public String getType();
     public MetricTreeNode getParent();
