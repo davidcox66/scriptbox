@@ -1,4 +1,4 @@
 root=$(dirname $0)/..
 JAVA_OPTS="\
 	-Dlogback.configurationFile=panopticon-logback.xml"
-java $JAVA_OPTS -cp $root/target/panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.box.plugins.jmx.VmJmxConnectionBuilder "$@"
+java $JAVA_OPTS -cp $root/target/panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.box.plugins.jmx.VmJmxUtil "$@"

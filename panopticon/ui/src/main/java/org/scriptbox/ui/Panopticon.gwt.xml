@@ -29,6 +29,17 @@
     <when-type-is class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetector" />
   </replace-with>
   -->
+  <replace-with class='com.sencha.gxt.chart.client.draw.engine.SVG'>
+  	<when-type-is class='com.sencha.gxt.chart.client.draw.Surface' />
+  </replace-with>
+ 
+  <replace-with class='com.sencha.gxt.chart.client.draw.engine.VML'>
+    <when-type-is class='com.sencha.gxt.chart.client.draw.Surface' />
+    <any>
+      <when-property-is name='user.agent' value='ie6' />
+      <when-property-is name='user.agent' value='ie8' />
+    </any>
+   </replace-with>
   
   <!-- Specify the paths for translatable code                    -->
   <source path='client'/>

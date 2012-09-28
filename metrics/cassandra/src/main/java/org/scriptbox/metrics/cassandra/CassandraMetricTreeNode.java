@@ -77,7 +77,7 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 		return tree.store;
 	}
 	
-	String getId() {
+	public String getId() {
 		if( id == null ) { 
 			StringBuilder builder = new StringBuilder();
 			builder.append( tree.getName() );
