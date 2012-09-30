@@ -3,11 +3,11 @@ package org.scriptbox.ui.client;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.MetricTreeGWTInterface;
-import org.scriptbox.ui.shared.MetricTreeGWTInterfaceAsync;
-import org.scriptbox.ui.shared.TreeDto;
-import org.scriptbox.ui.shared.TreeNodeDto;
-import org.scriptbox.ui.shared.TreeParentNodeDto;
+import org.scriptbox.ui.shared.tree.MetricTreeDto;
+import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
+import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
+import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -31,10 +31,10 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 
 	private static final Logger logger = Logger.getLogger("PanopticonUI");
 
-	class KeyProvider implements ModelKeyProvider<TreeNodeDto> {
+	class KeyProvider implements ModelKeyProvider<MetricTreeNodeDto> {
 		@Override
-		public String getKey(TreeNodeDto item) {
-			return (item instanceof TreeParentNodeDto ? "f-" : "m-")
+		public String getKey(MetricTreeNodeDto item) {
+			return (item instanceof MetricTreeParentNodeDto ? "f-" : "m-")
 					+ item.getId().toString();
 		}
 	}
@@ -49,18 +49,18 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		VerticalLayoutContainer con = new VerticalLayoutContainer();
 		panel.add(con);
 
-		final TreeStore<TreeNodeDto> store = new TreeStore<TreeNodeDto>(new KeyProvider());
+		final TreeStore<MetricTreeNodeDto> store = new TreeStore<MetricTreeNodeDto>(new KeyProvider());
 
-		final Tree<TreeNodeDto, String> tree = new Tree<TreeNodeDto, String>(store,
-			new ValueProvider<TreeNodeDto, String>() {
+		final Tree<MetricTreeNodeDto, String> tree = new Tree<MetricTreeNodeDto, String>(store,
+			new ValueProvider<MetricTreeNodeDto, String>() {
 
 				@Override
-				public String getValue(TreeNodeDto node) {
+				public String getValue(MetricTreeNodeDto node) {
 					return node.getName();
 				}
 
 				@Override
-				public void setValue(TreeNodeDto object, String value) {
+				public void setValue(MetricTreeNodeDto object, String value) {
 				}
 
 				@Override
@@ -70,15 +70,15 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 			});
 
 		
-		final AsyncCallback<TreeParentNodeDto> cb = new AsyncCallback<TreeParentNodeDto>() {
+		final AsyncCallback<MetricTreeParentNodeDto> cb = new AsyncCallback<MetricTreeParentNodeDto>() {
 			 public void onFailure(Throwable ex) {
 				 logger.info( "Failed getting tree: " + ex );
 			 }
-			 public void onSuccess(TreeParentNodeDto root) {
-				 for (TreeNodeDto base : root.getChildren()) {
+			 public void onSuccess(MetricTreeParentNodeDto root) {
+				 for (MetricTreeNodeDto base : root.getChildren()) {
 				      store.add(base);
-				      if (base instanceof TreeParentNodeDto ) {
-				        processFolder(store, (TreeParentNodeDto) base);
+				      if (base instanceof MetricTreeParentNodeDto ) {
+				        processFolder(store, (MetricTreeParentNodeDto) base);
 				      }
 				    }
 				 
@@ -87,17 +87,17 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		};
 		
 		final MetricTreeGWTInterfaceAsync service = GWT.create(MetricTreeGWTInterface.class);
-		service.getTrees( new AsyncCallback<ArrayList<TreeDto>>() {
+		service.getTrees( new AsyncCallback<ArrayList<MetricTreeDto>>() {
 			 public void onFailure(Throwable ex) {
 				 logger.info( "Failed getting trees: " + ex );
 			 }
-			 public void onSuccess(ArrayList<TreeDto> result) {
-				 service.getRoot( (TreeDto)result.get(0), cb );
+			 public void onSuccess(ArrayList<MetricTreeDto> result) {
+				 service.getRoot( (MetricTreeDto)result.get(0), cb );
 			 }
 			
 		} );
 
-		// TreeStateHandler<TreeNodeDto> stateHandler = new TreeStateHandler<TreeNodeDto>( tree);
+		// TreeStateHandler<MetricTreeNodeDto> stateHandler = new TreeStateHandler<MetricTreeNodeDto>( tree);
 		// stateHandler.loadState();
 		// tree.getStyle().setLeafIcon(ExampleImages.INSTANCE.music());
 
@@ -128,11 +128,11 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		RootPanel.get().add(asWidget());
 	}
 	
-	private void processFolder(TreeStore<TreeNodeDto> store, TreeParentNodeDto folder) {
-		for (TreeNodeDto child : folder.getChildren()) {
+	private void processFolder(TreeStore<MetricTreeNodeDto> store, MetricTreeParentNodeDto folder) {
+		for (MetricTreeNodeDto child : folder.getChildren()) {
 			store.add(folder, child);
-		    if (child instanceof TreeParentNodeDto) {
-		    	processFolder(store, (TreeParentNodeDto) child);
+		    if (child instanceof MetricTreeParentNodeDto) {
+		    	processFolder(store, (MetricTreeParentNodeDto) child);
 		    }
 		}
 	}

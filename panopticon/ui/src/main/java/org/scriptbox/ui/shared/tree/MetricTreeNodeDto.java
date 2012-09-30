@@ -1,8 +1,8 @@
-package org.scriptbox.ui.shared;
+package org.scriptbox.ui.shared.tree;
 
 import java.io.Serializable;
 
-public class TreeNodeDto implements Serializable {
+public class MetricTreeNodeDto implements Serializable {
 
 	
 	private static final long serialVersionUID = 1L;
@@ -11,10 +11,10 @@ public class TreeNodeDto implements Serializable {
 	private String id;
 	private String name;
 	
-	public TreeNodeDto() {
+	public MetricTreeNodeDto() {
 	}
 	
-	public TreeNodeDto( String treeName, String id, String name ) {
+	public MetricTreeNodeDto( String treeName, String id, String name ) {
 		this.treeName = treeName;
 		this.id = id;
 		this.name = name;

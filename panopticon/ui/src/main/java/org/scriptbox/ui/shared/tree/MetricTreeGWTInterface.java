@@ -1,4 +1,4 @@
-package org.scriptbox.ui.shared;
+package org.scriptbox.ui.shared.tree;
 
 import java.util.ArrayList;
 
@@ -8,6 +8,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("remote/treeService")
 public interface MetricTreeGWTInterface extends RemoteService {
 
-	public ArrayList<TreeDto> getTrees();
-	public TreeParentNodeDto getRoot( TreeDto tree );
+	public ArrayList<MetricTreeDto> getTrees();
+	public MetricTreeParentNodeDto getRoot( MetricTreeDto tree );
 }

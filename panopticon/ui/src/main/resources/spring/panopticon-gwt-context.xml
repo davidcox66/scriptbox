@@ -21,7 +21,7 @@
 
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
-                p:host="10.161.3.63"
+                p:host="localhost"
                 p:port="9160" />
     <bean name="cluster"
         factory-bean="clusterFactory"
@@ -38,4 +38,52 @@
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace" />
     	
+    	
+    <bean id="serviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+    	<constructor-arg type="org.springframework.aop.Pointcut" >
+         	<bean id="servicePointcut" class="org.springframework.aop.support.annotation.AnnotationMatchingPointcut" >
+            	<constructor-arg value="org.springframework.stereotype.Service" />
+            	<constructor-arg value="true" />
+         	</bean>
+    	</constructor-arg>
+    	<constructor-arg type="org.aopalliance.aop.Advice">
+        	<ref bean="gwtInterceptor" />
+    	</constructor-arg>
+	</bean>
+
+	<bean id="repositoryAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+    	<constructor-arg type="org.springframework.aop.Pointcut" >
+         	<bean id="repositoryPointcut" class="org.springframework.aop.support.annotation.AnnotationMatchingPointcut" >
+            	<constructor-arg value="org.springframework.stereotype.Repository" />
+	            <!-- 
+	                EXTREMELY important to set AnnotationMatchingPointcut.checkInherited == true because the cglib proxy with create a subclass
+	                that has the @Transactional attribute (making the transaction interceptor work but this interceptor will mysteriously
+	                not work because the proxy does not have the @Repository annotation.
+	                The serviceAdvisor still seemed to work without this for some reason. Likely, it wasn't using cglib in that case but
+	                that's just a guess.
+	             -->
+	            <constructor-arg value="true" />
+	         </bean>
+	    </constructor-arg>
+	    <constructor-arg type="org.aopalliance.aop.Advice">
+	        <ref bean="gwtInterceptor" />
+	    </constructor-arg>
+	</bean>
+
+	<!-- 
+	<bean id="springAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+	    <constructor-arg type="org.springframework.aop.Pointcut" >
+	         <bean id="springPointcut" class="org.springframework.aop.support.annotation.AnnotationMatchingPointcut" >
+	            <constructor-arg value="org.joule.spring.SpringInterceptors" />
+	            <constructor-arg value="true" />
+	         </bean>
+	    </constructor-arg>
+	    <constructor-arg type="org.aopalliance.aop.Advice">
+	        <ref bean="gwtInterceptor" />
+	    </constructor-arg>
+	</bean>
+	-->
+	
+	<bean id="gwtInterceptor" class="org.scriptbox.util.gwt.server.remote.ServiceExceptionInterceptor" />
+	    	
 </beans>
