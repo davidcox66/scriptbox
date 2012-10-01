@@ -31,9 +31,18 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	private Cluster cluster;
 	private String instance;
 	private CassandraMetricStore cstore;
-
+	private NameSplitter nameSplitter;
+	
 	private CassandraDownTemplate down = new CassandraDownTemplate();
 	
+	public NameSplitter getNameSplitter() {
+		return nameSplitter;
+	}
+
+	public void setNameSplitter(NameSplitter nameSplitter) {
+		this.nameSplitter = nameSplitter;
+	}
+
 	public void contextCreated( BoxContext context ) throws Exception {
 		context.getBeans().put( "store", this );
 	}
@@ -86,7 +95,20 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 					MetricTreeNode root = tree.getRoot();
 					MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
 					MetricTreeNode inst = src.getChild(instance, "instance" ) ;
-					MetricTreeNode attr = inst.getChild(result.attribute, "attribute" );
+					MetricTreeNode attr = inst;
+					//
+					// Optional break up which typically is delimited ObjectName into a series of children
+					// instead of a single long name
+					//
+					if( nameSplitter != null ) {
+						String[] names = nameSplitter.split( result.attribute );
+						for( String name : names ) {
+							attr = attr.getChild(name, "attribute" );
+						}
+					}
+					else {
+						attr = inst.getChild(result.attribute, "attribute" );
+					}
 					MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
 					MetricSequence seq  = stat.getMetricSequence();
 					seq.record( new Metric(result.millis,value) );

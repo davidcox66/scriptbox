@@ -25,7 +25,12 @@
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt</artifactId>
-			<version>3.0.1</version>
+			<version>${gxt.version}</version>
+   		</dependency>	
+		<dependency>
+			<groupId>com.sencha.gxt</groupId>
+			<artifactId>gxt-chart</artifactId>
+			<version>${gxt.version}</version>
    		</dependency>	
 		<dependency>
 			<groupId>org.scriptbox</groupId>

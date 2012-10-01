@@ -6,9 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.ui.shared.tree.MetricQuery;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
@@ -67,6 +71,21 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 		}
 	}
 	
+	public List<Metric> getMetrics( MetricQuery query ) {
+		MetricTree tree = getTreeByName( query.getNode().getTreeName() );
+		Map<String,MetricTreeNode> nodes = allNodes.get( tree );
+		if( nodes == null ) {
+			throw new RuntimeException( "Tree nodes not found: '" + tree.getName() );
+		}
+		MetricTreeNode node = nodes.get( query.getNode().getId() ); 
+		if( node == null ) {
+			throw new RuntimeException( "Node not found: '" + query.getNode().getId() );
+		}
+		MetricSequence seq = node.getMetricSequence();
+		MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
+		return range.getMetrics();
+	}
+
 	private MetricTree getTreeByName( String name ) {
 		for( MetricTree tree : trees ) {
 			if( tree.getName().equals(name) ) {

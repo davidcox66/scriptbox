@@ -1,6 +1,7 @@
 package org.scriptbox.metrics.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Metric implements Serializable {
 
@@ -14,6 +15,10 @@ public class Metric implements Serializable {
 		this.value = value;
 	}
 
+	public Date getDate() {
+		return new Date( millis );
+	}
+	
 	public long getMillis() {
 		return millis;
 	}
