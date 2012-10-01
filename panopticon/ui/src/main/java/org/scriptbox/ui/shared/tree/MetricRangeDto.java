@@ -1,18 +1,24 @@
 package org.scriptbox.ui.shared.tree;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.shared.timed.TimeBasedLoadResult;
 
-public class MetricRangeDto implements TimeBasedLoadResult<Metric> {
+public class MetricRangeDto implements TimeBasedLoadResult<Metric>, Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Date first;
 	private Date last;
 	private Date start;
 	private Date end;
 	private List<Metric> metrics;
+	
+	public MetricRangeDto() {
+	}
 	
 	public MetricRangeDto( long first, long last, long start, long end, List<Metric> metrics ) {
 		this.first = new Date(first);

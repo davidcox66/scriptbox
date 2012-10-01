@@ -18,19 +18,16 @@
 	<properties>
 		<gwt.debugPort>8000</gwt.debugPort>
 		<classes.directory>target/www/WEB-INF/classes</classes.directory>
-		<gxt.version>3.0.1</gxt.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt</artifactId>
-			<version>${gxt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt-chart</artifactId>
-			<version>${gxt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scriptbox</groupId>

@@ -41,7 +41,7 @@ public class ChartPanel extends ContentPanel {
 		@Path("date")
 		ModelKeyProvider<Metric> nameKey();
 		ValueProvider<Metric, Date> date();
-		ValueProvider<Metric, Double> value();
+		ValueProvider<Metric, Float> value();
 	}
 
 	private static final MetricPropertyAccess metricAccess = GWT.create(MetricPropertyAccess.class);

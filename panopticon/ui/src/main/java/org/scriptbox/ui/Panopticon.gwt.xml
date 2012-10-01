@@ -14,7 +14,8 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <inherits name="com.sencha.gxt.ui.GXT" />
-  <inherits name='com.sencha.gxt.charts.Chart' />
+  <inherits name='com.sencha.gxt.chart.Chart' />
+  <inherits name='org.scriptbox.metrics.Metrics' />
 
   <!-- Other module inherits                                      -->
 
