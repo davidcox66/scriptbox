@@ -13,5 +13,5 @@ public interface MetricTreeGWTInterface extends RemoteService {
 
 	public ArrayList<MetricTreeDto> getTrees();
 	public MetricTreeParentNodeDto getRoot( MetricTreeDto tree );
-	public List<Metric> getMetrics( MetricQuery query );
+	public MetricRangeDto getMetrics( MetricQueryDto query );
 }

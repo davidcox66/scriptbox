@@ -26,12 +26,12 @@
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt</artifactId>
 			<version>${gxt.version}</version>
-   		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt-chart</artifactId>
 			<version>${gxt.version}</version>
-   		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.scriptbox</groupId>
 			<artifactId>util.gwt.client</artifactId>
@@ -60,12 +60,8 @@
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-dev</artifactId>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-web</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -118,7 +114,7 @@
 				<executions>
 					<execution>
 						<id>generateAsync</id>
-						<phase>process-resources</phase>
+						<phase>process-sources</phase>
 						<goals>
 							<goal>generateAsync</goal>
 						</goals>
@@ -196,12 +192,6 @@
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets>
-						<fileset>
-							<directory>src/main/java/com/lrd/ui/shared</directory>
-						</fileset>
-						<fileset>
-							<directory>src/main/webapp/lrdui</directory>
-						</fileset>
 						<fileset>
 							<directory>src/main/webapp/WEB-INF/classes</directory>
 						</fileset>

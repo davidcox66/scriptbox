@@ -1,20 +1,21 @@
 package org.scriptbox.ui.client;
 
 import java.util.Date;
-import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
-import org.scriptbox.ui.shared.tree.MetricQuery;
+import org.scriptbox.ui.shared.timed.TimeBasedChartUpdateBinding;
+import org.scriptbox.ui.shared.timed.TimeBasedLoader;
+import org.scriptbox.ui.shared.tree.MetricQueryDto;
+import org.scriptbox.ui.shared.tree.MetricRangeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Chart.Position;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
@@ -30,143 +31,106 @@ import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
-import com.sencha.gxt.data.shared.loader.Loader;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.FramedPanel;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
- 
-public class ChartPanel {
 
-	 public interface MetricPropertyAccess extends PropertyAccess<Metric> {
-		    ValueProvider<Metric, Date> date();
-		 
-		    @Path("date")
-		    ModelKeyProvider<Metric> nameKey();
-		 
-		    ValueProvider<Metric, Double> value();
-		  }
-		 
-		  private static final MetricPropertyAccess metricAccess = GWT.create(MetricPropertyAccess.class);
-		  private static final DateTimeFormat f = DateTimeFormat.getFormat("HH:mm:ss");
-		  // private Timer update;
-		 
-		  public Widget asWidget() {
-		    final Chart<Metric> chart = new Chart<Metric>(600, 400);
-		    chart.setDefaultInsets(20);
-		 
-		    
-		    final MetricTreeGWTInterfaceAsync service = GWT.create(MetricTreeGWTInterface.class);
-		    
-		    RpcProxy<MetricQuery, Metric> proxy = new RpcProxy<MetricQuery, Metric>() {
-		        @Override
-		        public void load(MetricQuery loadConfig, AsyncCallback<Metric> callback) {
-		          service.getMetrics( loadConfig, callback );
-		        }
-		      };
-		   
-		    Loader<MetricQuery,Metric> loader = new Loader<MetricQuery,Metric>( proxy );
-		    
-		    final ListStore<Metric> store = new ListStore<Metric>(metricAccess.nameKey());
-		    Date initial = f.parse("Feb 1");
-		    for (int i = 0; i < 7; i++) {
-		      store.add(new Site(initial, Math.random() * 20 + 80, Math.random() * 20 + 40, Math.random() * 20));
-		      initial = CalendarUtil.copyDate(initial);
-		      CalendarUtil.addDaysToDate(initial, 1);
-		    }
-		    chart.setStore(store);
-		 
-		    NumericAxis<Metric> axis = new NumericAxis<Metric>();
-		    axis.setPosition(Position.LEFT);
-		    axis.addField(metricAccess.value());
-		    TextSprite title = new TextSprite("Value");
-		    title.setFontSize(18);
-		    axis.setTitleConfig(title);
-		    axis.setDisplayGrid(true);
-		    axis.setMinimum(0);
-		    axis.setMaximum(100);
-		    chart.addAxis(axis);
-		 
-		    final TimeAxis<Metric> time = new TimeAxis<Metric>();
-		    time.setField(metricAccess.date());
-		    time.setStartDate(f.parse("Feb 1"));
-		    time.setEndDate(f.parse("Feb 7"));
-		    time.setLabelProvider(new LabelProvider<Date>() {
-		      @Override
-		      public String getLabel(Date item) {
-		        return f.format(item);
-		      }
-		    });
-		    chart.addAxis(time);
-		 
-		    LineSeries<Metric> series = new LineSeries<Metric>();
-		    series.setYAxisPosition(Position.LEFT);
-		    series.setYField(metricAccess.value());
-		    series.setStroke(new RGB(148, 174, 10));
-		    series.setShowMarkers(true);
-		    series.setMarkerIndex(1);
-		    Sprite marker = Primitives.circle(0, 0, 6);
-		    marker.setFill(new RGB(148, 174, 10));
-		    series.setMarkerConfig(marker);
-		    chart.addSeries(series);
-		 
-		    /*
-		    update = new Timer() {
-		      @Override
-		      public void run() {
-		        Date startDate = CalendarUtil.copyDate(time.getStartDate());
-		        Date endDate = CalendarUtil.copyDate(time.getEndDate());
-		        CalendarUtil.addDaysToDate(startDate, 1);
-		        CalendarUtil.addDaysToDate(endDate, 1);
-		        chart.getStore().add(new Site(endDate, Math.random() * 20 + 80, Math.random() * 20 + 40, Math.random() * 20));
-		        time.setStartDate(startDate);
-		        time.setEndDate(endDate);
-		        chart.redrawChart();
-		      }
-		    };
-		 
-		    update.scheduleRepeating(1000);
-		 
-		    ToggleButton animation = new ToggleButton("Animate");
-		    animation.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-		      @Override
-		      public void onValueChange(ValueChangeEvent<Boolean> event) {
-		        chart.setAnimated(event.getValue());
-		      }
-		    });
-		    animation.setValue(true, true);
-		    
-		    ToolBar toolBar = new ToolBar();
-		    toolBar.add(animation);
-		 	*/
-		 
-		    ContentPanel panel = new FramedPanel();
-		    panel.getElement().getStyle().setMargin(10, Unit.PX);
-		    panel.setCollapsible(true);
-		    panel.setHeadingText("Chart");
-		    panel.setPixelSize(620, 500);
-		    panel.setBodyBorder(true);
-		 
-		    VerticalLayoutContainer layout = new VerticalLayoutContainer();
-		    panel.add(layout);
-		 
-		    // toolBar.setLayoutData(new VerticalLayoutData(1, -1));
-		    // layout.add(toolBar);
-		 
-		    chart.setLayoutData(new VerticalLayoutData(1, 1));
-		    layout.add(chart);
-		 
-		    /*
-		    panel.addAttachHandler(new AttachEvent.Handler() {
-		      @Override
-		      public void onAttachOrDetach(AttachEvent event) {
-		        if (event.isAttached() == false) {
-		          update.cancel();
-		        }
-		      }
-		    });
-		 	*/
-		    
-		    return panel;
-		  }
+public class ChartPanel extends ContentPanel {
+
+	public interface MetricPropertyAccess extends PropertyAccess<Metric> {
+		@Path("date")
+		ModelKeyProvider<Metric> nameKey();
+		ValueProvider<Metric, Date> date();
+		ValueProvider<Metric, Double> value();
+	}
+
+	private static final MetricPropertyAccess metricAccess = GWT.create(MetricPropertyAccess.class);
+	private static final DateTimeFormat f = DateTimeFormat.getFormat("HH:mm:ss");
+
+	// private Timer update;
+
+	private Chart<Metric> chart;
+	private NumericAxis<Metric> valueAxis;
+	private TimeAxis<Metric> timeAxis;
+	private	LineSeries<Metric> series;
+	private MetricTreeGWTInterfaceAsync service;
+	private	TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader;
+	private ListStore<Metric> store;
+	private TimeBasedChartUpdateBinding<MetricQueryDto, Metric, MetricRangeDto> binding;
+	
+
+	public void load( MetricTreeNodeDto node ) {
+		MetricQueryDto query = new MetricQueryDto();
+		query.setNode( node );
+		query.setStart( new Date() );
+		query.setEnd( new Date() );
+		loader.load( query );
+	}
+	
+	public ChartPanel() {
+		service = GWT.create(MetricTreeGWTInterface.class);
+		
+		chart = new Chart<Metric>(600, 400);
+		chart.setDefaultInsets(20);
+
+		RpcProxy<MetricQueryDto, MetricRangeDto> proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
+			@Override
+			public void load(MetricQueryDto loadConfig, AsyncCallback<MetricRangeDto> callback) {
+				service.getMetrics(loadConfig, callback);
+			}
+		};
+
+		loader = new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
+		store = new ListStore<Metric>(metricAccess.nameKey());
+		chart.setStore(store);
+
+		valueAxis = new NumericAxis<Metric>();
+		valueAxis.setPosition(Position.LEFT);
+		valueAxis.addField(metricAccess.value());
+		TextSprite title = new TextSprite("Value");
+		title.setFontSize(18);
+		valueAxis.setTitleConfig(title);
+		valueAxis.setDisplayGrid(true);
+		valueAxis.setMinimum(0);
+		valueAxis.setMaximum(100);
+		
+		chart.addAxis(valueAxis);
+
+		timeAxis = new TimeAxis<Metric>();
+		timeAxis.setField(metricAccess.date());
+		timeAxis.setStartDate(new Date());
+		timeAxis.setEndDate(new Date());
+		timeAxis.setLabelProvider(new LabelProvider<Date>() {
+			@Override
+			public String getLabel(Date item) {
+				return f.format(item);
+			}
+		});
+		chart.addAxis(timeAxis);
+
+		series = new LineSeries<Metric>();
+		series.setYAxisPosition(Position.LEFT);
+		series.setYField(metricAccess.value());
+		series.setStroke(new RGB(148, 174, 10));
+		series.setShowMarkers(true);
+		series.setMarkerIndex(1);
+		Sprite marker = Primitives.circle(0, 0, 6);
+		marker.setFill(new RGB(148, 174, 10));
+		series.setMarkerConfig(marker);
+		chart.addSeries(series);
+
+		binding = new TimeBasedChartUpdateBinding<MetricQueryDto, Metric, MetricRangeDto>(chart, timeAxis, store);
+		
+		getElement().getStyle().setMargin(10, Unit.PX);
+		setCollapsible(true);
+		setHeadingText("Chart");
+		setPixelSize(620, 500);
+		setBodyBorder(true);
+
+		VerticalLayoutContainer layout = new VerticalLayoutContainer();
+		add(layout);
+
+		chart.setLayoutData(new VerticalLayoutData(1, 1));
+		layout.add(chart);
+	}
 }

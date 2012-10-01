@@ -21,7 +21,7 @@
 
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
-                p:host="localhost"
+                p:host="${cassandra_host}"
                 p:port="9160" />
     <bean name="cluster"
         factory-bean="clusterFactory"

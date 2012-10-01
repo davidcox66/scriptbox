@@ -1,5 +1,6 @@
 package org.scriptbox.metrics.model;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,11 +14,18 @@ public abstract class MetricRange {
 		this.end = end;
 	}
 
+	public Date getStartDate() {
+		return new Date( start );
+	}
 
 	public long getStart() {
 		return start;
 	}
 
+	public Date getEndDate() {
+		return new Date( end );
+	}
+	
 	public long getEnd() {
 		return end;
 	}

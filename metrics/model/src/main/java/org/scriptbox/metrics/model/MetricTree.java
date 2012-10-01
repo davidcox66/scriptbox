@@ -18,6 +18,30 @@ public abstract class MetricTree {
 		return name;
 	}
 
+	public MetricResolution getNearestResolution( int seconds ) {
+		MetricResolution best = null;
+		for( MetricResolution res : resolutions ) {
+			if( res.getSeconds() < seconds ) {
+				if( best == null || best.getSeconds() < res.getSeconds() ) {
+					best = res;
+				}
+			}
+		}
+		return best != null ? best : getFinestResolution();
+	}
+	
+	public MetricResolution getFinestResolution() {
+		int min = Integer.MAX_VALUE;
+		MetricResolution ret = null;
+		for( MetricResolution res : resolutions ) {
+			if( res.getSeconds() < min ) {
+				ret = res;
+				min = res.getSeconds();
+			}
+		}
+		return ret;
+	}
+	
 	public List<MetricResolution> getResolutions() {
 		return resolutions;
 	}

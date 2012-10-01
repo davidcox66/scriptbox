@@ -3,14 +3,13 @@ package org.scriptbox.ui.client;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -36,10 +35,16 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		}
 	}
 
+	private Tree<MetricTreeNodeDto,String> tree;
+	
+	public void addSelectionHandler( SelectionHandler<MetricTreeNodeDto> handler ) {
+		tree.getSelectionModel().addSelectionHandler( handler );
+	}
+	
 	public MetricTreePanel() {
 		final TreeStore<MetricTreeNodeDto> store = new TreeStore<MetricTreeNodeDto>(new KeyProvider());
 
-		final Tree<MetricTreeNodeDto, String> tree = new Tree<MetricTreeNodeDto, String>(store,
+		tree = new Tree<MetricTreeNodeDto, String>(store,
 			new ValueProvider<MetricTreeNodeDto, String>() {
 
 				@Override
@@ -56,15 +61,6 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 					return "name";
 				}
 			});
-		
-		tree.getSelectionModel().addSelectionHandler(new SelectionHandler<MetricTreeNodeDto>() {
-	        @Override
-	        public void onSelection(SelectionEvent<MetricTreeNodeDto> event) {
-        	  MetricTreeNodeDto item = event.getSelectedItem();
-	          if ( !(item instanceof MetricTreeParentNodeDto) ) {
-	          }
-	        }
-	      });		
 		
 		final AsyncCallback<MetricTreeParentNodeDto> cb = new AsyncCallback<MetricTreeParentNodeDto>() {
 			 public void onFailure(Throwable ex) {

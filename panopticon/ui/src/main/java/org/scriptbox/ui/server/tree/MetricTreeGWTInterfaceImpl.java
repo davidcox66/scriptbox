@@ -6,25 +6,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
-import org.scriptbox.ui.shared.tree.MetricQuery;
+import org.scriptbox.ui.shared.tree.MetricQueryDto;
+import org.scriptbox.ui.shared.tree.MetricRangeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
-import org.scriptbox.util.gwt.server.remote.ExportableService;
-import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.scriptbox.util.gwt.server.remote.ExportableService;
+import org.scriptbox.util.gwt.server.remote.ServiceScope;
+import org.scriptbox.metrics.model.DateRange;
+import org.scriptbox.ui.shared.tree.MetricRangeDto;
 
 @Service("treeService")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
@@ -71,7 +73,7 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 		}
 	}
 	
-	public List<Metric> getMetrics( MetricQuery query ) {
+	public MetricRangeDto getMetrics( MetricQueryDto query ) {
 		MetricTree tree = getTreeByName( query.getNode().getTreeName() );
 		Map<String,MetricTreeNode> nodes = allNodes.get( tree );
 		if( nodes == null ) {
@@ -82,8 +84,15 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			throw new RuntimeException( "Node not found: '" + query.getNode().getId() );
 		}
 		MetricSequence seq = node.getMetricSequence();
-		MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
-		return range.getMetrics();
+		// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
+		DateRange dr = seq.getDateRange();
+		MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime(), 30 );
+		return new MetricRangeDto( 
+			dr.getStart().getTime(), 
+			dr.getEnd().getTime(), 
+			range.getStart(), 
+			range.getEnd(), 
+			range.getMetrics() );
 	}
 
 	private MetricTree getTreeByName( String name ) {
