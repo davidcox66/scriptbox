@@ -1,6 +1,7 @@
 package org.scriptbox.ui.shared.timed;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 import com.sencha.gxt.data.shared.loader.DataProxy;
 import com.sencha.gxt.data.shared.loader.DataReader;
@@ -10,6 +11,8 @@ import com.sencha.gxt.data.shared.loader.PagingLoadConfigBean;
 
 public class TimeBasedLoader<C extends TimeBasedLoadConfig, D extends TimeBasedLoadResult<?>> extends Loader<C, D> {
 
+	private static final Logger logger = Logger.getLogger("TimeBasedLoader");
+	
 	  private Date first;
 	  private Date start;
 	  private Date end;
@@ -88,6 +91,7 @@ public class TimeBasedLoader<C extends TimeBasedLoadConfig, D extends TimeBasedL
 	   */
 	  @Override
 	  protected void onLoadSuccess(C loadConfig, D result) {
+		logger.info( "onLoadSuccess: config=" + loadConfig + ", result=" + result );
 	    first = result.getFirst();
 	    last = result.getLast();
 	    fireEvent(new LoadEvent<C, D>(loadConfig, result));

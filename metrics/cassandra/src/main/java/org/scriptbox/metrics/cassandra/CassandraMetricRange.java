@@ -22,6 +22,7 @@ public class CassandraMetricRange extends MetricRange {
 	
 	private MetricResolution resolution;
 	private CassandraMetricSequence sequence;
+	private List<Metric> metrics;
 	
 	static void begin() {
 		cache.set( new HashMap<CassandraMetricRange,List<Metric>>() );
@@ -47,23 +48,50 @@ public class CassandraMetricRange extends MetricRange {
 		return sequence;
 	}
 
+	public float getMin() {
+		float min = Float.MAX_VALUE;
+		for( Metric metric : getMetrics() ) {
+			min = Math.min( min, metric.getValue() );
+		}
+		return min;
+	}
+	
+	public float getMax() {
+		float max = Float.MIN_VALUE;
+		for( Metric metric : getMetrics() ) {
+			max = Math.max( max, metric.getValue() );
+		}
+		return max;
+	}
+	
 	@Override
 	public List<Metric> getMetrics() {
-		Map<CassandraMetricRange,List<Metric>> lcache = cache.get();
-		if( lcache != null ) {
-			List<Metric> cached = lcache.get( this );
-			if( cached != null ) {
-				return cached;
+		if( metrics == null ) { 
+			Map<CassandraMetricRange,List<Metric>> lcache = cache.get();
+			if( lcache != null ) {
+				List<Metric> cached = lcache.get( this );
+				if( cached != null ) {
+					return cached;
+				}
+			}
+			
+			fetchMetrics();
+			
+			if( lcache != null ) {
+				lcache.put( this, metrics );
 			}
 		}
-		
+		return metrics;
+	}
+	
+	private List<Metric> fetchMetrics() {
 		String compositeId = sequence.node.getId() + "," + resolution.getSeconds();
 		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
 		predicate.setRange(getStart(), getEnd(), false, Integer.MAX_VALUE );
 		ColumnFamilyResult<String,Long> result = sequence.node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
 		
 		Collection<Long> times = result.getColumnNames();
-		List<Metric> metrics = new ArrayList<Metric>( times.size() + 2 ); // 2 for the potential of adding an earlier and later value
+		metrics = new ArrayList<Metric>( times.size() + 2 ); // 2 for the potential of adding an earlier and later value
 		Iterator<Long> iter = times.iterator();
 	
 		Long millis = null;
@@ -92,12 +120,9 @@ public class CassandraMetricRange extends MetricRange {
 				metrics.add( new Metric(getEnd(), after != null ? after.getValue() : metric.getValue()) );
 			}
 		}
-		
-		if( lcache != null ) {
-			lcache.put( this, metrics );
-		}
 		return metrics;
 	}
+	
 
 	private Metric findRangeExteriorMetric( String compositeId, Long first, Long last, boolean reversed ) {
 		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );

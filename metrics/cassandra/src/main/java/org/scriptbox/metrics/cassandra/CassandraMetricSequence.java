@@ -57,7 +57,7 @@ public class CassandraMetricSequence extends MetricSequence {
 	public DateRange getDateRange() {
 		String compositeId = node.getId() + "," + node.tree.getFinestResolution().getSeconds();
 		Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
-		Date end = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, true );
+		Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
 		if( start != null && end != null ) {
 			return new DateRange( start, end );
 		}

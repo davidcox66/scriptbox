@@ -3,12 +3,17 @@ package org.scriptbox.metrics.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class Metric implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class Metric implements Serializable, IsSerializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private long millis;
 	private float value;
+	
+	public Metric() {
+	}
 	
 	public Metric( long millis, float value ) {
 		this.millis = millis;

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.scriptbox.metrics.model.DateRange;
+import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
@@ -17,16 +19,14 @@ import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
+import org.scriptbox.util.gwt.server.remote.ExportableService;
+import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.scriptbox.util.gwt.server.remote.ExportableService;
-import org.scriptbox.util.gwt.server.remote.ServiceScope;
-import org.scriptbox.metrics.model.DateRange;
-import org.scriptbox.ui.shared.tree.MetricRangeDto;
 
 @Service("treeService")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
@@ -92,9 +92,13 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			dr.getEnd().getTime(), 
 			range.getStart(), 
 			range.getEnd(), 
+			range.getMin(),
+			range.getMax(),
 			range.getMetrics() );
 	}
 
+	public Metric whitelist1( Metric value ) { return null; }
+	
 	private MetricTree getTreeByName( String name ) {
 		for( MetricTree tree : trees ) {
 			if( tree.getName().equals(name) ) {

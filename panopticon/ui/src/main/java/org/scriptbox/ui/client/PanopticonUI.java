@@ -39,6 +39,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	        public void onSelection(SelectionEvent<MetricTreeNodeDto> event) {
         	  MetricTreeNodeDto item = event.getSelectedItem();
 	          if ( !(item instanceof MetricTreeParentNodeDto) ) {
+	        	  logger.info( "Loadding metrics");
 	        	  chartPanel.load( item );
 	          }
 	        }

@@ -33,6 +33,8 @@ public abstract class MetricRange {
 	public abstract MetricResolution getResolution(); 
 	public abstract MetricSequence getSequence(); 
 	public abstract List<Metric> getMetrics();
+	public abstract float getMin();
+	public abstract float getMax();
 	
 	public Iterator<Metric> getConstantResolutionIterator() {
 		final List<Metric> metrics = getMetrics();

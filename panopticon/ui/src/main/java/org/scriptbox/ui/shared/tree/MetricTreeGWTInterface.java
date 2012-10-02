@@ -1,7 +1,6 @@
 package org.scriptbox.ui.shared.tree;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
 
@@ -14,4 +13,5 @@ public interface MetricTreeGWTInterface extends RemoteService {
 	public ArrayList<MetricTreeDto> getTrees();
 	public MetricTreeParentNodeDto getRoot( MetricTreeDto tree );
 	public MetricRangeDto getMetrics( MetricQueryDto query );
+	public Metric whitelist1( Metric x );
 }
