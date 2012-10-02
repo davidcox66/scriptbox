@@ -1,8 +1,6 @@
 package org.scriptbox.box.remoting;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,13 +24,32 @@ public class BoxCliHelper {
 	private String[] contextLocations;
 	private List<HostPort> agents;
 	private int defaultAgentPort;
+
+	private String tunnelHost;
+	private int tunnelPort;
+	private BoxTunnelCredentials credentials;
 	
 	public BoxCliHelper( String[] args, String agentBeanName, String[] contextLocations, int defaultAgentPort ) throws CommandLineException {
 		this.agentBeanName = agentBeanName;
 		this.contextLocations = contextLocations;
+		this.defaultAgentPort = defaultAgentPort;
 		cmd = new CommandLine( args );
 		agents = getAgentHostPorts( cmd );
-		this.defaultAgentPort = defaultAgentPort;
+		processTunnel();
+	}
+
+	private void processTunnel() throws CommandLineException {
+		String tunnel = cmd.consumeArgValue("tunnel",false);
+		if( tunnel != null ) {
+			String[] parts = tunnel.split(":");
+			tunnelHost = parts[0];
+			tunnelPort = parts.length > 1 ? Integer.parseInt(parts[1]) : 22;
+			String user = cmd.consumeArgValue("user", true);
+			String password = cmd.consumeArgValue("password", true);
+			String passphrase = cmd.consumeArgValue("passphrase", false);
+			credentials = new BoxTunnelCredentials(user, passphrase, password);
+		}
+		
 	}
 	
 	public void process() throws Exception {
@@ -45,8 +62,9 @@ public class BoxCliHelper {
 	}
 	
 	public static void usage() {
-		System.err.println( "Usage: BoxCli [--port=<port>] --agents=<[host]:[port]>...\n" +
+		System.err.println( "Usage: BoxCli [--port=<port>] [--tunnel=<host:[port]> --user <user> --password <password> [--passphrase <phrase>]] --agents=<[host]:[port]> ...\n" +
 			"    {\n" +
+			"        --status\n" +
 			"        --createContext <language> <contextName>\n" +
 			"        --startContext <name> <args...>\n" +
 			"        --stopContext <name>\n" +
@@ -58,7 +76,7 @@ public class BoxCliHelper {
 	}
 	
 	private List<Thread> processAgents() throws Exception {
-		
+	
 		if( cmd.consumeArgWithParameters("createContext", 2) ) {
 			cmd.checkUnusedArgs();
 			final String language = cmd.getParameter( 0 );
@@ -152,12 +170,29 @@ public class BoxCliHelper {
 		final String preMessage,
 		final String postMessage ) 
 	{
-		final ApplicationContext ctx = ContextBuilder.create( agentBeanName, hostPort, contextLocations );	
-		final BoxInterface box = ctx.getBean( "monitor", BoxInterface.class );
-		final Agent agent = new Agent( hostPort, box );
 		Thread ret = new Thread(new Runnable() {
 			public void run() {
+				BoxTunnel tunnel = null;
 	            try {
+	            	HostPort hp = hostPort;
+	            	if( credentials != null ) {
+	            		tunnel = new BoxTunnel();
+	            		tunnel.setCredentials( credentials );
+	            		tunnel.setTunnelHost( tunnelHost );
+	            		tunnel.setTunnelPort( tunnelPort );
+	            		tunnel.setRemoteHost( hp.getHost() );
+	            		tunnel.setRemotePort( hp.getPort() );
+	            		int localPort = tunnel.connect();
+	            		hp = new HostPort( "localhost", localPort );
+	            		
+	            		System.out.println(hostPort.getHost() + ":" + hostPort.getPort() + " : " +
+	            			"established tunnel to: " + 
+	            		    hostPort.getHost() + ":" + hostPort.getPort() + " through: " + localPort );
+	            	}
+					ApplicationContext ctx = ContextBuilder.create( agentBeanName, hp, contextLocations );	
+					BoxInterface box = ctx.getBean( "monitor", BoxInterface.class );
+					Agent agent = new Agent( hostPort, box );
+					
 			        System.out.println(hostPort.getHost() + ":" + hostPort.getPort() + " : " + preMessage + " ..." );
 			        runner.run( agent );
 	                if( postMessage != null ) {
@@ -168,6 +203,16 @@ public class BoxCliHelper {
 	                LOGGER.error( "Error from " + hostPort.getHost() + ":" + hostPort.getPort(), ex );
 	                String exstr = ExceptionHelper.toString( ex );
 	                System.out.println( prefixLines(hostPort,exstr) );
+	            }
+	            finally {
+	            	if( tunnel != null ) {
+	            		try {
+		            		tunnel.disconnect();
+	            		}
+	            		catch( Exception ex ) {
+	            			LOGGER.error( "Error disconnecting tunnel: " + tunnel.getRemoteHost() + ":" + tunnel.getRemotePort() );
+	            		}
+	            	}
 	            }
 			}
         }, hostPort.getHost() + ":" + hostPort.getPort() );

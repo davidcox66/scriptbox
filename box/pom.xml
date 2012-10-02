@@ -50,7 +50,13 @@
 			<groupId>org.codehaus.gmaven.runtime</groupId>
 			<artifactId>gmaven-runtime-${groovy.runtime.version}</artifactId>
 		</dependency>
-
+		
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.48</version>
+		</dependency>
+            
 		<dependency>
 			<groupId>com.sun</groupId>
 			<artifactId>tools</artifactId>
