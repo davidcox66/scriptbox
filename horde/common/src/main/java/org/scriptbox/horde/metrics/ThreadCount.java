@@ -12,4 +12,7 @@ public class ThreadCount extends ScriptMetric {
         return "threads";
     }
 
+    public String getDescription() {
+    	return "Thread Count";
+    }
 }

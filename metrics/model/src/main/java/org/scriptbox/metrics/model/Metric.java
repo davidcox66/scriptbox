@@ -3,9 +3,7 @@ package org.scriptbox.metrics.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class Metric implements Serializable, IsSerializable {
+public class Metric implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

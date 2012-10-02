@@ -12,6 +12,8 @@ import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.horde.metrics.AbstractMetric;
 import org.scriptbox.horde.metrics.ScriptMetric;
 import org.scriptbox.horde.metrics.ThreadCount;
+import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.ActionScriptDynamicMetricMBean;
 import org.scriptbox.util.common.obj.RunnableWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +27,8 @@ public class ActionScript {
     private List<ActionRunner> runners = new ArrayList<ActionRunner>();
     private List<Runnable> destructors = new ArrayList<Runnable>();
     
-    private Map<ObjectName,ScriptMetric> scriptMetrics = new HashMap<ObjectName,ScriptMetric>();
-   
+    private AbstractDynamicMetricMBean mbean;
+    
     /**
      * Glean the classloader from calls to addAction which should have the context classloader
      * from the scriptengine - the same classloader we want to use for other threads.
@@ -35,6 +37,7 @@ public class ActionScript {
     
     public ActionScript( BoxScript boxScript ) {
         this.boxScript = boxScript;
+        this.mbean = new ActionScriptDynamicMetricMBean(this);
         addScriptMetric( new ThreadCount() );
     }
     
@@ -74,7 +77,7 @@ public class ActionScript {
    
     public void addScriptMetric( ScriptMetric metric ) { 
         metric.init( this );
-        AbstractMetric.addMetric( scriptMetrics, metric );
+        mbean.addMetric( metric );
     }
     
     // generic type should technically be ? extends GeneratorMetric but Groovy flips out 
@@ -177,16 +180,26 @@ public class ActionScript {
     }
     
     private void registerMBeans() throws Exception {
-    	AbstractMetric.registerAll( scriptMetrics );
+    	mbean.register();
     	for( Action action : actions ) {
             action.registerMBeans();
         }
     }    
     
     private void unregisterMBeans() throws Exception {
-    	AbstractMetric.unregisterAll( scriptMetrics );
+    	try {
+	    	mbean.unregister();
+    	}
+    	catch( Exception ex ) {
+    		LOGGER.error( "Error unregistering: " + mbean.getObjectName() );
+    	}
     	for( Action action : actions ) {
-            action.unregisterMBeans();
+    		try {
+	            action.unregisterMBeans();
+    		}
+	    	catch( Exception ex ) {
+	    		LOGGER.error( "Error unregistering mbeans for action: " + action.getName() );
+	    	}
         }
     } 
 

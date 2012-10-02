@@ -12,6 +12,10 @@ public class MaxTransactionTime extends ActionMetric {
         return "max";
     } 
     
+    public String getDescription() {
+    	return "Maximum Transaction Time";
+    }
+    
     synchronized public void record( boolean success, long millis ) {
         max = (int)Math.max( max, millis );
     }

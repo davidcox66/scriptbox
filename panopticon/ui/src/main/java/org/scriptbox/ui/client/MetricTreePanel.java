@@ -84,7 +84,11 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 				 logger.info( "Failed getting trees: " + ex );
 			 }
 			 public void onSuccess(ArrayList<MetricTreeDto> result) {
-				 service.getRoot( (MetricTreeDto)result.get(0), cb );
+				 for( MetricTreeDto tree : result ) {
+					 if( tree.getTreeName().equals("foobar") ) {
+						 service.getRoot( tree, cb );
+					 }
+				 }
 			 }
 			
 		} );

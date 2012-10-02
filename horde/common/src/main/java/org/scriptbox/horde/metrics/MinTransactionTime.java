@@ -11,6 +11,9 @@ public class MinTransactionTime extends ActionMetric {
         return "min";
     } 
     
+    public String getDescription() {
+    	return "Minimum Transaction Time";
+    }
     synchronized public void record( boolean success, long millis ) {
         min = (int)Math.min( min, millis );
     }

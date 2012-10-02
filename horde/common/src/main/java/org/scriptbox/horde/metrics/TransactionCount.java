@@ -13,6 +13,10 @@ public class TransactionCount extends ActionMetric {
         return "count";
     } 
     
+    public String getDescription() {
+    	return "Transaction Count";
+    }
+    
     synchronized public void record( boolean success, long millis ) {
         transactionCount.addAndGet( 1 );
     }

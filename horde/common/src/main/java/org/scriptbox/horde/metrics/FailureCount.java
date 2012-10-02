@@ -13,6 +13,10 @@ public class FailureCount extends ActionMetric {
         return "failures";
     } 
     
+    public String getDescription() {
+    	return "Failure Count";
+    }
+    
     public void record( boolean success, long millis ) {
         if( !success ) {
 	        failures.addAndGet( 1 );    

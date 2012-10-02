@@ -73,25 +73,18 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 		};
 
 		loader = new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
+		loader.addLoadHandler(this);
 		store = new ListStore<Metric>(metricAccess.nameKey());
 		
 		chart = new Chart<Metric>();
 		chart.setStore(store);
 
-		valueAxis = new NumericAxis<Metric>();
-		valueAxis.setPosition(Position.LEFT);
-		valueAxis.addField(metricAccess.value());
-		TextSprite title = new TextSprite("Value");
-		title.setFontSize(18);
-		valueAxis.setTitleConfig(title);
-		valueAxis.setDisplayGrid(true);
-		// valueAxis.setAdjustMaximumByMajorUnit( true );
-		// valueAxis.setAdjustMinimumByMajorUnit( true );
-		// valueAxis.setMinimum(0);
-		// valueAxis.setMaximum(100);
-		
-		chart.addAxis(valueAxis);
+		buildValueAxis();
+		buildTimeAxis();
+		buildValueSeries();
+	}
 
+	private void buildTimeAxis() {
 		timeAxis = new TimeAxis<Metric>();
 		timeAxis.setField(metricAccess.date());
 		timeAxis.setStartDate(new Date());
@@ -116,7 +109,24 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 			}
 		});
 		chart.addAxis(timeAxis);
+	}
+	private void buildValueAxis() {
+		valueAxis = new NumericAxis<Metric>();
+		valueAxis.setPosition(Position.LEFT);
+		valueAxis.addField(metricAccess.value());
+		TextSprite title = new TextSprite("Value");
+		title.setFontSize(18);
+		valueAxis.setTitleConfig(title);
+		valueAxis.setDisplayGrid(true);
+		// valueAxis.setAdjustMaximumByMajorUnit( true );
+		// valueAxis.setAdjustMinimumByMajorUnit( true );
+		// valueAxis.setMinimum(0);
+		// valueAxis.setMaximum(100);
+		
+		chart.addAxis(valueAxis);
+	}
 
+	private void buildValueSeries() {
 		series = new LineSeries<Metric>();
 		series.setYAxisPosition(Position.LEFT);
 		series.setYField(metricAccess.value());
@@ -127,8 +137,6 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 		marker.setFill(new RGB(148, 174, 10));
 		series.setMarkerConfig(marker);
 		chart.addSeries(series);
-
-		loader.addLoadHandler(this);
 	}
 	
 	public Widget asWidget() {
@@ -153,14 +161,17 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
         double axisMin = loaded.getMin() > 0 && loaded.getMin() != loaded.getMax() ? 
         	loaded.getMin() - ((loaded.getMax() - loaded.getMin()) * 0.05) : 0;
         double axisMax = loaded.getMax()+1;
+        
 		logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
 			", min=" + loaded.getMin() + ", max=" + loaded.getMax() +
 			", axisMin=" + axisMin + ", axisMax=" + axisMax );
+		
 	    timeAxis.setStartDate(loaded.getStart());
         timeAxis.setEndDate(loaded.getEnd());
 		valueAxis.setMinimum( axisMin );
 		valueAxis.setMaximum( axisMax );
 	    store.replaceAll( loaded.getData() );
-        chart.redrawChart();
+        // chart.redrawChart();
+        chart.redrawChartForced();
 	}	
 }

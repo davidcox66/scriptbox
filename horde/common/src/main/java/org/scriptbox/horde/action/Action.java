@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
-import org.scriptbox.horde.metrics.AbstractMetric;
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.FailureCount;
@@ -14,6 +13,8 @@ import org.scriptbox.horde.metrics.MaxTransactionTime;
 import org.scriptbox.horde.metrics.MinTransactionTime;
 import org.scriptbox.horde.metrics.TransactionCount;
 import org.scriptbox.horde.metrics.TransactionsPerSecond;
+import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.ActionDynamicMetricMBean;
 import org.scriptbox.util.common.collection.CollectionUtil;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
@@ -36,13 +37,16 @@ public class Action {
     private ParameterizedRunnableWithResult<Boolean,List> pre;
     private ParameterizedRunnableWithResult<Boolean,List> post;
     
-    private Map<ObjectName,ActionMetric> preMetrics = new HashMap<ObjectName,ActionMetric>();
-    private Map<ObjectName,ActionMetric> metrics = new HashMap<ObjectName,ActionMetric>();
-    private Map<ObjectName,ActionMetric> postMetrics = new HashMap<ObjectName,ActionMetric>();
+    private Map<String,ActionMetric> preMetrics = new HashMap<String,ActionMetric>();
+    private Map<String,ActionMetric> metrics = new HashMap<String,ActionMetric>();
+    private Map<String,ActionMetric> postMetrics = new HashMap<String,ActionMetric>();
 
+    private AbstractDynamicMetricMBean mbean;
+    
     public Action( ActionScript script, String name ) {
         this.script = script;
         this.name = name;
+        this.mbean = new ActionDynamicMetricMBean( this );
     }
     
     public ActionScript getActionScript() {
@@ -118,9 +122,10 @@ public class Action {
     void addPostMetric( ActionMetric metric ) {
         addActionMetric( postMetrics, metric );
     }
-    private void addActionMetric( Map<ObjectName,ActionMetric> mets, ActionMetric metric ) {
+    private void addActionMetric( Map<String,ActionMetric> mets, ActionMetric metric ) {
         metric.init( this );
-        AbstractMetric.addMetric( mets, metric );
+        mbean.addMetric( metric );
+        mets.put( metric.getName(), metric );
     }
    
     public Object getTestAttribute( String name ) {
@@ -135,7 +140,7 @@ public class Action {
        callAndCollectMetrics( metrics, run );
        callAndCollectMetrics( postMetrics, post );
     }
-    public void callAndCollectMetrics( Map<ObjectName,ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
+    public void callAndCollectMetrics( Map<String,ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
     	throws Throwable
     {
         List<String> arguments = script.getBoxScript().getArguments();
@@ -159,15 +164,11 @@ public class Action {
         ActionMetric.collectAll( metrics, success, millis );
     }
     public void registerMBeans() throws Exception {
-    	AbstractMetric.registerAll(preMetrics);
-    	AbstractMetric.registerAll(metrics);
-    	AbstractMetric.registerAll(postMetrics);
+    	mbean.register();
     }    
     
-    public void unregisterMBeans() {
-    	AbstractMetric.unregisterAll(preMetrics);
-    	AbstractMetric.unregisterAll(metrics);
-    	AbstractMetric.unregisterAll(postMetrics);
+    public void unregisterMBeans() throws Exception {
+    	mbean.unregister();
     }
     
     public String toString() {

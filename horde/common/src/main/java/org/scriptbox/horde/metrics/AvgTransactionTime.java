@@ -19,6 +19,10 @@ public class AvgTransactionTime extends ActionMetric {
         return name;
     } 
     
+    public String getDescription() {
+    	return "Average Transaction Time";
+    }
+    
     synchronized public void record( boolean success, long millis ) {
         transactionCount++;
         totalMillis += millis;

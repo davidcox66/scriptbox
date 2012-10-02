@@ -13,6 +13,10 @@ public class TransactionsPerSecond extends ActionMetric {
         return "tps";
     } 
     
+    public String getDescription() {
+    	return "Transactions Per Second";
+    }
+    
     synchronized public void record( boolean success, long millis ) {
         if( lastChecked == Long.MIN_VALUE ) {
            lastChecked = System.currentTimeMillis(); 

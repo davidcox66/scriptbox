@@ -16,7 +16,7 @@ public abstract class ActionMetric extends AbstractMetric {
     
     protected Action action;
     
-    public static void collectAll( Map<ObjectName,? extends ActionMetric> met, final boolean success, final long millis ) {
+    public static void collectAll( Map<String,? extends ActionMetric> met, final boolean success, final long millis ) {
     	for( ActionMetric metric : met.values() ) {
             metric.record( success, millis );
         }
@@ -27,16 +27,6 @@ public abstract class ActionMetric extends AbstractMetric {
         this.script = action.getActionScript();
     }
 
-    public ObjectName getObjectName() {
-	    String str = "ActionMetrics:context=" + script.getBoxScript().getContext().getName() + ",script=" + script.getName() + ",action=" + action.getName() + ",name=" + getName();
-    	try {
-	        return new ObjectName( str );
-    	}
-    	catch( MalformedObjectNameException ex ) {
-    		throw new RuntimeException( "Bad ObjectName: " + str, ex  );
-    	}
-    }
-    
     public abstract String getName();
     
     public abstract void record( boolean success, long millis );
