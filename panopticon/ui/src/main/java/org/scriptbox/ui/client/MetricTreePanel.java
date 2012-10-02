@@ -1,15 +1,12 @@
 package org.scriptbox.ui.client;
 
-import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
+import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -35,14 +32,18 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		}
 	}
 
+	private MetricTreeGWTInterfaceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
+	private TreeStore<MetricTreeNodeDto> store;
 	
 	public void addSelectionHandler( SelectionHandler<MetricTreeNodeDto> handler ) {
 		tree.getSelectionModel().addSelectionHandler( handler );
 	}
 	
-	public MetricTreePanel() {
-		final TreeStore<MetricTreeNodeDto> store = new TreeStore<MetricTreeNodeDto>(new KeyProvider());
+	public MetricTreePanel( MetricTreeGWTInterfaceAsync service ) {
+		this.service = service;
+		
+		store = new TreeStore<MetricTreeNodeDto>(new KeyProvider());
 
 		tree = new Tree<MetricTreeNodeDto, String>(store,
 			new ValueProvider<MetricTreeNodeDto, String>() {
@@ -60,39 +61,9 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 				public String getPath() {
 					return "name";
 				}
-			});
+		});
 		
-		final AsyncCallback<MetricTreeParentNodeDto> cb = new AsyncCallback<MetricTreeParentNodeDto>() {
-			 public void onFailure(Throwable ex) {
-				 logger.info( "Failed getting tree: " + ex );
-			 }
-			 public void onSuccess(MetricTreeParentNodeDto root) {
-				 for (MetricTreeNodeDto base : root.getChildren()) {
-				      store.add(base);
-				      if (base instanceof MetricTreeParentNodeDto ) {
-				        processFolder(store, (MetricTreeParentNodeDto) base);
-				      }
-				    }
-				 
-			 }
-			
-		};
 		
-		final MetricTreeGWTInterfaceAsync service = GWT.create(MetricTreeGWTInterface.class);
-		service.getTrees( new AsyncCallback<ArrayList<MetricTreeDto>>() {
-			 public void onFailure(Throwable ex) {
-				 logger.info( "Failed getting trees: " + ex );
-			 }
-			 public void onSuccess(ArrayList<MetricTreeDto> result) {
-				 for( MetricTreeDto tree : result ) {
-					 if( tree.getTreeName().equals("foobar") ) {
-						 service.getRoot( tree, cb );
-					 }
-				 }
-			 }
-			
-		} );
-
 		ToolBar buttonBar = new ToolBar();
 		buttonBar.add(new TextButton("Expand All", new SelectHandler() {
 
@@ -113,6 +84,22 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
 	
+	public void load( MetricTreeDto treeDto ) {
+		AsyncCallback<MetricTreeParentNodeDto> callback = new AsyncCallback<MetricTreeParentNodeDto>() {
+			 public void onFailure(Throwable ex) {
+				 logger.info( "Failed getting tree: " + ex );
+			 }
+			 public void onSuccess(MetricTreeParentNodeDto root) {
+				 for (MetricTreeNodeDto base : root.getChildren()) {
+				      store.add(base);
+				      if (base instanceof MetricTreeParentNodeDto ) {
+				        processFolder(store, (MetricTreeParentNodeDto) base);
+				      }
+				 }
+			 }
+		};
+		service.getRoot( treeDto, callback );
+	}
 	private void processFolder(TreeStore<MetricTreeNodeDto> store, MetricTreeParentNodeDto folder) {
 		for (MetricTreeNodeDto child : folder.getChildren()) {
 			store.add(folder, child);
@@ -121,4 +108,5 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		    }
 		}
 	}
+	
 }

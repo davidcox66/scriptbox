@@ -3,6 +3,7 @@ package org.scriptbox.ui.client;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -21,8 +22,8 @@ public class ChartPanel extends ContentPanel {
 		controller.load( node );
 	}
 	
-	public ChartPanel() {
-		controller = new SimpleChartController();
+	public ChartPanel( MetricTreeGWTInterfaceAsync service ) {
+		controller = new SimpleChartController( service );
 		Chart<Metric> chart = controller.getChart();
 		chart.setPixelSize(600, 400);
 		chart.setDefaultInsets(20);

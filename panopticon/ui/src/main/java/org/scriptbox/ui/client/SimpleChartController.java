@@ -8,12 +8,10 @@ import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
 import org.scriptbox.ui.shared.tree.MetricQueryDto;
 import org.scriptbox.ui.shared.tree.MetricRangeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -42,7 +40,6 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 	private static final Logger logger = Logger.getLogger("ChartPanel");
 	
 	public interface MetricPropertyAccess extends PropertyAccess<Metric> {
-		@Path("date")
 		ModelKeyProvider<Metric> nameKey();
 		ValueProvider<Metric, Date> date();
 		ValueProvider<Metric, Float> value();
@@ -53,22 +50,22 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 
 	// private Timer update;
 
+	private MetricTreeGWTInterfaceAsync service; 
 	private Chart<Metric> chart;
 	private NumericAxis<Metric> valueAxis;
 	private TimeAxis<Metric> timeAxis;
 	private	LineSeries<Metric> series;
-	private MetricTreeGWTInterfaceAsync service;
 	private	TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader;
 	private ListStore<Metric> store;
 	
 	
-	public SimpleChartController() {
-		service = GWT.create(MetricTreeGWTInterface.class);
+	public SimpleChartController( MetricTreeGWTInterfaceAsync service ) {
+		this.service = service;
 
 		RpcProxy<MetricQueryDto, MetricRangeDto> proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
 			@Override
 			public void load(MetricQueryDto loadConfig, AsyncCallback<MetricRangeDto> callback) {
-				service.getMetrics(loadConfig, callback);
+				SimpleChartController.this.service.getMetrics(loadConfig, callback);
 			}
 		};
 

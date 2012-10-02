@@ -74,11 +74,15 @@
   		p:instance="local"
   		p:path="/tmp/metrics.csv" />
   	-->
-  	
+
+	<bean name="nameSplitter" class="org.scriptbox.panopticon.store.PatternNameSplitter"  	
+		p:pattern="," />
+		
     <bean name="store" class="org.scriptbox.panopticon.store.CassandraCaptureStore"
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
-    	p:instance="local" />
+    	p:instance="local" 
+    	p:nameSplitter-ref="nameSplitter" />
     	
     <bean name="heartbeats" class="org.scriptbox.util.cassandra.heartbeat.EndpointPublishingHeartbeatGenerator"
     	init-method="start"
