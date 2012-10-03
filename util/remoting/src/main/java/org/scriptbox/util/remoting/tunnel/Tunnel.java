@@ -59,6 +59,38 @@ public class Tunnel
     
     private Session session;
     
+    public static void main( String[] args ) {
+    	try {
+    		if( args.length != 6 ) {
+    			usage();
+    		}
+    		Tunnel tunnel = new Tunnel();
+    		TunnelCredentials credentials = new TunnelCredentials();
+    		tunnel.setCredentials( credentials );
+    		credentials.setUser( args[0] );
+    		credentials.setPassword( args[1] );
+    		tunnel.setLocalPort( Integer.parseInt(args[2]) ); 
+    		tunnel.setTunnelHost( args[3] );
+    		tunnel.setRemoteHost( args[4] );
+    		tunnel.setRemotePort( Integer.parseInt(args[5]) ); 
+    		
+    		tunnel.connect();
+    		
+    		while( true ) {
+    			Thread.sleep( 60*1000 );
+    			System.out.print( "." );
+    		}
+    	}
+    	catch( Exception ex ) {
+    		ex.printStackTrace( System.err );
+    	}
+    }
+    
+    public static void usage() {
+    	System.err.println( "Usage: Tunnel <user> <password> <local port> <tunnel host> <remote host> <remote port>" );
+    	System.exit( 1 );
+    }
+    
     public Tunnel() {
     }
 

@@ -12,6 +12,7 @@ import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -19,10 +20,9 @@ import com.sencha.gxt.chart.client.chart.Chart.Position;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
 import com.sencha.gxt.chart.client.chart.axis.TimeAxis;
 import com.sencha.gxt.chart.client.chart.series.LineSeries;
-import com.sencha.gxt.chart.client.chart.series.Primitives;
+import com.sencha.gxt.chart.client.chart.series.SeriesLabelProvider;
+import com.sencha.gxt.chart.client.chart.series.SeriesToolTipConfig;
 import com.sencha.gxt.chart.client.draw.RGB;
-import com.sencha.gxt.chart.client.draw.path.PathSprite;
-import com.sencha.gxt.chart.client.draw.sprite.Sprite;
 import com.sencha.gxt.chart.client.draw.sprite.TextSprite;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.client.loader.RpcProxy;
@@ -32,7 +32,6 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
-import com.google.gwt.editor.client.Editor.Path;
 
 public class SimpleChartController implements LoadHandler<MetricQueryDto, MetricRangeDto> {
 
@@ -101,10 +100,10 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	    timeAxis.setLabelPadding(-5);
 	    timeAxis.setMinorTickSteps(5);
 	    // timeAxis.setLabelTolerance(60);
-	    timeAxis.setLabelStepRatio(2);
+	    // timeAxis.setLabelStepRatio(2);
 	    
-	    PathSprite pathSprite = new PathSprite();
-	    timeAxis.setAxisConfig(pathSprite);
+	    // PathSprite pathSprite = new PathSprite();
+	    // timeAxis.setAxisConfig(pathSprite);
 	    
 		timeAxis.setLabelProvider(new LabelProvider<Date>() {
 			@Override
@@ -134,12 +133,22 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		series.setYAxisPosition(Position.LEFT);
 		series.setYField(metricAccess.value());
 		// series.setStroke(new RGB(148, 174, 10));
-		series.setStroke(new RGB(255,255,255));
+		series.setStroke(new RGB(255,0,0));
 		// series.setShowMarkers(true);
 		// series.setMarkerIndex(1);
 		// Sprite marker = Primitives.circle(0, 0, 6);
 		// marker.setFill(new RGB(148, 174, 10));
 		// series.setMarkerConfig(marker);
+		SeriesToolTipConfig<Metric> toolTip = new SeriesToolTipConfig<Metric>();
+	    toolTip.setTrackMouse(true);
+	    toolTip.setHideDelay(20);
+	    toolTip.setLabelProvider(new SeriesLabelProvider<Metric>() {
+	      @Override
+	      public String getLabel(Metric item, ValueProvider<? super Metric, ? extends Number> valueProvider) {
+	        return f.format(item.getDate()) + " - " + item.getValue();
+	      }
+	    });
+	    series.setToolTipConfig(toolTip);
 	}
 	
 	public Chart<Metric> getChart() {
