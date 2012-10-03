@@ -33,7 +33,7 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
 
-public class SimpleChartController implements LoadHandler<MetricQueryDto, MetricRangeDto> {
+public class SimpleChartController {
 
 	private static final Logger logger = Logger.getLogger("ChartListPanel");
 	
@@ -54,22 +54,18 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	private NumericAxis<Metric> valueAxis;
 	private TimeAxis<Metric> timeAxis;
 	private	LineSeries<Metric> series;
-	private	TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader;
+	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private ListStore<Metric> store;
 	
 	public SimpleChartController( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
-		
-		RpcProxy<MetricQueryDto, MetricRangeDto> proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
+		proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
 			@Override
 			public void load(MetricQueryDto loadConfig, AsyncCallback<MetricRangeDto> callback) {
 				SimpleChartController.this.service.getMetrics(loadConfig, callback);
 			}
 		};
 
-		loader = new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
-		loader.addLoadHandler(this);
-		
 		store = new ListStore<Metric>(metricAccess.key());
 
 		buildValueAxis();
@@ -153,31 +149,32 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		return chart;
 	}
 	
-	public void load( MetricTreeNodeDto node, Runnable callback ) {
-		this.callback = callback;
+	public void load( MetricTreeNodeDto node, final Runnable callback ) {
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
 		query.setStart( new Date() );
 		query.setEnd( new Date() );
+		
+		TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader= new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
+		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
+			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
+				MetricRangeDto loaded = event.getLoadResult();
+				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
+					", values.size()=" + loaded.getData().size() ); 
+				
+			    timeAxis.setStartDate(loaded.getStart());
+		        timeAxis.setEndDate(loaded.getEnd());
+		        
+				// setSeriesNameForNode( event.getLoadConfig().getNode() );
+				
+			    store.replaceAll( loaded.getData() );
+			    chart = buildChart();
+			    callback.run();
+				chart.redrawChart();
+						
+			}
+		} );
 		loader.load( query );
+		
 	}
-	
-	@Override
-	public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
-		MetricRangeDto loaded = event.getLoadResult();
-        
-		logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
-			", values.size()=" + loaded.getData().size() ); 
-		
-	    timeAxis.setStartDate(loaded.getStart());
-        timeAxis.setEndDate(loaded.getEnd());
-        
-		// setSeriesNameForNode( event.getLoadConfig().getNode() );
-		
-		
-	    store.replaceAll( loaded.getData() );
-	    chart = buildChart();
-	    callback.run();
-		chart.redrawChart();
-	}	
 }
