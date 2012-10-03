@@ -136,6 +136,11 @@
 					<!-- Ask GWT to create the Story of Your Compile (SOYC) (gwt:compile) -->
 					<compileReport>true</compileReport>
 					<debugPort>${gwt.debugPort}</debugPort>
+					<!-- 
+					<style>OBFUSCATED</style>
+					<style>PRETTY</style>
+					-->
+					<style>DETAILED</style>
 				</configuration>
 			</plugin>
 

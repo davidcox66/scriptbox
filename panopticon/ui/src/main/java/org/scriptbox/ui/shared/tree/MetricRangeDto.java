@@ -18,6 +18,7 @@ public class MetricRangeDto implements TimeBasedLoadResult<Metric>, Serializable
 	private float min;
 	private float max;
 	private List<Metric> metrics;
+	private boolean changes;
 	
 	public MetricRangeDto() {
 	}
@@ -30,6 +31,18 @@ public class MetricRangeDto implements TimeBasedLoadResult<Metric>, Serializable
 		this.min = min;
 		this.max = max;
 		this.metrics = metrics;
+	
+		// Like to know if the metrics are flat-lined. This has some bearing on GXT charts
+		// which have a problem in the browser compiled version with a flat chart
+		if( metrics.size() > 0 ) {
+			float initial = metrics.get(0).getValue();
+			for( Metric m : metrics ) {
+				if( m.getValue() != initial ) {
+					changes = true;
+					break;
+				}
+			}
+		}
 	}
 
 	public float getMin() {
@@ -40,6 +53,10 @@ public class MetricRangeDto implements TimeBasedLoadResult<Metric>, Serializable
 		return max < 0 ? 0 : max;
 	}
 
+	public boolean isChanges() {
+		return changes;
+	}
+	
 	public Date getStart() {
 		return start;
 	}

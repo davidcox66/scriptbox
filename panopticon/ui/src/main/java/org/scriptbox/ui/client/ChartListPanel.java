@@ -13,7 +13,6 @@ import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Portlet;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
-import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.PortalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
@@ -46,20 +45,23 @@ public class ChartListPanel extends ContentPanel {
 		add( portal );
 	}
 	
-	public void load( MetricTreeNodeDto node ) {
-		SimpleChartController controller = new SimpleChartController( service );
-		Chart<Metric> chart = controller.getChart();
-		chart.setDefaultInsets(10);
-		
-	    Portlet portlet = new Portlet();
-	    portlet.setHeadingText(node.getId());
-	    configPanel(portlet);
-	    portlet.add( chart );
-	    portlet.setHeight( 350 );
-	    portal.add(portlet, 0);
-		portlets.add( portlet );
-		
-		controller.load( node );
+	public void load( final MetricTreeNodeDto node ) {
+		final SimpleChartController controller = new SimpleChartController( service );
+		controller.load( node, new Runnable() {
+			public void run() {
+				Chart<Metric> chart = controller.getChart();
+				chart.setDefaultInsets(10);
+				
+			    Portlet portlet = new Portlet();
+			    portlet.setHeadingText(node.getId());
+			    configPanel(portlet);
+			    portlet.add( chart );
+			    portlet.setHeight( 350 );
+			    portal.add(portlet, 0);
+				portlets.add( portlet );
+				chart.redrawChart();
+			}
+		} );
 	}
 	
 	private void configPanel(final Portlet panel) {
@@ -70,6 +72,7 @@ public class ChartListPanel extends ContentPanel {
 			@Override
 			public void onSelect(SelectEvent event) {
 				panel.removeFromParent();
+				portlets.remove( panel );
 			}
 		}));
 	}

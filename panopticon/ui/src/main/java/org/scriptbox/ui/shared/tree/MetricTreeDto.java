@@ -2,7 +2,9 @@ package org.scriptbox.ui.shared.tree;
 
 import java.io.Serializable;
 
-public class MetricTreeDto implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class MetricTreeDto implements Serializable, IsSerializable {
 
 	private static final long serialVersionUID = 1L;
 	

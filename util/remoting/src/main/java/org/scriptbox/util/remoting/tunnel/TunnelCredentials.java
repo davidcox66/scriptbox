@@ -8,13 +8,18 @@ import com.jcraft.jsch.UserInfo;
 public class TunnelCredentials implements UserInfo {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( TunnelCredentials.class );
+
+	public static final int RETRIES = 0;
 	
 	private String user;
 	private String passphrase;
 	private String password;
 
-	private boolean askedForPassword;
-	private boolean askedForPassphrase;
+	private int maxPasswordRetries = RETRIES;
+	private int maxPassphraseRetries = RETRIES;
+
+	private int passwordRetries;
+	private int passphraseRetries;
 	
 	public TunnelCredentials() {
 	}
@@ -34,7 +39,7 @@ public class TunnelCredentials implements UserInfo {
 	}
 	
 	public String getUser() {
-		LOGGER.debug( "getUser: retrieving user");
+		LOGGER.debug( "getUser: retrieving user: '" + user + "'");
 		return user;
 	}
 
@@ -50,27 +55,42 @@ public class TunnelCredentials implements UserInfo {
 
 	@Override
 	public String getPassword() {
-		LOGGER.debug( "getPassword: retrieving password");
+		LOGGER.debug( "getPassword: retrieving password: '" + password + "'");
 		return password;
+	}
+
+	
+	public int getMaxPasswordRetries() {
+		return maxPasswordRetries;
+	}
+
+	public void setMaxPasswordRetries(int maxPasswordRetries) {
+		this.maxPasswordRetries = maxPasswordRetries;
+	}
+
+	public int getMaxPassphraseRetries() {
+		return maxPassphraseRetries;
+	}
+
+	public void setMaxPassphraseRetries(int maxPassphraseRetries) {
+		this.maxPassphraseRetries = maxPassphraseRetries;
 	}
 
 	@Override
 	public boolean promptPassword(String message) {
 		LOGGER.debug( "promptPassword: retrieving password: " + message );
-		if( askedForPassword ) {
+		if( maxPasswordRetries > 0 && passwordRetries++ >= maxPasswordRetries ) {
 			throw new RuntimeException( "Continuing to ask for password, so aborting.");
 		}
-		askedForPassword = true;
 		return true;
 	}
 
 	@Override
 	public boolean promptPassphrase(String message) {
 		LOGGER.debug( "promptPassphrase: retrieving passphrase: " + message );
-		if( askedForPassphrase ) {
+		if( maxPassphraseRetries > 0 && passphraseRetries++ >= maxPassphraseRetries ) {
 			throw new RuntimeException( "Continuing to ask for passphrase, so aborting.");
 		}
-		askedForPassphrase = true;
 		return true;
 	}
 

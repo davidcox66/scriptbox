@@ -62,18 +62,32 @@
   	<bean name="/lm/" class="org.springframework.remoting.caucho.HessianServiceExporter"
   		p:service-ref="monitor"
   		p:serviceInterface="org.scriptbox.box.remoting.BoxInterface" />
- 
- 	<bean name="tunnel" >
- 	</bean> 
+
+	<bean name="tunnelCredentials" class="org.scriptbox.util.remoting.tunnel.TunnelCredentials" 
+		p:user="${tunnel.user}"
+		p:password="${tunnel.password}"
+		p:passphrase="${tunnel.passphrase}" />
+		
+	<bean name="tunnel" class="org.scriptbox.util.remoting.tunnel.Tunnel" 
+		p:tunnelHost="${tunnel.host}"
+		p:tunnelPort="${tunnel.port}"
+		p:remoteHost="${cassandra.host}"
+		p:remotePort="${cassandra.port}" 
+		p:credentials-ref="tunnelCredentials" />
+		
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
                 p:host="${cassandra.host}"
-                p:port="${cassandra.port}" />
+                p:port="${cassandra.port}"
+                p:tunnel-ref="tunnel" />
+                
     <bean name="cluster"
         factory-bean="clusterFactory"
         factory-method="getInstance" />    
+        
     <bean name="keyspaceFactory" class="org.scriptbox.util.cassandra.CassandraKeyspaceFactory"
         p:cluster-ref="cluster" />
+        
     <bean name="keyspace" class="me.prettyprint.hector.api.Keyspace"
         factory-bean="keyspaceFactory"
         factory-method="getInstance">      

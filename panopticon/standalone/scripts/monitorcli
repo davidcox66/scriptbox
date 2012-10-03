@@ -1,5 +1,15 @@
-root=$(dirname $0)/..
+#!/bin/bash
+
+jar=panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar
+dir=$(dirname $0)
+if [[ -f $jar ]] ; then
+	root=$dir
+else
+	root=$dir/../target
+fi	
+
+
 set -x
 JAVA_OPTS="\
 	-Dlogback.configurationFile=panopticon-logback.xml"
-java $JAVA_OPTS -cp $root/target/panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.panopticon.main.MonitorCli "$@"
+java $JAVA_OPTS -cp $root/$jar:$dir org.scriptbox.panopticon.main.MonitorCli "$@"

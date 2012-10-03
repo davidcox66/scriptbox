@@ -1,6 +1,7 @@
 set -x
-scp $(dirname $0)/../target/captcha.gwt-1.0-SNAPSHOT.war gandolf:/tmp
-ssh remote_host "\
-  sudo /opt/tomcat/bin/shutdown.sh ; \
-  sudo cp /tmp/panopticon.gwt-1.0-SNAPSHOT.war /opt/tomcat/webapps/panopticon.war ; \
-  sudo /opt/tomcat/bin/startup.sh"
+export TOMCAT_HOME=/Users/david/tools/tomcat
+$TOMCAT_HOME/bin/shutdown.sh
+rm -rf $TOMCAT_HOME/webapps/panopticon*
+cp $(dirname $0)/../target/panopticon.ui-1.0-SNAPSHOT.war $TOMCAT_HOME/webapps/panopticon.war
+$TOMCAT_HOME/bin/startup.sh
+

@@ -32,13 +32,15 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
+import com.google.gwt.editor.client.Editor.Path;
 
 public class SimpleChartController implements LoadHandler<MetricQueryDto, MetricRangeDto> {
 
 	private static final Logger logger = Logger.getLogger("ChartListPanel");
 	
 	public interface MetricPropertyAccess extends PropertyAccess<Metric> {
-		ModelKeyProvider<Metric> nameKey();
+		@Path("millis")
+		ModelKeyProvider<Metric> key();
 		ValueProvider<Metric, Date> date();
 		ValueProvider<Metric, Float> value();
 	}
@@ -55,11 +57,11 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	private	LineSeries<Metric> series;
 	private	TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader;
 	private ListStore<Metric> store;
-	
+	private Runnable callback;
 	
 	public SimpleChartController( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
-
+		
 		RpcProxy<MetricQueryDto, MetricRangeDto> proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
 			@Override
 			public void load(MetricQueryDto loadConfig, AsyncCallback<MetricRangeDto> callback) {
@@ -69,16 +71,23 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 
 		loader = new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
 		loader.addLoadHandler(this);
-		store = new ListStore<Metric>(metricAccess.nameKey());
 		
-		chart = new Chart<Metric>();
-		chart.setStore(store);
+		store = new ListStore<Metric>(metricAccess.key());
 
 		buildValueAxis();
 		buildTimeAxis();
 		buildValueSeries();
 	}
 
+	private Chart<Metric> buildChart() {
+		chart = new Chart<Metric>();
+		chart.setStore(store);
+		chart.addAxis(timeAxis);
+		chart.addAxis(valueAxis);
+		chart.addSeries(series);
+		return chart;
+	}
+	
 	private void buildTimeAxis() {
 		timeAxis = new TimeAxis<Metric>();
 		timeAxis.setField(metricAccess.date());
@@ -103,43 +112,42 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 				return f.format(item);
 			}
 		});
-		chart.addAxis(timeAxis);
 	}
 	private void buildValueAxis() {
 		valueAxis = new NumericAxis<Metric>();
 		valueAxis.setPosition(Position.LEFT);
-		valueAxis.setWidth( 40 );
 		valueAxis.addField(metricAccess.value());
 		valueAxis.setDisplayGrid(true);
 		// TextSprite title = new TextSprite("Value");
 		// title.setFontSize(18);
 		// valueAxis.setTitleConfig(title);
+		
 		// valueAxis.setAdjustMaximumByMajorUnit( true );
 		// valueAxis.setAdjustMinimumByMajorUnit( true );
 		// valueAxis.setMinimum(0);
 		// valueAxis.setMaximum(100);
 		
-		chart.addAxis(valueAxis);
 	}
 
 	private void buildValueSeries() {
 		series = new LineSeries<Metric>();
 		series.setYAxisPosition(Position.LEFT);
 		series.setYField(metricAccess.value());
-		series.setStroke(new RGB(148, 174, 10));
-		series.setShowMarkers(true);
-		series.setMarkerIndex(1);
-		Sprite marker = Primitives.circle(0, 0, 6);
-		marker.setFill(new RGB(148, 174, 10));
-		series.setMarkerConfig(marker);
-		chart.addSeries(series);
+		// series.setStroke(new RGB(148, 174, 10));
+		series.setStroke(new RGB(255,255,255));
+		// series.setShowMarkers(true);
+		// series.setMarkerIndex(1);
+		// Sprite marker = Primitives.circle(0, 0, 6);
+		// marker.setFill(new RGB(148, 174, 10));
+		// series.setMarkerConfig(marker);
 	}
 	
 	public Chart<Metric> getChart() {
 		return chart;
 	}
 	
-	public void load( MetricTreeNodeDto node ) {
+	public void load( MetricTreeNodeDto node, Runnable callback ) {
+		this.callback = callback;
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
 		query.setStart( new Date() );
@@ -159,12 +167,32 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 			", min=" + loaded.getMin() + ", max=" + loaded.getMax() +
 			", axisMin=" + axisMin + ", axisMax=" + axisMax );
 		
+		// TextSprite title = new TextSprite( event.getLoadConfig().getNode().getName() );
+		// title.setFontSize(18);
+		// valueAxis.setTitleConfig(title);
+		
 	    timeAxis.setStartDate(loaded.getStart());
         timeAxis.setEndDate(loaded.getEnd());
 		valueAxis.setMinimum( axisMin );
 		valueAxis.setMaximum( axisMax );
+
+		/*
+		if( loaded.isChanges() ) {
+			series.setShowMarkers(true);
+			series.setMarkerIndex(1);
+			Sprite marker = Primitives.circle(0, 0, 6);
+			marker.setFill(new RGB(148, 174, 10));
+			series.setMarkerConfig(marker);
+		}
+		*/
+		
 	    store.replaceAll( loaded.getData() );
+	    logger.log( Level.INFO, "onLoad: building chart" );
+	    chart = buildChart();
+	    logger.log( Level.INFO, "onLoad: invoking callback" );
+	    callback.run();
         // chart.redrawChart();
-        chart.redrawChartForced();
+        // chart.redrawChartForced();
+	    logger.log( Level.INFO, "onLoad: complete" );
 	}	
 }
