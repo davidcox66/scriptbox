@@ -91,7 +91,8 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 			 }
 			 public void onSuccess(MetricTreeParentNodeDto root) {
 				 for (MetricTreeNodeDto base : root.getChildren()) {
-				      store.add(base);
+				      store.clear();
+				      store.add( base );
 				      if (base instanceof MetricTreeParentNodeDto ) {
 				        processFolder(store, (MetricTreeParentNodeDto) base);
 				      }

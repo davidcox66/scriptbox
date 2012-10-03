@@ -27,7 +27,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 
 	private MetricListPanel listPanel;
 	private MetricTreePanel treePanel;
-	private ChartPanel chartPanel;
+	private ChartListPanel chartListPanel;
 	private MetricTreeGWTInterfaceAsync service; 
 	
 	@Override
@@ -39,7 +39,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		
 		VerticalLayoutContainer parent = new VerticalLayoutContainer();
 		parent.add(metricControls, new VerticalLayoutData(1, 250));
-	    parent.add(wrapContent(chartPanel,"Charts"), new VerticalLayoutData(1, -1));
+	    parent.add(chartListPanel, new VerticalLayoutData(1, 500) );
 	    
 		return parent;
 	}
@@ -49,7 +49,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		
 		listPanel = new MetricListPanel( service );
 		treePanel = new MetricTreePanel( service );
-		chartPanel = new ChartPanel( service );
+		chartListPanel = new ChartListPanel( service );
 		
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
 	        @Override
@@ -66,7 +66,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
         	  MetricTreeNodeDto item = event.getSelectedItem();
 	          if ( !(item instanceof MetricTreeParentNodeDto) ) {
 	        	  logger.info( "Loadding metrics");
-	        	  chartPanel.load( item );
+	        	  chartListPanel.load( item );
 	          }
 	        }
 	    });		

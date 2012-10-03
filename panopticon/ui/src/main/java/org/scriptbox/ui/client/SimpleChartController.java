@@ -14,8 +14,6 @@ import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Chart.Position;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
@@ -35,9 +33,9 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
 
-public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryDto, MetricRangeDto> {
+public class SimpleChartController implements LoadHandler<MetricQueryDto, MetricRangeDto> {
 
-	private static final Logger logger = Logger.getLogger("ChartPanel");
+	private static final Logger logger = Logger.getLogger("ChartListPanel");
 	
 	public interface MetricPropertyAccess extends PropertyAccess<Metric> {
 		ModelKeyProvider<Metric> nameKey();
@@ -136,10 +134,6 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
 		chart.addSeries(series);
 	}
 	
-	public Widget asWidget() {
-		return chart;
-	}
-
 	public Chart<Metric> getChart() {
 		return chart;
 	}
@@ -160,6 +154,7 @@ public class SimpleChartController implements IsWidget, LoadHandler<MetricQueryD
         double axisMax = loaded.getMax()+1;
         
 		logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
+			", values.size()=" + loaded.getData().size() + 
 			", min=" + loaded.getMin() + ", max=" + loaded.getMax() +
 			", axisMin=" + axisMin + ", axisMax=" + axisMax );
 		
