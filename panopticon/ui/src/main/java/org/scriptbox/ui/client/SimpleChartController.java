@@ -109,10 +109,10 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		valueAxis = new NumericAxis<Metric>();
 		valueAxis.setPosition(Position.LEFT);
 		valueAxis.addField(metricAccess.value());
-		TextSprite title = new TextSprite("Value");
-		title.setFontSize(18);
-		valueAxis.setTitleConfig(title);
 		valueAxis.setDisplayGrid(true);
+		// TextSprite title = new TextSprite("Value");
+		// title.setFontSize(18);
+		// valueAxis.setTitleConfig(title);
 		// valueAxis.setAdjustMaximumByMajorUnit( true );
 		// valueAxis.setAdjustMinimumByMajorUnit( true );
 		// valueAxis.setMinimum(0);

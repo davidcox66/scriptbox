@@ -7,40 +7,73 @@ import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.sencha.gxt.chart.client.chart.Chart;
-import com.sencha.gxt.chart.client.draw.Color;
+import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.Portlet;
+import com.sencha.gxt.widget.core.client.button.ToolButton;
+import com.sencha.gxt.widget.core.client.container.PortalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 
 public class ChartListPanel extends ContentPanel {
 
 	private static final Logger logger = Logger.getLogger("ChartListPanel");
 
 	private MetricTreeGWTInterfaceAsync service;
-	private VerticalLayoutContainer layout;
+	private PortalLayoutContainer portal;
 	
 	public ChartListPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
-		this.layout = new VerticalLayoutContainer();
+		// this.layout = new VerticalLayoutContainer();
 		// add(layout);
 		setHeadingText("Chart");
+		
+		portal = new PortalLayoutContainer(1);
+		portal.setColumnWidth(0, .95);
+	    portal.getScrollSupport().setScrollMode(ScrollMode.AUTO);
+		add( portal );
 	}
 	
 	public void load( MetricTreeNodeDto node ) {
 		SimpleChartController controller = new SimpleChartController( service );
 		Chart<Metric> chart = controller.getChart();
-		chart.setPixelSize(800,300);
 		chart.setDefaultInsets(20);
+		// chart.setPixelSize(800,300);
 		// chart.setBackground(new Color("green"));
 		
 		/*
 		ContentPanel chartContent = new ContentPanel();
 		chartContent.setHeadingText( node.getId() );
-		chartContent.add( chart );
-		layout.add(chartContent,new VerticalLayoutData(1, 400));
+		chartContent.getElement().getStyle().setMargin(10, Unit.PX);
+		chartContent.setCollapsible(true);
+		chartContent.setPixelSize(1000, 400);
+		chartContent.setBodyBorder(true);
+		chartContent.add( chart, new MarginData(10) );
 		*/
-		add( chart );
+		
+		// layout.add(chartContent,new VerticalLayoutData(1, 400));
+		// add( chartContent );
+
+		
+	    Portlet portlet = new Portlet();
+	    portlet.setHeadingText(node.getId());
+	    configPanel(portlet);
+	    portlet.add(chart );
+	    portlet.setPixelSize(1000, 350);
+	    portal.add(portlet, 0);
 		
 		controller.load( node );
+	}
+	
+	private void configPanel(final Portlet panel) {
+		panel.setCollapsible(true);
+		panel.setAnimCollapse(false);
+		panel.getHeader().addTool(new ToolButton(ToolButton.GEAR));
+		panel.getHeader().addTool(new ToolButton(ToolButton.CLOSE, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				panel.removeFromParent();
+			}
+		}));
 	}
 }
