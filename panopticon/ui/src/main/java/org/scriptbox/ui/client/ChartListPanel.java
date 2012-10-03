@@ -1,5 +1,7 @@
 package org.scriptbox.ui.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
@@ -21,10 +23,21 @@ public class ChartListPanel extends ContentPanel {
 
 	private MetricTreeGWTInterfaceAsync service;
 	private PortalLayoutContainer portal;
+	private List<Portlet> portlets = new ArrayList<Portlet>();
 	
 	public ChartListPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		setHeadingText("Chart");
+		
+		getHeader().addTool(new ToolButton(ToolButton.CLOSE, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				for( Portlet portlet : portlets ) {
+					portlet.removeFromParent();
+				}
+				portlets.clear();
+			}
+		}));
 		
 		portal = new PortalLayoutContainer(1);
 		portal.setColumnWidth(0, 0.99 );
@@ -43,6 +56,7 @@ public class ChartListPanel extends ContentPanel {
 	    portlet.add( chart );
 	    portlet.setHeight( 350 );
 	    portal.add(portlet, 0);
+		portlets.add( portlet );
 		
 		controller.load( node );
 	}

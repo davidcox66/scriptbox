@@ -58,7 +58,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	        @Override
 	        public void onSelection(SelectionEvent<MetricTreeDto> event) {
         	  MetricTreeDto item = event.getSelectedItem();
-        	  logger.info( "Loadding tree");
+        	  logger.info( "Loading tree");
         	  treePanel.load( item );
 	        }
 	    });		
