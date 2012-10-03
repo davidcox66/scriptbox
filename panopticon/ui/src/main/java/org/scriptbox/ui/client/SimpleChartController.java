@@ -121,8 +121,8 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		// title.setFontSize(18);
 		// valueAxis.setTitleConfig(title);
 		
-		// valueAxis.setAdjustMaximumByMajorUnit( true );
-		// valueAxis.setAdjustMinimumByMajorUnit( true );
+		valueAxis.setAdjustMaximumByMajorUnit( true );
+		valueAxis.setAdjustMinimumByMajorUnit( true );
 		// valueAxis.setMinimum(0);
 		// valueAxis.setMaximum(100);
 		
@@ -150,6 +150,12 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	    });
 	    series.setToolTipConfig(toolTip);
 	}
+
+	public void setSeriesNameForNode( MetricTreeNodeDto node ) { 
+		TextSprite title = new TextSprite( node.getName() );
+		title.setFontSize(18);
+		valueAxis.setTitleConfig(title);
+	}
 	
 	public Chart<Metric> getChart() {
 		return chart;
@@ -176,14 +182,12 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 			", min=" + loaded.getMin() + ", max=" + loaded.getMax() +
 			", axisMin=" + axisMin + ", axisMax=" + axisMax );
 		
-		// TextSprite title = new TextSprite( event.getLoadConfig().getNode().getName() );
-		// title.setFontSize(18);
-		// valueAxis.setTitleConfig(title);
+		// setSeriesNameForNode( event.getLoadConfig().getNode() );
 		
 	    timeAxis.setStartDate(loaded.getStart());
         timeAxis.setEndDate(loaded.getEnd());
-		valueAxis.setMinimum( axisMin );
-		valueAxis.setMaximum( axisMax );
+		// valueAxis.setMinimum( axisMin );
+		// valueAxis.setMaximum( axisMax );
 
 		/*
 		if( loaded.isChanges() ) {
@@ -196,12 +200,8 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		*/
 		
 	    store.replaceAll( loaded.getData() );
-	    logger.log( Level.INFO, "onLoad: building chart" );
 	    chart = buildChart();
-	    logger.log( Level.INFO, "onLoad: invoking callback" );
 	    callback.run();
-        // chart.redrawChart();
-        // chart.redrawChartForced();
-	    logger.log( Level.INFO, "onLoad: complete" );
+		chart.redrawChart();
 	}	
 }

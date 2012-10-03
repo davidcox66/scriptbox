@@ -59,7 +59,6 @@ public class ChartListPanel extends ContentPanel {
 			    portlet.setHeight( 350 );
 			    portal.add(portlet, 0);
 				portlets.add( portlet );
-				chart.redrawChart();
 			}
 		} );
 	}
