@@ -1,4 +1,4 @@
-package org.scriptbox.util.remoting;
+package org.scriptbox.util.remoting.jetty;
 
 public interface TestServiceInterface {
 

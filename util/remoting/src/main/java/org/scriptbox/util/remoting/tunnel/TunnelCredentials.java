@@ -1,13 +1,13 @@
-package org.scriptbox.box.remoting;
+package org.scriptbox.util.remoting.tunnel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.UserInfo;
 
-public class BoxTunnelCredentials implements UserInfo {
+public class TunnelCredentials implements UserInfo {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( BoxTunnelCredentials.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( TunnelCredentials.class );
 	
 	private String user;
 	private String passphrase;
@@ -16,10 +16,10 @@ public class BoxTunnelCredentials implements UserInfo {
 	private boolean askedForPassword;
 	private boolean askedForPassphrase;
 	
-	public BoxTunnelCredentials() {
+	public TunnelCredentials() {
 	}
 	
-	public BoxTunnelCredentials( String user, String passphrase, String password ) {
+	public TunnelCredentials( String user, String passphrase, String password ) {
 		this.user = user;
 		this.passphrase = passphrase;
 		this.password = password;

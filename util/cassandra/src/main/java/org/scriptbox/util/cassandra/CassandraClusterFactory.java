@@ -4,8 +4,11 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
 
+import org.scriptbox.util.remoting.tunnel.Tunnel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Factory to remove Cassandra configuration concerns from DAO objects. 
@@ -22,6 +25,8 @@ public class CassandraClusterFactory
 	private String host;
 	private int port;
 
+	private Tunnel tunnel;
+	
 	private Cluster cluster;
 	
 	public String getName() {
@@ -48,11 +53,26 @@ public class CassandraClusterFactory
 		this.port = port;
 	}
 
-	synchronized public Cluster getInstance() {
+	
+	public Tunnel getTunnel() {
+		return tunnel;
+	}
+
+	public void setTunnel(Tunnel tunnel) {
+		this.tunnel = tunnel;
+	}
+
+	synchronized public Cluster getInstance() throws Exception {
 		if( cluster == null ) {
+			String chost = host;
+			int cport = port;
+			if( tunnel != null && StringUtils.isNotEmpty(tunnel.getTunnelHost()) ) {
+				chost = "localhost";
+				cport = tunnel.connect();
+			}
 			LOGGER.debug( "getInstance: creating cluster name=" + name + ", host=" + host + ", port=" + port );
-			CassandraHostConfigurator config = new CassandraHostConfigurator(host);
-			config.setPort( port );
+			CassandraHostConfigurator config = new CassandraHostConfigurator(chost);
+			config.setPort( cport );
 			cluster = HFactory.getOrCreateCluster( name, config );
 		}
 		return cluster;

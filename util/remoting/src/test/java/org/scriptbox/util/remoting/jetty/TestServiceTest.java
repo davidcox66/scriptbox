@@ -1,4 +1,4 @@
-package org.scriptbox.util.remoting;
+package org.scriptbox.util.remoting.jetty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.scriptbox.util.remoting.jetty.JettyService;
 import org.scriptbox.util.spring.context.ContextBuilder;
 
 public class TestServiceTest {

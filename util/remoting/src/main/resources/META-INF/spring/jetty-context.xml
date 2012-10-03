@@ -17,7 +17,7 @@
   	</bean>
   
 	<conditional:test expression="${jetty.jmx}" >
-		<bean name="jettyJmx" class="org.scriptbox.util.remoting.JettyJmxInitializer" init-method="start"
+		<bean name="jettyJmx" class="org.scriptbox.util.remoting.jetty.JettyJmxInitializer" init-method="start"
 			p:server-ref="jettyServer" />
 	</conditional:test>
 	

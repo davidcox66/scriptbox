@@ -13,6 +13,7 @@ import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Portlet;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
+import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.PortalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
@@ -48,7 +49,7 @@ public class ChartListPanel extends ContentPanel {
 	public void load( MetricTreeNodeDto node ) {
 		SimpleChartController controller = new SimpleChartController( service );
 		Chart<Metric> chart = controller.getChart();
-		chart.setDefaultInsets(20);
+		chart.setDefaultInsets(10);
 		
 	    Portlet portlet = new Portlet();
 	    portlet.setHeadingText(node.getId());

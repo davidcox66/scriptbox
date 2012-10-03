@@ -1,6 +1,6 @@
 package org.scriptbox.panopticon.main;
 
-import org.scriptbox.util.remoting.JettyService;
+import org.scriptbox.util.remoting.jetty.JettyService;
 
 public class MonitorMain {
 

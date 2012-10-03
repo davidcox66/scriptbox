@@ -14,6 +14,15 @@
 	
 	<import resource="classpath:box-basic-context.xml" />
 
+  	<bean id="runtimeConfigurer" class="org.scriptbox.util.spring.context.EvalConfigurer">
+	 	<property name="locations">
+		  <list>
+			<value>classpath*:panopticon.properties</value>
+		  </list>
+		</property>
+    	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+  	</bean>
+	
 	<conditional:dependency classes="groovy.lang.GroovyShell" >
 		<bean name="runGroovyInjector" class="org.scriptbox.box.plugins.run.RunGroovyInjector" 
 			p:plugin-ref="run" />
@@ -53,11 +62,13 @@
   	<bean name="/lm/" class="org.springframework.remoting.caucho.HessianServiceExporter"
   		p:service-ref="monitor"
   		p:serviceInterface="org.scriptbox.box.remoting.BoxInterface" />
-  
+ 
+ 	<bean name="tunnel" >
+ 	</bean> 
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
                 p:host="${cassandra.host}"
-                p:port="9160" />
+                p:port="${cassandra.port}" />
     <bean name="cluster"
         factory-bean="clusterFactory"
         factory-method="getInstance" />    

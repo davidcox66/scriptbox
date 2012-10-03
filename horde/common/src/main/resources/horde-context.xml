@@ -14,6 +14,15 @@
 	
 	<import resource="classpath:box-basic-context.xml" />
 
+  	<bean id="runtimeConfigurer" class="org.scriptbox.util.spring.context.EvalConfigurer">
+	 	<property name="locations">
+		  <list>
+			<value>classpath*:horde.properties</value>
+		  </list>
+		</property>
+    	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+  	</bean>
+	
 	<conditional:dependency classes="groovy.lang.GroovyShell" >
 		<bean name="actionGroovyInjector" class="org.scriptbox.horde.action.ActionGroovyInjector"  />
 	</conditional:dependency>

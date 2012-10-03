@@ -1,6 +1,7 @@
 package org.scriptbox.box.remoting;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import org.scriptbox.util.remoting.tunnel.Tunnel;
+import org.scriptbox.util.remoting.tunnel.TunnelCredentials;
+
 public class BoxCliHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( BoxCliHelper.class );
@@ -27,7 +31,7 @@ public class BoxCliHelper {
 
 	private String tunnelHost;
 	private int tunnelPort;
-	private BoxTunnelCredentials credentials;
+	private TunnelCredentials credentials;
 	
 	public BoxCliHelper( String[] args, String agentBeanName, String[] contextLocations, int defaultAgentPort ) throws CommandLineException {
 		this.agentBeanName = agentBeanName;
@@ -47,7 +51,7 @@ public class BoxCliHelper {
 			String user = cmd.consumeArgValue("user", true);
 			String password = cmd.consumeArgValue("password", true);
 			String passphrase = cmd.consumeArgValue("passphrase", false);
-			credentials = new BoxTunnelCredentials(user, passphrase, password);
+			credentials = new TunnelCredentials(user, passphrase, password);
 		}
 		
 	}
@@ -172,11 +176,11 @@ public class BoxCliHelper {
 	{
 		Thread ret = new Thread(new Runnable() {
 			public void run() {
-				BoxTunnel tunnel = null;
+				Tunnel tunnel = null;
 	            try {
 	            	HostPort hp = hostPort;
 	            	if( credentials != null ) {
-	            		tunnel = new BoxTunnel();
+	            		tunnel = new Tunnel();
 	            		tunnel.setCredentials( credentials );
 	            		tunnel.setTunnelHost( tunnelHost );
 	            		tunnel.setTunnelPort( tunnelPort );

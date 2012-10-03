@@ -13,11 +13,11 @@
     	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   	</bean>
 	
-	<bean name="service" class="org.scriptbox.util.remoting.TestService"/>
+	<bean name="service" class="org.scriptbox.util.remoting.jetty.TestService"/>
 	
 	<bean name="/test-service/" class="org.springframework.remoting.caucho.HessianServiceExporter">
 	    <property name="service" ref="service"/>
-	    <property name="serviceInterface" value="org.scriptbox.util.remoting.TestServiceInterface" />
+	    <property name="serviceInterface" value="org.scriptbox.util.remoting.jetty.TestServiceInterface" />
 	</bean>  
 	
 </beans>

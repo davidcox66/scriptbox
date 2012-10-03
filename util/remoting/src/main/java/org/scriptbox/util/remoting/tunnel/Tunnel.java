@@ -1,4 +1,4 @@
-package org.scriptbox.box.remoting;
+package org.scriptbox.util.remoting.tunnel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,11 +7,11 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-public class BoxTunnel 
+public class Tunnel 
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger( BoxTunnel.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( Tunnel.class );
 	
-	private BoxTunnelCredentials credentials;
+	private TunnelCredentials credentials;
     private int localPort;
     private String tunnelHost;
     private int tunnelPort = 22;
@@ -20,16 +20,16 @@ public class BoxTunnel
 
     private Session session;
     
-    public BoxTunnel() {
+    public Tunnel() {
     }
 
     
-	public BoxTunnelCredentials getCredentials() {
+	public TunnelCredentials getCredentials() {
 		return credentials;
 	}
 
 
-	public void setCredentials(BoxTunnelCredentials credentials) {
+	public void setCredentials(TunnelCredentials credentials) {
 		this.credentials = credentials;
 	}
 
@@ -96,6 +96,14 @@ public class BoxTunnel
 
 	public int connect() throws JSchException {
 
+	  assertArg( credentials, "No credentials specified");
+	  assertArg( credentials.getUser(), "No credentials.user specified");
+	  assertArg( localPort, "No local port specified" );
+	  assertArg( tunnelHost, "No tunnel host specified" );
+	  assertArg( tunnelPort != 0, "No tunnel port specified" );
+	  assertArg( remoteHost, "No remote host specified" );
+	  assertArg( remotePort != 0, "No remote port specified" );
+	  
       JSch jsch=new JSch();
       
       session= jsch.getSession(credentials.getUser(), tunnelHost, tunnelPort);
@@ -107,6 +115,15 @@ public class BoxTunnel
       return assignedPort;
   }
 
+  private void assertArg( Object obj, String message ) {
+	  assertArg( obj != null, message );
+  }
+  private void assertArg( boolean arg, String message ) {
+	  if( !arg ) {
+		  throw new IllegalArgumentException( message ); 
+	  }
+  }
+  
   public void disconnect() {
 	  if( session != null ) {
 		  session.disconnect();

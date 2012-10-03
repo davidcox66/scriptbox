@@ -16,13 +16,32 @@
   	<bean id="annotationServiceLocator" class="org.scriptbox.util.gwt.server.remote.locator.AnnotationServiceLocator"/>
   
   	<bean id="configurer" class="org.scriptbox.util.spring.context.EvalConfigurer"> 
+	 	<property name="locations">
+		  <list>
+			<value>classpath*:panopticon-ui.properties</value>
+		  </list>
+		</property>
     	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   	</bean>
 
+	<bean name="tunnelCredentials" class="org.scriptbox.util.remoting.tunnel.TunnelCredentials" 
+		p:user="${tunnel.user}"
+		p:password="${tunnel.password}"
+		p:passphrase="${tunnel.passphrase}" />
+		
+	<bean name="tunnel" class="org.scriptbox.util.remoting.tunnel.Tunnel" 
+		p:tunnelHost="${tunnel.host}"
+		p:tunnelPort="${tunnel.port}"
+		p:remoteHost="${cassandra.host}"
+		p:remotePort="${cassandra.port}" 
+		p:credentials-ref="tunnelCredentials" />
+		
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
-                p:host="${cassandra_host}"
-                p:port="9160" />
+                p:host="${cassandra.host}"
+                p:port="${cassandra.port}"
+                p:tunnel-ref="tunnel" />
+                
     <bean name="cluster"
         factory-bean="clusterFactory"
         factory-method="getInstance" />    

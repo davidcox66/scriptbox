@@ -1,4 +1,4 @@
-package org.scriptbox.util.remoting;
+package org.scriptbox.util.remoting.jetty;
 
 import java.lang.management.ManagementFactory;
 
@@ -6,7 +6,7 @@ import javax.management.MBeanServer;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
-import org.scriptbox.util.remoting.JettyJmxInitializer;
+import org.scriptbox.util.remoting.jetty.JettyJmxInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
