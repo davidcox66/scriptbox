@@ -24,12 +24,10 @@ public class ChartListPanel extends ContentPanel {
 	
 	public ChartListPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
-		// this.layout = new VerticalLayoutContainer();
-		// add(layout);
 		setHeadingText("Chart");
 		
 		portal = new PortalLayoutContainer(1);
-		portal.setColumnWidth(0, .95);
+		portal.setColumnWidth(0, 0.99 );
 	    portal.getScrollSupport().setScrollMode(ScrollMode.AUTO);
 		add( portal );
 	}
@@ -38,28 +36,12 @@ public class ChartListPanel extends ContentPanel {
 		SimpleChartController controller = new SimpleChartController( service );
 		Chart<Metric> chart = controller.getChart();
 		chart.setDefaultInsets(20);
-		// chart.setPixelSize(800,300);
-		// chart.setBackground(new Color("green"));
-		
-		/*
-		ContentPanel chartContent = new ContentPanel();
-		chartContent.setHeadingText( node.getId() );
-		chartContent.getElement().getStyle().setMargin(10, Unit.PX);
-		chartContent.setCollapsible(true);
-		chartContent.setPixelSize(1000, 400);
-		chartContent.setBodyBorder(true);
-		chartContent.add( chart, new MarginData(10) );
-		*/
-		
-		// layout.add(chartContent,new VerticalLayoutData(1, 400));
-		// add( chartContent );
-
 		
 	    Portlet portlet = new Portlet();
 	    portlet.setHeadingText(node.getId());
 	    configPanel(portlet);
-	    portlet.add(chart );
-	    portlet.setPixelSize(1000, 350);
+	    portlet.add( chart );
+	    portlet.setHeight( 350 );
 	    portal.add(portlet, 0);
 		
 		controller.load( node );

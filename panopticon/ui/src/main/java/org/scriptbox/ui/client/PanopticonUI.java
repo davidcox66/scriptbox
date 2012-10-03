@@ -20,6 +20,7 @@ import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.container.Viewport;
 
 public class PanopticonUI implements IsWidget, EntryPoint {
 
@@ -39,9 +40,11 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		
 		VerticalLayoutContainer parent = new VerticalLayoutContainer();
 		parent.add(metricControls, new VerticalLayoutData(1, 250));
-	    parent.add(chartListPanel, new VerticalLayoutData(1, 500) );
-	    
-		return parent;
+	    parent.add(chartListPanel, new VerticalLayoutData(1, 1) );
+
+	    Viewport viewport = new Viewport();
+	    viewport.add( parent );
+		return viewport;
 	}
 
 	public void onModuleLoad() {
