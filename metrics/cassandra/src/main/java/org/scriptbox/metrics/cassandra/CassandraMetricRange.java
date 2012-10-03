@@ -48,22 +48,6 @@ public class CassandraMetricRange extends MetricRange {
 		return sequence;
 	}
 
-	public float getMin() {
-		float min = Float.MAX_VALUE;
-		for( Metric metric : getMetrics() ) {
-			min = Math.min( min, metric.getValue() );
-		}
-		return min;
-	}
-	
-	public float getMax() {
-		float max = Float.MIN_VALUE;
-		for( Metric metric : getMetrics() ) {
-			max = Math.max( max, metric.getValue() );
-		}
-		return max;
-	}
-	
 	@Override
 	public List<Metric> getMetrics() {
 		if( metrics == null ) { 

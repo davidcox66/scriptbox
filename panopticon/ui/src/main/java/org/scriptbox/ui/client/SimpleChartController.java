@@ -56,7 +56,6 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	private	LineSeries<Metric> series;
 	private	TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader;
 	private ListStore<Metric> store;
-	private Runnable callback;
 	
 	public SimpleChartController( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
@@ -98,12 +97,9 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	    textSprite.setRotation(315);
 	    timeAxis.setLabelConfig(textSprite);
 	    timeAxis.setLabelPadding(-5);
-	    timeAxis.setMinorTickSteps(5);
+	    // timeAxis.setMinorTickSteps(5);
 	    // timeAxis.setLabelTolerance(60);
 	    // timeAxis.setLabelStepRatio(2);
-	    
-	    // PathSprite pathSprite = new PathSprite();
-	    // timeAxis.setAxisConfig(pathSprite);
 	    
 		timeAxis.setLabelProvider(new LabelProvider<Date>() {
 			@Override
@@ -117,14 +113,9 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		valueAxis.setPosition(Position.LEFT);
 		valueAxis.addField(metricAccess.value());
 		valueAxis.setDisplayGrid(true);
-		// TextSprite title = new TextSprite("Value");
-		// title.setFontSize(18);
-		// valueAxis.setTitleConfig(title);
 		
 		valueAxis.setAdjustMaximumByMajorUnit( true );
 		valueAxis.setAdjustMinimumByMajorUnit( true );
-		// valueAxis.setMinimum(0);
-		// valueAxis.setMaximum(100);
 		
 	}
 
@@ -132,13 +123,14 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 		series = new LineSeries<Metric>();
 		series.setYAxisPosition(Position.LEFT);
 		series.setYField(metricAccess.value());
-		// series.setStroke(new RGB(148, 174, 10));
 		series.setStroke(new RGB(255,0,0));
+		// series.setStroke(new RGB(148, 174, 10));
 		// series.setShowMarkers(true);
 		// series.setMarkerIndex(1);
 		// Sprite marker = Primitives.circle(0, 0, 6);
 		// marker.setFill(new RGB(148, 174, 10));
 		// series.setMarkerConfig(marker);
+		
 		SeriesToolTipConfig<Metric> toolTip = new SeriesToolTipConfig<Metric>();
 	    toolTip.setTrackMouse(true);
 	    toolTip.setHideDelay(20);
@@ -173,31 +165,15 @@ public class SimpleChartController implements LoadHandler<MetricQueryDto, Metric
 	@Override
 	public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
 		MetricRangeDto loaded = event.getLoadResult();
-        double axisMin = loaded.getMin() > 0 && loaded.getMin() != loaded.getMax() ? 
-        	loaded.getMin() - ((loaded.getMax() - loaded.getMin()) * 0.05) : 0;
-        double axisMax = loaded.getMax()+1;
         
 		logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
-			", values.size()=" + loaded.getData().size() + 
-			", min=" + loaded.getMin() + ", max=" + loaded.getMax() +
-			", axisMin=" + axisMin + ", axisMax=" + axisMax );
-		
-		// setSeriesNameForNode( event.getLoadConfig().getNode() );
+			", values.size()=" + loaded.getData().size() ); 
 		
 	    timeAxis.setStartDate(loaded.getStart());
         timeAxis.setEndDate(loaded.getEnd());
-		// valueAxis.setMinimum( axisMin );
-		// valueAxis.setMaximum( axisMax );
-
-		/*
-		if( loaded.isChanges() ) {
-			series.setShowMarkers(true);
-			series.setMarkerIndex(1);
-			Sprite marker = Primitives.circle(0, 0, 6);
-			marker.setFill(new RGB(148, 174, 10));
-			series.setMarkerConfig(marker);
-		}
-		*/
+        
+		// setSeriesNameForNode( event.getLoadConfig().getNode() );
+		
 		
 	    store.replaceAll( loaded.getData() );
 	    chart = buildChart();

@@ -92,8 +92,6 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			dr.getEnd().getTime(), 
 			range.getStart(), 
 			range.getEnd(), 
-			range.getMin(),
-			range.getMax(),
 			range.getMetrics() );
 	}
 
