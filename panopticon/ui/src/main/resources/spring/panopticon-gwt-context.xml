@@ -21,6 +21,7 @@
 			<value>classpath*:panopticon-ui.properties</value>
 		  </list>
 		</property>
+    	<property name="environmentAware" value="true" />
     	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   	</bean>
 
