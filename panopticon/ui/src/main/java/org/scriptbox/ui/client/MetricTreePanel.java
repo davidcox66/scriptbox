@@ -11,7 +11,6 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
-import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -25,14 +24,6 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 
 	private static final Logger logger = Logger.getLogger("MetricTreePanel");
 
-	class KeyProvider implements ModelKeyProvider<MetricTreeNodeDto> {
-		@Override
-		public String getKey(MetricTreeNodeDto item) {
-			return (item instanceof MetricTreeParentNodeDto ? "f-" : "m-")
-					+ item.getId().toString();
-		}
-	}
-
 	private MetricTreeGWTInterfaceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
 	private TreeStore<MetricTreeNodeDto> store;
@@ -43,46 +34,49 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 	
 	public MetricTreePanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
-		
-		store = new TreeStore<MetricTreeNodeDto>(new KeyProvider());
+		buildStore();
+		buildToolBar();
+		buildTree();
+	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
+	}
 
-		tree = new Tree<MetricTreeNodeDto, String>(store,
-			new ValueProvider<MetricTreeNodeDto, String>() {
-
-				@Override
-				public String getValue(MetricTreeNodeDto node) {
-					return node.getName();
-				}
-
-				@Override
-				public void setValue(MetricTreeNodeDto object, String value) {
-				}
-
-				@Override
-				public String getPath() {
-					return "name";
-				}
+	private void buildStore() {
+		store = new TreeStore<MetricTreeNodeDto>(new ModelKeyProvider<MetricTreeNodeDto>() {
+			public String getKey(MetricTreeNodeDto item) {
+				return (item instanceof MetricTreeParentNodeDto ? "f-" : "m-")
+						+ item.getId().toString();
+			} 
 		});
-		
-		
+	}
+	
+	private void buildToolBar() {
 		ToolBar buttonBar = new ToolBar();
 		buttonBar.add(new TextButton("Expand All", new SelectHandler() {
-
-			@Override
 			public void onSelect(SelectEvent event) {
 				tree.expandAll();
 			}
 		}));
 		buttonBar.add(new TextButton("Collapse All", new SelectHandler() {
-			@Override
 			public void onSelect(SelectEvent event) {
 				tree.collapseAll();
 			}
-
 		}));
 		add(buttonBar, new VerticalLayoutData(1, -1));
+	}
+	
+	private void buildTree() {
+		tree = new Tree<MetricTreeNodeDto, String>(store,
+			new ValueProvider<MetricTreeNodeDto, String>() {
+				public String getValue(MetricTreeNodeDto node) {
+					return node.getName();
+				}
+				public void setValue(MetricTreeNodeDto object, String value) {
+				}
+				public String getPath() {
+					return "name";
+				}
+		});
 	    add(tree, new VerticalLayoutData(1, 1));
-	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
 	
 	public void load( MetricTreeDto treeDto ) {

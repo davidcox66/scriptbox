@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.scriptbox.metrics.model.DateRange;
-import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
@@ -95,7 +94,7 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			range.getMetrics() );
 	}
 
-	public Metric whitelist1( Metric value ) { return null; }
+	// public Metric whitelist1( Metric value ) { return null; }
 	
 	private MetricTree getTreeByName( String name ) {
 		for( MetricTree tree : trees ) {
