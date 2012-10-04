@@ -14,13 +14,13 @@ else
 	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
 fi
 
-port=${1:-7800}
-jmx_port=$((port + 1))
-listen_host=${2:-$ip}
-
-if [[ -n $3 ]] ; then
-    DB_ARGS=-Dcassandra.host=$3
+if [[ -n $1 ]] ; then
+    DB_ARGS=-Dcassandra.host=$1
 fi
+
+listen_host=${2:-$ip}
+port=${3:-7800}
+jmx_port=$((port + 1))
 
 set -x
 JAVA_OPTS="\
