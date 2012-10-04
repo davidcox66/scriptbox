@@ -8,6 +8,8 @@ import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -17,14 +19,11 @@ import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.PortalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
-import com.sencha.gxt.widget.core.client.event.ParseErrorEvent;
-import com.sencha.gxt.widget.core.client.event.ParseErrorEvent.ParseErrorHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.IntegerPropertyEditor;
-import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
@@ -49,7 +48,7 @@ public class ChartListPanel extends ContentPanel {
 
 	public void load( final MetricTreeNodeDto node ) {
 		final SimpleChartController controller = new SimpleChartController( service );
-		enforceChartLimit();
+		enforceChartLimit( 1 );
 		controller.load( node, new Runnable() {
 			public void run() {
 				Chart<Metric> chart = controller.getChart();
@@ -85,17 +84,23 @@ public class ChartListPanel extends ContentPanel {
 	private void buildLimit( ToolBar bar ) {
 		limit = new NumberField<Integer>(new IntegerPropertyEditor());
 		limit.setWidth( 50 );
+		limit.addChangeHandler( new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				enforceChartLimit(0);
+			}
+		} );
+		/*
 	    limit.addParseErrorHandler(new ParseErrorHandler() {
-	 
 	      @Override
 	      public void onParseError(ParseErrorEvent event) {
 	        Info.display("Parse Error", event.getErrorValue() + " could not be parsed as a number");
 	      }
 	    });
+	    */
 	    limit.setAllowBlank(false);
 	    
 		FieldLabel label = new FieldLabel(limit, "Limit");
-		label.setLabelWidth( 50 );
+		label.setLabelWidth( 40 );
 		bar.add( label );
 	}
 	
@@ -116,10 +121,10 @@ public class ChartListPanel extends ContentPanel {
 		portlets.add( portlet );
 	}
 	
-	private void enforceChartLimit() {
+	private void enforceChartLimit( int adding ) {
 		Integer lim = limit.getValue();
 		if( lim != null && lim.intValue() > 0 ) {
-			int l = lim.intValue() - 1;
+			int l = lim.intValue() - adding;
 			while( portlets.size() > l ) {
 				Portlet rm = portlets.get(portlets.size()-1);
 				portlets.remove(portlets.size()-1);

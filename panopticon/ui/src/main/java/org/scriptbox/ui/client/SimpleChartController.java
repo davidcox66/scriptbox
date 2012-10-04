@@ -1,6 +1,7 @@
 package org.scriptbox.ui.client;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,6 +74,44 @@ public class SimpleChartController {
 		buildValueSeries();
 	}
 
+	public Chart<Metric> getChart() {
+		return chart;
+	}
+	
+	public void load( MetricTreeNodeDto node, final Runnable callback ) {
+		MetricQueryDto query = new MetricQueryDto();
+		query.setNode( node );
+		query.setStart( new Date() );
+		query.setEnd( new Date() );
+		
+		TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader= new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
+		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
+			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
+				MetricRangeDto loaded = event.getLoadResult();
+				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
+					", values.size()=" + loaded.getData().size() ); 
+				
+			    timeAxis.setStartDate(loaded.getStart());
+		        timeAxis.setEndDate(loaded.getEnd());
+		        
+				// setSeriesNameForNode( event.getLoadConfig().getNode() );
+		        float singleValue = getSingleValue( loaded.getData() );
+		        if( singleValue != Float.NaN ) {
+					valueAxis.setAdjustMaximumByMajorUnit( false );
+					valueAxis.setAdjustMinimumByMajorUnit( false );
+					valueAxis.setMinimum(singleValue - 2 ); 
+					valueAxis.setMaximum(singleValue + 2 ); 
+		        }
+			    store.replaceAll( loaded.getData() );
+			    chart = buildChart();
+			    callback.run();
+				chart.redrawChart();
+			}
+		} );
+		loader.load( query );
+		
+	}
+
 	private Chart<Metric> buildChart() {
 		chart = new Chart<Metric>();
 		chart.setStore(store);
@@ -112,7 +151,7 @@ public class SimpleChartController {
 		
 		valueAxis.setAdjustMaximumByMajorUnit( true );
 		valueAxis.setAdjustMinimumByMajorUnit( true );
-		
+		// valueAxis.setMinimum(0); 
 	}
 
 	private void buildValueSeries() {
@@ -139,42 +178,29 @@ public class SimpleChartController {
 	    series.setToolTipConfig(toolTip);
 	}
 
-	public void setSeriesNameForNode( MetricTreeNodeDto node ) { 
+	private void setSeriesNameForNode( MetricTreeNodeDto node ) { 
 		TextSprite title = new TextSprite( node.getName() );
 		title.setFontSize(18);
 		valueAxis.setTitleConfig(title);
 	}
 	
-	public Chart<Metric> getChart() {
-		return chart;
-	}
-	
-	public void load( MetricTreeNodeDto node, final Runnable callback ) {
-		MetricQueryDto query = new MetricQueryDto();
-		query.setNode( node );
-		query.setStart( new Date() );
-		query.setEnd( new Date() );
-		
-		TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader= new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
-		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
-			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
-				MetricRangeDto loaded = event.getLoadResult();
-				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
-					", values.size()=" + loaded.getData().size() ); 
-				
-			    timeAxis.setStartDate(loaded.getStart());
-		        timeAxis.setEndDate(loaded.getEnd());
-		        
-				// setSeriesNameForNode( event.getLoadConfig().getNode() );
-				
-			    store.replaceAll( loaded.getData() );
-			    chart = buildChart();
-			    callback.run();
-				chart.redrawChart();
-						
+	/**
+	 * Deal with a problem in GXT where the series is all the same value and it can't calculate
+	 * a min/max for the axis
+	 * 
+	 * @param metrics
+	 * @return
+	 */
+	private float getSingleValue( List<Metric> metrics ) {
+		if( metrics.size() > 0 ) {
+			float val = metrics.get(0).getValue();
+			for( Metric metric : metrics ) {
+				if( metric.getValue() != val ) {
+					return Float.NaN;
+				}
 			}
-		} );
-		loader.load( query );
-		
-	}
+			return val;
+		}
+		return Float.NaN;
+	}	
 }
