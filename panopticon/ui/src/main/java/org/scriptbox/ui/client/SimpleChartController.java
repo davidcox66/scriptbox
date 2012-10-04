@@ -112,6 +112,25 @@ public class SimpleChartController {
 		
 	}
 
+	/**
+	 * Deal with a problem in GXT where the series is all the same value and it can't calculate
+	 * a min/max for the axis
+	 * 
+	 * @param metrics
+	 * @return
+	 */
+	private float getSingleValue( List<Metric> metrics ) {
+		if( metrics.size() > 0 ) {
+			float val = metrics.get(0).getValue();
+			for( Metric metric : metrics ) {
+				if( metric.getValue() != val ) {
+					return Float.NaN;
+				}
+			}
+			return val;
+		}
+		return Float.NaN;
+	}	
 	private Chart<Metric> buildChart() {
 		chart = new Chart<Metric>();
 		chart.setStore(store);
@@ -184,23 +203,4 @@ public class SimpleChartController {
 		valueAxis.setTitleConfig(title);
 	}
 	
-	/**
-	 * Deal with a problem in GXT where the series is all the same value and it can't calculate
-	 * a min/max for the axis
-	 * 
-	 * @param metrics
-	 * @return
-	 */
-	private float getSingleValue( List<Metric> metrics ) {
-		if( metrics.size() > 0 ) {
-			float val = metrics.get(0).getValue();
-			for( Metric metric : metrics ) {
-				if( metric.getValue() != val ) {
-					return Float.NaN;
-				}
-			}
-			return val;
-		}
-		return Float.NaN;
-	}	
 }

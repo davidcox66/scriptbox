@@ -48,7 +48,7 @@ public class ChartListPanel extends ContentPanel {
 
 	public void load( final MetricTreeNodeDto node ) {
 		final SimpleChartController controller = new SimpleChartController( service );
-		enforceChartLimit( 1 );
+		enforceChartLimit( 1, null );
 		controller.load( node, new Runnable() {
 			public void run() {
 				Chart<Metric> chart = controller.getChart();
@@ -61,6 +61,7 @@ public class ChartListPanel extends ContentPanel {
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
 		ToolBar bar = new ToolBar();
 		buildRemoveAll( bar );
+		buildCollapseAll( bar );
 		SeparatorToolItem sep = new SeparatorToolItem();
 		sep.setWidth(20);
 		bar.add( sep );
@@ -70,8 +71,6 @@ public class ChartListPanel extends ContentPanel {
 	
 	private void buildRemoveAll( ToolBar bar ) {
 		bar.add(new TextButton("Remove All", new SelectHandler() {
-
-			@Override
 			public void onSelect(SelectEvent event) {
 				for( Portlet portlet : portlets ) {
 					portlet.removeFromParent();
@@ -81,12 +80,22 @@ public class ChartListPanel extends ContentPanel {
 		}));
 	}
 	
+	private void buildCollapseAll( ToolBar bar ) {
+		bar.add(new TextButton("Collapse All", new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				for( Portlet portlet : portlets ) {
+					portlet.collapse();
+				}
+			}
+		}));
+	}
+	
 	private void buildLimit( ToolBar bar ) {
 		limit = new NumberField<Integer>(new IntegerPropertyEditor());
 		limit.setWidth( 50 );
 		limit.addChangeHandler( new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				enforceChartLimit(0);
+				enforceChartLimit(0,null);
 			}
 		} );
 		/*
@@ -118,17 +127,33 @@ public class ChartListPanel extends ContentPanel {
 	    portlet.add( chart );
 	    portlet.setHeight( 350 );
 	    portal.insert(portlet, 0, 0);
-		portlets.add( portlet );
+		portlets.add( 0, portlet );
 	}
 	
-	private void enforceChartLimit( int adding ) {
+	private void enforceChartLimit( int adding, Portlet excluded ) {
 		Integer lim = limit.getValue();
 		if( lim != null && lim.intValue() > 0 ) {
 			int l = lim.intValue() - adding;
-			while( portlets.size() > l ) {
-				Portlet rm = portlets.get(portlets.size()-1);
-				portlets.remove(portlets.size()-1);
-				rm.removeFromParent();
+			// Only consider open ones for closing
+			List<Portlet> opened = new ArrayList<Portlet>();
+			for( Portlet portlet : portlets ) {
+				if( !portlet.isCollapsed() ) {
+					opened.add( portlet );
+				}
+			}
+			// Close enough, ignoring the excluded portlet if specified
+			int fromEnd = 0;
+			while( opened.size() - fromEnd > l ) {
+				int ind = opened.size() - 1 - fromEnd;
+				Portlet rm = opened.get( ind );
+				if( excluded == null || rm != excluded ) {
+					opened.remove(ind);
+					portlets.remove(rm);
+					rm.removeFromParent();
+				}
+				else if( rm == excluded ) {
+					fromEnd++;
+				}
 			}
 		}
 	}
@@ -143,5 +168,12 @@ public class ChartListPanel extends ContentPanel {
 				portlets.remove( panel );
 			}
 		}));
+		/*
+		panel.addExpandHandler( new ExpandHandler() {
+			public void onExpand( ExpandEvent event ) {
+				enforceChartLimit( 0, panel );
+			}
+		} );
+		*/
 	}
 }
