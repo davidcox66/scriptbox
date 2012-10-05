@@ -94,13 +94,24 @@ public abstract class EnvConfiguration {
     public void add( String name ) throws ConfigurationException {
 		URL resource = EnvConfiguration.class.getResource( name );
 		if( resource == null ) {
-		    resource = EnvConfiguration.class.getResource( "/" + name );
-		    if( resource == null ) {
-		        resource = EnvConfiguration.class.getResource( "/" + name + ".properties" );
-		    }
+		    resource = EnvConfiguration.class.getResource( name );
 		}
+	    if( resource == null && !name.endsWith(".properties") ) {
+	        resource = EnvConfiguration.class.getResource( name + ".properties" );
+	    }
+	    
+		if( resource == null ) {
+		    resource = EnvConfiguration.class.getResource( "/" + name );
+		}
+	    if( resource == null && !name.endsWith(".properties") ) {
+	        resource = EnvConfiguration.class.getResource( "/" + name + ".properties" );
+	    }
+	    
 		if( resource == null ) {
 			throw new ConfigurationException( "Could not find resource: " + name );
+		}
+		else {
+			LOGGER.debug( "add: found resource: '" + name + "' at: " + resource );
 		}
 		resources.add( resource );
     }
@@ -126,22 +137,16 @@ public abstract class EnvConfiguration {
     	for( URL resource : resources ) {
 			CompositeConfiguration combined = new CompositeConfiguration();
 			combined.setDelimiterParsingDisabled( true );
+		
+			AbstractConfiguration cfg = load( resource );
 			
-			PropertiesConfiguration ini = new PropertiesConfiguration();
-			ini.setDelimiterParsingDisabled( true );
-			try {
-	    		ini.load( new InputStreamReader(resource.openStream()));
-			}
-			catch( IOException ex ) {
-				throw new ConfigurationException( "Failed opening resource: " + resource, ex );
-			}
 			for( String env : environments ) {
-	    		SubsetConfiguration subset = new SubsetConfiguration( ini, env, ".");
+	    		SubsetConfiguration subset = new SubsetConfiguration( cfg, env, ".");
 		        subset.setDelimiterParsingDisabled( true );
 	    		combined.addConfiguration( subset );
 			}
 			// For just plain 'property' access without environment parts
-			combined.addConfiguration( ini );
+			combined.addConfiguration( cfg );
 			
 			all.addConfiguration( combined );
 			

@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.template.SuperCfResult;
 import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.SuperCfUpdater;
@@ -14,9 +16,13 @@ import org.apache.commons.lang.StringUtils;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CassandraMetricTree extends MetricTree {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( CassandraMetricTree.class );
+	
 	public static final String ROOT_NODE_NAME = "Metrics";
 	
 	CassandraMetricStore store;
@@ -44,7 +50,11 @@ public class CassandraMetricTree extends MetricTree {
 		};
 		
 		final Map<String,NodeInfo> allNodesById = new HashMap<String,NodeInfo>();
-		SuperCfResult<String,String,String> result = store.metricTreeTemplate.querySuperColumns(name);
+
+		HSlicePredicate<String> predicate = new HSlicePredicate<String>(StringSerializer.get());
+		predicate.setCount( Integer.MAX_VALUE );
+		SuperCfResult<String,String,String> result = store.metricTreeTemplate.querySuperColumns(name,predicate);
+		int count=0;
 		if( result.hasResults() ) {
 			Collection<String> ids = result.getSuperColumns();
 			for( String id : ids ) {
@@ -55,9 +65,12 @@ public class CassandraMetricTree extends MetricTree {
 				     result.getString("name"),
 				     result.getString("type") );
 				 NodeInfo info = new NodeInfo( node, result.getString("parent") );
-				 allNodesById.put( result.getActiveSuperColumn(), info );
+				 if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getRoot: parent=" + info.parentId + ", node=" + node ); }
+				 allNodesById.put( id, info );
+				 count++;
 			 }
 		}  
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getRoot: processed " + count + " columns, found " + allNodesById.size() + " nodes" ); }
 		if( !allNodesById.isEmpty() ) {
 			for( Map.Entry<String,NodeInfo> entry : allNodesById.entrySet() ) {
 				String nodeId = entry.getKey();

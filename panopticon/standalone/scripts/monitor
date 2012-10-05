@@ -22,6 +22,16 @@ listen_host=${2:-$ip}
 port=${3:-7800}
 jmx_port=$((port + 1))
 
+if [[ -f $JAVA_HOME/lib/tools.jar ]] ; then
+	echo "Added tools.jar to classpath"
+	tools=$JAVA_HOME/lib/tools.jar
+fi
+
+CP= 
+CP="$CP:$dir"
+CP="$CP:$tools"
+CP="$CP:$root/$jar"
+
 set -x
 JAVA_OPTS="\
         $DB_ARGS \
@@ -31,4 +41,4 @@ JAVA_OPTS="\
         -Dcom.sun.management.jmxremote.port=$jmx_port \
     -Dcom.sun.management.jmxremote.ssl=false \
     -Dcom.sun.management.jmxremote.authenticate=false"
-java $JAVA_OPTS -cp $dir:$root/$jar org.scriptbox.panopticon.main.MonitorMain "$@"
+java $JAVA_OPTS -cp $CP org.scriptbox.panopticon.main.MonitorMain "$@"

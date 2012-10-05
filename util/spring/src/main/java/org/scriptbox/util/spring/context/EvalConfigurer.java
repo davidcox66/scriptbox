@@ -8,7 +8,7 @@ import java.util.Properties;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.scriptbox.util.config.EnvConfiguration;
-import org.scriptbox.util.config.IniEnvConfiguration;
+import org.scriptbox.util.config.PropertiesEnvConfiguration;
 import org.scriptbox.util.spring.context.accessor.BeanPropertyAccessor;
 import org.scriptbox.util.spring.context.accessor.JsonPropertyAccessor;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class EvalConfigurer extends PropertyPlaceholderConfigurer {
 			if (this.locations != null) {
 				List<String> environments = getEnvironmentList();
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "loadProperties: environments=" + environments ); }
-				EnvConfiguration config = new IniEnvConfiguration( getEnvironmentList() );
+				EnvConfiguration config = new PropertiesEnvConfiguration( getEnvironmentList() );
 				config.setUseSystemProperties( false );
 				for (Resource location : this.locations) {
 					config.add( location.getURL() );
@@ -85,6 +85,12 @@ public class EvalConfigurer extends PropertyPlaceholderConfigurer {
 		String env = System.getProperty("ENV");
 		if( StringUtils.isEmpty(env) ) {
 			env = System.getenv("ENV");
+			if( StringUtils.isNotEmpty(env) ) {
+				LOGGER.debug( "getEnvironmentList: found environment variable ENV='" + env + "'" );
+			}
+		}
+		else {
+			LOGGER.debug( "getEnvironmentList: found system property ENV='" + env + "'" );
 		}
 		if( StringUtils.isEmpty(env) ) {
 			throw new RuntimeException( "No ENV property or environment variable set");

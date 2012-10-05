@@ -32,8 +32,12 @@ public class TransactionsPerSecond extends ActionMetric {
         long now = System.currentTimeMillis();
         try {
         	if( lastChecked > 0 ) {
-	        	float divisor = (now - lastChecked) / 1000;
-	            return divisor > 0 ? (int)(transactionCount / divisor) : 0;
+	        	double divisor = (now - lastChecked) / 1000;
+	            int ret = divisor > 0 ? (int)(transactionCount / divisor) : 0;
+	        	if( LOGGER.isDebugEnabled() ) {
+	        		LOGGER.debug( "getValue: now=" + now + ", lastChecked=" + lastChecked + ", divisor=" + divisor + ", ret=" + ret );
+	        	}
+	            return ret;
         	}
         	else {
         		LOGGER.warn( "getValue: attempting to get TPS without ever recording values" );

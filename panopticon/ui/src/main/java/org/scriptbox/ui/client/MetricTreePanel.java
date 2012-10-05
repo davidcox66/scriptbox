@@ -85,13 +85,9 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 				 logger.info( "Failed getting tree: " + ex );
 			 }
 			 public void onSuccess(MetricTreeParentNodeDto root) {
-				 for (MetricTreeNodeDto base : root.getChildren()) {
-				      store.clear();
-				      store.add( base );
-				      if (base instanceof MetricTreeParentNodeDto ) {
-				        processFolder(store, (MetricTreeParentNodeDto) base);
-				      }
-				 }
+				 store.clear();
+				 store.add( root );
+				 processFolder( store, root );
 			 }
 		};
 		service.getRoot( treeDto, callback );

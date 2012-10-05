@@ -103,6 +103,10 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 		}
 		return new CassandraMetricSequence( this );
 	}
+	
+	public String toString() {
+		return "CassandraMetricTreeNode{ name=" + name + ", type=" + type + ", id=" + id + "}";
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

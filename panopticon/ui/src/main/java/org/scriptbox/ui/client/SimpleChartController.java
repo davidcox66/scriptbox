@@ -15,6 +15,7 @@ import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor.Path;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Chart.Position;
@@ -170,6 +171,14 @@ public class SimpleChartController {
 		
 		valueAxis.setAdjustMaximumByMajorUnit( true );
 		valueAxis.setAdjustMinimumByMajorUnit( true );
+		
+		valueAxis.setLabelProvider(new LabelProvider<Number>() {
+			  public String getLabel(Number item) {
+			    return NumberFormat.getFormat("0.00").format(item.doubleValue());
+			  }
+			}
+		);
+
 		// valueAxis.setMinimum(0); 
 	}
 
