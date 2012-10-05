@@ -73,7 +73,7 @@ public class Box {
 		        LOGGER.info( "shutdownContext: stopped context=" + contextName );
 	        }
 	        else {
-	            LOGGER.info( "shutdownContext: not loaded: ${contextName}");
+	            LOGGER.info( "shutdownContext: not loaded: " + contextName );
 	        }
         }
         finally {

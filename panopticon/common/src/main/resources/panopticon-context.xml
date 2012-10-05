@@ -106,7 +106,7 @@
     <bean name="store" class="org.scriptbox.panopticon.store.CassandraCaptureStore"
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
-    	p:instance="local" 
+    	p:instance="${metrics.instance}" 
     	p:nameSplitter-ref="nameSplitter" />
     	
     <bean name="heartbeats" class="org.scriptbox.util.cassandra.heartbeat.EndpointPublishingHeartbeatGenerator"

@@ -14,9 +14,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.container.MarginData;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 
 public class ChartView implements IsWidget {
 
@@ -61,24 +61,23 @@ public class ChartView implements IsWidget {
 	
 	@Override
 	public Widget asWidget() {
-		HorizontalLayoutContainer metricControls = new HorizontalLayoutContainer();
-		metricControls.add(wrapContent(listPanel,"Trees"), new HorizontalLayoutData(250, 1));
-	    metricControls.add(wrapContent(treePanel,"Metrics"), new HorizontalLayoutData(1, 1));
+		VerticalLayoutContainer metricControls = new VerticalLayoutContainer();
+		metricControls.add(wrapContent(listPanel,"Trees"), new VerticalLayoutData(1, 0.3));
+	    metricControls.add(wrapContent(treePanel,"Metrics"), new VerticalLayoutData(1, 0.7));
 	    
-		// VerticalLayoutContainer parent = new VerticalLayoutContainer();
-		// parent.add(metricControls, new VerticalLayoutData(1, 250));
-	    // parent.add(chartListPanel, new VerticalLayoutData(1, 1) );
-
+		// HorizontalLayoutContainer metricControls = new HorizontalLayoutContainer();
+		// metricControls.add(wrapContent(listPanel,"Trees"), new HorizontalLayoutData(250, 1));
+	    // metricControls.add(wrapContent(treePanel,"Metrics"), new HorizontalLayoutData(1, 1));
+	    
 	    BorderLayoutContainer parent = new BorderLayoutContainer();
 	    parent.setBorders(true);
 	
-	    BorderLayoutData northData = new BorderLayoutData(250);
-	    // northData.setMargins(new Margins(5));
-	    northData.setCollapsible(true);
-	    northData.setSplit(true);
+	    BorderLayoutData controlData = new BorderLayoutData(250);
+	    controlData.setCollapsible(true);
+	    controlData.setSplit(true);
 	    
 	    MarginData centerData = new MarginData();
-		parent.setNorthWidget( metricControls, northData );
+		parent.setWestWidget( metricControls, controlData );
 	    parent.setCenterWidget( chartListPanel, centerData );
 	    
 	    return parent;
