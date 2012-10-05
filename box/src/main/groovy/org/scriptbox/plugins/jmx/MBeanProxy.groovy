@@ -3,7 +3,7 @@ package org.scriptbox.plugins.jmx;
 import javax.management.Attribute
 import javax.management.ObjectName
 
-import org.scriptbox.box.plugins.jmx.JmxConnection
+import org.scriptbox.box.jmx.conn.JmxConnection
 
 /**
  * This object is returned from an mbean() call. It allows you to declare an mbean method invocation in a 

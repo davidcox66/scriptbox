@@ -1,4 +1,4 @@
-package org.scriptbox.box.plugins.jmx;
+package org.scriptbox.panopticon.jmx;
 
 import org.scriptbox.box.inject.Injector;
 

@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.scriptbox.box.plugins.jmx.HostPort;
+import org.scriptbox.box.jmx.conn.HostPort;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.common.error.ExceptionHelper;
@@ -70,11 +70,12 @@ public class BoxCliHelper {
 			"    {\n" +
 			"        --status\n" +
 			"        --createContext <language> <contextName>\n" +
-			"        --startContext <name> <args...>\n" +
-			"        --stopContext <name>\n" +
-			"        --shutdownContext <name>\n" +
+			"        --startContext <contextName> <args...>\n" +
+			"        --stopContext <contextName>\n" +
+			"        --shutdownContext <contextName>\n" +
 			"        --shutdownAllContexts\n" +
-			"        --loadScript <contextName> <scriptName> <script> <args...>\n" + 
+			"        --loadScript <contextName> <scriptName> <scriptFile> <args...>\n" + 
+			"        --startScript <language> <contextName> <scriptName> <script> <args...>\n" + 
 			"    }" );
 		System.exit( 1 );
 	}
@@ -138,6 +139,22 @@ public class BoxCliHelper {
 			return forEachAgent( "Loading script", "Script loaded", new ParameterizedRunnable<Agent>() {
 				public void run( Agent agent ) throws Exception {
 					agent.box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), arguments  );
+				}
+			} );
+		}
+		else if( cmd.consumeArgWithMinParameters("startScript",4) ) {
+			cmd.checkUnusedArgs();
+			List<String> parameters = cmd.getParameters();
+			final String language = parameters.get(0);
+			final String contextName = parameters.get(1);
+			final String scriptName = parameters.get(2);
+			final String fileName = parameters.get(3);
+			final List<String> arguments = parameters.subList(4, parameters.size());
+			return forEachAgent( "Starting script", "Script started", new ParameterizedRunnable<Agent>() {
+				public void run( Agent agent ) throws Exception {
+					agent.box.createContext( language, contextName );
+					agent.box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), arguments  );
+					agent.box.startContext( contextName, arguments );
 				}
 			} );
 		}

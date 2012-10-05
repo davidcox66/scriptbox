@@ -10,15 +10,19 @@ import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.container.Lookup;
 import org.scriptbox.box.controls.BoxService;
-import org.scriptbox.box.events.BoxInvocationContext;
 import org.scriptbox.box.events.BoxContextListener;
+import org.scriptbox.box.events.BoxInvocationContext;
 import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ActionGroovyInjector implements ActionInjector, BoxContextListener {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( ActionGroovyInjector.class );
+	
 	private static final String SERVICE_KEY = "action.service";
 	private static final String SCRIPT_KEY = "action.script";
 	
@@ -89,12 +93,15 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 				actionScript.start( threadCount );
 			}
 			public void shutdown() throws Exception {
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "shutdown: script=" + actionScript ); }
 				actionScript.shutdown();
 			}
 			public void stop() throws Exception {
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "stop: script=" + actionScript ); }
 				actionScript.stop();
 			}
 			public String status() throws Exception {
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "status: script=" + actionScript ); }
 				return actionScript.toString();
 			}
 		});

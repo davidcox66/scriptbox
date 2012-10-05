@@ -1,4 +1,4 @@
-package org.scriptbox.box.plugins.jmx;
+package org.scriptbox.panopticon.jmx;
 
 import java.util.Set;
 
@@ -6,7 +6,8 @@ import javax.management.ObjectName;
 
 import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
-import org.scriptbox.box.plugins.jmx.proc.JmxProcess;
+import org.scriptbox.box.jmx.conn.JmxConnection;
+import org.scriptbox.box.jmx.proc.JmxProcess;
 import org.scriptbox.plugins.jmx.MBeanProxy;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 

@@ -28,8 +28,8 @@
 			p:plugin-ref="run" />
 		<bean name="quartzGroovyInjector" class="org.scriptbox.box.plugins.quartz.QuartzGroovyInjector" 
 			p:plugin-ref="quartz" />
-		<bean name="jmxGroovyInjector" class="org.scriptbox.box.plugins.jmx.JmxGroovyInjector" 
-			p:plugin-ref="jmx" />
+		<bean name="jmxGroovyInjector" class="org.scriptbox.panopticon.jmx.JmxGroovyInjector" 
+			p:connections-ref="jmxConnections" />
 	</conditional:dependency>
 	
     <bean name="quartzListeners" class="org.scriptbox.util.spring.context.BeanListFactoryBean" 
@@ -38,14 +38,13 @@
     <bean name="run" class="org.scriptbox.box.plugins.run.RunPlugin" />
     <bean name="quartz" class="org.scriptbox.box.plugins.quartz.QuartzPlugin" 
     	p:listeners-ref="quartzListeners" />
-    <bean name="jmx" class="org.scriptbox.box.plugins.jmx.JmxPlugin" 
-    	p:connections-ref="jmxConnections" />
+    <bean name="jmx" class="org.scriptbox.panopticon.jmx.JmxPlugin" />
    
-    <bean name="vmJmxConnectionBuilder" class="org.scriptbox.box.plugins.jmx.VmJmxConnectionBuilder" />
-    <bean name="jmxConnections" class="org.scriptbox.box.plugins.jmx.JmxConnections"
+    <bean name="vmJmxConnectionBuilder" class="org.scriptbox.box.jmx.vm.VmJmxConnectionBuilder" />
+    <bean name="jmxConnections" class="org.scriptbox.box.jmx.conn.JmxConnections"
     	p:builder-ref="vmJmxConnectionBuilder" />
   
-	<bean name="monitorImpl" class="org.scriptbox.box.remoting.BoxImpl" init-method="start"
+	<bean name="monitorImpl" class="org.scriptbox.box.remoting.BoxWithServices" init-method="start"
 		p:box-ref="box" />
 
 	<bean id="serviceErrorHandler" class="org.scriptbox.util.spring.aop.ServiceErrorHandler" />
@@ -95,15 +94,15 @@
     </bean>
 
 	<!-- 
-  	<bean name="store" class="org.scriptbox.box.plugins.jmx.capture.CsvCaptureStore"
+  	<bean name="store" class="org.scriptbox.panopticon.jmx.capture.CsvCaptureStore"
   		p:instance="local"
   		p:path="/tmp/metrics.csv" />
   	-->
 
-	<bean name="nameSplitter" class="org.scriptbox.panopticon.store.PatternNameSplitter"  	
+	<bean name="nameSplitter" class="org.scriptbox.panopticon.capture.PatternNameSplitter"  	
 		p:pattern="," />
 		
-    <bean name="store" class="org.scriptbox.panopticon.store.CassandraCaptureStore"
+    <bean name="store" class="org.scriptbox.panopticon.capture.CassandraCaptureStore"
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
     	p:instance="${metrics.instance}" 

@@ -10,4 +10,8 @@ public class ActionPlugin extends BoxContextInjectingListener {
 		setInjectors( context.getBox().getInjectorsOfType(ActionInjector.class) );
 		super.contextCreated( context );
 	}
+	@Override
+	public void contextShutdown(BoxContext context) throws Exception {
+		super.contextShutdown( context );
+	}
 }

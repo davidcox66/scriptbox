@@ -1,4 +1,4 @@
-package org.scriptbox.box.plugins.jmx;
+package org.scriptbox.panopticon.jmx;
 
 import java.rmi.ConnectException;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import javax.management.QueryExp;
 
 import org.scriptbox.box.exec.AbstractExecBlock;
 import org.scriptbox.box.exec.ExecContext;
-import org.scriptbox.box.plugins.jmx.capture.JmxCapture;
-import org.scriptbox.box.plugins.jmx.proc.JmxProcess;
+import org.scriptbox.box.jmx.conn.JmxConnection;
+import org.scriptbox.box.jmx.proc.JmxProcess;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

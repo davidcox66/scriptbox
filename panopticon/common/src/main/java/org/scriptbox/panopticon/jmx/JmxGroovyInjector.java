@@ -1,4 +1,4 @@
-package org.scriptbox.box.plugins.jmx;
+package org.scriptbox.panopticon.jmx;
 
 import groovy.lang.Closure;
 
@@ -15,11 +15,11 @@ import org.scriptbox.box.exec.ExecBlock;
 import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
-import org.scriptbox.box.plugins.jmx.capture.CaptureContext;
-import org.scriptbox.box.plugins.jmx.capture.CaptureResult;
-import org.scriptbox.box.plugins.jmx.capture.JmxCapture;
-import org.scriptbox.box.plugins.jmx.proc.JmxLocalProcessProvider;
-import org.scriptbox.box.plugins.jmx.proc.JmxRemoteProcessProvider;
+import org.scriptbox.box.jmx.conn.JmxConnections;
+import org.scriptbox.box.jmx.proc.JmxLocalProcessProvider;
+import org.scriptbox.box.jmx.proc.JmxRemoteProcessProvider;
+import org.scriptbox.panopticon.capture.CaptureContext;
+import org.scriptbox.panopticon.capture.CaptureResult;
 import org.scriptbox.plugins.jmx.MBeanProxy;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.scriptbox.util.common.os.proc.ProcessStatus;
@@ -31,14 +31,14 @@ public class JmxGroovyInjector implements JmxInjector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( JmxGroovyInjector.class );
 	
-	private JmxPlugin plugin;
+	private JmxConnections connections;
 	
-	public JmxPlugin getPlugin() {
-		return plugin;
+	public JmxConnections getConnections() {
+		return connections;
 	}
 
-	public void setPlugin(JmxPlugin plugin) {
-		this.plugin = plugin;
+	public void setConnections(JmxConnections connections) {
+		this.connections = connections;
 	}
 
 	@Override
@@ -71,11 +71,11 @@ public class JmxGroovyInjector implements JmxInjector {
 			};
 		}
 		
-		add( closure, new JmxLocalProcessProvider(plugin, name, finder) );
+		add( closure, new JmxLocalProcessProvider(connections, name, finder) );
 	}
 	
 	public void remote( String name, String host, int port, Closure closure ) throws Exception {
-		add( closure, new JmxRemoteProcessProvider(plugin, name, host, port) );
+		add( closure, new JmxRemoteProcessProvider(connections, name, host, port) );
 	}
 	
 	public void mbeans( String objectName, Closure closure ) throws Exception {
