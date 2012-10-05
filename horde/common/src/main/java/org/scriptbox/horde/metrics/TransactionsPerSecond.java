@@ -32,7 +32,7 @@ public class TransactionsPerSecond extends ActionMetric {
         long now = System.currentTimeMillis();
         try {
         	if( lastChecked > 0 ) {
-	        	float divisor = (now - lastChecked) / 1000;
+	        	double divisor = (now - lastChecked) / 1000;
 	            return divisor > 0 ? (int)(transactionCount / divisor) : 0;
         	}
         	else {

@@ -2,11 +2,8 @@ package org.scriptbox.ui.client;
 
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
-import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -16,74 +13,63 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
+import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.container.Viewport;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuBar;
+import com.sencha.gxt.widget.core.client.menu.MenuBarItem;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 public class PanopticonUI implements IsWidget, EntryPoint {
 
 	private static final Logger logger = Logger.getLogger("PanopticonUI");
 
-	private MetricListPanel listPanel;
-	private MetricTreePanel treePanel;
-	private ChartListPanel chartListPanel;
+	private CardLayoutContainer cards;
+	private ChartView chartView;
+	private Menu viewMenu ;
 	private MetricTreeGWTInterfaceAsync service; 
 	
 	@Override
 	public Widget asWidget() {
-		HorizontalLayoutContainer metricControls = new HorizontalLayoutContainer();
-		
-		metricControls.add(wrapContent(listPanel,"Trees"), new HorizontalLayoutData(250, 1));
-	    metricControls.add(wrapContent(treePanel,"Metrics"), new HorizontalLayoutData(1, 1));
-		
 		VerticalLayoutContainer parent = new VerticalLayoutContainer();
-		parent.add(metricControls, new VerticalLayoutData(1, 250));
-	    parent.add(chartListPanel, new VerticalLayoutData(1, 1) );
-
-	    Viewport viewport = new Viewport();
-	    viewport.add( parent );
-		return viewport;
+		MenuBar tools = new MenuBar();
+		
+		viewMenu = new Menu();
+		tools.add( new MenuBarItem("View", viewMenu) );
+		
+		cards = new CardLayoutContainer();	
+		parent.add( tools, new VerticalLayoutData(1,-1) );
+		parent.add( cards, new VerticalLayoutData(1,1) );
+		
+		buildViewItem( "Charts", chartView.asWidget() );
+		buildViewItem( "Agents", new ContentPanel() );
+		buildViewItem( "Maintenance", new ContentPanel() );
+		
+		return parent;
+	    
 	}
 
+	private void buildViewItem( String label, final Widget view ) {
+		cards.add( view );
+		MenuItem agentsItem = new MenuItem( label );
+		viewMenu.add( agentsItem );
+		agentsItem.addSelectionHandler( new SelectionHandler<Item>() {
+			public void onSelection( SelectionEvent<Item> event ) {
+				cards.setActiveWidget( view );
+			}
+		} );
+		
+	}
 	public void onModuleLoad() {
 		service = GWT.create(MetricTreeGWTInterface.class);
+		chartView = new ChartView( service );
+		chartView.load();
 		
-		listPanel = new MetricListPanel( service );
-		treePanel = new MetricTreePanel( service );
-		chartListPanel = new ChartListPanel( service );
-		
-		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
-	        @Override
-	        public void onSelection(SelectionEvent<MetricTreeDto> event) {
-        	  MetricTreeDto item = event.getSelectedItem();
-        	  logger.info( "Loading tree");
-        	  treePanel.load( item );
-	        }
-	    });		
-		
-		treePanel.addSelectionHandler(new SelectionHandler<MetricTreeNodeDto>() {
-	        @Override
-	        public void onSelection(SelectionEvent<MetricTreeNodeDto> event) {
-        	  MetricTreeNodeDto item = event.getSelectedItem();
-	          if ( !(item instanceof MetricTreeParentNodeDto) ) {
-	        	  logger.info( "Loadding metrics");
-	        	  chartListPanel.load( item );
-	          }
-	        }
-	    });		
-		
-		listPanel.load();
-		
-		RootPanel.get().add(asWidget());
-	}
-	
-	private ContentPanel wrapContent( Widget widget, String title ) {
-		ContentPanel content = new ContentPanel();
-		content.setHeadingText( title );
-		content.add( widget );
-		return content;
-		
+	    Viewport viewport = new Viewport();
+	    viewport.add( asWidget() );
+		RootPanel.get().add( viewport );
 	}
 }
