@@ -2,9 +2,10 @@ package org.scriptbox.metrics.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class MetricResolution implements Serializable {
+public class MetricResolution implements Serializable, Comparable<MetricResolution> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -16,7 +17,8 @@ public class MetricResolution implements Serializable {
 		for( int second : seconds ) {
 			ret.add( new MetricResolution(second) );
 		}
-		return ret;
+		Collections.sort( ret );
+		return Collections.unmodifiableList( ret );
 	}
 	
 	public MetricResolution( int seconds ) {
@@ -36,6 +38,10 @@ public class MetricResolution implements Serializable {
 		return ttl;
 	}
 
+	public int compareTo(MetricResolution o) {
+		return getSeconds() - o.getSeconds();
+	}
+	 
 	@Override
 	public int hashCode() {
 		final int prime = 31;

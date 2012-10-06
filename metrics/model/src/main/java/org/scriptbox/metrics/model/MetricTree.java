@@ -1,6 +1,10 @@
 package org.scriptbox.metrics.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 public abstract class MetricTree {
 
@@ -8,8 +12,17 @@ public abstract class MetricTree {
 	protected List<MetricResolution> resolutions;
 	
 	public MetricTree( String name, List<MetricResolution> resolutions ) {
+		if( StringUtils.isEmpty(name) ) {
+			throw new IllegalArgumentException( "Name cannot be null");
+		}
+		if( resolutions == null || resolutions.size() == 0 ) {
+			throw new IllegalArgumentException( "Resolutions cannot be empty");
+		}
+		
 		this.name = name;
-		this.resolutions = resolutions;
+		List<MetricResolution> res = new ArrayList<MetricResolution>(resolutions);
+		Collections.sort( res );
+		this.resolutions = Collections.unmodifiableList( res );
 	}
 
 	public abstract MetricTreeNode getRoot(); 
@@ -31,15 +44,7 @@ public abstract class MetricTree {
 	}
 	
 	public MetricResolution getFinestResolution() {
-		int min = Integer.MAX_VALUE;
-		MetricResolution ret = null;
-		for( MetricResolution res : resolutions ) {
-			if( res.getSeconds() < min ) {
-				ret = res;
-				min = res.getSeconds();
-			}
-		}
-		return ret;
+		return resolutions.get(0);
 	}
 	
 	public List<MetricResolution> getResolutions() {

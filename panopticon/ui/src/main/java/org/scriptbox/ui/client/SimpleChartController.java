@@ -146,7 +146,7 @@ public class SimpleChartController {
 		timeAxis.setField(metricAccess.date());
 		timeAxis.setStartDate(new Date());
 		timeAxis.setEndDate(new Date());
-		// timeAxis.setLabelOverlapHiding( true );
+		timeAxis.setLabelOverlapHiding( true );
 		
 		TextSprite textSprite = new TextSprite();
 	    textSprite.setRotation(315);

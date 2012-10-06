@@ -104,17 +104,17 @@ public class CassandraStoreTest {
 		
 		long millis = now;
 		Metric mv = metrics.get(0);
-		Assert.assertEquals( mv.getValue(), 1.0F, 0 );
+		Assert.assertEquals( 1.0F, mv.getValue(), 0 );
 		Assert.assertEquals( mv.getMillis(), millis );
 		millis += 60*1000;
 		
 		mv = metrics.get(1);
-		Assert.assertEquals( mv.getValue(), 2.0F, 0 );
+		Assert.assertEquals( 2.0F, mv.getValue(), 0 );
 		Assert.assertEquals( mv.getMillis(), millis );
 		millis += 60*1000;
 		
 		mv = metrics.get(2);
-		Assert.assertEquals( mv.getValue(), 3.0F, 0 );
+		Assert.assertEquals( 3.0F, mv.getValue(), 0 );
 		Assert.assertEquals( mv.getMillis(), millis );
 	}
 }

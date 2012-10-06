@@ -25,7 +25,15 @@ public class CassandraMetricSequence extends MetricSequence {
 	
 	CassandraMetricTreeNode node;
 
-	private Map<Integer,Metric> lastSavedValues = new HashMap<Integer,Metric>();
+	static class LastSaved
+	{
+		long millis;
+		float value = Float.NaN;
+		float accumulator;
+		int count;
+	}
+	
+	private Map<Integer,LastSaved> lastSavedValues = new HashMap<Integer,LastSaved>();
 	
 	public CassandraMetricSequence( CassandraMetricTreeNode node ) {
 		this.node = node;
@@ -37,16 +45,28 @@ public class CassandraMetricSequence extends MetricSequence {
 		ColumnFamilyTemplate<String,Long> tmpl = node.getStore().metricSequenceTemplate;
 		for( MetricResolution res : node.tree.getResolutions() ) {
 			int resm = res.getSeconds() * 1000;
-			Metric lastSaved = lastSavedValues.get( resm );
-			if( lastSaved == null || 
-				(lastSaved.getValue() != metric.getValue() &&
-				(metric.getMillis() - resm) > lastSaved.getMillis()) ) 
+			LastSaved lastSaved = lastSavedValues.get( resm );
+			if( lastSaved == null ) {
+				lastSaved = new LastSaved();
+				lastSavedValues.put( resm, lastSaved );
+			}
+			lastSaved.accumulator += metric.getValue();
+			lastSaved.count++;
+			
+			if( lastSaved.value != metric.getValue() && (metric.getMillis() - resm) > lastSaved.millis ) 
 			{
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: saving metric=" + metric ); }
+				float average = lastSaved.count == 1 ? lastSaved.accumulator : (lastSaved.accumulator / lastSaved.count);
+				if( LOGGER.isDebugEnabled() ) { 
+					LOGGER.debug( "record: saving metric=" + metric + ", count=" + lastSaved.count + ", average=" + average); 
+				}
 				ColumnFamilyUpdater<String,Long> updater = tmpl.createUpdater(node.getId()+","+res.getSeconds());
-				updater.setFloat(new Long(metric.getMillis()), metric.getValue());
+				updater.setFloat(new Long(metric.getMillis()), average);
 				tmpl.update( updater );
-				lastSavedValues.put( resm, metric );
+				
+				lastSaved.accumulator = 0;
+				lastSaved.count = 0;
+				lastSaved.millis = metric.getMillis();
+				lastSaved.value = metric.getValue();
 			}
 			else {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: skipping metric=" + metric ); }
@@ -93,8 +113,6 @@ public class CassandraMetricSequence extends MetricSequence {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((lastSavedValues == null) ? 0 : lastSavedValues.hashCode());
 		result = prime * result + ((node == null) ? 0 : node.hashCode());
 		return result;
 	}
@@ -108,11 +126,6 @@ public class CassandraMetricSequence extends MetricSequence {
 		if (getClass() != obj.getClass())
 			return false;
 		CassandraMetricSequence other = (CassandraMetricSequence) obj;
-		if (lastSavedValues == null) {
-			if (other.lastSavedValues != null)
-				return false;
-		} else if (!lastSavedValues.equals(other.lastSavedValues))
-			return false;
 		if (node == null) {
 			if (other.node != null)
 				return false;
