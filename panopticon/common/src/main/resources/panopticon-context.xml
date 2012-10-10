@@ -100,7 +100,7 @@
   	-->
 
 	<bean name="nameSplitter" class="org.scriptbox.panopticon.capture.PatternNameSplitter"  	
-		p:pattern="," />
+		p:pattern="[,.]" />
 		
     <bean name="store" class="org.scriptbox.panopticon.capture.CassandraCaptureStore"
     	p:cluster-ref="cluster"

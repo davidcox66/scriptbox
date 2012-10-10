@@ -26,11 +26,23 @@ public abstract class MetricTree {
 	}
 
 	public abstract MetricTreeNode getRoot(); 
+	public abstract void delete();
 	
 	public String getName() {
 		return name;
 	}
 
+	public void visitNodes( MetricTreeVisitor visitor ) {
+		MetricTreeNode root = getRoot();
+		visitNodeImpl( root, visitor );
+	}
+	
+	private void visitNodeImpl( MetricTreeNode node, MetricTreeVisitor visitor ) {
+		visitor.visit( node );
+		for( MetricTreeNode child : node.getChildren().values() ) {
+			visitNodeImpl( child, visitor );
+		}
+	}
 	public MetricResolution getNearestResolution( int seconds ) {
 		MetricResolution best = null;
 		for( MetricResolution res : resolutions ) {

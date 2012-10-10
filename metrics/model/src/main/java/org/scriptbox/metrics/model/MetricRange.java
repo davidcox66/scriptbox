@@ -30,45 +30,8 @@ public abstract class MetricRange {
 		return end;
 	}
 
-	public abstract MetricResolution getResolution(); 
-	public abstract MetricSequence getSequence(); 
-	public abstract List<Metric> getMetrics();
-	
-	public Iterator<Metric> getConstantResolutionIterator() {
-		final List<Metric> metrics = getMetrics();
-		return new Iterator<Metric>() {
-			long cstart = start;
-			int res = getResolution().getSeconds() * 1000; 
-			Metric last = null;
-			Metric pending = null;
-			Iterator<Metric> iter = metrics.iterator();
-			public boolean hasNext() {
-				return iter.hasNext() || pending != null;
-			}
-			public Metric next() {
-				Metric ret = null;
-				long cend = cstart + res;
-				if( last == null ) {
-					pending = last = iter.next();
-				}
-				if( pending == null ) {
-					pending = iter.next();
-				}
-				if( pending.isBetween(cstart, cend) ) {
-					ret = pending;
-					pending = null;
-				}
-				else {
-					ret = new Metric(cstart, last.getValue() );
-				}
-				cstart += ret.getMillis();
-				return ret;
-			}
-			public void remove() {
-				throw new UnsupportedOperationException("remove() not supported");
-			}
-		};
-	}
+	public abstract List<Metric> getMetrics( int resolution ); 
+	public abstract Iterator<Metric> getIterator( final int resolution ); 
 
 	@Override
 	public int hashCode() {

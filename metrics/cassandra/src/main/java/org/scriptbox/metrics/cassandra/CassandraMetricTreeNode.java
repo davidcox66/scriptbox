@@ -54,7 +54,7 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 		}
 		return child;
 	}
-	
+
 	void persist() {
 		String id = getId();
 		if( StringUtils.isEmpty(id) ) {

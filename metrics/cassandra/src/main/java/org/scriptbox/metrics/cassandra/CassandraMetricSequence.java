@@ -2,14 +2,13 @@ package org.scriptbox.metrics.cassandra;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
-import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
+import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
+import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 
 import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
@@ -23,33 +22,38 @@ public class CassandraMetricSequence extends MetricSequence {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( CassandraMetricSequence.class );
 	
-	CassandraMetricTreeNode node;
-
 	static class LastSaved
 	{
 		long millis;
 		float value = Float.NaN;
 		float accumulator;
 		int count;
+		MetricResolution resolution;
 	}
 	
-	private Map<Integer,LastSaved> lastSavedValues = new HashMap<Integer,LastSaved>();
+	CassandraMetricTreeNode node;
+	private LastSaved[] lastSavedValues;
 	
 	public CassandraMetricSequence( CassandraMetricTreeNode node ) {
 		this.node = node;
+		List<MetricResolution> resolutions = node.tree.getResolutions();
+		lastSavedValues = new LastSaved[ resolutions.size() ];
+		int i=0;
+		for( MetricResolution res : resolutions ) {
+			LastSaved lastSaved = new LastSaved();
+			lastSaved.resolution = res;
+			lastSavedValues[i++] = lastSaved;
+		}
 	}
 	
 	public void record( Metric metric ) {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: metric=" + metric ); }
 		
 		ColumnFamilyTemplate<String,Long> tmpl = node.getStore().metricSequenceTemplate;
-		for( MetricResolution res : node.tree.getResolutions() ) {
-			int resm = res.getSeconds() * 1000;
-			LastSaved lastSaved = lastSavedValues.get( resm );
-			if( lastSaved == null ) {
-				lastSaved = new LastSaved();
-				lastSavedValues.put( resm, lastSaved );
-			}
+		for( LastSaved lastSaved : lastSavedValues ) {
+			int seconds = lastSaved.resolution.getSeconds();
+			int resm = seconds * 1000;
+			
 			lastSaved.accumulator += metric.getValue();
 			lastSaved.count++;
 			
@@ -59,7 +63,7 @@ public class CassandraMetricSequence extends MetricSequence {
 				if( LOGGER.isDebugEnabled() ) { 
 					LOGGER.debug( "record: saving metric=" + metric + ", count=" + lastSaved.count + ", average=" + average); 
 				}
-				ColumnFamilyUpdater<String,Long> updater = tmpl.createUpdater(node.getId()+","+res.getSeconds());
+				ColumnFamilyUpdater<String,Long> updater = tmpl.createUpdater(node.getId()+","+seconds);
 				updater.setFloat(new Long(metric.getMillis()), average);
 				tmpl.update( updater );
 				
@@ -74,7 +78,7 @@ public class CassandraMetricSequence extends MetricSequence {
 		}
 	}
 	
-	public DateRange getDateRange() {
+	public DateRange getFullDateRange() {
 		String compositeId = node.getId() + "," + node.tree.getFinestResolution().getSeconds();
 		Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
 		Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
@@ -98,16 +102,18 @@ public class CassandraMetricSequence extends MetricSequence {
 	}
 	
 	@Override
-	public MetricRange getRange(long start, long end, int resolution) {
-		MetricResolution res = node.tree.getResolutionEx( resolution ); 
-		return new CassandraMetricRange(this, start, end, res );
+	public MetricRange<? extends Metric> getRange(long start, long end) {
+		return new CassandraMetricRange<Metric>(this, start, end );
 	}
 
 	@Override
-	public void deleteAll() {
-		// TODO Auto-generated method stub
-
+	public void delete() {
+		List<MetricResolution> resolutions = node.tree.getResolutions();
+		for( MetricResolution res : resolutions ) {
+			node.getStore().metricSequenceTemplate.deleteRow( node.getId() + "," + res.getSeconds() );
+		}
 	}
+	
 
 	@Override
 	public int hashCode() {

@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.metrics.model.MetricTreeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,14 @@ public class CassandraMetricTree extends MetricTree {
 	}
 	
 	public void delete() {
+		visitNodes( new MetricTreeVisitor() {
+			public void visit( MetricTreeNode node ) {
+				if( node.isSequenceAvailable() ) {
+					node.getMetricSequence().delete();
+				}
+			}
+		} );
+		store.metricTreeTemplate.deleteRow( name );
 		store.metricTreeTemplate.deleteColumn( CassandraMetricStore.ALL_NAMES_KEY, name );
 	}
 	
