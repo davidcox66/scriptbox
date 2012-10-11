@@ -4,7 +4,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class MetricRange {
+import org.scriptbox.metrics.query.MetricProvider;
+
+public abstract class MetricRange implements MetricProvider {
 
 	private String description;
 	private long start;
@@ -36,6 +38,7 @@ public abstract class MetricRange {
 		return end;
 	}
 
+	// public abstract boolean isTransient();
 	public abstract List<Metric> getMetrics( int resolution ); 
 	public abstract Iterator<Metric> getIterator( final int resolution );
 

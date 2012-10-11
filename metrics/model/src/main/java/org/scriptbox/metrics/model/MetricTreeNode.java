@@ -2,9 +2,12 @@ package org.scriptbox.metrics.model;
 
 import java.util.Map;
 
-public interface MetricTreeNode {
+import org.scriptbox.metrics.query.MetricProvider;
+
+public interface MetricTreeNode extends MetricProvider {
 
 	public String getId();
+	public String getId( int resolution );
 	public String getName();
 	public String getType();
     public MetricTreeNode getParent();

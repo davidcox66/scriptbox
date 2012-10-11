@@ -15,7 +15,7 @@ public abstract class UnaryQueryExp implements MetricQueryExp {
 		this.child = child;
 	}
 
-	public Object evaluate(MetricQueryContext ctx) {
+	public Object evaluate(MetricQueryContext ctx) throws Exception {
 		Object result = child.evaluate(ctx);
 		Object ret = process(result, ctx);
 		if (LOGGER.isTraceEnabled()) {

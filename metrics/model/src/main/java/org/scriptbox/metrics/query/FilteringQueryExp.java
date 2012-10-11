@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.scriptbox.metrics.model.MetricRange;
 
@@ -13,40 +14,45 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	  private MetricQueryExp child; 
 	  private int count;
 
+	  public static class CriticalValue 
+	  {
+		  public CriticalValue( MetricProvider provider, float value ) {
+			  this.provider = provider;
+			  this.value = value;
+		  }
+		  
+		  public MetricProvider provider;
+		  public float value;
+	  }
+	  
 	  public FilteringQueryExp( String operator, int count, MetricQueryExp child ) {
 	    this.operator = operator;
 	    this.count = count;
 	    this.child = child;
 	  }
 	  
-	  abstract double findCriticalValue( MetricRange range );
-	  abstract void sort( List<SourceMetricCriticalValue> cvs );
+	  abstract float filter( MetricRange range );
+	  abstract void sort( List<CriticalValue> cvs );
 	  
-	  public Object evaluate( MetricQueryContext ctx ) {
-		  
-		  MetricTreeNode node = child.evaluate()
-	      Map<SourceMetric,List<MetricValue>> metrics = ValueGrouper.toValues( child.evaluate(ctx), ctx );
-	      List<SourceMetricCriticalValue> cvs = new ArrayList<SourceMetricCriticalValue>();
-	      metrics.each{ SourceMetric metric, List<MetricValue> values ->
-	          double cv = findCriticalValue( values );
-	          cvs.add( new SourceMetricCriticalValue(metric:metric,value:cv) ) ;
+	  public Object evaluate( MetricQueryContext ctx ) throws Exception {
+		 
+		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.evaluateProviders(ctx, child);
+	      List<CriticalValue> cvs = new ArrayList<CriticalValue>();
+	      for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : metrics.entrySet() ) {
+	    	  float cv = filter( entry.getValue() );
+	    	  cvs.add( new CriticalValue(entry.getKey(),cv) );
 	      }
 	      sort( cvs );
 	      int countOrLast = Math.min(count,cvs.size()) - 1;
-	      return new HashSet<SourceMetric>(cvs[0..countOrLast].collect{ SourceMetricCriticalValue  cv -> cv.metric } );
+	      Set<MetricProvider> ret = new HashSet<MetricProvider>(countOrLast);
+	      for( int i=0 ; i < countOrLast ; i++ ) {
+	    	  ret.add( cvs.get(i).provider );
+	      }
+	      return ret;
 	  }
-	  String toString() {
-	    return "${name}(${child})";
+	  
+	  public String toString() {
+	    return operator + "(" + child + ")";
 	  }
-	}
-	
-	
-	
-	
-	@Override
-	public Object evaluate(MetricQueryContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
+	

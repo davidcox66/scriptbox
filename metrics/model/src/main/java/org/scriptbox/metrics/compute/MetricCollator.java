@@ -1,6 +1,7 @@
 package org.scriptbox.metrics.compute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -19,9 +20,9 @@ public class MetricCollator {
 	
 	private String description;
 	private int seconds;
-	private List<MetricRange> ranges;
+	private Collection<? extends MetricRange> ranges;
 	
-	public MetricCollator( String description, int seconds, List<MetricRange> ranges ) {
+	public MetricCollator( String description, int seconds, Collection<? extends MetricRange> ranges ) {
 		this.description = description;
 		this.seconds = seconds;
 		this.ranges = ranges;

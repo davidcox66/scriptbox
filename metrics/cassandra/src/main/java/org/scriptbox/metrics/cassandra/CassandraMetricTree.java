@@ -13,7 +13,6 @@ import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.SuperCfUpdater;
 
 import org.apache.commons.lang.StringUtils;
-import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
@@ -114,10 +113,6 @@ public class CassandraMetricTree extends MetricTree {
 		store.metricTreeTemplate.deleteColumn( CassandraMetricStore.ALL_NAMES_KEY, name );
 	}
 	
-	public Map<MetricTreeNode,MetricRange> getRanges( Collection<MetricTreeNode> nodes, long start, long end ) {
-		
-	}
-
 	void persist() {
 		if( StringUtils.isEmpty(name) ) {
 			throw new RuntimeException( "Tree name cannot be null");

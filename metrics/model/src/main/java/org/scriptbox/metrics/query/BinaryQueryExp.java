@@ -18,7 +18,7 @@ public abstract class BinaryQueryExp implements MetricQueryExp {
 		this.rhs = rhs;
 	}
 
-	public Object evaluate(MetricQueryContext ctx) {
+	public Object evaluate(MetricQueryContext ctx) throws Exception {
 		Object lresult = lhs.evaluate(ctx);
 		Object rresult = rhs.evaluate(ctx);
 		Object ret = process(lresult, rresult, ctx);

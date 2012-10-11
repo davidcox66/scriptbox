@@ -13,12 +13,10 @@ public class TreePathQueryExp implements MetricQueryExp {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger( TreePathQueryExp.class );
 	
-	  private String operator;
 	  private String type;
 	  private Pattern pattern;
 	  
-	  public TreePathQueryExp( String operator, String type, Pattern pattern ) {
-	    this.operator = operator;
+	  public TreePathQueryExp( String type, Pattern pattern ) {
 	    this.type = type;
 	    this.pattern = pattern;
 	  }
@@ -28,26 +26,25 @@ public class TreePathQueryExp implements MetricQueryExp {
 		ctx.getTree().visitNodes( new MetricTreeVisitor() {
 			public boolean visit( MetricTreeNode node ) {
 				if( node.getType().equals(type) && pattern.matcher(node.getName()).matches() ) {
-					addSubtree( node, ret );
+					addLeaves( node, ret );
 					return false;
 				}
 				return true;
 			}
 		} );
-	    if( LOGGER.isTraceEnabled() ) {
-		    LOGGER.trace( "evaluate(type): " + toString() + " result=" + ret );
-	    }
 	    return ret;
 	  }
 	  
-	  private void addSubtree( MetricTreeNode node, Set<MetricTreeNode> nodes ) {
-		  nodes.add( node );
+	  private void addLeaves( MetricTreeNode node, Set<MetricTreeNode> nodes ) {
+		  if( node.isSequenceAvailable() ) {
+			  nodes.add( node );
+		  }
 		  for( MetricTreeNode child : node.getChildren().values() ) {
-			  addSubtree( child, nodes );
+			  addLeaves( child, nodes );
 		  }
 	  }
 	  
 	  public String toString() {
-	    return operator + "(" + pattern + ")";
+	    return type + "(" + pattern + ")";
 	  }
 }

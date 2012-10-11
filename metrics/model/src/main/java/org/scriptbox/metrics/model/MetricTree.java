@@ -29,7 +29,6 @@ public abstract class MetricTree {
 
 	public abstract MetricTreeNode getRoot(); 
 	public abstract void delete();
-	public abstract Map<MetricTreeNode,MetricRange> getRanges( Collection<MetricTreeNode> nodes, long start, long end );
 	
 	public String getName() {
 		return name;

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.MetricQueryContext;
 
 public class ListBackedMetricRange extends MetricRange {
 
@@ -14,12 +15,32 @@ public class ListBackedMetricRange extends MetricRange {
 		super( description, start, end );
 		this.metrics = metrics;
 	}
+
+	public String getName() {
+		return getDescription();
+	}
 	
+	public boolean isPersistent() {
+		return false;
+	}
+
 	@Override
 	public List<Metric> getMetrics(int resolution) {
 		return metrics;
 	}
 
+	public MetricRange getMetrics( MetricQueryContext ctx ) {
+		return this;
+	}
+
+	public String getId( int seconds ) {
+		throw new UnsupportedOperationException( "Not supported");
+	}
+	
+	public int getNearestResolutionSeconds( int seconds ) {
+		return seconds;
+	}
+	
 	@Override
 	public Iterator<Metric> getIterator(int resolution) {
 		return metrics.iterator();

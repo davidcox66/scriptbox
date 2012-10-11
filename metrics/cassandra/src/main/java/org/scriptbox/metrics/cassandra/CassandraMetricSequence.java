@@ -45,7 +45,23 @@ public class CassandraMetricSequence extends MetricSequence {
 			lastSavedValues[i++] = lastSaved;
 		}
 	}
+
+	public String getName() {
+		return node.getName();
+	}
+
+	public String getId( int seconds ) {
+		return node.getId( seconds );
+	}
+
+	public int getNearestResolutionSeconds( int seconds ) {
+		return node.getNearestResolutionSeconds(seconds);
+	}
 	
+	public boolean isPersistent() {
+		return true;
+	}
+
 	public void record( Metric metric ) {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "record: metric=" + metric ); }
 		

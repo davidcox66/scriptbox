@@ -10,12 +10,12 @@ import me.prettyprint.cassandra.service.template.SuperCfUpdater;
 
 import org.apache.commons.lang.StringUtils;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTreeNode;
 import org.scriptbox.metrics.query.MetricQueryContext;
-import org.scriptbox.metrics.query.MetricValueProvider;
 
-public class CassandraMetricTreeNode implements MetricTreeNode, MetricValueProvider {
+public class CassandraMetricTreeNode implements MetricTreeNode {
 
 	private String name;
 	private String type;
@@ -43,8 +43,16 @@ public class CassandraMetricTreeNode implements MetricTreeNode, MetricValueProvi
 		return parent;
 	}
 
-	public MetricRange getValues( MetricQueryContext ctx ) {
-		return getMetricSequence().getValues( ctx );
+	public int getNearestResolutionSeconds( int seconds ) {
+		return tree.getNearestResolution(seconds).getSeconds();
+	}
+	
+	public boolean isPersistent() {
+		return true;
+	}
+
+	public MetricRange getMetrics( MetricQueryContext ctx ) {
+		return getMetricSequence().getMetrics( ctx );
 	}
 	
 	public MetricTreeNode getChild( String name ) {
@@ -99,6 +107,11 @@ public class CassandraMetricTreeNode implements MetricTreeNode, MetricValueProvi
 			id = builder.toString();
 		}
 		return id;
+	}
+
+	public String getId( int seconds ) {
+		MetricResolution resolution = tree.getNearestResolution( seconds );
+		return getId() + "," + resolution.getSeconds();
 	}
 	
 	public boolean isSequenceAvailable() {
