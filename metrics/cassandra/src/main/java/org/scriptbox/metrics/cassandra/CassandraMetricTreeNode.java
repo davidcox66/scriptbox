@@ -9,10 +9,13 @@ import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.SuperCfUpdater;
 
 import org.apache.commons.lang.StringUtils;
+import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.metrics.query.MetricQueryContext;
+import org.scriptbox.metrics.query.MetricValueProvider;
 
-public class CassandraMetricTreeNode implements MetricTreeNode {
+public class CassandraMetricTreeNode implements MetricTreeNode, MetricValueProvider {
 
 	private String name;
 	private String type;
@@ -40,6 +43,10 @@ public class CassandraMetricTreeNode implements MetricTreeNode {
 		return parent;
 	}
 
+	public MetricRange getValues( MetricQueryContext ctx ) {
+		return getMetricSequence().getValues( ctx );
+	}
+	
 	public MetricTreeNode getChild( String name ) {
 		return children.get( name );
 	}

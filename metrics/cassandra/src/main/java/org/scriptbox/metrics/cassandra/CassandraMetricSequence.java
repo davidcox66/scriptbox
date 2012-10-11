@@ -102,8 +102,8 @@ public class CassandraMetricSequence extends MetricSequence {
 	}
 	
 	@Override
-	public MetricRange<? extends Metric> getRange(long start, long end) {
-		return new CassandraMetricRange<Metric>(this, start, end );
+	public MetricRange getRange(long start, long end) {
+		return new CassandraMetricRange(this, start, end );
 	}
 
 	@Override

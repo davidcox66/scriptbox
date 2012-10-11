@@ -68,7 +68,7 @@ public class CassandraMetricRange extends MetricRange {
 	}
 	
 	public CassandraMetricRange( CassandraMetricSequence sequence, long start, long end ) {
-		super( start, end );
+		super( sequence.node.getName(), start, end );
 		this.sequence = sequence;
 	}
 	

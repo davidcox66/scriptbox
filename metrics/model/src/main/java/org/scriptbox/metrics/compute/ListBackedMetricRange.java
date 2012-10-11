@@ -10,8 +10,8 @@ public class ListBackedMetricRange extends MetricRange {
 
 	private List<Metric> metrics;
 	
-	public ListBackedMetricRange( long start, long end, List<Metric> metrics ) {
-		super( start, end );
+	public ListBackedMetricRange( String description, long start, long end, List<Metric> metrics ) {
+		super( description, start, end );
 		this.metrics = metrics;
 	}
 	

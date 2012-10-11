@@ -17,25 +17,38 @@ public class MetricCollator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( MetricCollator.class );
 	
+	private String description;
+	private int seconds;
 	private List<MetricRange> ranges;
 	
-	public MetricCollator( List<MetricRange> ranges ) {
+	public MetricCollator( String description, int seconds, List<MetricRange> ranges ) {
+		this.description = description;
+		this.seconds = seconds;
 		this.ranges = ranges;
 	}
 
-	public MetricRange group( final int seconds, final ParameterizedRunnableWithResult<Metric,List<MetricRange>> closure ) throws Exception {
-		final List<Metric> ret = new ArrayList<Metric>();
-	     
+	public MetricRange group( final ParameterizedRunnableWithResult<Metric,List<MetricRange>> closure ) throws Exception {
+		
 	    // Preload collections to store values from the grouping. We try to reuse these temporary collections
 	    // as much as possible instead of constantly allocating new ones since the given closure will not
 	    // be retaining what we supply it.  
+		final List<MetricRange> rangesByReferenceNumber = new ArrayList<MetricRange>(ranges.size());
 	    final List<List<Metric>> metricsByReferenceNumber = new ArrayList<List<Metric>>(ranges.size());
-	    for( int i=0 ; i < ranges.size() ; i++ ) {
-	    	metricsByReferenceNumber.add( new ArrayList<Metric>() );    
+	    long start = Long.MAX_VALUE;
+	    long end = 0;
+	    
+	    for( MetricRange range : ranges ) {
+	    	start = Math.min(start, range.getStart() );
+	    	end = Math.max(end, range.getEnd() );
+	    }
+	    for( MetricRange range :ranges ) {
+	    	List<Metric> metrics = new ArrayList<Metric>();    
+	    	metricsByReferenceNumber.add( metrics );    
+	    	rangesByReferenceNumber.add( new ListBackedMetricRange(range.getDescription(),start,end,metrics) );
 	    }
 	     
-	    collate( seconds, true, new ParameterizedRunnableWithResult<Metric,MetricRange>() {
-	    	public Metric run( MetricRange range ) {
+	    return collate( true, new ParameterizedRunnableWithResult<Metric,MetricRange>() {
+	    	public Metric run( MetricRange range ) throws Exception {
 	    		Iterator<MetricWithAssociation<Integer>> iter = (Iterator)range.getIterator(seconds);
     			while( iter.hasNext() ) {
     				MetricWithAssociation<Integer> metric = iter.next();
@@ -46,22 +59,18 @@ public class MetricCollator {
 	              	//
 		          	metricsByReferenceNumber.get(metric.getAssociate()).add( metric );
 	          	}
-    			Metric result = closure.run( metricsByReferenceNumber );
-    			if( result != null ) {
-    				ret.add( result ); 
-    			}
+    			Metric result = closure.run( rangesByReferenceNumber );
          
     			// Clear and reuse instead of making GC bear the brunt 
     			for( List<Metric> metrics : metricsByReferenceNumber ) {
     				metrics.clear(); 
     			}
-    			return null; // don't need groupTogether to accumulate any metrics, just return null to not do anything
+    			return result;
 	    	}
       	} );
-      	return ret;		
 	}
 
-	public MetricRange collate( int seconds, boolean associate, ParameterizedRunnableWithResult<Metric,MetricRange> closure ) throws Exception {
+	public MetricRange collate( boolean associate, ParameterizedRunnableWithResult<Metric,MetricRange> closure ) throws Exception {
 
 		final List<Metric> ret = new ArrayList<Metric>();
 		CollatingIterator citer = new CollatingIterator( new Comparator<Metric>() {
@@ -73,7 +82,7 @@ public class MetricCollator {
 		int i=0;
 		for( MetricRange range : ranges ) {
 			Iterator<Metric> iter = range.getIterator( seconds );
-			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i,iter) : iter );
+			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i++,iter) : iter );
 		}
 		
 		final List<Metric> block = new ArrayList<Metric>();
@@ -83,7 +92,7 @@ public class MetricCollator {
 		    long bucket = mv.getMillis() / seconds;     
 		    if( current != 0 && bucket != current ) {
 		    	long millis = current * seconds; 
-		        Metric result = closure.run( new ListBackedMetricRange(millis,millis+seconds*1000,block) );
+		        Metric result = closure.run( new ListBackedMetricRange(null,millis,millis+seconds*1000,block) );
 			    if( LOGGER.isTraceEnabled() ) { 
 			    	Date dt = new Date( millis );
 			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + millis + "), result: " + result + ", block: " + block ); 
@@ -99,7 +108,7 @@ public class MetricCollator {
 		// If any leftover in last chunk
 		if( block.size() > 0 ) {
 			long millis = current * seconds; 
-		    Metric result = closure.run( new ListBackedMetricRange(millis,millis+seconds*1000,block)  );
+		    Metric result = closure.run( new ListBackedMetricRange(null,millis,millis+seconds*1000,block)  );
 		    if( LOGGER.isTraceEnabled() ) { 
 		    	Date dt = new Date( millis );
 		    	LOGGER.trace( "collate: processed bucket: " + dt + "(" + millis + "), result: " + result + ", block: " + block ); 
@@ -109,7 +118,7 @@ public class MetricCollator {
 			}
 		}
 		if( ret.size() > 0 ) {
-			return new ListBackedMetricRange(ret.get(0).getMillis(),ret.get(ret.size()-1).getMillis(), ret); 
+			return new ListBackedMetricRange(description, ret.get(0).getMillis(),ret.get(ret.size()-1).getMillis(), ret); 
 		}
 		return null;
 	}

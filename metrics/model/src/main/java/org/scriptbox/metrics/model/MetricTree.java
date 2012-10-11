@@ -1,8 +1,10 @@
 package org.scriptbox.metrics.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -27,6 +29,7 @@ public abstract class MetricTree {
 
 	public abstract MetricTreeNode getRoot(); 
 	public abstract void delete();
+	public abstract Map<MetricTreeNode,MetricRange> getRanges( Collection<MetricTreeNode> nodes, long start, long end );
 	
 	public String getName() {
 		return name;
@@ -38,9 +41,10 @@ public abstract class MetricTree {
 	}
 	
 	private void visitNodeImpl( MetricTreeNode node, MetricTreeVisitor visitor ) {
-		visitor.visit( node );
-		for( MetricTreeNode child : node.getChildren().values() ) {
-			visitNodeImpl( child, visitor );
+		if( visitor.visit(node) ) {
+			for( MetricTreeNode child : node.getChildren().values() ) {
+				visitNodeImpl( child, visitor );
+			}
 		}
 	}
 	public MetricResolution getNearestResolution( int seconds ) {
