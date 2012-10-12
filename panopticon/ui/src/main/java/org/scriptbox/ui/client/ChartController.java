@@ -23,9 +23,9 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
 
-public class SimpleChartController {
+public class ChartController {
 
-	private static final Logger logger = Logger.getLogger("ChartListPanel");
+	private static final Logger logger = Logger.getLogger("ChartController");
 	
 	// private Timer update;
 
@@ -37,12 +37,12 @@ public class SimpleChartController {
 	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private ListStore<Metric> store;
 	
-	public SimpleChartController( MetricTreeGWTInterfaceAsync service ) {
+	public ChartController( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
 			@Override
 			public void load(MetricQueryDto loadConfig, AsyncCallback<MetricRangeDto> callback) {
-				SimpleChartController.this.service.getMetrics(loadConfig, callback);
+				ChartController.this.service.getMetrics(loadConfig, callback);
 			}
 		};
 

@@ -48,7 +48,7 @@ public class ChartListPanel extends ContentPanel {
 	}
 
 	public void load( final MetricTreeNodeDto node ) {
-		final SimpleChartController controller = new SimpleChartController( service );
+		final ChartController controller = new ChartController( service );
 		enforceChartLimit( 1, null );
 		controller.load( node, new Runnable() {
 			public void run() {

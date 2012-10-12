@@ -28,6 +28,7 @@ import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
+import org.scriptbox.ui.shared.tree.ReportQueryDto;
 import org.scriptbox.util.gwt.server.remote.ExportableService;
 import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.slf4j.Logger;
@@ -162,9 +163,9 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 		return ret;
 	}
 	
-	public MetricReportDto getReport( String treeName, String reportName ) throws Exception {
-		MetricTree tree = getTreeByName( treeName );
-		Report report = getReportByName( reportName );
+	public MetricReportDto getReport( ReportQueryDto query ) throws Exception {
+		MetricTree tree = getTreeByName( query.getTreeName() );
+		Report report = getReportByName( query.getReportName() );
 		
 		MetricReportDto reportDto = new MetricReportDto();
 		for( ReportElement element : report.getElements() ) {
