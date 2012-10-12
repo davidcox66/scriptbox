@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -6,6 +6,9 @@ import java.util.Map;
 import org.scriptbox.metrics.compute.MetricCollator;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 
 public class TotalPerSecondQueryExp implements MetricQueryExp {
@@ -18,7 +21,7 @@ public class TotalPerSecondQueryExp implements MetricQueryExp {
 
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
 		final int seconds = ctx.getChunk() / 1000;
-		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.evaluateProviders(ctx, child);
+		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 		MetricCollator collator = new MetricCollator("tps", ctx.getChunk(), metrics.values());
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {

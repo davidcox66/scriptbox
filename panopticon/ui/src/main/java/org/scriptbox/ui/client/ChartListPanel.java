@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
@@ -58,6 +59,10 @@ public class ChartListPanel extends ContentPanel {
 		} );
 	}
 
+	public void load( final MetricReportSummaryDto report ) {
+		
+	}
+	
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
 		ToolBar bar = new ToolBar();
 		buildRemoveAll( bar );

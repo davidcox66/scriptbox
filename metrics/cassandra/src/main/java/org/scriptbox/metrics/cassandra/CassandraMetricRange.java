@@ -1,7 +1,6 @@
 package org.scriptbox.metrics.cassandra;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,13 +8,13 @@ import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 
+import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricCache;
 import org.scriptbox.metrics.model.MetricRange;
-import org.scriptbox.metrics.model.MetricResolution;
-import org.scriptbox.metrics.query.MetricQueryContext;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
-public class CassandraMetricRange extends MetricRange {
+public class CassandraMetricRange extends MetricRange implements CassandraMetricProvider {
 
 	private CassandraMetricSequence sequence;
 
@@ -40,6 +39,10 @@ public class CassandraMetricRange extends MetricRange {
 		return true;
 	}
 
+	public DateRange getFullDateRange() {
+		return sequence.getFullDateRange();
+	}
+	
 	public MetricRange getMetrics( MetricQueryContext ctx ) {
 		return this;
 	}

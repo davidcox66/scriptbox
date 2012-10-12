@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,6 +10,9 @@ import java.util.Set;
 import org.scriptbox.metrics.compute.ListBackedMetricRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,7 @@ public class DeltaQueryExp implements MetricQueryExp {
 	  }
 	  public Object evaluate( MetricQueryContext ctx ) throws Exception {
 		  Set<MetricProvider> ret = new HashSet<MetricProvider>();
-		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.evaluateProviders(ctx, child);
+		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 		  for (MetricRange range : metrics.values() ) {
 			  List<Metric> deltas = new ArrayList<Metric>();
 		      Metric prev = null;

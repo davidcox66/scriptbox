@@ -1,5 +1,7 @@
 package org.scriptbox.ui.server.tree;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,8 +14,16 @@ import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.metrics.query.groovy.Report;
+import org.scriptbox.metrics.query.groovy.ReportBuilder;
+import org.scriptbox.metrics.query.groovy.ReportElement;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.ui.shared.tree.MetricChartDto;
 import org.scriptbox.ui.shared.tree.MetricQueryDto;
 import org.scriptbox.ui.shared.tree.MetricRangeDto;
+import org.scriptbox.ui.shared.tree.MetricReportDto;
+import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
@@ -22,24 +32,39 @@ import org.scriptbox.util.gwt.server.remote.ExportableService;
 import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
-@Service("treeService")
+// @Service("treeService")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @ExportableService(value="treeService",scope=ServiceScope.SESSION)
 public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( MetricTreeGWTInterfaceImpl.class );
 	
-	@Autowired
 	private MetricStore store;
+	private List<String> reportPaths;
 	
 	private List<MetricTree> trees;
 	private Map<MetricTree,Map<String,MetricTreeNode>> allNodes = new HashMap<MetricTree,Map<String,MetricTreeNode>>();
+	private Map<String,Report> reports;
 	
+	public MetricStore getStore() {
+		return store;
+	}
+
+	public void setStore(MetricStore store) {
+		this.store = store;
+	}
+
+	public List<String> getReportPaths() {
+		return reportPaths;
+	}
+
+	public void setReportPaths(List<String> reportPaths) {
+		this.reportPaths = reportPaths;
+	}
+
 	@Override
 	public ArrayList<MetricTreeDto> getTrees() {
 		store.begin();
@@ -84,18 +109,93 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 		}
 		MetricSequence seq = node.getMetricSequence();
 		// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
-		DateRange dr = seq.getDateRange();
-		MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime(), 30 );
+		DateRange dr = seq.getFullDateRange();
+		MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime() );
 		return new MetricRangeDto( 
 			dr.getStart().getTime(), 
 			dr.getEnd().getTime(), 
 			range.getStart(), 
 			range.getEnd(), 
-			range.getMetrics() );
+			range.getMetrics(30) );
 	}
 
+	public ArrayList<MetricReportSummaryDto> getReports() {
+		reports = new HashMap<String,Report>();
+		ArrayList<MetricReportSummaryDto> ret = new ArrayList<MetricReportSummaryDto>();
+		if( reportPaths == null || reportPaths.size() == 0 ) {
+			LOGGER.warn( "getReports: no report paths found" );
+		}
+		for( String reportPath : reportPaths ) {
+			File reportPathFile = new File( reportPath );
+			if( reportPathFile.exists() && reportPathFile.isDirectory() ) {
+				LOGGER.debug( "getReports: scanning " + reportPathFile );
+				File[] reportFiles = reportPathFile.listFiles( new FilenameFilter() {
+					public boolean accept(File dir, String name) {
+						return name.endsWith(".groovy");
+					}
+				});
+				for( File reportFile : reportFiles ) {
+					try {
+						LOGGER.debug( "getReports: loading " + reportFile );
+						ReportBuilder builder = new ReportBuilder( reportFile );
+						Report report = builder.compile();
+						reports.put( report.getName(), report );
+						
+						ArrayList<String> charts = new ArrayList<String>();
+						for( ReportElement element : report.getElements() ) {
+							charts.add( element.getTitle() );
+						}
+						MetricReportSummaryDto summaryDto = new MetricReportSummaryDto();
+						summaryDto.setName( report.getName () );
+						summaryDto.setCharts( charts );
+						ret.add( summaryDto );
+					}
+					catch( Exception ex ) {
+						LOGGER.error( "getReports: failed loading report: " + reportFile );
+					}
+				}
+			}
+			else {
+				LOGGER.warn( "getReports: report directory does not exist: " + reportPath );
+			}
+		}
+		return ret;
+	}
+	
+	public MetricReportDto getReport( String treeName, String reportName ) throws Exception {
+		MetricTree tree = getTreeByName( treeName );
+		Report report = getReportByName( reportName );
+		
+		MetricReportDto reportDto = new MetricReportDto();
+		for( ReportElement element : report.getElements() ) {
+			Map<? extends MetricProvider,? extends MetricRange> result = MetricQueries.query(
+				store, tree, element.getExpression(), report.getStart(), report.getEnd(), report.getChunk());
+			
+			MetricChartDto chartDto = new MetricChartDto();
+			for( Map.Entry<? extends MetricProvider, ? extends MetricRange> entry : result.entrySet() ) {
+				MetricProvider provider = entry.getKey();
+				MetricRange range =  entry.getValue();
+				DateRange dr = provider.getFullDateRange();
+				chartDto.addSeries( new MetricRangeDto( 
+					dr.getStart().getTime(), 
+					dr.getEnd().getTime(), 
+					range.getStart(), 
+					range.getEnd(), 
+					range.getMetrics(30)) );
+			}
+			reportDto.addChart( chartDto );
+		}
+		return reportDto;
+	}
 	// public Metric whitelist1( Metric value ) { return null; }
 	
+	private Report getReportByName( String name ) {
+		Report report = reports.get( name );
+		if( report == null ) {
+			throw new RuntimeException( "Could not find report: " + name );
+		}
+		return report;
+	}
 	private MetricTree getTreeByName( String name ) {
 		for( MetricTree tree : trees ) {
 			if( tree.getName().equals(name) ) {

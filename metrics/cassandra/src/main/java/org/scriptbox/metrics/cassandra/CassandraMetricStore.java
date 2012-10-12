@@ -30,8 +30,8 @@ import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
-import org.scriptbox.metrics.query.MetricProvider;
-import org.scriptbox.metrics.query.MetricQueryContext;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.cassandra.Cassandra;
 import org.scriptbox.util.cassandra.ColumnFamilyDefinition;
 
@@ -98,13 +98,16 @@ public class CassandraMetricStore implements MetricStore {
 	     
 	    for( MetricProvider node : nodes ) {
 	    	// CassandraMetricTreeNode cnode = (CassandraMetricTreeNode)node;
-	    	int resolution = node.getNearestResolutionSeconds( seconds );
 	    	MetricRange range = node.getMetrics( ctx );
-			if( node.isPersistent() && !MetricCache.contains(range, resolution)) {
-				String compositeId = node.getId( resolution );
-				toQueryIds.add( compositeId );
-				resolutionsByNodeId.put(compositeId, resolution);
-				rangesById.put(compositeId, range);
+			if( node.isPersistent() ) {
+				CassandraMetricProvider cnode = (CassandraMetricProvider)node;
+				int resolution = cnode.getNearestResolutionSeconds( seconds );
+				if( !MetricCache.contains(range, resolution)) {
+					String compositeId = cnode.getId( resolution );
+					toQueryIds.add( compositeId );
+					resolutionsByNodeId.put(compositeId, resolution);
+					rangesById.put(compositeId, range);
+				}
 			}
 	    	ret.put(node, range);
 	    }

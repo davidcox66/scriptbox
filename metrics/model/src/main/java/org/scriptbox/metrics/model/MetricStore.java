@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.scriptbox.metrics.query.MetricProvider;
-import org.scriptbox.metrics.query.MetricQueryContext;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public interface MetricStore {
 

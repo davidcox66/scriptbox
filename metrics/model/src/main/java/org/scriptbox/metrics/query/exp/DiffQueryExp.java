@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,6 +7,9 @@ import java.util.List;
 import org.scriptbox.metrics.compute.MetricCollator;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 
 public class DiffQueryExp implements MetricQueryExp {
@@ -21,8 +24,8 @@ public class DiffQueryExp implements MetricQueryExp {
 	    this.child2 = child2;
 	  }
 	  public Object evaluate( final MetricQueryContext ctx ) throws Exception {
-	      MetricProvider provider1 = MetricQueries.evaluateProvider(ctx, child1 );
-	      MetricProvider provider2 = MetricQueries.evaluateProvider(ctx, child2 );
+	      MetricProvider provider1 = MetricQueries.provider(ctx, child1 );
+	      MetricProvider provider2 = MetricQueries.provider(ctx, child2 );
 
 	      List<MetricRange> metrics = new ArrayList<MetricRange>(2);
 	      metrics.add( provider1.getMetrics(ctx) );

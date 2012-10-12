@@ -1,6 +1,7 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import org.apache.commons.collections.Closure;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

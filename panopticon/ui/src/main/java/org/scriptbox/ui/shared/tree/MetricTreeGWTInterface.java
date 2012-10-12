@@ -11,5 +11,7 @@ public interface MetricTreeGWTInterface extends RemoteService {
 	public ArrayList<MetricTreeDto> getTrees();
 	public MetricTreeParentNodeDto getRoot( MetricTreeDto tree );
 	public MetricRangeDto getMetrics( MetricQueryDto query );
+	public ArrayList<MetricReportSummaryDto> getReports();
+	public MetricReportDto getReport( String treeName, String reportName ) throws Exception;
 	// public Metric whitelist1( Metric x );
 }

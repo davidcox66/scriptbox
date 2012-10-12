@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,33 +10,36 @@ import java.util.Set;
 import org.scriptbox.metrics.compute.ListBackedMetricRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
-public class MultiplyQueryExp implements MetricQueryExp {
+public class DivideQueryExp implements MetricQueryExp {
 
 	private MetricQueryExp child;
-	private float multiplier;
+	private float divisor;
 
-	public MultiplyQueryExp(float multiplier, MetricQueryExp child) {
+	public DivideQueryExp(float divisor, MetricQueryExp child) {
 		this.child = child;
-		this.multiplier = multiplier;
+		this.divisor = divisor;
 	}
 
 	public Object evaluate(MetricQueryContext ctx) throws Exception {
 		Set<MetricProvider> ret = new HashSet<MetricProvider>();
-		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.evaluateProviders(ctx, child);
+		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 		for (MetricRange range : metrics.values() ) {
 			List<Metric> values = new ArrayList<Metric>();
 			Iterator<Metric> iter = range.getIterator(ctx.getChunk());
 			while (iter.hasNext()) {
 				Metric metric = iter.next();
-				values.add(new Metric(metric.getMillis(), metric.getValue() * multiplier));
+				values.add(new Metric(metric.getMillis(), metric.getValue() / divisor));
 			}
-			ret.add(new ListBackedMetricRange("multiply(" + range.getDescription() + ")", range.getStart(), range .getEnd(), values));
+			ret.add(new ListBackedMetricRange("divide(" + range.getDescription() + ")", range.getStart(), range .getEnd(), values));
 		}
 		return ret;
 	}
 
 	public String toString() {
-		return "multiply(" + child + ")";
+		return "divide(" + child + ")";
 	}
 }

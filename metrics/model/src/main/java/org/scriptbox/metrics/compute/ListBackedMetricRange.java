@@ -1,11 +1,13 @@
 package org.scriptbox.metrics.compute;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
-import org.scriptbox.metrics.query.MetricQueryContext;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class ListBackedMetricRange extends MetricRange {
 
@@ -33,14 +35,12 @@ public class ListBackedMetricRange extends MetricRange {
 		return this;
 	}
 
-	public String getId( int seconds ) {
-		throw new UnsupportedOperationException( "Not supported");
+	public DateRange getFullDateRange() {
+		if( metrics.size() > 0 ) {
+			return new DateRange( new Date(metrics.get(0).getMillis()), new Date(metrics.get(metrics.size()-1).getMillis()) );
+		}
+		return null;
 	}
-	
-	public int getNearestResolutionSeconds( int seconds ) {
-		return seconds;
-	}
-	
 	@Override
 	public Iterator<Metric> getIterator(int resolution) {
 		return metrics.iterator();

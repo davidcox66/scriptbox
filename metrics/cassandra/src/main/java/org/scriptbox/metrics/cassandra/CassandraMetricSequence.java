@@ -18,7 +18,7 @@ import org.scriptbox.metrics.model.MetricSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraMetricSequence extends MetricSequence {
+public class CassandraMetricSequence extends MetricSequence implements CassandraMetricProvider {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( CassandraMetricSequence.class );
 	
@@ -95,26 +95,7 @@ public class CassandraMetricSequence extends MetricSequence {
 	}
 	
 	public DateRange getFullDateRange() {
-		String compositeId = node.getId() + "," + node.tree.getFinestResolution().getSeconds();
-		Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
-		Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
-		if( start != null && end != null ) {
-			return new DateRange( start, end );
-		}
-		return null;
-	}
-	
-	
-	private Date findMetricEdgeDate( String compositeId, Long first, Long last, boolean reversed ) {
-		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
-		predicate.setRange(first, last, reversed, 1 );
-		ColumnFamilyResult<String,Long> result = node.getStore().metricSequenceTemplate.queryColumns( compositeId, predicate );
-		Collection<Long> times = result.getColumnNames();
-		if( times.size() > 0 ) {
-			Long millis = times.iterator().next();
-			return new Date( millis );
-		}
-		return null;
+		return node.getFullDateRange();
 	}
 	
 	@Override

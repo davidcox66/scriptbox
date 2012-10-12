@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.main;
 
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;

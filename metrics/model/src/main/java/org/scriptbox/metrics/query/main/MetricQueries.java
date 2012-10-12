@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.main;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,13 +12,30 @@ import java.util.regex.Pattern;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
+import org.scriptbox.metrics.query.exp.AverageQueryExp;
+import org.scriptbox.metrics.query.exp.BinaryQueryExp;
+import org.scriptbox.metrics.query.exp.BottomAverageQueryExp;
+import org.scriptbox.metrics.query.exp.BottomQueryExp;
+import org.scriptbox.metrics.query.exp.DeltaQueryExp;
+import org.scriptbox.metrics.query.exp.DiffQueryExp;
+import org.scriptbox.metrics.query.exp.DivideQueryExp;
+import org.scriptbox.metrics.query.exp.MaxQueryExp;
+import org.scriptbox.metrics.query.exp.MetricQueryExp;
+import org.scriptbox.metrics.query.exp.MinQueryExp;
+import org.scriptbox.metrics.query.exp.MultiplyQueryExp;
+import org.scriptbox.metrics.query.exp.PerSecondQueryExp;
+import org.scriptbox.metrics.query.exp.TopAverageQueryExp;
+import org.scriptbox.metrics.query.exp.TopQueryExp;
+import org.scriptbox.metrics.query.exp.TotalPerSecondQueryExp;
+import org.scriptbox.metrics.query.exp.TotalQueryExp;
+import org.scriptbox.metrics.query.exp.TreePathQueryExp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MetricQueries {
 	static final Logger LOGGER = LoggerFactory.getLogger(MetricQueries.class);
 
-	public static Map<? extends MetricProvider, ? extends MetricRange> evaluateProviders(
+	public static Map<? extends MetricProvider, ? extends MetricRange> providers(
 		MetricQueryContext ctx, 
 		MetricQueryExp child) 
 			throws Exception 
@@ -28,7 +45,7 @@ public class MetricQueries {
 		return ctx.getStore().getAllMetrics(providers, ctx);
 	}
 
-	public static <X extends MetricProvider> X evaluateProvider(
+	public static <X extends MetricProvider> X provider(
 		MetricQueryContext ctx, 
 		MetricQueryExp child) 
 			throws Exception 
@@ -58,7 +75,7 @@ public class MetricQueries {
 		return null;
 	}
 
-	public static Object query( MetricStore store, MetricTree tree, MetricQueryExp exp, Date start, Date end, int chunk ) 
+	public static Map<? extends MetricProvider, ? extends MetricRange> query( MetricStore store, MetricTree tree, MetricQueryExp exp, Date start, Date end, int chunk ) 
 		throws Exception
 	{
 	    if( LOGGER.isDebugEnabled() ) {
@@ -68,7 +85,7 @@ public class MetricQueries {
 	    
 	    MetricQueryContext ctx = new MetricQueryContext( store, tree, start.getTime(), end.getTime(), chunk );
 	    try {
-		    return exp.evaluate( ctx );
+		    return providers( ctx, exp );
 	    }
 	    finally {
 	    	if( begin != 0 ) {

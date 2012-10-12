@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,18 +8,20 @@ import java.util.List;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 
-public class BottomQueryExp extends FilteringQueryExp {
+public class BottomAverageQueryExp extends FilteringQueryExp {
 
-	  public BottomQueryExp( int count, MetricQueryExp child ) {
-	    super( "bottom", count, child );
+	  public BottomAverageQueryExp( int count, MetricQueryExp child ) {
+	    super( "bottomavg", count, child );
 	  }
 	  float filter( MetricRange range ) {
-	      float min = Float.MAX_VALUE;
+		  int count = 0;
+	      float total = 0;
 	      for( Iterator<Metric> iter = range.getIterator(0) ; iter.hasNext() ; ) {
 	    	  Metric metric = iter.next();
-	          min = Math.min( min, metric.getValue() );
+	    	  total += metric.getValue();
+	    	  count++;
 	      }
-	      return min;
+	      return count > 0 ? total / count : 0;
 	  }
 	  void sort( List<CriticalValue> cvs ) {
 		  Collections.sort( cvs, new Comparator<CriticalValue>() {

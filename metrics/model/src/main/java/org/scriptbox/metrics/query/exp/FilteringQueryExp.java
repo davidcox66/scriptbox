@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query;
+package org.scriptbox.metrics.query.exp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueries;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public abstract class FilteringQueryExp implements MetricQueryExp {
 
@@ -36,7 +39,7 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	  
 	  public Object evaluate( MetricQueryContext ctx ) throws Exception {
 		 
-		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.evaluateProviders(ctx, child);
+		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 	      List<CriticalValue> cvs = new ArrayList<CriticalValue>();
 	      for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : metrics.entrySet() ) {
 	    	  float cv = filter( entry.getValue() );

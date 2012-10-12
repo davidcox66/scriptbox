@@ -58,7 +58,15 @@
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace" />
     	
-    	
+    <bean name="treeService" class="org.scriptbox.ui.server.tree.MetricTreeGWTInterfaceImpl"
+    	p:store-ref="store">
+    	<property name="reportPaths">
+    		<list>
+    			<value>/tmp/reports</value>
+    		</list>
+    	</property>
+    </bean>
+    
     <bean id="serviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
     	<constructor-arg type="org.springframework.aop.Pointcut" >
          	<bean id="servicePointcut" class="org.springframework.aop.support.annotation.AnnotationMatchingPointcut" >

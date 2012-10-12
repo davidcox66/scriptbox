@@ -2,6 +2,7 @@ package org.scriptbox.ui.client;
 
 import java.util.logging.Logger;
 
+import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
@@ -12,11 +13,11 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer.ExpandMode;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
 import com.sencha.gxt.widget.core.client.container.MarginData;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 
 public class ChartView implements IsWidget {
 
@@ -24,12 +25,14 @@ public class ChartView implements IsWidget {
 
 	private MetricListPanel listPanel;
 	private MetricTreePanel treePanel;
+	private MetricReportPanel reportPanel;
 	private ChartListPanel chartListPanel;
 	
 	public ChartView( MetricTreeGWTInterfaceAsync service ) {
 		
 		listPanel = new MetricListPanel( service );
 		treePanel = new MetricTreePanel( service );
+		reportPanel = new MetricReportPanel( service );
 		chartListPanel = new ChartListPanel( service );
 		
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
@@ -52,19 +55,36 @@ public class ChartView implements IsWidget {
 	        }
 	    });		
 		
+		reportPanel.addSelectionHandler(new SelectionHandler<MetricReportSummaryDto>() {
+	        @Override
+	        public void onSelection(SelectionEvent<MetricReportSummaryDto> event) {
+        	  MetricReportSummaryDto item = event.getSelectedItem();
+        	  logger.info( "Loadding report");
+        	  chartListPanel.load( item );
+	        }
+	    });		
+		
 		
 	}
 
 	public void load() {
 		listPanel.load();
+		reportPanel.load();
 	}
 	
 	@Override
 	public Widget asWidget() {
-		VerticalLayoutContainer metricControls = new VerticalLayoutContainer();
-		metricControls.add(wrapContent(listPanel,"Trees"), new VerticalLayoutData(1, 0.3));
-	    metricControls.add(wrapContent(treePanel,"Metrics"), new VerticalLayoutData(1, 0.7));
+	    AccordionLayoutContainer metricControls = new AccordionLayoutContainer();
+	    metricControls.setExpandMode(ExpandMode.SINGLE_FILL);
+	 
+	    // AccordionLayoutAppearance appearance = GWT.<AccordionLayoutAppearance> create(AccordionLayoutAppearance.class);
+	 
+	    Widget listWidget = wrapContent(listPanel,"Trees");
+		metricControls.add(listWidget);
+	    metricControls.add(wrapContent(treePanel,"Metrics"));
+	    metricControls.add(wrapContent(reportPanel,"Reports"));
 	    
+	    metricControls.setActiveWidget( listWidget );
 		// HorizontalLayoutContainer metricControls = new HorizontalLayoutContainer();
 		// metricControls.add(wrapContent(listPanel,"Trees"), new HorizontalLayoutData(250, 1));
 	    // metricControls.add(wrapContent(treePanel,"Metrics"), new HorizontalLayoutData(1, 1));

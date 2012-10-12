@@ -1,7 +1,7 @@
 package org.scriptbox.metrics.model;
 
-import org.scriptbox.metrics.query.MetricQueryContext;
-import org.scriptbox.metrics.query.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 
 public abstract class MetricSequence implements MetricProvider {

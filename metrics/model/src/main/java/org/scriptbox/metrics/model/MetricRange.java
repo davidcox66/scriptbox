@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.scriptbox.metrics.query.MetricProvider;
+import org.scriptbox.metrics.query.main.MetricProvider;
 
 public abstract class MetricRange implements MetricProvider {
 
