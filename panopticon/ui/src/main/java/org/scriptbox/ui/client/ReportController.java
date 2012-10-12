@@ -39,9 +39,9 @@ public class ReportController {
 		ListStore<Metric> store;
 		
 		public ReportLine( MetricRangeDto rangeDto ) {
-			series = ChartBuilder
-	        ChartBuilder.fixEmptySeries(valueAxis, loaded.getData() );
-			
+			series = ChartBuilder.buildValueSeries(new RGB(255,0,0) );
+			store = ChartBuilder.buildListStore();
+			store.replaceAll( rangeDto.getData() );
 		}
 	}
 	
@@ -57,10 +57,20 @@ public class ReportController {
 			timeAxis = ChartBuilder.buildTimeAxis();
 			timeAxis.setStartDate(start);
 		    timeAxis.setEndDate(end);
+		    
+		    chart = new Chart<Metric>();
+			chart.addAxis(timeAxis);
+			chart.addAxis(valueAxis);
+		    
 		    lines = new ArrayList<ReportLine>( chartDto.getSeries().size() );
 		    for( MetricRangeDto range : chartDto.getSeries() ) {
-		    	lines.add( new ReportLine(range) );
+		    	ReportLine line = new ReportLine(range);
+		    	lines.add( line );
+		    	ChartBuilder.fixEmptySeries(valueAxis, range.getData() );
+		    	chart.addSeries( line.series );
 		    }
+		    
+		    chart.setStore(store);
 		}
 	}
 	
@@ -76,17 +86,8 @@ public class ReportController {
 				ReportController.this.service.getReport(loadConfig, callback);
 			}
 		};
-		store = ChartBuilder.buildListStore();
-
-		buildValueAxis();
-		buildTimeAxis();
-		buildValueSeries();
 	}
 
-	public Chart<Metric> getChart() {
-		return chart;
-	}
-	
 	public void load( String treeName, String reportName, final Runnable callback ) {
 		ReportQueryDto query = new ReportQueryDto();
 		query.setTreeName( treeName );
@@ -102,45 +103,18 @@ public class ReportController {
 				List<MetricChartDto> charts = loaded.getData();
 				holders = new ArrayList<ChartHolder>( charts.size() );
 				for( MetricChartDto chart : charts ) {
-					holders.add( new ChartHolder(chart,loaded.getStart(),loaded.getEnd()) );
+					ChartHolder holder = new ChartHolder(chart,loaded.getStart(),loaded.getEnd());
+					holders.add( holder );
 				}
 		        
-				// setSeriesNameForNode( event.getLoadConfig().getNode() );
-		        ChartBuilder.fixEmptySeries(valueAxis, loaded.getData() );
-			    store.replaceAll( loaded.getData() );
-			    chart = buildChart();
-			    callback.run();
-				chart.redrawChart();
+				callback.run();
+				
+				for( ChartHolder holder : holders ) {
+					holder.chart.redrawChart();
+				}
 			}
 		} );
 		loader.load( query );
 		
 	}
-
-	private Chart<Metric> buildChart() {
-		chart = new Chart<Metric>();
-		chart.setStore(store);
-		chart.addAxis(timeAxis);
-		chart.addAxis(valueAxis);
-		chart.addSeries(series);
-		return chart;
-	}
-	
-	private void buildTimeAxis() {
-		timeAxis = ChartBuilder.buildTimeAxis();
-	}
-	private void buildValueAxis() {
-		valueAxis = ChartBuilder.buildValueAxis();
-	}
-
-	private void buildValueSeries() {
-		series = ChartBuilder.buildValueSeries( new RGB(255,0,0) );
-	}
-
-	private void setSeriesNameForNode( MetricTreeNodeDto node ) { 
-		TextSprite title = new TextSprite( node.getName() );
-		title.setFontSize(18);
-		valueAxis.setTitleConfig(title);
-	}
-	
 }
