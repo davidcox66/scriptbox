@@ -26,6 +26,7 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricCache;
+import org.scriptbox.metrics.model.SequenceCache;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricStore;
@@ -79,10 +80,12 @@ public class CassandraMetricStore implements MetricStore {
 	public void begin() {
 		initialize();
 		MetricCache.begin();
+		SequenceCache.begin();
 	}
 	
 	public void end() {
 		MetricCache.end();
+		SequenceCache.end();
 	}
 
 	public Map<? extends MetricProvider,? extends MetricRange> getAllMetrics( final Collection<? extends MetricProvider> nodes, final MetricQueryContext ctx ) {

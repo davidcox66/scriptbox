@@ -4,22 +4,26 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.scriptbox.metrics.compute.MetricCollator;
 import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.metrics.query.groovy.Report;
 import org.scriptbox.metrics.query.groovy.ReportBuilder;
 import org.scriptbox.metrics.query.groovy.ReportElement;
 import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
-import org.scriptbox.ui.shared.tree.MetricChartDto;
 import org.scriptbox.ui.shared.tree.MetricQueryDto;
 import org.scriptbox.ui.shared.tree.MetricRangeDto;
 import org.scriptbox.ui.shared.tree.MetricReportDto;
@@ -28,7 +32,9 @@ import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
+import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
 import org.scriptbox.ui.shared.tree.ReportQueryDto;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.gwt.server.remote.ExportableService;
 import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.slf4j.Logger;
@@ -99,25 +105,31 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 	}
 	
 	public MetricRangeDto getMetrics( MetricQueryDto query ) {
-		MetricTree tree = getTreeByName( query.getNode().getTreeName() );
-		Map<String,MetricTreeNode> nodes = allNodes.get( tree );
-		if( nodes == null ) {
-			throw new RuntimeException( "Tree nodes not found: '" + tree.getName() );
+		store.begin();
+		try {
+			MetricTree tree = getTreeByName( query.getNode().getTreeName() );
+			Map<String,MetricTreeNode> nodes = allNodes.get( tree );
+			if( nodes == null ) {
+				throw new RuntimeException( "Tree nodes not found: '" + tree.getName() );
+			}
+			MetricTreeNode node = nodes.get( query.getNode().getId() ); 
+			if( node == null ) {
+				throw new RuntimeException( "Node not found: '" + query.getNode().getId() );
+			}
+			MetricSequence seq = node.getMetricSequence();
+			// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
+			DateRange dr = seq.getFullDateRange();
+			MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime() );
+			return new MetricRangeDto( 
+				dr.getStart().getTime(), 
+				dr.getEnd().getTime(), 
+				range.getStart(), 
+				range.getEnd(), 
+				range.getMetrics(30) );
 		}
-		MetricTreeNode node = nodes.get( query.getNode().getId() ); 
-		if( node == null ) {
-			throw new RuntimeException( "Node not found: '" + query.getNode().getId() );
+		finally {
+			store.end();
 		}
-		MetricSequence seq = node.getMetricSequence();
-		// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
-		DateRange dr = seq.getFullDateRange();
-		MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime() );
-		return new MetricRangeDto( 
-			dr.getStart().getTime(), 
-			dr.getEnd().getTime(), 
-			range.getStart(), 
-			range.getEnd(), 
-			range.getMetrics(30) );
 	}
 
 	public ArrayList<MetricReportSummaryDto> getReports() {
@@ -142,8 +154,10 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 						Report report = builder.compile();
 						reports.put( report.getName(), report );
 						
+						LOGGER.debug( "getReports: loaded report " + report.getName() );
 						ArrayList<String> charts = new ArrayList<String>();
 						for( ReportElement element : report.getElements() ) {
+							LOGGER.debug( "getReports: processing chart " + element.getTitle() );
 							charts.add( element.getTitle() );
 						}
 						MetricReportSummaryDto summaryDto = new MetricReportSummaryDto();
@@ -164,29 +178,73 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 	}
 	
 	public MetricReportDto getReport( ReportQueryDto query ) throws Exception {
-		MetricTree tree = getTreeByName( query.getTreeName() );
-		Report report = getReportByName( query.getReportName() );
 		
-		MetricReportDto reportDto = new MetricReportDto();
-		for( ReportElement element : report.getElements() ) {
-			Map<? extends MetricProvider,? extends MetricRange> result = MetricQueries.query(
-				store, tree, element.getExpression(), report.getStart(), report.getEnd(), report.getChunk());
-			
-			MetricChartDto chartDto = new MetricChartDto();
-			for( Map.Entry<? extends MetricProvider, ? extends MetricRange> entry : result.entrySet() ) {
-				MetricProvider provider = entry.getKey();
-				MetricRange range =  entry.getValue();
-				DateRange dr = provider.getFullDateRange();
-				chartDto.addSeries( new MetricRangeDto( 
-					dr.getStart().getTime(), 
-					dr.getEnd().getTime(), 
-					range.getStart(), 
-					range.getEnd(), 
-					range.getMetrics(30)) );
+		store.begin();
+		try {
+			MetricTree tree = getTreeByName( query.getTreeName() );
+			Report report = getReportByName( query.getReportName() );
+		
+			if( LOGGER.isDebugEnabled() ) {
+				LOGGER.debug( "getReport: tree=" + tree.getName() + ", report=" + report.getName() );
 			}
-			reportDto.addChart( chartDto );
+			long first = Long.MAX_VALUE;
+			long last = Long.MIN_VALUE;
+			
+			MetricReportDto reportDto = new MetricReportDto();
+			for( ReportElement element : report.getElements() ) {
+				Map<? extends MetricProvider,? extends MetricRange> result = MetricQueries.query(
+					store, tree, element.getExpression(), report.getStart(), report.getEnd(), report.getChunk());
+	
+				if( LOGGER.isDebugEnabled() ) {
+					LOGGER.debug( "getReport: result.size()=" + result.size() );
+					for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : result.entrySet() ) {
+						LOGGER.debug( "getReport: provider=" + entry.getKey() + ", range=" + entry.getValue() );
+					}
+				}
+			
+				//
+				// Get an ordered list of both the names and corresponding list of metrics so that
+				// we can properly associate these for displaying information about each
+				// series in the UI (such as tooltips)
+				//
+				List<String> lines = new ArrayList<String>(result.size());
+				List<MetricRange> ranges = new ArrayList<MetricRange>(result.size());
+				for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : result.entrySet() ) {
+					lines.add( entry.getKey().getId() );
+					ranges.add( entry.getValue() );
+				}
+			
+				//
+				// Convert the multiple ranges into a single range of MultiMetric where each MultiMetric
+				// has values from each of the original ranges. This format is more acceptable to the 
+				// GXT charting APIs
+				//
+				final List<MultiMetric> metrics = new ArrayList<MultiMetric>( 128 ); // Just a reasonable starting point
+				MetricCollator collator = new MetricCollator( element.getTitle(), element.getTitle(), 30, ranges );
+				collator.multi( new ParameterizedRunnable<MultiMetric>() {
+					public void run( MultiMetric metric ) {
+						metrics.add( metric );
+					}
+				});
+				// Compute the overall date range of the report
+				if( metrics.size() > 0 ) {
+					first = Math.min(first, metrics.get(0).getMillis() );
+					last = Math.max(last, metrics.get(metrics.size()-1).getMillis() );
+				}
+				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), lines, metrics );
+				reportDto.addChart( range );
+			}
+			reportDto.setStart( new Date(first) );
+			reportDto.setEnd( new Date(last) );
+			reportDto.setFirst( new Date(first) );
+			reportDto.setLast( new Date(last) );
+			
+			LOGGER.debug( "getReport: finished generating report: " + report.getName() );
+			return reportDto;
 		}
-		return reportDto;
+		finally {
+			store.end();
+		}
 	}
 	// public Metric whitelist1( Metric value ) { return null; }
 	
@@ -214,6 +272,11 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			for( MetricTreeNode child : children ) {
 				dchildren.add( populateNodes(nodes, tree, child) );
 			}
+			Collections.sort( dchildren, new Comparator<MetricTreeNodeDto>() {
+				public int compare( MetricTreeNodeDto n1, MetricTreeNodeDto n2 ) {
+					return n1.getName().compareTo(n2.getName());
+				}
+			} );
 			parent.setChildren( dchildren );
 			nodes.put( parent.getId(), node );
 			return parent;

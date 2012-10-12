@@ -34,7 +34,10 @@ public class DivideQueryExp implements MetricQueryExp {
 				Metric metric = iter.next();
 				values.add(new Metric(metric.getMillis(), metric.getValue() / divisor));
 			}
-			ret.add(new ListBackedMetricRange("divide(" + range.getDescription() + ")", range.getStart(), range .getEnd(), values));
+			ret.add(new ListBackedMetricRange(
+				"divide(" + range.getName() + ")", 
+				"divide(" + range.getId() + ")", 
+				range.getFullDateRange(), range.getStart(), range .getEnd(), values));
 		}
 		return ret;
 	}

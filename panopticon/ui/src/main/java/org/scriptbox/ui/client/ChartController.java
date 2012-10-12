@@ -46,7 +46,7 @@ public class ChartController {
 			}
 		};
 
-		store = ChartBuilder.buildListStore();
+		store = MetricChartBuilder.buildListStore();
 
 		buildValueAxis();
 		buildTimeAxis();
@@ -74,7 +74,7 @@ public class ChartController {
 		        timeAxis.setEndDate(loaded.getEnd());
 		        
 				// setSeriesNameForNode( event.getLoadConfig().getNode() );
-		        ChartBuilder.fixEmptySeries(valueAxis, loaded.getData() );
+		        MetricChartBuilder.fixEmptySeries(valueAxis, loaded.getData() );
 			    store.replaceAll( loaded.getData() );
 			    chart = buildChart();
 			    callback.run();
@@ -95,14 +95,14 @@ public class ChartController {
 	}
 	
 	private void buildTimeAxis() {
-		timeAxis = ChartBuilder.buildTimeAxis();
+		timeAxis = MetricChartBuilder.buildTimeAxis();
 	}
 	private void buildValueAxis() {
-		valueAxis = ChartBuilder.buildValueAxis();
+		valueAxis = MetricChartBuilder.buildValueAxis();
 	}
 
 	private void buildValueSeries() {
-		series = ChartBuilder.buildValueSeries( new RGB(255,0,0) );
+		series = MetricChartBuilder.buildValueSeries( new RGB(255,0,0) );
 	}
 
 	private void setSeriesNameForNode( MetricTreeNodeDto node ) { 

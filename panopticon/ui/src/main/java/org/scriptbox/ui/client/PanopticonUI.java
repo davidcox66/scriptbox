@@ -1,5 +1,6 @@
 package org.scriptbox.ui.client;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
@@ -7,6 +8,7 @@ import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -64,6 +66,11 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		
 	}
 	public void onModuleLoad() {
+		GWT.setUncaughtExceptionHandler( new UncaughtExceptionHandler() {
+			public void onUncaughtException(Throwable ex ) {
+				logger.log( Level.SEVERE, "Uncaught exception", ex ); 
+			}
+		} );
 		service = GWT.create(MetricTreeGWTInterface.class);
 		chartView = new ChartView( service );
 		chartView.load();

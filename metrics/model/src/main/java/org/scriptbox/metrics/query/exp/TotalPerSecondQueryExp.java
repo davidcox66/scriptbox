@@ -22,7 +22,7 @@ public class TotalPerSecondQueryExp implements MetricQueryExp {
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
 		final int seconds = ctx.getChunk() / 1000;
 		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
-		MetricCollator collator = new MetricCollator("tps", ctx.getChunk(), metrics.values());
+		MetricCollator collator = new MetricCollator("tps", "tps", ctx.getChunk(), metrics.values());
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getChunk());

@@ -19,7 +19,7 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 	private CassandraMetricSequence sequence;
 
 	public CassandraMetricRange( CassandraMetricSequence sequence, long start, long end ) {
-		super( sequence.node.getName(), start, end );
+		super( start, end );
 		this.sequence = sequence;
 	}
 
@@ -27,6 +27,9 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 		return sequence.node.getName();
 	}
 
+	public String getId() {
+		return sequence.node.getId();
+	}
 	public String getId( int seconds ) {
 		return sequence.node.getId( seconds );
 	}
@@ -65,6 +68,7 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 			Metric last = null;
 			Metric pending = null;
 			Iterator<Metric> iter = metrics.iterator();
+			
 			public boolean hasNext() {
 				return iter.hasNext() || pending != null;
 			}
@@ -77,7 +81,6 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 				else if( pending == null ) {
 					pending = iter.next();
 				}
-				
 				if( pending.getMillis() < cend ) {
 					// round to next resolution increment
 					cstart += pending.getMillis() + resm - (pending.getMillis() % resm); 
@@ -86,7 +89,7 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 				}
 				else {
 					ret = new Metric(cstart, last.getValue() );
-					cstart += resolution * 1000;
+					cstart += resm;
 				}
 				return ret;
 			}
@@ -141,5 +144,8 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 			return false;
 		return true;
 	}
-	
+
+	public String toString() {
+		return "CassandraMetricRange{ name=" + getName() + ", start=" + getStart() + ", end=" + getEnd() + " }";
+	}
 }

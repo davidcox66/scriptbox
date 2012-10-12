@@ -34,7 +34,10 @@ public class MultiplyQueryExp implements MetricQueryExp {
 				Metric metric = iter.next();
 				values.add(new Metric(metric.getMillis(), metric.getValue() * multiplier));
 			}
-			ret.add(new ListBackedMetricRange("multiply(" + range.getDescription() + ")", range.getStart(), range .getEnd(), values));
+			ret.add(new ListBackedMetricRange(
+				"multiply(" + range.getName() + ")", 
+				"multiply(" + range.getId() + ")", 
+				range.getFullDateRange(), range.getStart(), range .getEnd(), values));
 		}
 		return ret;
 	}

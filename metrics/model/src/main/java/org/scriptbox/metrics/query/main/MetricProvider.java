@@ -6,6 +6,7 @@ import org.scriptbox.metrics.model.MetricRange;
 public interface MetricProvider {
 
 	public String getName();
+	public String getId();
 	public boolean isPersistent();
 	public DateRange getFullDateRange();
 	public MetricRange getMetrics( MetricQueryContext ctx );

@@ -1,6 +1,8 @@
 package org.scriptbox.metrics.cassandra;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +101,7 @@ public class CassandraMetricTree extends MetricTree {
 		}
 		return root;
 	}
-	
+
 	public void delete() {
 		visitNodes( new MetricTreeVisitor() {
 			public boolean visit( MetricTreeNode node ) {

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.scriptbox.ui.shared.timed.TimeBasedLoadResult;
 
-public class MetricReportDto implements TimeBasedLoadResult<MetricChartDto>, Serializable {
+public class MetricReportDto implements TimeBasedLoadResult<MultiMetricRangeDto>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -15,17 +15,17 @@ public class MetricReportDto implements TimeBasedLoadResult<MetricChartDto>, Ser
 	private Date last;
 	private Date start;
 	private Date end;
-	private ArrayList<MetricChartDto> charts = new ArrayList<MetricChartDto>();
+	private ArrayList<MultiMetricRangeDto> charts = new ArrayList<MultiMetricRangeDto>();
 
-	public void addChart( MetricChartDto chart ) {
+	public void addChart( MultiMetricRangeDto chart ) {
 		charts.add( chart );
 	}
 	
-	public ArrayList<MetricChartDto> getCharts() {
+	public ArrayList<MultiMetricRangeDto> getCharts() {
 		return charts;
 	}
 	
-	public void setCharts(ArrayList<MetricChartDto> charts) {
+	public void setCharts(ArrayList<MultiMetricRangeDto> charts) {
 		this.charts = charts;
 	}
 	
@@ -61,7 +61,7 @@ public class MetricReportDto implements TimeBasedLoadResult<MetricChartDto>, Ser
 		this.end = end;
 	}
 
-	public List<MetricChartDto> getData() {
+	public List<MultiMetricRangeDto> getData() {
 		return charts;
 	}
 }

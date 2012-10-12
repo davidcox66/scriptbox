@@ -49,7 +49,10 @@ public class PerSecondQueryExp implements MetricQueryExp {
 				}
 				prev = metric;
 			}
-			ret.add(new ListBackedMetricRange("persecond(" + range.getDescription() + ")", range.getStart(), range.getEnd(), deltas));
+			ret.add(new ListBackedMetricRange(
+				"persecond(" + range.getName() + ")", 
+				"persecond(" + range.getId() + ")", 
+				range.getFullDateRange(), range.getStart(), range.getEnd(), deltas));
 		}
 		return ret;
 	}

@@ -8,7 +8,9 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.scriptbox.metrics.cassandra.CassandraMetricStore;
 import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.metrics.model.MetricCache;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
@@ -53,6 +55,7 @@ public class CassandraStoreTest {
 	
 	@Test
 	public void testLoadAndRetrieve() {
+		MetricCache.begin();
 		final CassandraMetricStore store = new CassandraMetricStore();
 		store.setKeyspace(Cassandra.getKeyspace(KEYSPACE));
 		store.setCluster(Cassandra.getOrCreateCluster());
@@ -116,5 +119,6 @@ public class CassandraStoreTest {
 		mv = metrics.get(2);
 		Assert.assertEquals( 3.0F, mv.getValue(), 0 );
 		Assert.assertEquals( mv.getMillis(), millis );
+		MetricCache.end();
 	}
 }

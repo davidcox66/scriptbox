@@ -31,7 +31,7 @@ public class DiffQueryExp implements MetricQueryExp {
 	      metrics.add( provider1.getMetrics(ctx) );
 	      metrics.add( provider2.getMetrics(ctx) );
 	      
-			MetricCollator collator = new MetricCollator("diff", chunk, metrics);
+			MetricCollator collator = new MetricCollator("diff", "diff", chunk, metrics);
 			return collator.group(new ParameterizedRunnableWithResult<Metric, List<MetricRange>>() {
 				public Metric run(List<MetricRange> ranges) {
 					float avg1 = computeAverage( ranges.get(0) );

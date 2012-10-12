@@ -48,7 +48,10 @@ public class DeltaQueryExp implements MetricQueryExp {
 		    	 }
 		    	 prev = metric;
 		      }
-		      ret.add( new ListBackedMetricRange("diff("+range.getDescription()+")", range.getStart(), range.getEnd(), deltas) );
+		      ret.add( new ListBackedMetricRange(
+		    	  "diff("+range.getName()+")", 
+		    	  "diff("+range.getId()+")", 
+		          range.getFullDateRange(), range.getStart(), range.getEnd(), deltas) );
 		  }
 		  return ret;
 	  }

@@ -3,8 +3,8 @@ package org.scriptbox.ui.client;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.tree.MetricReportDto;
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
+import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -18,7 +18,14 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.Portlet;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
 public class MetricReportPanel extends VerticalLayoutContainer {
 
@@ -43,6 +50,8 @@ public class MetricReportPanel extends VerticalLayoutContainer {
 		store = new ListStore<MetricReportSummaryDto>(access.key());
 		list = new ListView<MetricReportSummaryDto,String>(store,access.name());
 		list.getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
+		
+		buildToolBar();
 	    add(list, new VerticalLayoutData(1, 1));
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
@@ -61,6 +70,20 @@ public class MetricReportPanel extends VerticalLayoutContainer {
 	
 	public void addSelectionHandler( SelectionHandler<MetricReportSummaryDto> handler ) {
 		list.getSelectionModel().addSelectionHandler( handler );
+	}
+	
+	private void buildToolBar() {
+		ToolBar bar = new ToolBar();
+		buildReload( bar );
+		add( bar, new VerticalLayoutData(1,-1) );
+	}
+	
+	private void buildReload( ToolBar bar ) {
+		bar.add(new TextButton("Reload", new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				load();
+			}
+		}));
 	}
 	
 }

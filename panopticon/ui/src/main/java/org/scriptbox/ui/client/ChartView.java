@@ -41,6 +41,7 @@ public class ChartView implements IsWidget {
         	  MetricTreeDto item = event.getSelectedItem();
         	  logger.info( "Loading tree");
         	  treePanel.load( item );
+        	  chartListPanel.setTree( item );
 	        }
 	    });		
 		

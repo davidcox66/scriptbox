@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
+import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -36,6 +39,7 @@ public class ChartListPanel extends ContentPanel {
 	private PortalLayoutContainer portal;
 	private List<Portlet> portlets = new ArrayList<Portlet>();
 	private	NumberField<Integer> limit;
+	private MetricTreeDto tree;
 	
 	public ChartListPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
@@ -47,6 +51,14 @@ public class ChartListPanel extends ContentPanel {
 		add( vertical );
 	}
 
+	public MetricTreeDto getTree() {
+		return tree;
+	}
+
+	public void setTree(MetricTreeDto tree) {
+		this.tree = tree;
+	}
+
 	public void load( final MetricTreeNodeDto node ) {
 		final ChartController controller = new ChartController( service );
 		enforceChartLimit( 1, null );
@@ -54,13 +66,40 @@ public class ChartListPanel extends ContentPanel {
 			public void run() {
 				Chart<Metric> chart = controller.getChart();
 				chart.setDefaultInsets(10);
-				addChartPortlet( node, chart );
+				addChartPortlet( node.getId(), chart );
 			}
 		} );
 	}
 
 	public void load( final MetricReportSummaryDto report ) {
-		
+		if( tree != null ) {
+			final ReportController controller = new ReportController( service );
+			enforceChartLimit( 1, null );
+			controller.load( tree.getTreeName(), report.getName(), new Runnable() {
+				public void run() {
+					List<MultiMetricChartHolder> holders = controller.getCharts();
+					VerticalLayoutContainer layout = new VerticalLayoutContainer();
+					for( MultiMetricChartHolder holder : holders ) {
+						Chart<MultiMetric> chart = holder.getChart();
+						chart.setDefaultInsets(10);
+						
+						ContentPanel panel = new ContentPanel();
+						panel.setHeadingText(holder.getTitle());
+						panel.add( chart );
+						layout.add( panel, new VerticalLayoutData(1,350) );
+					}
+					addChartPortlet( report.getName(), layout );
+					/*
+					for( MultiMetricChartHolder holder : holders ) {
+						Chart<MultiMetric> chart = holder.getChart();
+						chart.setPixelSize(600, 350);
+						chart.setDefaultInsets(10);
+						addChartPortlet( report.getName(), chart );
+					}
+					*/
+				}
+			} );
+		}
 	}
 	
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
@@ -125,11 +164,11 @@ public class ChartListPanel extends ContentPanel {
 		vertical.add( portal, new VerticalLayoutData(1,1) );
 	}
 	
-	private void addChartPortlet( MetricTreeNodeDto node, Chart<Metric> chart ) {
+	private void addChartPortlet( String title, Widget widget ) {
 	    Portlet portlet = new Portlet();
-	    portlet.setHeadingText(node.getId());
+	    portlet.setHeadingText( title );
 	    configPortlet( portlet );
-	    portlet.add( chart );
+	    portlet.add( widget );
 	    portlet.setHeight( 350 );
 	    portal.insert(portlet, 0, 0);
 		portlets.add( 0, portlet );

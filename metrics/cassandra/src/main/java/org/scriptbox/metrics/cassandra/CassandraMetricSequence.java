@@ -1,12 +1,7 @@
 package org.scriptbox.metrics.cassandra;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
-import me.prettyprint.cassandra.model.HSlicePredicate;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 
@@ -50,6 +45,9 @@ public class CassandraMetricSequence extends MetricSequence implements Cassandra
 		return node.getName();
 	}
 
+	public String getId() {
+		return node.getId();
+	}
 	public String getId( int seconds ) {
 		return node.getId( seconds );
 	}
@@ -60,6 +58,10 @@ public class CassandraMetricSequence extends MetricSequence implements Cassandra
 	
 	public boolean isPersistent() {
 		return true;
+	}
+	
+	public DateRange getFullDateRange() {
+		return node.getFullDateRange();
 	}
 
 	public void record( Metric metric ) {
@@ -94,13 +96,18 @@ public class CassandraMetricSequence extends MetricSequence implements Cassandra
 		}
 	}
 	
-	public DateRange getFullDateRange() {
-		return node.getFullDateRange();
-	}
-	
 	@Override
 	public MetricRange getRange(long start, long end) {
-		return new CassandraMetricRange(this, start, end );
+		if( start > end ) {
+			throw new IllegalArgumentException( "Start cannot be greater than end");
+		}
+		DateRange dates = getFullDateRange();
+		if( dates != null ) {
+			return new CassandraMetricRange(this, 
+				Math.max(start,dates.getStart().getTime()), 
+				Math.min(end,dates.getEnd().getTime()) );
+		}
+		return new CassandraMetricRange( this, start, end );
 	}
 
 	@Override

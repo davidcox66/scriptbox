@@ -19,6 +19,7 @@ import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.metrics.model.SequenceCache;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class CassandraMetricTreeNode implements MetricTreeNode, CassandraMetricProvider {
@@ -58,13 +59,17 @@ public class CassandraMetricTreeNode implements MetricTreeNode, CassandraMetricP
 	}
 
 	public DateRange getFullDateRange() {
-		String compositeId = getId(tree.getFinestResolution().getSeconds());
-		Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
-		Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
-		if( start != null && end != null ) {
-			return new DateRange( start, end );
+		DateRange range = SequenceCache.get( this );
+		if( range == null ) {
+			String compositeId = getId(tree.getFinestResolution().getSeconds());
+			Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
+			Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
+			if( start != null && end != null ) {
+				range = new DateRange( start, end );
+				SequenceCache.put( this, range );
+			}
 		}
-		return null;
+		return range;
 	}
 	
 	private Date findMetricEdgeDate( String compositeId, Long first, Long last, boolean reversed ) {
@@ -198,6 +203,4 @@ public class CassandraMetricTreeNode implements MetricTreeNode, CassandraMetricP
 			return false;
 		return true;
 	}
-	
-	
 }
