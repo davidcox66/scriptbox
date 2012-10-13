@@ -87,7 +87,7 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 					Lookup beans = ctx.getBeans();
 					MetricTree tree = beans.get( "metric.tree", MetricTree.class );
 					if( tree == null ) {
-						tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30) );
+						tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30,300,900,1800) );
 						beans.put( "metric.tree", tree );
 					}
 					MetricTreeNode root = tree.getRoot();
