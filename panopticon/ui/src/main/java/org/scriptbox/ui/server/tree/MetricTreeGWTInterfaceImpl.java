@@ -157,7 +157,7 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 						LOGGER.debug( "getReports: loaded report " + report.getName() );
 						ArrayList<String> charts = new ArrayList<String>();
 						for( ReportElement element : report.getElements() ) {
-							LOGGER.debug( "getReports: processing chart " + element.getTitle() );
+							// LOGGER.debug( "getReports: processing chart " + element.getTitle() );
 							charts.add( element.getTitle() );
 						}
 						MetricReportSummaryDto summaryDto = new MetricReportSummaryDto();
@@ -166,7 +166,7 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 						ret.add( summaryDto );
 					}
 					catch( Exception ex ) {
-						LOGGER.error( "getReports: failed loading report: " + reportFile );
+						LOGGER.error( "getReports: failed loading report: " + reportFile, ex );
 					}
 				}
 			}

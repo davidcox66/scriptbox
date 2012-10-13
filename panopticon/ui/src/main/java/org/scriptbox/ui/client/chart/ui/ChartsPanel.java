@@ -1,4 +1,4 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,9 @@ import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MultiMetric;
+import org.scriptbox.ui.client.chart.controller.LineChartController;
+import org.scriptbox.ui.client.chart.controller.ReportChartController;
+import org.scriptbox.ui.client.chart.model.MultiLineChart;
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
@@ -31,17 +34,20 @@ import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.IntegerProper
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
-public class ChartListPanel extends ContentPanel {
+public class ChartsPanel extends ContentPanel {
 
-	private static final Logger logger = Logger.getLogger("ChartListPanel");
+	private static final Logger logger = Logger.getLogger("ChartsPanel");
 
+	private static final int HEIGHT = 350;
+	private static final int HEADER = 45;
+	
 	private MetricTreeGWTInterfaceAsync service;
 	private PortalLayoutContainer portal;
 	private List<Portlet> portlets = new ArrayList<Portlet>();
 	private	NumberField<Integer> limit;
 	private MetricTreeDto tree;
 	
-	public ChartListPanel( MetricTreeGWTInterfaceAsync service ) {
+	public ChartsPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		setHeadingText("Chart");
 		
@@ -60,43 +66,35 @@ public class ChartListPanel extends ContentPanel {
 	}
 
 	public void load( final MetricTreeNodeDto node ) {
-		final ChartController controller = new ChartController( service );
+		final LineChartController controller = new LineChartController( service );
 		enforceChartLimit( 1, null );
 		controller.load( node, new Runnable() {
 			public void run() {
-				Chart<Metric> chart = controller.getChart();
+				Chart<Metric> chart = controller.getChart().getChart();
 				chart.setDefaultInsets(10);
-				addChartPortlet( node.getId(), chart );
+				addChartPortlet( node.getId(), chart, HEIGHT );
 			}
 		} );
 	}
 
 	public void load( final MetricReportSummaryDto report ) {
 		if( tree != null ) {
-			final ReportController controller = new ReportController( service );
+			final ReportChartController controller = new ReportChartController( service );
 			enforceChartLimit( 1, null );
 			controller.load( tree.getTreeName(), report.getName(), new Runnable() {
 				public void run() {
-					List<MultiMetricChartHolder> holders = controller.getCharts();
+					List<MultiLineChart> charts = controller.getCharts();
 					VerticalLayoutContainer layout = new VerticalLayoutContainer();
-					for( MultiMetricChartHolder holder : holders ) {
-						Chart<MultiMetric> chart = holder.getChart();
-						chart.setDefaultInsets(10);
+					for( MultiLineChart chart : charts ) {
+						Chart<MultiMetric> ch = chart.getChart();
+						ch.setDefaultInsets(10);
 						
 						ContentPanel panel = new ContentPanel();
-						panel.setHeadingText(holder.getTitle());
-						panel.add( chart );
-						layout.add( panel, new VerticalLayoutData(1,350) );
+						panel.setHeadingText(chart.getTitle());
+						panel.add( ch );
+						layout.add( panel, new VerticalLayoutData(1,HEIGHT) );
 					}
-					addChartPortlet( report.getName(), layout );
-					/*
-					for( MultiMetricChartHolder holder : holders ) {
-						Chart<MultiMetric> chart = holder.getChart();
-						chart.setPixelSize(600, 350);
-						chart.setDefaultInsets(10);
-						addChartPortlet( report.getName(), chart );
-					}
-					*/
+					addChartPortlet( report.getName(), layout, charts.size() * (HEIGHT+HEADER)  );
 				}
 			} );
 		}
@@ -164,12 +162,14 @@ public class ChartListPanel extends ContentPanel {
 		vertical.add( portal, new VerticalLayoutData(1,1) );
 	}
 	
-	private void addChartPortlet( String title, Widget widget ) {
+	private void addChartPortlet( String title, Widget widget, int height ) {
 	    Portlet portlet = new Portlet();
 	    portlet.setHeadingText( title );
 	    configPortlet( portlet );
 	    portlet.add( widget );
-	    portlet.setHeight( 350 );
+	    if( height != 0 ) {
+	    	portlet.setHeight( height );
+	    }
 	    portal.insert(portlet, 0, 0);
 		portlets.add( 0, portlet );
 	}

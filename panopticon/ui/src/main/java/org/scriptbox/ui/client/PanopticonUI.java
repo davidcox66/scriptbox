@@ -3,6 +3,7 @@ package org.scriptbox.ui.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.scriptbox.ui.client.chart.ui.ChartPerspective;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 
@@ -30,7 +31,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	private static final Logger logger = Logger.getLogger("PanopticonUI");
 
 	private CardLayoutContainer cards;
-	private ChartView chartView;
+	private ChartPerspective chartView;
 	private Menu viewMenu ;
 	private MetricTreeGWTInterfaceAsync service; 
 	
@@ -72,7 +73,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 			}
 		} );
 		service = GWT.create(MetricTreeGWTInterface.class);
-		chartView = new ChartView( service );
+		chartView = new ChartPerspective( service );
 		chartView.load();
 		
 	    Viewport viewport = new Viewport();

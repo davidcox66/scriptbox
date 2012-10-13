@@ -1,4 +1,4 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.ui;
 
 import java.util.logging.Logger;
 
@@ -19,21 +19,21 @@ import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
 import com.sencha.gxt.widget.core.client.container.MarginData;
 
-public class ChartView implements IsWidget {
+public class ChartPerspective implements IsWidget {
 
-	private static final Logger logger = Logger.getLogger("ChartView");
+	private static final Logger logger = Logger.getLogger("ChartPerspective");
 
-	private MetricListPanel listPanel;
-	private MetricTreePanel treePanel;
-	private MetricReportPanel reportPanel;
-	private ChartListPanel chartListPanel;
+	private ListPanel listPanel;
+	private TreePanel treePanel;
+	private ReportPanel reportPanel;
+	private ChartsPanel chartListPanel;
 	
-	public ChartView( MetricTreeGWTInterfaceAsync service ) {
+	public ChartPerspective( MetricTreeGWTInterfaceAsync service ) {
 		
-		listPanel = new MetricListPanel( service );
-		treePanel = new MetricTreePanel( service );
-		reportPanel = new MetricReportPanel( service );
-		chartListPanel = new ChartListPanel( service );
+		listPanel = new ListPanel( service );
+		treePanel = new TreePanel( service );
+		reportPanel = new ReportPanel( service );
+		chartListPanel = new ChartsPanel( service );
 		
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
 	        @Override

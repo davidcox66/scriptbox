@@ -1,10 +1,9 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -18,18 +17,15 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.ListView;
-import com.sencha.gxt.widget.core.client.Portlet;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
-import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
-public class MetricReportPanel extends VerticalLayoutContainer {
+public class ReportPanel extends VerticalLayoutContainer {
 
-	private static final Logger logger = Logger.getLogger("MetricReportPanel");
+	private static final Logger logger = Logger.getLogger("ReportPanel");
 	
 	public interface MetricReportDtoAccess extends PropertyAccess<MetricReportSummaryDto> {
 		@Path("name")
@@ -42,7 +38,7 @@ public class MetricReportPanel extends VerticalLayoutContainer {
 	private ListView<MetricReportSummaryDto,String> list;
 	private ListStore<MetricReportSummaryDto> store;
 	
-	public MetricReportPanel( MetricTreeGWTInterfaceAsync service ) {
+	public ReportPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		
 		MetricReportDtoAccess access = GWT.create(MetricReportDtoAccess.class);

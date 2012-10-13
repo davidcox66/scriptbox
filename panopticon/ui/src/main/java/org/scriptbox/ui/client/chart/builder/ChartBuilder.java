@@ -1,4 +1,4 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.builder;
 
 import java.util.Date;
 

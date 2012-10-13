@@ -1,4 +1,4 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.ui;
 
 import java.util.logging.Logger;
 
@@ -20,9 +20,9 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
-public class MetricTreePanel extends VerticalLayoutContainer {
+public class TreePanel extends VerticalLayoutContainer {
 
-	private static final Logger logger = Logger.getLogger("MetricTreePanel");
+	private static final Logger logger = Logger.getLogger("TreePanel");
 
 	private MetricTreeGWTInterfaceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
@@ -32,7 +32,7 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		tree.getSelectionModel().addSelectionHandler( handler );
 	}
 	
-	public MetricTreePanel( MetricTreeGWTInterfaceAsync service ) {
+	public TreePanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		buildStore();
 		buildToolBar();

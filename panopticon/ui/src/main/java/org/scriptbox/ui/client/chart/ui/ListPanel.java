@@ -1,4 +1,4 @@
-package org.scriptbox.ui.client;
+package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -19,9 +19,9 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 
-public class MetricListPanel extends VerticalLayoutContainer {
+public class ListPanel extends VerticalLayoutContainer {
 
-	private static final Logger logger = Logger.getLogger("MetricTreePanel");
+	private static final Logger logger = Logger.getLogger("TreePanel");
 	
 	public interface MetricTreeDtoAccess extends PropertyAccess<MetricTreeDto> {
 		@Path("treeName")
@@ -34,7 +34,7 @@ public class MetricListPanel extends VerticalLayoutContainer {
 	private ListView<MetricTreeDto,String> list;
 	private ListStore<MetricTreeDto> store;
 	
-	public MetricListPanel( MetricTreeGWTInterfaceAsync service ) {
+	public ListPanel( MetricTreeGWTInterfaceAsync service ) {
 		this.service = service;
 		
 		MetricTreeDtoAccess access = GWT.create(MetricTreeDtoAccess.class);
