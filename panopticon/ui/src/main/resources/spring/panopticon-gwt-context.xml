@@ -58,7 +58,7 @@
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace" />
     	
-    <bean name="treeService" class="org.scriptbox.ui.server.tree.MetricTreeGWTInterfaceImpl"
+    <bean name="treeService" class="org.scriptbox.ui.server.tree.ChartGWTServiceImpl"
     	p:store-ref="store">
     	<property name="reportPaths">
     		<list>

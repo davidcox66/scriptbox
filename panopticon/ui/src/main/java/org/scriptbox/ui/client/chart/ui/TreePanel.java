@@ -3,7 +3,7 @@ package org.scriptbox.ui.client.chart.ui;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
@@ -24,7 +24,7 @@ public class TreePanel extends VerticalLayoutContainer {
 
 	private static final Logger logger = Logger.getLogger("TreePanel");
 
-	private MetricTreeGWTInterfaceAsync service; 
+	private ChartGWTServiceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
 	private TreeStore<MetricTreeNodeDto> store;
 	private MetricTreeDto treeDto;
@@ -33,7 +33,7 @@ public class TreePanel extends VerticalLayoutContainer {
 		tree.getSelectionModel().addSelectionHandler( handler );
 	}
 	
-	public TreePanel( MetricTreeGWTInterfaceAsync service ) {
+	public TreePanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		buildStore();
 		buildToolBar();

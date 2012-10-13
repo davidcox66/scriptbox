@@ -49,7 +49,6 @@ public class MultiLineChart {
 		timeAxis.setStartDate(start);
 		timeAxis.setEndDate(end);
 
-		legend = ChartBuilder.buildLegend( MultiMetric.class );
 	    
 		store = MultiLineChartBuilder.buildListStore();
 		store.replaceAll(dto.getData());
@@ -58,7 +57,11 @@ public class MultiLineChart {
 		chart.setStore(store);
 		chart.addAxis(timeAxis);
 		chart.addAxis(valueAxis);
-	    chart.setLegend(legend);
+		
+		if( dto.getLines().size() > 1 ) {
+			legend = ChartBuilder.buildLegend( MultiMetric.class );
+		    chart.setLegend(legend);
+		}
 
 		series = new ArrayList<LineSeries<MultiMetric>>();
 		int i=0;

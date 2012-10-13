@@ -128,7 +128,7 @@
 					documentation at codehaus.org -->
 				<configuration>
 					<!-- Pattern for interfaces which will get Async ones generated automatically -->
-					<servicePattern>**/*GWTInterface.java</servicePattern>
+					<servicePattern>**/*GWTService.java</servicePattern>
 					<!-- URL that should be automatically opened in the GWT shell (gwt:run). -->
 					<runTarget>Panopticon.html</runTarget>
 					<!-- Location of the develop-mode web application structure (gwt:run). -->

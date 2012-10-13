@@ -9,7 +9,7 @@ import org.scriptbox.ui.client.chart.model.LineChart;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
 import org.scriptbox.ui.shared.tree.MetricQueryDto;
 import org.scriptbox.ui.shared.tree.MetricRangeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,11 +24,11 @@ public class LineChartController {
 	
 	// private Timer update;
 
-	private MetricTreeGWTInterfaceAsync service; 
+	private ChartGWTServiceAsync service; 
 	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private LineChart chart;
 	
-	public LineChartController( MetricTreeGWTInterfaceAsync service ) {
+	public LineChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
 		proxy = new RpcProxy<MetricQueryDto, MetricRangeDto>() {
 			@Override

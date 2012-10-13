@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor.Path;
@@ -34,11 +34,11 @@ public class ReportPanel extends VerticalLayoutContainer {
 	}
 
 
-	private MetricTreeGWTInterfaceAsync service; 
+	private ChartGWTServiceAsync service; 
 	private ListView<MetricReportSummaryDto,String> list;
 	private ListStore<MetricReportSummaryDto> store;
 	
-	public ReportPanel( MetricTreeGWTInterfaceAsync service ) {
+	public ReportPanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		
 		MetricReportDtoAccess access = GWT.create(MetricReportDtoAccess.class);

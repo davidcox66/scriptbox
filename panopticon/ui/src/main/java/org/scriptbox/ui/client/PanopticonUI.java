@@ -4,8 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.client.chart.ui.ChartPerspective;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTService;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -33,7 +33,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	private CardLayoutContainer cards;
 	private ChartPerspective chartView;
 	private Menu viewMenu ;
-	private MetricTreeGWTInterfaceAsync service; 
+	private ChartGWTServiceAsync service; 
 	
 	@Override
 	public Widget asWidget() {
@@ -72,7 +72,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 				logger.log( Level.SEVERE, "Uncaught exception", ex ); 
 			}
 		} );
-		service = GWT.create(MetricTreeGWTInterface.class);
+		service = GWT.create(ChartGWTService.class);
 		chartView = new ChartPerspective( service );
 		chartView.load();
 		

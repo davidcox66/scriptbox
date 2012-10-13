@@ -11,7 +11,7 @@ import org.scriptbox.ui.client.chart.controller.ReportChartController;
 import org.scriptbox.ui.client.chart.model.MultiLineChart;
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -39,15 +39,15 @@ public class ChartsPanel extends ContentPanel {
 	private static final Logger logger = Logger.getLogger("ChartsPanel");
 
 	private static final int HEIGHT = 350;
-	private static final int HEADER = 45;
+	private static final int HEADER = 25;
 	
-	private MetricTreeGWTInterfaceAsync service;
+	private ChartGWTServiceAsync service;
 	private PortalLayoutContainer portal;
 	private List<Portlet> portlets = new ArrayList<Portlet>();
 	private	NumberField<Integer> limit;
 	private MetricTreeDto tree;
 	
-	public ChartsPanel( MetricTreeGWTInterfaceAsync service ) {
+	public ChartsPanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		setHeadingText("Chart");
 		

@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 
@@ -28,7 +28,7 @@ public class ChartPerspective implements IsWidget {
 	private ReportPanel reportPanel;
 	private ChartsPanel chartListPanel;
 	
-	public ChartPerspective( MetricTreeGWTInterfaceAsync service ) {
+	public ChartPerspective( ChartGWTServiceAsync service ) {
 		
 		listPanel = new ListPanel( service );
 		treePanel = new TreePanel( service );

@@ -30,7 +30,7 @@ import org.scriptbox.ui.shared.tree.MetricRangeDto;
 import org.scriptbox.ui.shared.tree.MetricReportDto;
 import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterface;
+import org.scriptbox.ui.shared.tree.ChartGWTService;
 import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
 import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
@@ -46,9 +46,9 @@ import org.springframework.context.annotation.Scope;
 // @Service("treeService")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @ExportableService(value="treeService",scope=ServiceScope.SESSION)
-public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
+public class ChartGWTServiceImpl implements ChartGWTService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( MetricTreeGWTInterfaceImpl.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( ChartGWTServiceImpl.class );
 	
 	private MetricStore store;
 	private List<String> reportPaths;
@@ -103,6 +103,11 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 		finally {
 			store.end();
 		}
+	}
+	
+	public void delete( MetricTreeDto treeDto ) {
+		MetricTree tree = getTreeByName(treeDto.getTreeName());
+		tree.delete();
 	}
 	
 	public MetricRangeDto getMetrics( MetricQueryDto query ) {

@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import org.scriptbox.ui.client.chart.model.MultiLineChart;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
 import org.scriptbox.ui.shared.tree.MetricReportDto;
-import org.scriptbox.ui.shared.tree.MetricTreeGWTInterfaceAsync;
+import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
 import org.scriptbox.ui.shared.tree.ReportQueryDto;
 
@@ -21,11 +21,11 @@ public class ReportChartController {
 
 	private static final Logger logger = Logger.getLogger("ReportChartController");
 	
-	private MetricTreeGWTInterfaceAsync service; 
+	private ChartGWTServiceAsync service; 
 	private ArrayList<MultiLineChart> charts;
 	private RpcProxy<ReportQueryDto, MetricReportDto> proxy;
 	
-	public ReportChartController( MetricTreeGWTInterfaceAsync service ) {
+	public ReportChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
 		proxy = new RpcProxy<ReportQueryDto, MetricReportDto>() {
 			@Override
