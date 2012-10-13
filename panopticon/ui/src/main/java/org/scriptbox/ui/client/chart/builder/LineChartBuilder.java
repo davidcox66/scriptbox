@@ -15,7 +15,7 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 
-public class MetricChartBuilder extends ChartBuilder {
+public class LineChartBuilder extends ChartBuilder {
 
 	private static ValueProvider<Metric,Float> valueProvider = new ValueProvider<Metric,Float>() {
 		public Float getValue(Metric metric) {

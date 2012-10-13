@@ -35,6 +35,6 @@ public class Metric implements Serializable {
 	}
 	
 	public String toString() {
-		return "Metric{ millis=" + millis + ", value=" + value + " }";
+		return "Metric{ millis=" + millis + ", date=" + getDate() + ", value=" + value + " }";
 	}
 }

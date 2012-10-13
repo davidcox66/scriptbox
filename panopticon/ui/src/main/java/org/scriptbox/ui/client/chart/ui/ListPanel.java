@@ -17,7 +17,11 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
 public class ListPanel extends VerticalLayoutContainer {
 
@@ -42,6 +46,7 @@ public class ListPanel extends VerticalLayoutContainer {
 		store = new ListStore<MetricTreeDto>(access.key());
 		list = new ListView<MetricTreeDto,String>(store,access.treeName());
 		list.getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
+		buildToolBar();
 	    add(list, new VerticalLayoutData(1, 1));
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
@@ -62,4 +67,17 @@ public class ListPanel extends VerticalLayoutContainer {
 		list.getSelectionModel().addSelectionHandler( handler );
 	}
 	
+	private void buildToolBar() {
+		ToolBar bar = new ToolBar();
+		buildReload( bar );
+		add( bar, new VerticalLayoutData(1,-1) );
+	}
+	
+	private void buildReload( ToolBar bar ) {
+		bar.add(new TextButton("Reload", new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				load();
+			}
+		}));
+	}
 }

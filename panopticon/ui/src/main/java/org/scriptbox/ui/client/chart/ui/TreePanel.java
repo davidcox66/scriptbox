@@ -27,6 +27,7 @@ public class TreePanel extends VerticalLayoutContainer {
 	private MetricTreeGWTInterfaceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
 	private TreeStore<MetricTreeNodeDto> store;
+	private MetricTreeDto treeDto;
 	
 	public void addSelectionHandler( SelectionHandler<MetricTreeNodeDto> handler ) {
 		tree.getSelectionModel().addSelectionHandler( handler );
@@ -51,6 +52,11 @@ public class TreePanel extends VerticalLayoutContainer {
 	
 	private void buildToolBar() {
 		ToolBar buttonBar = new ToolBar();
+		buttonBar.add(new TextButton("Reload", new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				load();
+			}
+		}));
 		buttonBar.add(new TextButton("Expand All", new SelectHandler() {
 			public void onSelect(SelectEvent event) {
 				tree.expandAll();
@@ -79,7 +85,14 @@ public class TreePanel extends VerticalLayoutContainer {
 	    add(tree, new VerticalLayoutData(1, 1));
 	}
 	
+	public void load() {
+		if( treeDto != null ) {
+			load( treeDto );
+		}
+	}
+	
 	public void load( MetricTreeDto treeDto ) {
+		this.treeDto = treeDto;
 		AsyncCallback<MetricTreeParentNodeDto> callback = new AsyncCallback<MetricTreeParentNodeDto>() {
 			 public void onFailure(Throwable ex) {
 				 logger.info( "Failed getting tree: " + ex );

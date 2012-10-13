@@ -3,7 +3,7 @@ package org.scriptbox.ui.client.chart.model;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
-import org.scriptbox.ui.client.chart.builder.MetricChartBuilder;
+import org.scriptbox.ui.client.chart.builder.LineChartBuilder;
 import org.scriptbox.ui.shared.tree.MetricRangeDto;
 
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -26,17 +26,17 @@ public class LineChart {
 	private ListStore<Metric> store;
 	
 	public LineChart( MetricRangeDto dto ) {
-		store = MetricChartBuilder.buildListStore();
+		store = LineChartBuilder.buildListStore();
 		store.replaceAll(dto.getData());
 		
-		timeAxis = MetricChartBuilder.buildTimeAxis();
-		valueAxis = MetricChartBuilder.buildValueAxis();
-		series = MetricChartBuilder.buildValueSeries( new RGB(255,0,0) );
+		timeAxis = LineChartBuilder.buildTimeAxis();
+		valueAxis = LineChartBuilder.buildValueAxis();
+		series = LineChartBuilder.buildValueSeries( new RGB(255,0,0) );
 		
 	    timeAxis.setStartDate(dto.getStart());
         timeAxis.setEndDate(dto.getEnd());
         
-        MetricChartBuilder.fixEmptySeries(valueAxis, dto.getData() );
+        LineChartBuilder.fixEmptySeries(valueAxis, dto.getData() );
         
 		chart = new Chart<Metric>();
 		chart.setStore(store);

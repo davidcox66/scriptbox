@@ -1,6 +1,7 @@
 package org.scriptbox.ui.client.chart.builder;
 
 import java.util.Date;
+import java.util.List;
 
 import org.scriptbox.metrics.model.MultiMetric;
 
@@ -14,7 +15,7 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 
-public class MultiMetricChartBuilder extends ChartBuilder {
+public class MultiLineChartBuilder extends ChartBuilder {
 
 	private static ValueProvider<MultiMetric,Date> dateProvider = new ValueProvider<MultiMetric,Date>() {
 		public Date getValue(MultiMetric metric) {
@@ -37,7 +38,7 @@ public class MultiMetricChartBuilder extends ChartBuilder {
 		
 		private int index;
 		
-		public MultiMetricValueProvider(int index ) {
+		public MultiMetricValueProvider( int index ) {
 			this.index = index;
 		}
 		
@@ -55,9 +56,9 @@ public class MultiMetricChartBuilder extends ChartBuilder {
 		return new ListStore<MultiMetric>(keyProvider);	
 	}
 	
-	public static NumericAxis<MultiMetric> buildValueAxis( int count ) {
+	public static NumericAxis<MultiMetric> buildValueAxis( List<String> labels ) {
 		NumericAxis<MultiMetric> valueAxis = buildValueAxis(MultiMetric.class);
-		for( int i=0 ; i < count ; i++ ) {
+		for( int i=0 ; i < labels.size() ; i++ ) {
 			valueAxis.addField(new MultiMetricValueProvider(i) );
 		}
 		return valueAxis;
@@ -71,14 +72,15 @@ public class MultiMetricChartBuilder extends ChartBuilder {
 	
 	public static LineSeries<MultiMetric> buildValueSeries( final String label, final int index, Color color ) {
 		LineSeries<MultiMetric> series = buildValueSeries( MultiMetric.class, color );
+		series.setLegendTitle( label );
 		series.setYField( new MultiMetricValueProvider(index) );
 		SeriesToolTipConfig<MultiMetric> toolTip = new SeriesToolTipConfig<MultiMetric>();
 	    toolTip.setTrackMouse(true);
-	    toolTip.setHideDelay(20);
+	    toolTip.setHideDelay(10);
 	    toolTip.setLabelProvider(new SeriesLabelProvider<MultiMetric>() {
 	      @Override
 	      public String getLabel(MultiMetric item, ValueProvider<? super MultiMetric, ? extends Number> valueProvider) {
-	        return dateFormat.format(item.getDate()) + " - " + label + " - " + item.getValues()[index];
+	        return dateFormat.format(item.getDate()) + " : " + item.getValues()[index] + " : " + label;
 	      }
 	    });
 	    series.setToolTipConfig(toolTip);

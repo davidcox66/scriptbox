@@ -8,8 +8,8 @@ import org.scriptbox.metrics.query.main.MetricProvider;
 
 public abstract class MetricRange implements MetricProvider {
 
-	private long start;
-	private long end;
+	protected long start;
+	protected long end;
 	
 	public MetricRange( long start, long end ) {
 		this.start = start;

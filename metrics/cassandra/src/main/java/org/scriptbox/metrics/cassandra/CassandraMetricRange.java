@@ -1,6 +1,7 @@
 package org.scriptbox.metrics.cassandra;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -146,6 +147,6 @@ public class CassandraMetricRange extends MetricRange implements CassandraMetric
 	}
 
 	public String toString() {
-		return "CassandraMetricRange{ name=" + getName() + ", start=" + getStart() + ", end=" + getEnd() + " }";
+		return "CassandraMetricRange{ name=" + getName() + ", start=" + new Date(getStart()) + ", end=" + new Date(getEnd()) + " }";
 	}
 }

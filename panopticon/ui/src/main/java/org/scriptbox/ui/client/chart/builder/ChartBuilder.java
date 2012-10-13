@@ -5,6 +5,7 @@ import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sencha.gxt.chart.client.chart.Chart.Position;
+import com.sencha.gxt.chart.client.chart.Legend;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
 import com.sencha.gxt.chart.client.chart.axis.TimeAxis;
 import com.sencha.gxt.chart.client.chart.series.LineSeries;
@@ -33,6 +34,14 @@ public class ChartBuilder {
 
 		// valueAxis.setMinimum(0); 
 		return valueAxis;
+	}
+	
+	public static <X> Legend<X> buildLegend( Class<X> cls ) {
+		Legend<X> legend = new Legend<X>();
+	    legend.setPosition(Position.BOTTOM);
+	    legend.setItemHighlighting(true);
+	    legend.setItemHiding(true);
+	    return legend;	
 	}
 	
 	protected static <X> TimeAxis<X> buildTimeAxis( Class<X> cls ) {

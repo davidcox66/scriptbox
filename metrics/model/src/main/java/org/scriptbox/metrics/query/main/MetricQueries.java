@@ -70,6 +70,7 @@ public class MetricQueries {
 			} else {
 				List<X> ret = new ArrayList<X>(1);
 				ret.add((X) obj);
+				return ret;
 			}
 		}
 		return null;

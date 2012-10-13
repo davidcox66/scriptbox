@@ -14,22 +14,38 @@ public class ListBackedMetricRange extends MetricRange {
 	private String name;
 	private String id;
 	private List<Metric> metrics;
-	private DateRange dates;
+	private DateRange fullDateRange;
 	
-	public ListBackedMetricRange( String name, String id, DateRange dates, long start, long end, List<Metric> metrics ) {
+	public ListBackedMetricRange( String name, String id, DateRange fullDateRange, long start, long end, List<Metric> metrics ) {
 		super( start, end );
 		this.name = name;
 		this.id = id;
 		this.metrics = metrics;
-		this.dates = dates;
+		this.fullDateRange = fullDateRange;
 	}
 
+	public void setStart( long start ) {
+		this.start = start;
+	}
+	
+	public void setEnd( long end ) {
+		this.end = end;
+	}
+	
 	public String getName() {
 		return name;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getId() {
 		return id;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
 	}
 	
 	public boolean isPersistent() {
@@ -45,10 +61,22 @@ public class ListBackedMetricRange extends MetricRange {
 		return this;
 	}
 
-	public DateRange getFullDateRange() {
-		return dates;
+	public List<Metric> getMetrics() {
+		return metrics;
+	}
+
+	public void setMetrics(List<Metric> metrics) {
+		this.metrics = metrics;
 	}
 	
+	public void setFullDateRange(DateRange fullDateRange) {
+		this.fullDateRange = fullDateRange;
+	}
+
+	public DateRange getFullDateRange() {
+		return fullDateRange;
+	}
+
 	@Override
 	public Iterator<Metric> getIterator(int resolution) {
 		return metrics.iterator();
@@ -80,7 +108,7 @@ public class ListBackedMetricRange extends MetricRange {
 	}
 
 	public String toString() {
-		return "ListBackedMetricRange{ name=" + getName() + ", start=" + getStart() + ", end=" + getEnd() + ", size=" + metrics.size() + " }";
+		return "ListBackedMetricRange{ name=" + getName() + ", start=" + new Date(getStart()) + ", end=" + new Date(getEnd()) + ", size=" + metrics.size() + " }";
 	}
 	
 }

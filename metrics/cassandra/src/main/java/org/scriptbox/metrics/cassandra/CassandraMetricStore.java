@@ -175,9 +175,14 @@ public class CassandraMetricStore implements MetricStore {
 			millis = iter.next();
 			metric = new Metric( millis, results.getFloat(millis) );
 			// If first metric is not near the beginning, try to find last previous value
-			if( millis >= (start + resolution*1000) ) {
-				Metric before = findRangeExteriorMetric(results.getKey(), start, null, true );
-				metrics.add( new Metric(start, before != null ? before.getValue() : metric.getValue()) );
+			if( start > Long.MIN_VALUE && millis >= (start + resolution*1000) ) {
+				Metric before = findRangeExteriorMetric(results.getKey(), metric.getMillis(), Long.MIN_VALUE, true );
+				if( before != null ) {
+					metrics.add( new Metric(Math.max(before.getMillis(),start), before.getValue()) );
+				}
+				else {
+					metrics.add( new Metric( start, metric.getValue()) );
+				}
 			}
 			metrics.add( metric );
 		}
@@ -190,15 +195,20 @@ public class CassandraMetricStore implements MetricStore {
 		if( metrics.size() > 0 ) {
 			metric = metrics.get( metrics.size()-1 );
 			// If last value was not near the end, search beyond for the next value
-			if( metric.getMillis() <= (end - resolution*1000) ) {
-				Metric after = findRangeExteriorMetric(results.getKey(), end, Long.MAX_VALUE, false );
-				metrics.add( new Metric(end, after != null ? after.getValue() : metric.getValue()) );
+			if( end < Long.MAX_VALUE && metric.getMillis() <= (end - resolution*1000) ) {
+				Metric after = findRangeExteriorMetric(results.getKey(), metric.getMillis(), Long.MAX_VALUE, false );
+				if( after != null ) {
+					metrics.add( new Metric(Math.min(end,after.getMillis()), after.getValue()) );
+				}
+				else {
+					metrics.add( new Metric(end, metric.getValue()) );
+				}
 			}
 		}
 		return metrics;
 	}
 		
-	Metric findRangeExteriorMetric( String compositeId, Long first, Long last, boolean reversed ) {
+	Metric findRangeExteriorMetric( String compositeId, long first, long last, boolean reversed ) {
 		HSlicePredicate<Long> predicate = new HSlicePredicate<Long>( LongSerializer.get() );
 		predicate.setRange(first, last, reversed, 1 );
 		ColumnFamilyResult<String,Long> result = metricSequenceTemplate.queryColumns( compositeId, predicate );

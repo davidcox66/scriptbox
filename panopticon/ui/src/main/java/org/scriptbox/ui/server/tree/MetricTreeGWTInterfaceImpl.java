@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.scriptbox.metrics.compute.MetricCollator;
@@ -213,19 +214,9 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 					lines.add( entry.getKey().getId() );
 					ranges.add( entry.getValue() );
 				}
-			
-				//
-				// Convert the multiple ranges into a single range of MultiMetric where each MultiMetric
-				// has values from each of the original ranges. This format is more acceptable to the 
-				// GXT charting APIs
-				//
-				final List<MultiMetric> metrics = new ArrayList<MultiMetric>( 128 ); // Just a reasonable starting point
-				MetricCollator collator = new MetricCollator( element.getTitle(), element.getTitle(), 30, ranges );
-				collator.multi( new ParameterizedRunnable<MultiMetric>() {
-					public void run( MultiMetric metric ) {
-						metrics.add( metric );
-					}
-				});
+				trimUniquePortionOfIds( lines );
+				final List<MultiMetric> metrics = toMultiMetrics( element, ranges );
+				
 				// Compute the overall date range of the report
 				if( metrics.size() > 0 ) {
 					first = Math.min(first, metrics.get(0).getMillis() );
@@ -239,15 +230,44 @@ public class MetricTreeGWTInterfaceImpl implements MetricTreeGWTInterface {
 			reportDto.setFirst( new Date(first) );
 			reportDto.setLast( new Date(last) );
 			
-			LOGGER.debug( "getReport: finished generating report: " + report.getName() );
+			LOGGER.debug( "getReport: finished generating report: " + report.getName() + ", tree: " + query.getTreeName() );
 			return reportDto;
+		}
+		catch( Exception ex ) {
+			LOGGER.error( "getReport: error generating report: " + query.getReportName() + ", tree: " + query.getTreeName(), ex );
+			throw ex;
 		}
 		finally {
 			store.end();
 		}
 	}
-	// public Metric whitelist1( Metric value ) { return null; }
+
+	private void trimUniquePortionOfIds( List<String> ids ) {
+		if( ids.size() > 1 ) {
+			IntRange indices = StringTrimmer.getStringCollectionUniqueNamePortion( ids );
+			for( ListIterator<String> iter = ids.listIterator() ; iter.hasNext(); ) {
+				String id = iter.next();
+				iter.set( id.substring(indices.getStart(),id.length()+indices.getEnd()) );
+			}
+		}
+	}
 	
+	private List<MultiMetric> toMultiMetrics( ReportElement element, List<MetricRange> ranges ) throws Exception {
+		//
+		// Convert the multiple ranges into a single range of MultiMetric where each MultiMetric
+		// has values from each of the original ranges. This format is more acceptable to the 
+		// GXT charting APIs
+		//
+		final List<MultiMetric> metrics = new ArrayList<MultiMetric>( 128 ); // Just a reasonable starting point
+		MetricCollator collator = new MetricCollator( element.getTitle(), element.getTitle(), 30, ranges );
+		collator.multi( new ParameterizedRunnable<MultiMetric>() {
+			public void run( MultiMetric metric ) {
+				metrics.add( metric );
+			}
+		});
+		return metrics;
+	}
+
 	private Report getReportByName( String name ) {
 		Report report = reports.get( name );
 		if( report == null ) {

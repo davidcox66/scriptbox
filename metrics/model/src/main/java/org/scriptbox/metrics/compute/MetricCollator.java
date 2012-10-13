@@ -47,10 +47,12 @@ public class MetricCollator {
 	    for( MetricRange range : ranges ) {
 	    	DateRange dr = range.getFullDateRange();
 	    	first = Math.min(first, dr.getStart().getTime());
-	    	last = Math.min(last, dr.getEnd().getTime());
+	    	last = Math.max(last, dr.getEnd().getTime());
 	    	start = Math.min(start, range.getStart() );
 	    	end = Math.max(end, range.getEnd() );
 	    }
+	    start = Math.max(start, first);
+	    end = Math.min(end, last);
 	    dates = new DateRange( new Date(first), new Date(last) ); 
 	}
 
@@ -136,22 +138,27 @@ public class MetricCollator {
 	
 		int i=0;
 		for( MetricRange range : ranges ) {
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "collate: range[" + i + "]=" + range ); }
 			Iterator<Metric> iter = range.getIterator( seconds );
-			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i++,iter) : iter );
+			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i,iter) : iter );
+			i++;
 		}
 		
 		final List<Metric> block = new ArrayList<Metric>();
+		final ListBackedMetricRange tmp = new ListBackedMetricRange(null,null,dates,0,0,block );
 		long current = 0;
 		while( citer.hasNext() ) {
 			Metric mv = (Metric)citer.next();
 		    long bucket = mv.getMillis() / seconds;     
 		    if( current != 0 && bucket != current ) {
-		    	long begin = current * seconds; 
-		    	long end = begin + seconds*1000;
-		        Metric result = closure.run( new ListBackedMetricRange(null,null,dates,begin,end,block) );
+		    	long bstart = current * seconds; 
+		    	long bend = bstart + seconds*1000;
+		    	tmp.setStart( bstart );
+		    	tmp.setEnd( bend );
+		        Metric result = closure.run( tmp );
 			    if( LOGGER.isTraceEnabled() ) { 
-			    	Date dt = new Date( begin );
-			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + begin + "), result: " + result + ", block: " + block ); 
+			    	Date dt = new Date( bstart );
+			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + bstart + "), result: " + result + ", block: " + block ); 
 			    }
 		        if( result != null ) {
 		          ret.add( result );  
