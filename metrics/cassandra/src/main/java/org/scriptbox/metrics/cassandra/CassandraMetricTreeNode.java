@@ -62,8 +62,8 @@ public class CassandraMetricTreeNode implements MetricTreeNode, CassandraMetricP
 		DateRange range = SequenceCache.get( this );
 		if( range == null ) {
 			String compositeId = getId(tree.getFinestResolution().getSeconds());
-			Date start = findMetricEdgeDate( compositeId, 0L, Long.MAX_VALUE, false );
-			Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, 0L, true );
+			Date start = findMetricEdgeDate( compositeId, Long.MIN_VALUE, Long.MAX_VALUE, false );
+			Date end = findMetricEdgeDate( compositeId, Long.MAX_VALUE, Long.MIN_VALUE, true );
 			if( start != null && end != null ) {
 				range = new DateRange( start, end );
 				SequenceCache.put( this, range );
