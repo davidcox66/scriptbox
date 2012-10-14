@@ -40,7 +40,7 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	  public Object evaluate( MetricQueryContext ctx ) throws Exception {
 		 
 		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
-	      List<CriticalValue> cvs = new ArrayList<CriticalValue>();
+	      List<CriticalValue> cvs = new ArrayList<CriticalValue>(metrics.size());
 	      for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : metrics.entrySet() ) {
 	    	  float cv = filter( entry.getValue() );
 	    	  cvs.add( new CriticalValue(entry.getKey(),cv) );
