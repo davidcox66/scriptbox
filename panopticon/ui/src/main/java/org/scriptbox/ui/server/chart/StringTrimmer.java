@@ -1,4 +1,4 @@
-package org.scriptbox.ui.server.tree;
+package org.scriptbox.ui.server.chart;
 
 import java.util.Collection;
 

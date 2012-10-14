@@ -16,6 +16,7 @@
   <inherits name="com.sencha.gxt.ui.GXT" />
   <inherits name='com.sencha.gxt.chart.Chart' />
   <inherits name='org.scriptbox.metrics.Metrics' />
+  <inherits name='org.scriptbox.util.gwt.server.remote.Remote' />
 
   <!-- Other module inherits                                      -->
 

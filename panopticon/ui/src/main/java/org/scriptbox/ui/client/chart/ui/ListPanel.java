@@ -3,8 +3,8 @@ package org.scriptbox.ui.client.chart.ui;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.MetricTreeDto;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor.Path;

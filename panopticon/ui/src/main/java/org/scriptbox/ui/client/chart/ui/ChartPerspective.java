@@ -2,11 +2,11 @@ package org.scriptbox.ui.client.chart.ui;
 
 import java.util.logging.Logger;
 
-import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
-import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.MetricReportSummaryDto;
+import org.scriptbox.ui.shared.chart.MetricTreeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeParentNodeDto;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;

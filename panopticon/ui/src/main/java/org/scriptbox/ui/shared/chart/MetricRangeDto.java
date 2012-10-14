@@ -1,4 +1,4 @@
-package org.scriptbox.ui.shared.tree;
+package org.scriptbox.ui.shared.chart;
 
 import java.io.Serializable;
 import java.util.Date;

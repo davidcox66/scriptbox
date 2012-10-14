@@ -3,6 +3,7 @@ package org.scriptbox.util.gwt.server.remote;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.scriptbox.util.common.error.ExceptionHelper;
+import org.scriptbox.util.gwt.server.remote.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

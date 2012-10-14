@@ -5,17 +5,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.scriptbox.ui.client.PanopticonUI;
 import org.scriptbox.ui.client.chart.model.MultiLineChart;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.MetricReportDto;
+import org.scriptbox.ui.shared.chart.MultiMetricRangeDto;
+import org.scriptbox.ui.shared.chart.ReportQueryDto;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
-import org.scriptbox.ui.shared.tree.MetricReportDto;
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
-import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
-import org.scriptbox.ui.shared.tree.ReportQueryDto;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
+import com.sencha.gxt.data.shared.loader.LoadExceptionEvent;
+import com.sencha.gxt.data.shared.loader.LoadExceptionEvent.LoadExceptionHandler;
 import com.sencha.gxt.data.shared.loader.LoadHandler;
+import com.sencha.gxt.widget.core.client.info.DefaultInfoConfig;
+import com.sencha.gxt.widget.core.client.info.Info;
 
 public class ReportChartController {
 
@@ -35,7 +40,7 @@ public class ReportChartController {
 		};
 	}
 
-	public void load( String treeName, String reportName, final Runnable callback ) {
+	public void load( final String treeName, final String reportName, final Runnable callback ) {
 		ReportQueryDto query = new ReportQueryDto();
 		query.setTreeName( treeName );
 		query.setReportName( reportName );
@@ -59,6 +64,11 @@ public class ReportChartController {
 				for( MultiLineChart chart : charts ) {
 					chart.getChart().redrawChart();
 				}
+			}
+		} );
+		loader.addLoadExceptionHandler( new LoadExceptionHandler<ReportQueryDto>() {
+			public void onLoadException(LoadExceptionEvent<ReportQueryDto> event) {
+				PanopticonUI.error( event.getException() );
 			}
 		} );
 		loader.load( query );

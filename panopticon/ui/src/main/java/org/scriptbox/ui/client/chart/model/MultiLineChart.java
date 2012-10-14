@@ -7,7 +7,7 @@ import java.util.List;
 import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.ui.client.chart.builder.ChartBuilder;
 import org.scriptbox.ui.client.chart.builder.MultiLineChartBuilder;
-import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
+import org.scriptbox.ui.shared.chart.MultiMetricRangeDto;
 
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Legend;

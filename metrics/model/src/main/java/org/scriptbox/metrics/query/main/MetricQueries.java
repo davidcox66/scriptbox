@@ -41,6 +41,9 @@ public class MetricQueries {
 			throws Exception 
 	{
 		Object obj = child.evaluate(ctx);
+		if( obj == null ) { 
+			throw new MetricException( "Query did not match any metrics");
+		}
 		Collection<MetricProvider> providers = MetricQueries.toCollection(obj, MetricProvider.class);
 		return ctx.getStore().getAllMetrics(providers, ctx);
 	}

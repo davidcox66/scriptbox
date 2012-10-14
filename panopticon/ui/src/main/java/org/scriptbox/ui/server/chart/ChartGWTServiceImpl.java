@@ -1,4 +1,4 @@
-package org.scriptbox.ui.server.tree;
+package org.scriptbox.ui.server.chart;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -25,19 +25,20 @@ import org.scriptbox.metrics.query.groovy.ReportBuilder;
 import org.scriptbox.metrics.query.groovy.ReportElement;
 import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
-import org.scriptbox.ui.shared.tree.MetricQueryDto;
-import org.scriptbox.ui.shared.tree.MetricRangeDto;
-import org.scriptbox.ui.shared.tree.MetricReportDto;
-import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.ChartGWTService;
-import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
-import org.scriptbox.ui.shared.tree.MetricTreeParentNodeDto;
-import org.scriptbox.ui.shared.tree.MultiMetricRangeDto;
-import org.scriptbox.ui.shared.tree.ReportQueryDto;
+import org.scriptbox.ui.shared.chart.ChartGWTService;
+import org.scriptbox.ui.shared.chart.MetricQueryDto;
+import org.scriptbox.ui.shared.chart.MetricRangeDto;
+import org.scriptbox.ui.shared.chart.MetricReportDto;
+import org.scriptbox.ui.shared.chart.MetricReportSummaryDto;
+import org.scriptbox.ui.shared.chart.MetricTreeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeParentNodeDto;
+import org.scriptbox.ui.shared.chart.MultiMetricRangeDto;
+import org.scriptbox.ui.shared.chart.ReportQueryDto;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.gwt.server.remote.ExportableService;
 import org.scriptbox.util.gwt.server.remote.ServiceScope;
+import org.scriptbox.util.gwt.server.remote.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -74,7 +75,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	}
 
 	@Override
-	public ArrayList<MetricTreeDto> getTrees() {
+	public ArrayList<MetricTreeDto> getTrees() throws ServiceException {
 		store.begin();
 		try {
 			trees = store.getAllMetricTrees();
@@ -89,7 +90,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		}
 	}
 
-	public MetricTreeParentNodeDto getRoot( MetricTreeDto treeDto ) {
+	public MetricTreeParentNodeDto getRoot( MetricTreeDto treeDto ) throws ServiceException {
 		store.begin();
 		try {
 			MetricTree tree = getTreeByName(treeDto.getTreeName());
@@ -105,7 +106,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		}
 	}
 	
-	public void delete( MetricTreeDto treeDto ) {
+	public void delete( MetricTreeDto treeDto ) throws ServiceException {
 		MetricTree tree = getTreeByName(treeDto.getTreeName());
 		tree.delete();
 	}
@@ -138,7 +139,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		}
 	}
 
-	public ArrayList<MetricReportSummaryDto> getReports() {
+	public ArrayList<MetricReportSummaryDto> getReports() throws ServiceException {
 		reports = new HashMap<String,Report>();
 		ArrayList<MetricReportSummaryDto> ret = new ArrayList<MetricReportSummaryDto>();
 		if( reportPaths == null || reportPaths.size() == 0 ) {
@@ -183,7 +184,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		return ret;
 	}
 	
-	public MetricReportDto getReport( ReportQueryDto query ) throws Exception {
+	public MetricReportDto getReport( ReportQueryDto query ) throws ServiceException {
 		
 		store.begin();
 		try {
@@ -239,8 +240,8 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			return reportDto;
 		}
 		catch( Exception ex ) {
-			LOGGER.error( "getReport: error generating report: " + query.getReportName() + ", tree: " + query.getTreeName(), ex );
-			throw ex;
+			LOGGER.debug( "getReport: error generating report: " + query.getReportName() + ", tree: " + query.getTreeName(), ex );
+			throw new ServiceException( ex.getMessage() );
 		}
 		finally {
 			store.end();

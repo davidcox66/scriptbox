@@ -9,14 +9,14 @@ import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.ui.client.chart.controller.LineChartController;
 import org.scriptbox.ui.client.chart.controller.ReportChartController;
 import org.scriptbox.ui.client.chart.model.MultiLineChart;
-import org.scriptbox.ui.shared.tree.MetricReportSummaryDto;
-import org.scriptbox.ui.shared.tree.MetricTreeDto;
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
-import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.MetricReportSummaryDto;
+import org.scriptbox.ui.shared.chart.MetricTreeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -39,7 +39,7 @@ public class ChartsPanel extends ContentPanel {
 	private static final Logger logger = Logger.getLogger("ChartsPanel");
 
 	private static final int HEIGHT = 350;
-	private static final int HEADER = 25;
+	private static final int HEADER = 15;
 	
 	private ChartGWTServiceAsync service;
 	private PortalLayoutContainer portal;

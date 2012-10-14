@@ -47,11 +47,14 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	      }
 	      sort( cvs );
 	      int countOrLast = Math.min(count,cvs.size()) - 1;
-	      Set<MetricProvider> ret = new HashSet<MetricProvider>(countOrLast);
-	      for( int i=0 ; i < countOrLast ; i++ ) {
-	    	  ret.add( cvs.get(i).provider );
+	      if( countOrLast > 0 ) {
+		      Set<MetricProvider> ret = new HashSet<MetricProvider>(countOrLast);
+		      for( int i=0 ; i < countOrLast ; i++ ) {
+		    	  ret.add( cvs.get(i).provider );
+		      }
+		      return ret;
 	      }
-	      return ret;
+	      return null;
 	  }
 	  
 	  public String toString() {

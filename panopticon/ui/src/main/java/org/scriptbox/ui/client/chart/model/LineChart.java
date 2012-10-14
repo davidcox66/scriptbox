@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.client.chart.builder.LineChartBuilder;
-import org.scriptbox.ui.shared.tree.MetricRangeDto;
+import org.scriptbox.ui.shared.chart.MetricRangeDto;
 
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;

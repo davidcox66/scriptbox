@@ -4,16 +4,14 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.client.chart.model.LineChart;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.MetricQueryDto;
+import org.scriptbox.ui.shared.chart.MetricRangeDto;
+import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
-import org.scriptbox.ui.shared.tree.MetricQueryDto;
-import org.scriptbox.ui.shared.tree.MetricRangeDto;
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
-import org.scriptbox.ui.shared.tree.MetricTreeNodeDto;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadHandler;

@@ -4,8 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.client.chart.ui.ChartPerspective;
-import org.scriptbox.ui.shared.tree.ChartGWTService;
-import org.scriptbox.ui.shared.tree.ChartGWTServiceAsync;
+import org.scriptbox.ui.shared.chart.ChartGWTService;
+import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -20,6 +20,8 @@ import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.container.Viewport;
+import com.sencha.gxt.widget.core.client.info.DefaultInfoConfig;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuBar;
@@ -69,7 +71,7 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	public void onModuleLoad() {
 		GWT.setUncaughtExceptionHandler( new UncaughtExceptionHandler() {
 			public void onUncaughtException(Throwable ex ) {
-				logger.log( Level.SEVERE, "Uncaught exception", ex ); 
+				error( ex );
 			}
 		} );
 		service = GWT.create(ChartGWTService.class);
@@ -79,5 +81,12 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	    Viewport viewport = new Viewport();
 	    viewport.add( asWidget() );
 		RootPanel.get().add( viewport );
+	}
+	
+	public static void error( Throwable ex ) {
+		logger.log( Level.SEVERE, "Uncaught exception", ex ); 
+		DefaultInfoConfig config = new DefaultInfoConfig( "Error", ex.getMessage() );
+		config.setDisplay( 5000 );
+		Info.display( config );
 	}
 }
