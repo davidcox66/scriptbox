@@ -70,7 +70,9 @@ public class JmxMBeans extends AbstractExecBlock<JmxCapture> {
                 if( caching ) {
                 	processObjectNames.put( connection, objectNames );
                 }
-		        with( objectNames );
+              }
+              if( objectNames != null && objectNames.size() > 0 ) {
+		          with( objectNames );
               }
               down = false;
           }

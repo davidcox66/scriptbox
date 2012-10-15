@@ -162,13 +162,13 @@ public class JmxCapture implements ExecRunnable {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("storing attribute: " + objectName + "." + attr.getName() + "=" + attr.getValue() );
 		}
-		CaptureContext ctx = new CaptureContext(connection, objectName, attr);
+		CaptureContext ctx = new CaptureContext(proc,connection, objectName, attr);
 		CaptureResult result = null;
 		if (closure != null) {
-			if( result.millis == 0 ) {
+			result = closure.run(ctx);
+			if( result != null && result.millis == 0 ) { // Ensure a proper timestamp if closure didn't bother to assign it
 				result.millis = System.currentTimeMillis();
 			}
-			result = closure.run(ctx);
 		} 
 		else {
 			result = new CaptureResult(proc, objectName.toString(), attr.getName(), attr.getValue(), System.currentTimeMillis());

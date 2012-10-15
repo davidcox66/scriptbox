@@ -40,6 +40,7 @@ public class ChartsPanel extends ContentPanel {
 
 	private static final int HEIGHT = 350;
 	private static final int HEADER = 15;
+	private static final int EXTRA = 20;
 	
 	private ChartGWTServiceAsync service;
 	private PortalLayoutContainer portal;
@@ -94,7 +95,7 @@ public class ChartsPanel extends ContentPanel {
 						panel.add( ch );
 						layout.add( panel, new VerticalLayoutData(1,HEIGHT) );
 					}
-					addChartPortlet( report.getName(), layout, charts.size() * (HEIGHT+HEADER)  );
+					addChartPortlet( report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
 				}
 			} );
 		}

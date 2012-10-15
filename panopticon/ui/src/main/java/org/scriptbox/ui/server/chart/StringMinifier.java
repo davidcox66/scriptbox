@@ -2,7 +2,7 @@ package org.scriptbox.ui.server.chart;
 
 import java.util.Collection;
 
-public class StringTrimmer {
+public class StringMinifier {
 	
 	  public static IntRange getStringCollectionUniqueNamePortion( Collection<String> strings ) {
 	      return new IntRange( findLeadingUniqueCharacterPosition(strings), findTrailingUniqueCharacterPosition(strings) );

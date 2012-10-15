@@ -17,7 +17,7 @@ fi
 if [[ -n $1 ]] ; then 
 	INSTANCE_ARGS="-Dmetrics.instance=$1"
 else 
-	echo "Usage: $0 <instance> [cassandra host] [listen address] [jmx address]"
+	echo "Usage: $0 <instance> [cassandra host] [listen address] [port]"
 	exit 1
 fi
 

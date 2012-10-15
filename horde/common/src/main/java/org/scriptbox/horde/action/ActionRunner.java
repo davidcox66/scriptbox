@@ -45,7 +45,18 @@ public class ActionRunner {
 					                }
 			                	}
 			                	catch( ActionScriptAbortException ex ) {
-			                		LOGGER.debug( "Action aborted script execution: " + aborted + " - " + ex.getMessage() );
+			                		if( LOGGER.isDebugEnabled() ) {
+			                			// If the abort was the result of something else going wrong, lets print the details.
+			                			// Otherwise assume it was generated based upon some expected condition and we
+			                			// don't need to see the stack where is was thrown within the script
+			                			if( ex.getCause() != null ) {
+					                		LOGGER.debug( "Action aborted script execution: " + aborted, ex );
+			                			}
+			                			else {
+					                		LOGGER.debug( "Action aborted script execution: " + aborted + " - "  + ex.getMessage() );
+			                				
+			                			}
+			                		}
 			                	}
 			                }
 			                LOGGER.info( "Runner thread exiting normally: " + Thread.currentThread().getName() );

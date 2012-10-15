@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import org.scriptbox.metrics.compute.MetricCollator;
@@ -53,6 +52,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	
 	private MetricStore store;
 	private List<String> reportPaths;
+	private List<LegendPostProcessor> legendPostProcessors;
 	
 	private List<MetricTree> trees;
 	private Map<MetricTree,Map<String,MetricTreeNode>> allNodes = new HashMap<MetricTree,Map<String,MetricTreeNode>>();
@@ -72,6 +72,14 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 
 	public void setReportPaths(List<String> reportPaths) {
 		this.reportPaths = reportPaths;
+	}
+
+	public List<LegendPostProcessor> getLegendPostProcessors() {
+		return legendPostProcessors;
+	}
+
+	public void setLegendPostProcessors( List<LegendPostProcessor> legendPostProcessors) {
+		this.legendPostProcessors = legendPostProcessors;
 	}
 
 	@Override
@@ -127,12 +135,14 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
 			DateRange dr = seq.getFullDateRange();
 			MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime() );
-			return new MetricRangeDto( 
+			MetricRangeDto ret = new MetricRangeDto( 
 				dr.getStart().getTime(), 
 				dr.getEnd().getTime(), 
 				range.getStart(), 
 				range.getEnd(), 
 				range.getMetrics(30) );
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getMetrics: node=" + node + ", metrics.size()=" + ret.getData().size() ); }
+			return ret;
 		}
 		finally {
 			store.end();
@@ -214,13 +224,17 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 				// we can properly associate these for displaying information about each
 				// series in the UI (such as tooltips)
 				//
-				List<String> lines = new ArrayList<String>(result.size());
+				List<String> legends = new ArrayList<String>(result.size());
 				List<MetricRange> ranges = new ArrayList<MetricRange>(result.size());
 				for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : result.entrySet() ) {
-					lines.add( entry.getKey().getId() );
+					legends.add( entry.getKey().getId() );
 					ranges.add( entry.getValue() );
 				}
-				trimUniquePortionOfIds( lines );
+				if( legendPostProcessors != null ) {
+					for( LegendPostProcessor proc : legendPostProcessors ) {
+						legends = proc.process( legends );
+					}
+				}
 				final List<MultiMetric> metrics = toMultiMetrics( element, ranges );
 				
 				// Compute the overall date range of the report
@@ -228,7 +242,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 					first = Math.min(first, metrics.get(0).getMillis() );
 					last = Math.max(last, metrics.get(metrics.size()-1).getMillis() );
 				}
-				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), lines, metrics );
+				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), legends, metrics );
 				reportDto.addChart( range );
 			}
 			reportDto.setStart( new Date(first) );
@@ -248,15 +262,6 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		}
 	}
 
-	private void trimUniquePortionOfIds( List<String> ids ) {
-		if( ids.size() > 1 ) {
-			IntRange indices = StringTrimmer.getStringCollectionUniqueNamePortion( ids );
-			for( ListIterator<String> iter = ids.listIterator() ; iter.hasNext(); ) {
-				String id = iter.next();
-				iter.set( id.substring(indices.getStart(),id.length()+indices.getEnd()) );
-			}
-		}
-	}
 	
 	private List<MultiMetric> toMultiMetrics( ReportElement element, List<MetricRange> ranges ) throws Exception {
 		//

@@ -82,7 +82,7 @@ public class ListPanel extends VerticalLayoutContainer {
 							 }
 							 public void onSuccess(Void result) {
 								 store.remove( tree );
-								 Info.display("MessageBox", "Tree deleted");
+								 Info.display("Deleted", "Tree deleted: " + tree.getTreeName() );
 							 }
 						} );
 			        }

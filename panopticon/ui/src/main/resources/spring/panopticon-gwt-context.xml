@@ -65,6 +65,16 @@
     			<value>/tmp/reports</value>
     		</list>
     	</property>
+    	<property name="legendPostProcessors">
+    		<list>
+    			<bean class="org.scriptbox.ui.server.chart.ReplacementLegendPostProcessor"
+    				p:pattern="\([^(]*?\)"
+    				p:replacement="" />
+    			<bean class="org.scriptbox.ui.server.chart.MinifyingLegendPostProcessor" />
+    			<bean class="org.scriptbox.ui.server.chart.MaxLengthLegendPostProcessor" 
+    				p:maximumLength="20" />
+    		</list>
+    	</property>
     </bean>
     
     <bean id="serviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
