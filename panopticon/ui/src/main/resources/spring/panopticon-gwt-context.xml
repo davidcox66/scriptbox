@@ -65,14 +65,15 @@
     			<value>/tmp/reports</value>
     		</list>
     	</property>
-    	<property name="legendPostProcessors">
+    	<property name="metricDescriptionProcessors">
     		<list>
-    			<bean class="org.scriptbox.ui.server.chart.ReplacementLegendPostProcessor"
+    			<bean class="org.scriptbox.ui.server.chart.ReplacementPostProcessor"
     				p:pattern="\([^(]*?\)"
     				p:replacement="" />
-    			<bean class="org.scriptbox.ui.server.chart.MinifyingLegendPostProcessor" />
-    			<bean class="org.scriptbox.ui.server.chart.MaxLengthLegendPostProcessor" 
-    				p:maximumLength="20" />
+    			<bean class="org.scriptbox.ui.server.chart.ReportElementProcessor"  />
+    			<bean class="org.scriptbox.ui.server.chart.MinifyingPostProcessor" />
+    			<bean class="org.scriptbox.ui.server.chart.MaxLengthPostProcessor" 
+    				p:maximumLength="25" />
     		</list>
     	</property>
     </bean>

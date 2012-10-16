@@ -7,4 +7,8 @@ class ReportElement
 	String title;
 	MetricQueryExp expression;
 	def params;
+	
+	String toString() {
+		return "ReportElement{ title=${title}, expression=${expression} }";
+	}
 }

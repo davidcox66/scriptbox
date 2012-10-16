@@ -80,7 +80,7 @@ public class MultiLineChartBuilder extends ChartBuilder {
 	    toolTip.setLabelProvider(new SeriesLabelProvider<MultiMetric>() {
 	      @Override
 	      public String getLabel(MultiMetric item, ValueProvider<? super MultiMetric, ? extends Number> valueProvider) {
-	        return dateFormat.format(item.getDate()) + " : " + item.getValues()[index] + " : " + label;
+	        return dateFormat.format(item.getDate()) + " : " + numberFormat.format(item.getValues()[index]) + " : " + label;
 	      }
 	    });
 	    series.setToolTipConfig(toolTip);

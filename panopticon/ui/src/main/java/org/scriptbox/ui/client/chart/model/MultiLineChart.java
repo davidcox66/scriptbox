@@ -7,6 +7,7 @@ import java.util.List;
 import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.ui.client.chart.builder.ChartBuilder;
 import org.scriptbox.ui.client.chart.builder.MultiLineChartBuilder;
+import org.scriptbox.ui.shared.chart.MetricDescriptionDto;
 import org.scriptbox.ui.shared.chart.MultiMetricRangeDto;
 
 import com.sencha.gxt.chart.client.chart.Chart;
@@ -44,7 +45,11 @@ public class MultiLineChart {
 	
 	public MultiLineChart(MultiMetricRangeDto dto, Date start, Date end) {
 		title = dto.getTitle();
-		valueAxis = MultiLineChartBuilder.buildValueAxis(dto.getLines());
+		List<String> lines = new ArrayList<String>( dto.getLines().size() );
+		for( MetricDescriptionDto desc : dto.getLines() ) {
+			lines.add( desc.getShortText());
+		}
+		valueAxis = MultiLineChartBuilder.buildValueAxis(lines);
 		timeAxis = MultiLineChartBuilder.buildTimeAxis();
 		timeAxis.setStartDate(start);
 		timeAxis.setEndDate(end);
@@ -58,14 +63,14 @@ public class MultiLineChart {
 		chart.addAxis(timeAxis);
 		chart.addAxis(valueAxis);
 		
-		if( dto.getLines().size() > 1 ) {
+		if( lines.size() > 1 ) {
 			legend = ChartBuilder.buildLegend( MultiMetric.class );
 		    chart.setLegend(legend);
 		}
 
 		series = new ArrayList<LineSeries<MultiMetric>>();
 		int i=0;
-		for( String line : dto.getLines() ) {
+		for( String line : lines ) {
 			LineSeries<MultiMetric> ls = MultiLineChartBuilder.buildValueSeries(line, i, COLORS[i % COLORS.length]);
 			series.add(ls);
 			chart.addSeries(ls);

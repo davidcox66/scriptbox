@@ -1,16 +1,17 @@
 package org.scriptbox.ui.server.chart;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.scriptbox.metrics.query.groovy.ReportElement;
+import org.scriptbox.ui.shared.chart.MetricDescriptionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class ReplacementLegendPostProcessor implements LegendPostProcessor, InitializingBean {
+public class ReplacementPostProcessor implements MetricDescriptionPostProcessor, InitializingBean {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( ReplacementLegendPostProcessor.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( ReplacementPostProcessor.class );
 	
 	private Pattern pattern;
 	private String replacement="";
@@ -38,14 +39,12 @@ public class ReplacementLegendPostProcessor implements LegendPostProcessor, Init
 		}
 	}
 	
-	public List<String> process(List<String> legends) {
-		List<String> ret = new ArrayList<String>( legends.size() );
-		for( String legend : legends ) {
-			String modified = pattern.matcher(legend).replaceAll(replacement);
-			ret.add( modified );
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: replaced='" + legend + "', with='" + modified + "'" ); }
+	public void process( ReportElement element, List<MetricDescriptionDto> descriptions ) {
+		for( MetricDescriptionDto desc : descriptions ) {
+			String text = desc.getShortText();
+			String modified = pattern.matcher(text).replaceAll(replacement);
+			desc.setShortText( modified );
 		}
-		return ret;
 	}
 
 }
