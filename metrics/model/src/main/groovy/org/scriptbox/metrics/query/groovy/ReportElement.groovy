@@ -6,4 +6,5 @@ class ReportElement
 {
 	String title;
 	MetricQueryExp expression;
+	def params;
 }

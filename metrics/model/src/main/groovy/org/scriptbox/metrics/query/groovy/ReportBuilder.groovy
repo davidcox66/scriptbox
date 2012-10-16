@@ -38,6 +38,9 @@ class ReportBuilder {
 	void chunk( int chunk ) {
 		report.chunk = chunk;
 	}
+	void chart( def params ) {
+		report.add( params ); 
+	}
 	void chart( String name, Closure closure ) {
 		report.add( name, closure );
 	}
