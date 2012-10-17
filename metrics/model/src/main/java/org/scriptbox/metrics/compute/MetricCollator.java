@@ -157,10 +157,7 @@ public class MetricCollator {
 			Metric mv = (Metric)citer.next();
 		    long bucket = mv.getMillis() / seconds;     
 		    if( current != 0 && bucket != current ) {
-		    	Metric result = call( closure, current, tmp );
-		        if( result != null ) {
-		          ret.add( result );  
-		        }
+		    	call( closure, current, tmp, ret );
 		    }
 			current = bucket;
 		    block.add( mv );
@@ -170,10 +167,7 @@ public class MetricCollator {
 		}
 		// If any leftover in last chunk
 		if( block.size() > 0 ) {
-			Metric result = call( closure, current, tmp );
-			if( result != null ) {
-				ret.add( result );  
-			}
+			call( closure, current, tmp, ret );
 		}
 		if( ret.size() > 0 ) {
 			return new ListBackedMetricRange(name, id, dates, start, end, ret); 
@@ -181,7 +175,7 @@ public class MetricCollator {
 		return null;
 	}
 	
-	private Metric call( ParameterizedRunnableWithResult<Metric,MetricRange> closure, long current, ListBackedMetricRange range ) throws Exception {
+	private void call( ParameterizedRunnableWithResult<Metric,MetricRange> closure, long current, ListBackedMetricRange range, List<Metric> ret ) throws Exception {
     	range.setStart( current * seconds ); 
     	range.setEnd( range.getStart() + seconds * 1000 );
         Metric result = closure.run( range );
@@ -191,7 +185,9 @@ public class MetricCollator {
 	        LOGGER.trace( "call: processed bucket: " + start + "(" + range.getStart() + ") - " + end + "(" + range.getEnd() + "), result: " + result + ", block: " + range.getMetrics() ); 
 	    }
         range.getMetrics().clear();
-        return result;
+		if( result != null ) {
+			ret.add( result );  
+		}
 
 	}
 }
