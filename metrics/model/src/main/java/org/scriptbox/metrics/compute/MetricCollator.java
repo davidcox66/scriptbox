@@ -13,6 +13,7 @@ import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MultiMetric;
+import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
@@ -21,6 +22,11 @@ import org.slf4j.LoggerFactory;
 public class MetricCollator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( MetricCollator.class );
+	
+	/**
+	 * A safeguard against possible accidental overrun of date ranges
+	 */
+	private static int MAX_METRICS = 50000; 
 	
 	private String name;
 	private String id;
@@ -151,32 +157,20 @@ public class MetricCollator {
 			Metric mv = (Metric)citer.next();
 		    long bucket = mv.getMillis() / seconds;     
 		    if( current != 0 && bucket != current ) {
-		    	long bstart = current * seconds; 
-		    	long bend = bstart + seconds*1000;
-		    	tmp.setStart( bstart );
-		    	tmp.setEnd( bend );
-		        Metric result = closure.run( tmp );
-			    if( LOGGER.isTraceEnabled() ) { 
-			    	Date dt = new Date( bstart );
-			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + bstart + "), result: " + result + ", block: " + block ); 
-			    }
+		    	Metric result = call( closure, current, tmp );
 		        if( result != null ) {
 		          ret.add( result );  
 		        }
-		        block.clear();
 		    }
 			current = bucket;
 		    block.add( mv );
+		    if( ret.size() > MAX_METRICS ) {
+		    	throw new MetricException( "Exceeded maximum allowed metrics of: " + MAX_METRICS );
+		    }
 		}
 		// If any leftover in last chunk
 		if( block.size() > 0 ) {
-			long begin = current * seconds; 
-			long end = begin + seconds*1000;
-		    Metric result = closure.run( new ListBackedMetricRange(null,null,dates,begin,end,block)  );
-		    if( LOGGER.isTraceEnabled() ) { 
-		    	Date dt = new Date( begin );
-		    	LOGGER.trace( "collate: processed bucket: " + dt + "(" + begin + "), result: " + result + ", block: " + block ); 
-		    }
+			Metric result = call( closure, current, tmp );
 			if( result != null ) {
 				ret.add( result );  
 			}
@@ -185,5 +179,19 @@ public class MetricCollator {
 			return new ListBackedMetricRange(name, id, dates, start, end, ret); 
 		}
 		return null;
+	}
+	
+	private Metric call( ParameterizedRunnableWithResult<Metric,MetricRange> closure, long current, ListBackedMetricRange range ) throws Exception {
+    	range.setStart( current * seconds ); 
+    	range.setEnd( range.getStart() + seconds * 1000 );
+        Metric result = closure.run( range );
+	    if( LOGGER.isTraceEnabled() ) { 
+	    	Date start = new Date( range.getStart() );
+	    	Date end = new Date( range.getEnd() );
+	        LOGGER.trace( "call: processed bucket: " + start + "(" + range.getStart() + ") - " + end + "(" + range.getEnd() + "), result: " + result + ", block: " + range.getMetrics() ); 
+	    }
+        range.getMetrics().clear();
+        return result;
+
 	}
 }
