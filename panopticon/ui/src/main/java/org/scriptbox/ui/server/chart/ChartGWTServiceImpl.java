@@ -25,6 +25,7 @@ import org.scriptbox.metrics.query.groovy.ReportElement;
 import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
 import org.scriptbox.ui.shared.chart.ChartGWTService;
+import org.scriptbox.ui.shared.chart.MetricDescriptionDto;
 import org.scriptbox.ui.shared.chart.MetricQueryDto;
 import org.scriptbox.ui.shared.chart.MetricRangeDto;
 import org.scriptbox.ui.shared.chart.MetricReportDto;
@@ -52,7 +53,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	
 	private MetricStore store;
 	private List<String> reportPaths;
-	private List<LegendPostProcessor> legendPostProcessors;
+	private List<MetricDescriptionPostProcessor> metricDescriptionProcessors;
 	
 	private List<MetricTree> trees;
 	private Map<MetricTree,Map<String,MetricTreeNode>> allNodes = new HashMap<MetricTree,Map<String,MetricTreeNode>>();
@@ -74,12 +75,14 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		this.reportPaths = reportPaths;
 	}
 
-	public List<LegendPostProcessor> getLegendPostProcessors() {
-		return legendPostProcessors;
+	
+	public List<MetricDescriptionPostProcessor> getMetricDescriptionProcessors() {
+		return metricDescriptionProcessors;
 	}
 
-	public void setLegendPostProcessors( List<LegendPostProcessor> legendPostProcessors) {
-		this.legendPostProcessors = legendPostProcessors;
+	public void setMetricDescriptionProcessors(
+			List<MetricDescriptionPostProcessor> metricDescriptionProcessors) {
+		this.metricDescriptionProcessors = metricDescriptionProcessors;
 	}
 
 	@Override
@@ -224,15 +227,15 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 				// we can properly associate these for displaying information about each
 				// series in the UI (such as tooltips)
 				//
-				List<String> legends = new ArrayList<String>(result.size());
+				List<MetricDescriptionDto> descriptions = new ArrayList<MetricDescriptionDto>(result.size());
 				List<MetricRange> ranges = new ArrayList<MetricRange>(result.size());
 				for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : result.entrySet() ) {
-					legends.add( entry.getKey().getId() );
+					descriptions.add( new MetricDescriptionDto(entry.getKey().getId()) );
 					ranges.add( entry.getValue() );
 				}
-				if( legendPostProcessors != null ) {
-					for( LegendPostProcessor proc : legendPostProcessors ) {
-						legends = proc.process( legends );
+				if( metricDescriptionProcessors != null ) {
+					for( MetricDescriptionPostProcessor proc : metricDescriptionProcessors ) {
+						proc.process( element, descriptions );
 					}
 				}
 				final List<MultiMetric> metrics = toMultiMetrics( element, ranges );
@@ -242,7 +245,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 					first = Math.min(first, metrics.get(0).getMillis() );
 					last = Math.max(last, metrics.get(metrics.size()-1).getMillis() );
 				}
-				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), legends, metrics );
+				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), descriptions, metrics );
 				reportDto.addChart( range );
 			}
 			reportDto.setStart( new Date(first) );

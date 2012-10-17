@@ -10,14 +10,14 @@ public class MultiMetricRangeDto implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String title;
-	private List<String> lines;
+	private List<MetricDescriptionDto> lines;
 	private List<MultiMetric> metrics;
 	
 	public MultiMetricRangeDto() {
 	}
 
 	
-	public MultiMetricRangeDto( String title, List<String> lines, List<MultiMetric> metrics ) {
+	public MultiMetricRangeDto( String title, List<MetricDescriptionDto> lines, List<MultiMetric> metrics ) {
 		this.title = title;
 		this.lines = lines;
 		this.metrics = metrics;
@@ -31,7 +31,7 @@ public class MultiMetricRangeDto implements Serializable {
 		return metrics;
 	}
 	
-	public List<String> getLines() {
+	public List<MetricDescriptionDto> getLines() {
 		return lines;
 	}
 
