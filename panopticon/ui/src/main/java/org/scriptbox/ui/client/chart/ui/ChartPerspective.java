@@ -38,9 +38,9 @@ public class ChartPerspective implements IsWidget {
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
 	        @Override
 	        public void onSelection(SelectionEvent<MetricTreeDto> event) {
+        	  logger.info( "Loading tree");
 	          reportPanel.clearSelection();
         	  MetricTreeDto item = event.getSelectedItem();
-        	  logger.info( "Loading tree");
         	  treePanel.load( item );
         	  chartListPanel.setTree( item );
 	        }
@@ -81,7 +81,7 @@ public class ChartPerspective implements IsWidget {
 	 
 	    // AccordionLayoutAppearance appearance = GWT.<AccordionLayoutAppearance> create(AccordionLayoutAppearance.class);
 	 
-	    Widget listWidget = wrapContent(listPanel,"Trees");
+	    Widget listWidget = wrapContent(listPanel,"List");
 		metricControls.add(listWidget);
 	    metricControls.add(wrapContent(treePanel,"Metrics"));
 	    metricControls.add(wrapContent(reportPanel,"Reports"));

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.configuration.SystemConfiguration;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MultiMetric;
 import org.scriptbox.ui.client.chart.controller.LineChartController;
@@ -14,6 +15,7 @@ import org.scriptbox.ui.shared.chart.MetricReportSummaryDto;
 import org.scriptbox.ui.shared.chart.MetricTreeDto;
 import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
 
+import com.google.gwt.dom.client.BodyElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -110,6 +112,7 @@ public class ChartsPanel extends ContentPanel {
 	
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
 		ToolBar bar = new ToolBar();
+		buildPrint( bar );
 		buildRemoveAll( bar );
 		buildCollapseAll( bar );
 		SeparatorToolItem sep = new SeparatorToolItem();
@@ -117,6 +120,14 @@ public class ChartsPanel extends ContentPanel {
 		bar.add( sep );
 		buildLimit( bar );
 		vertical.add( bar, new VerticalLayoutData(1,-1) );
+	}
+	
+	private void buildPrint( ToolBar bar ) {
+		bar.add(new TextButton("Print", new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				print();
+			}
+		}));
 	}
 	
 	private void buildRemoveAll( ToolBar bar ) {
@@ -170,6 +181,21 @@ public class ChartsPanel extends ContentPanel {
 		vertical.add( portal, new VerticalLayoutData(1,1) );
 	}
 	
+	private void print() {
+		BodyElement element = getBodyElement();
+		element.setInnerHTML( portal.getElement().getInnerHTML() );
+	}
+	
+	public static native BodyElement getBodyElement() /*-{
+        var win = window.open("", "win", "width=940,height=400,status=1,resizeable=1,scrollbars=1"); // a window object
+        win.document.open("text/html", "replace");
+		win.document.write("<HTML><HEAD></HEAD><BODY><div class=\"mainpanel\"><div style=\"width: 100%; height: 54px;\"><div id=\"mainbody\"class=\"mainbody\" style=\"width: 100%;\"></div></div></div></BODY></HTML>");
+        win.document.close(); 
+        win.focus();
+        return win.document.body;
+    }-*/;
+
+
 	private void addChartPortlet( String title, Widget widget, int height ) {
 	    Portlet portlet = new Portlet();
 	    portlet.setHeadingText( title );
