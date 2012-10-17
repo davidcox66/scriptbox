@@ -23,6 +23,12 @@ public class MetricCollator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( MetricCollator.class );
 	
+	/**
+	 * A safeguard against possible accidental overrun of date ranges. If you've gotten this far
+	 * then you are probably going to keep going until you run out of memory.
+	 */
+	private static int MAX_METRICS = 50000; 
+	
 	private String name;
 	private String id;
 	private int seconds;
@@ -55,6 +61,10 @@ public class MetricCollator {
 	    start = Math.max(start, first);
 	    end = Math.min(end, last);
 	    dates = new DateRange( new Date(first), new Date(last) ); 
+	    if( LOGGER.isDebugEnabled() ) {
+	    	LOGGER.debug( "MetricCollator: name=" + name + ", id=" + id + ", seconds=" + seconds + ", ranges=" + ranges +
+	    	    ", start=" + start + ", end=" + end + ", dates=" + dates );
+	    }
 	}
 
 	public void multi( final ParameterizedRunnable<MultiMetric> closure ) throws Exception {
@@ -152,49 +162,44 @@ public class MetricCollator {
 		final List<Metric> block = new ArrayList<Metric>();
 		final ListBackedMetricRange tmp = new ListBackedMetricRange(null,null,dates,0,0,block );
 		long current = 0;
+		int chunk = seconds * 1000;
 		while( citer.hasNext() ) {
 			Metric mv = (Metric)citer.next();
-		    long bucket = mv.getMillis() / seconds;     
+		    long bucket = mv.getMillis() / chunk;     
 		    if( current != 0 && bucket != current ) {
-		    	long bstart = current * seconds; 
-		    	long bend = bstart + seconds*1000;
-		    	tmp.setStart( bstart );
-		    	tmp.setEnd( bend );
-		        Metric result = closure.run( tmp );
-			    if( LOGGER.isTraceEnabled() ) { 
-			    	Date dt = new Date( bstart );
-			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + bstart + "), result: " + result + ", block: " + block ); 
-			    }
-		        if( result != null ) {
-		        	if( result.getValue() == Float.NaN ) {
-		        		throw new MetricException( "Computation generated an invalid number for metrics: " + block );
-		        	}
-		        	ret.add( result );  
-		        }
-		        block.clear();
+		    	call( closure, current, chunk, tmp, ret );
 		    }
 			current = bucket;
 		    block.add( mv );
+		    if( ret.size() > MAX_METRICS ) {
+		    	throw new MetricException( "Exceeded maximum allowed metrics of: " + MAX_METRICS );
+		    }
 		}
 		// If any leftover in last chunk
 		if( block.size() > 0 ) {
-			long begin = current * seconds; 
-			long end = begin + seconds*1000;
-		    Metric result = closure.run( new ListBackedMetricRange(null,null,dates,begin,end,block)  );
-		    if( LOGGER.isTraceEnabled() ) { 
-		    	Date dt = new Date( begin );
-		    	LOGGER.trace( "collate: processed bucket: " + dt + "(" + begin + "), result: " + result + ", block: " + block ); 
-		    }
-			if( result != null ) {
-	        	if( result.getValue() == Float.NaN ) {
-	        		throw new MetricException( "Computation generated an invalid number for metrics: " + block );
-	        	}
-				ret.add( result );  
-			}
+			call( closure, current, chunk, tmp, ret );
 		}
-		if( ret.size() > 0 ) {
-			return new ListBackedMetricRange(name, id, dates, start, end, ret); 
+		ListBackedMetricRange rng = ret.size() > 0 ?  new ListBackedMetricRange(name, id, dates, start, end, ret) : null; 
+		if( LOGGER.isTraceEnabled() ) {
+			LOGGER.trace( "collate: range: " + rng  + ", metrics: " + (rng != null ? rng.getMetrics() : null) );
 		}
-		return null;
+		return rng;
+	}
+	
+	private void call( ParameterizedRunnableWithResult<Metric,MetricRange> closure, long bucket, long chunk, ListBackedMetricRange range, List<Metric> ret ) throws Exception {
+    	range.setStart( bucket * chunk ); 
+    	range.setEnd( range.getStart() + chunk - 1 );
+        Metric result = closure.run( range );
+	    if( LOGGER.isTraceEnabled() ) { 
+	    	Date start = new Date( range.getStart() );
+	    	Date end = new Date( range.getEnd() );
+	        LOGGER.trace( "call: processed bucket: " + start + "(" + range.getStart() + ") - " + end + "(" + range.getEnd() + "), " +
+	        	"result: " + result + ", block: " + range.getMetrics() ); 
+	    }
+        range.getMetrics().clear();
+		if( result != null ) {
+			ret.add( result );  
+		}
+
 	}
 }

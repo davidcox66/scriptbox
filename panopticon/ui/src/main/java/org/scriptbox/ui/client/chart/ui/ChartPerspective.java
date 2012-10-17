@@ -38,6 +38,7 @@ public class ChartPerspective implements IsWidget {
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
 	        @Override
 	        public void onSelection(SelectionEvent<MetricTreeDto> event) {
+	          reportPanel.clearSelection();
         	  MetricTreeDto item = event.getSelectedItem();
         	  logger.info( "Loading tree");
         	  treePanel.load( item );

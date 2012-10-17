@@ -39,10 +39,13 @@ public class MetricQueries {
 
 	public static Map<? extends MetricProvider, ? extends MetricRange> providers(
 		MetricQueryContext ctx, 
-		MetricQueryExp child) 
+		MetricQueryExp expr) 
 			throws Exception 
 	{
-		Object obj = child.evaluate(ctx);
+		Object obj = expr.evaluate(ctx);
+		if( LOGGER.isDebugEnabled() ) {
+			LOGGER.debug( "providers: evaluated expr=" + expr + ", result=" + obj );
+		}
 		if( obj == null ) { 
 			throw new MetricException( "Query did not match any metrics");
 		}
@@ -52,15 +55,18 @@ public class MetricQueries {
 
 	public static <X extends MetricProvider> X provider(
 		MetricQueryContext ctx, 
-		MetricQueryExp child) 
+		MetricQueryExp expr) 
 			throws Exception 
 	{
-		Object obj = child.evaluate(ctx);
+		Object obj = expr.evaluate(ctx);
+		if( LOGGER.isDebugEnabled() ) {
+			LOGGER.debug( "providers: evaluated expr=" + expr + ", result=" + obj );
+		}
 		if (obj instanceof Collection) {
 			Collection<X> providers = (Collection<X>) obj;
 			if (providers.size() != 1) {
-				LOGGER.error( "provider: found multiple providers for child: " + child + ", providers: " + providers ); 
-				throw new RuntimeException( "Expected only a single metric provider: child=" + child + ", size=" + providers.size());
+				LOGGER.error( "provider: found multiple providers for expression: " + expr + ", providers: " + providers ); 
+				throw new RuntimeException( "Expected only a single metric provider - expression:" + expr + ", size:" + providers.size());
 			}
 			return providers.iterator().next();
 		} 

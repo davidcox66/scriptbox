@@ -51,6 +51,10 @@ public class ReportPanel extends VerticalLayoutContainer {
 	    add(list, new VerticalLayoutData(1, 1));
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
+
+	public void clearSelection() {
+		list.getSelectionModel().deselectAll();
+	}
 	
 	public void load() {
 		service.getReports( new AsyncCallback<ArrayList<MetricReportSummaryDto>>() {

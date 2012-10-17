@@ -19,18 +19,37 @@
     </encoder>
   </appender>
 
-  <logger name="org.springframework">
+  <logger name="org.springframework" additivity="false">
     <level value="${fine.level:-WARN}" />
+    <appender-ref ref="CONSOLE" />
   </logger>
 
-  <logger name="org.scriptbox">
-    <level value="${root.level:-DEBUG}" />
+  <logger name="me.prettyprint.hector" additivity="false">
+    <level value="${fine.level:-INFO}" />
+    <appender-ref ref="CONSOLE" />
+  </logger>
+  
+  <logger name="org.scriptbox" additivity="false">
+    <level value="${debug.level:-DEBUG}" />
+    <appender-ref ref="CONSOLE" />
   </logger>
 
+  <logger name="org.scriptbox.metrics" additivity="false">
+    <level value="${metrics.level:-DEBUG}" />
+    <appender-ref ref="CONSOLE" />
+  </logger>
+  
   <root>
     <level value="${root.level:-INFO}" />
     <appender-ref ref="CONSOLE" />
+    <!-- 
+    <appender-ref ref="FILE" />
+    -->
   </root>
+
+
+
+
 
 </configuration>
   

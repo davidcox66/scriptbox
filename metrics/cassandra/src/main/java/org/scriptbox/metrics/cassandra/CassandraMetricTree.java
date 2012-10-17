@@ -68,7 +68,7 @@ public class CassandraMetricTree extends MetricTree {
 				     result.getString("name"),
 				     result.getString("type") );
 				 NodeInfo info = new NodeInfo( node, result.getString("parent") );
-				 if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getRoot: parent=" + info.parentId + ", node=" + node ); }
+				 // if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getRoot: parent=" + info.parentId + ", node=" + node ); }
 				 allNodesById.put( id, info );
 				 count++;
 			 }
