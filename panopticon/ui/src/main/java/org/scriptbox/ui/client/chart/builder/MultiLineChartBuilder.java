@@ -76,7 +76,7 @@ public class MultiLineChartBuilder extends ChartBuilder {
 		series.setYField( new MultiMetricValueProvider(index) );
 		SeriesToolTipConfig<MultiMetric> toolTip = new SeriesToolTipConfig<MultiMetric>();
 	    toolTip.setTrackMouse(true);
-	    toolTip.setHideDelay(10);
+	    toolTip.setHideDelay(2);
 	    toolTip.setLabelProvider(new SeriesLabelProvider<MultiMetric>() {
 	      @Override
 	      public String getLabel(MultiMetric item, ValueProvider<? super MultiMetric, ? extends Number> valueProvider) {

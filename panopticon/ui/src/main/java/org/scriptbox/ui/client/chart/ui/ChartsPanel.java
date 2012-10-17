@@ -31,6 +31,8 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor.IntegerPropertyEditor;
+import com.sencha.gxt.widget.core.client.info.DefaultInfoConfig;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
@@ -95,9 +97,14 @@ public class ChartsPanel extends ContentPanel {
 						panel.add( ch );
 						layout.add( panel, new VerticalLayoutData(1,HEIGHT) );
 					}
-					addChartPortlet( report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
+					addChartPortlet( tree.getTreeName() + " : " + report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
 				}
 			} );
+		}
+		else {
+			DefaultInfoConfig config = new DefaultInfoConfig( "Error", "No tree selected" );
+			config.setDisplay( 5000 );
+			Info.display( config );
 		}
 	}
 	

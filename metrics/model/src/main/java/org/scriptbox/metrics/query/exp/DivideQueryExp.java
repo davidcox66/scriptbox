@@ -22,6 +22,9 @@ public class DivideQueryExp implements MetricQueryExp {
 	public DivideQueryExp(float divisor, MetricQueryExp child) {
 		this.child = child;
 		this.divisor = divisor;
+		if( divisor == 0 ) {
+			throw new IllegalArgumentException( "Divisor cannot be zero" );
+		}
 	}
 
 	public Object evaluate(MetricQueryContext ctx) throws Exception {

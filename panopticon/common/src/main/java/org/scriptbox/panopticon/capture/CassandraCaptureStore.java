@@ -16,6 +16,8 @@ import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricSequence;
 import org.scriptbox.metrics.model.MetricTree;
 import org.scriptbox.metrics.model.MetricTreeNode;
+import org.scriptbox.panopticon.jmx.JmxTypeVisitor;
+import org.scriptbox.panopticon.jmx.JmxTypeWalker;
 import org.scriptbox.util.cassandra.CassandraDownTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +83,7 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 		down.invoke( new Runnable() {
 			public void run() {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
-				if( result.value != null && result.value instanceof Number ) {
-					float value = ((Number)result.value).floatValue();
+				if( result.value != null && !(result.value instanceof String) ) {
 					BoxContext ctx = BoxContext.getCurrentContext();
 					Lookup beans = ctx.getBeans();
 					MetricTree tree = beans.get( "metric.tree", MetricTree.class );
@@ -90,32 +91,72 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 						tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30,300,900,1800) );
 						beans.put( "metric.tree", tree );
 					}
-					MetricTreeNode root = tree.getRoot();
-					MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
-					MetricTreeNode inst = src.getChild(instance, "instance" ) ;
-					MetricTreeNode attr = inst;
-					//
-					// Optional break up which typically is delimited ObjectName into a series of children
-					// instead of a single long name
-					//
-					if( nameSplitter != null ) {
-						String[] names = nameSplitter.split( result.attribute );
-						for( String name : names ) {
-							attr = attr.getChild(name, "attribute" );
-						}
+					if( result.value instanceof Number ) {
+						store( getAttributeNode(tree,result), result.millis, result.statistic, ((Number)result.value).floatValue() );
 					}
 					else {
-						attr = inst.getChild(result.attribute, "attribute" );
+						store( tree, result );
 					}
-					MetricTreeNode stat = attr.getChild(result.statistic, "metric" );
-					MetricSequence seq  = stat.getMetricSequence();
-					seq.record( new Metric(result.millis,value) );
-					
 				}
 			}
 		} );
 	}
+
 	
+	private void store( final MetricTree tree, final CaptureResult result ) {
+		JmxTypeWalker walker = new JmxTypeWalker( new JmxTypeVisitor() {
+			
+			private MetricTreeNode attr;
+			
+			private MetricTreeNode attr() {
+				// cache the value as it may get called multiple times for the same structure
+				if( attr == null ) {
+					attr = getAttributeNode( tree, result );
+				}
+				return attr;
+			}
+		
+			public void value( String prefix, String name, Object obj ) {
+				if( obj != null && obj instanceof Number ) {
+					store( attr(), result.millis, name, ((Number)obj).floatValue() );
+				}
+			}
+			public void enter( String prefix, String name, Object object ) {
+				
+			}
+			public void exit( String prefix, String name, Object object ) {
+				
+			}
+		} );
+		walker.walk("", result.statistic, result.value );
+	}
+
+	private void store( final MetricTreeNode attr, long millis, String name, float value ) {
+		MetricTreeNode stat = attr.getChild(name, "metric" );
+		MetricSequence seq  = stat.getMetricSequence();
+		seq.record( new Metric(millis,value) );
+	}
+	
+	private MetricTreeNode getAttributeNode( final MetricTree tree, final CaptureResult result ) {
+		MetricTreeNode root = tree.getRoot();
+		MetricTreeNode src  = root.getChild( result.process.getName(), "source" );
+		MetricTreeNode inst = src.getChild(instance, "instance" ) ;
+		MetricTreeNode attr = inst;
+		//
+		// Optional break up which typically is delimited ObjectName into a series of children
+		// instead of a single long name
+		//
+		if( nameSplitter != null ) {
+			String[] names = nameSplitter.split( result.attribute );
+			for( String name : names ) {
+				attr = attr.getChild(name, "attribute" );
+			}
+		}
+		else {
+			attr = inst.getChild(result.attribute, "attribute" );
+		}
+		return attr;
+	}
 	
 	public Keyspace getKeyspace() {
 		return keyspace;

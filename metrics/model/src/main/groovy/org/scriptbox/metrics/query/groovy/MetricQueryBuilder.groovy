@@ -58,6 +58,12 @@ class MetricQueryBuilder
   public MetricQueryExp diff( int chunk, MetricQueryExp arg1, MetricQueryExp arg2 )  {
     return MetricQueries.diff(chunk,arg1,arg2);  
   }
+  public MetricQueryExp divisor( int chunk, MetricQueryExp totals, MetricQueryExp divisors )  {
+    return MetricQueries.divisor(chunk,totals,divisors);  
+  }
+  public MetricQueryExp multiplier( int chunk, MetricQueryExp totals, MetricQueryExp multiples )  {
+    return MetricQueries.multiplier(chunk,totals,multiples);  
+  }
   
   public MetricQueryExp persecond( MetricQueryExp arg )  {
     return MetricQueries.persecond(arg);  

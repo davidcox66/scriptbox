@@ -12,13 +12,13 @@ import org.scriptbox.metrics.query.main.MetricQueries;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 
-public class DiffQueryExp implements MetricQueryExp {
+public class DivisorQueryExp implements MetricQueryExp {
 
 	  private int chunk;
 	  private MetricQueryExp child1; 
 	  private MetricQueryExp child2; 
 	  
-	  public DiffQueryExp( int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
+	  public DivisorQueryExp( int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
 	    this.chunk = chunk;
 	    this.child1 = child1;
 	    this.child2 = child2;
@@ -31,28 +31,27 @@ public class DiffQueryExp implements MetricQueryExp {
 	      metrics.add( provider1.getMetrics(ctx) );
 	      metrics.add( provider2.getMetrics(ctx) );
 	      
-			MetricCollator collator = new MetricCollator("diff", "diff", chunk, metrics);
+			MetricCollator collator = new MetricCollator("divisor", "divistor", chunk, metrics);
 			return collator.group(new ParameterizedRunnableWithResult<Metric, List<? extends MetricRange>>() {
 				public Metric run(List<? extends MetricRange> ranges) {
-					float avg1 = computeAverage( ranges.get(0) );
-					float avg2 = computeAverage( ranges.get(1) );
-					float diff = avg1 - avg2;
-					return new Metric( ranges.get(0).getStart(), diff );
+					float tot1 = computeTotal( ranges.get(0) );
+					float tot2 = computeTotal( ranges.get(1) );
+					float val = tot2 > 0 ? tot1 / tot2 : 0;
+					return new Metric( ranges.get(0).getStart(), val );
 				}
 			});
 	  }
 
-	  private float computeAverage( MetricRange range ) {
-		  int count = 0;
+	  private float computeTotal( MetricRange range ) {
 	      float accum = 0;
 	      for( Iterator<Metric> iter = range.getIterator(chunk) ; iter.hasNext() ; ) {
 	    	  Metric metric = iter.next();
 	          accum += metric.getValue();
 	      }
-		  return count > 0 ? accum / count : 0;
+		  return accum;
 	  }
 	  
 	  public String toString() {
-	    return "diff(child1=" + child1 + ", child2=" + child2 + ")";
+	    return "divistor(child1=" + child1 + ", child2=" + child2 + ")";
 	  }
 }

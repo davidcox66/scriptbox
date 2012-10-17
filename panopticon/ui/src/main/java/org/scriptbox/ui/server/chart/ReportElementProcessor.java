@@ -17,18 +17,23 @@ public class ReportElementProcessor implements MetricDescriptionPostProcessor {
 	public void process(ReportElement element, List<MetricDescriptionDto> descriptions) {
 		Map params = (Map)element.getParams();
 		if( params != null ) {
-			Closure textFilter = (Closure)params.get( "textFilter" );
-			if( textFilter != null ) {
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: filtering descriptions for: " + element ); }
-				textFilter.call( descriptions );
+			Map filters = (Map)params.get( "filters" );
+			if( filters != null ) {
+				Closure filter = (Closure)filters.get( "text" );
+				if( filter != null ) {
+					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: filtering descriptions for: " + element ); }
+					filter.call( descriptions );
+				}
+				else {
+					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: no text Filter defined for: " + element ); }
+				}
 			}
 			else {
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: no textFilter defined for: " + element ); }
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: no filters defined for: " + element ); }
 			}
 		}
 		else {
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "process: no parameters defined for: " + element ); }
 		}
 	}
-
 }

@@ -16,7 +16,7 @@ import com.sencha.gxt.data.shared.LabelProvider;
 public class ChartBuilder {
 
 	protected static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-	protected static final NumberFormat numberFormat = NumberFormat.getFormat("0.000");
+	protected static final NumberFormat numberFormat = NumberFormat.getFormat("###,##0.000" );
 	
 	protected static <X> NumericAxis<X> buildValueAxis(Class<X> cls) {
 		NumericAxis<X> valueAxis = new NumericAxis<X>();

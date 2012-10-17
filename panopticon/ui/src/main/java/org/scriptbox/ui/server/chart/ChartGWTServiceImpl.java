@@ -233,11 +233,8 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 					descriptions.add( new MetricDescriptionDto(entry.getKey().getId()) );
 					ranges.add( entry.getValue() );
 				}
-				if( metricDescriptionProcessors != null ) {
-					for( MetricDescriptionPostProcessor proc : metricDescriptionProcessors ) {
-						proc.process( element, descriptions );
-					}
-				}
+				processDescriptions( element, descriptions );
+				
 				final List<MultiMetric> metrics = toMultiMetrics( element, ranges );
 				
 				// Compute the overall date range of the report
@@ -265,6 +262,14 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		}
 	}
 
+	private void processDescriptions( ReportElement element, List<MetricDescriptionDto> descriptions )
+	{
+		if( metricDescriptionProcessors != null ) {
+			for( MetricDescriptionPostProcessor proc : metricDescriptionProcessors ) {
+				proc.process( element, descriptions );
+			}
+		}
+	}
 	
 	private List<MultiMetric> toMultiMetrics( ReportElement element, List<MetricRange> ranges ) throws Exception {
 		//

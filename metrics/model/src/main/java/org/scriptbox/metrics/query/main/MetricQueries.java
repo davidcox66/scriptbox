@@ -19,9 +19,11 @@ import org.scriptbox.metrics.query.exp.BottomQueryExp;
 import org.scriptbox.metrics.query.exp.DeltaQueryExp;
 import org.scriptbox.metrics.query.exp.DiffQueryExp;
 import org.scriptbox.metrics.query.exp.DivideQueryExp;
+import org.scriptbox.metrics.query.exp.DivisorQueryExp;
 import org.scriptbox.metrics.query.exp.MaxQueryExp;
 import org.scriptbox.metrics.query.exp.MetricQueryExp;
 import org.scriptbox.metrics.query.exp.MinQueryExp;
+import org.scriptbox.metrics.query.exp.MultiplierQueryExp;
 import org.scriptbox.metrics.query.exp.MultiplyQueryExp;
 import org.scriptbox.metrics.query.exp.PerSecondQueryExp;
 import org.scriptbox.metrics.query.exp.TopAverageQueryExp;
@@ -57,7 +59,8 @@ public class MetricQueries {
 		if (obj instanceof Collection) {
 			Collection<X> providers = (Collection<X>) obj;
 			if (providers.size() != 1) {
-				throw new RuntimeException( "Expected only a single metric provider: size=" + providers.size());
+				LOGGER.error( "provider: found multiple providers for child: " + child + ", providers: " + providers ); 
+				throw new RuntimeException( "Expected only a single metric provider: child=" + child + ", size=" + providers.size());
 			}
 			return providers.iterator().next();
 		} 
@@ -179,6 +182,14 @@ public class MetricQueries {
 
 	public static MetricQueryExp diff(int chunk, MetricQueryExp lhs, MetricQueryExp rhs) {
 		return new DiffQueryExp(chunk, lhs, rhs);
+	}
+	
+	public static MetricQueryExp divisor(int chunk, MetricQueryExp totals, MetricQueryExp divisors) {
+		return new DivisorQueryExp(chunk, totals, divisors);
+	}
+	
+	public static MetricQueryExp multiplier(int chunk, MetricQueryExp totals, MetricQueryExp multiples) {
+		return new MultiplierQueryExp(chunk, totals, multiples);
 	}
 
 	public static MetricQueryExp delta(MetricQueryExp exp) {

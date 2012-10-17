@@ -13,6 +13,7 @@ import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MultiMetric;
+import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
@@ -89,12 +90,12 @@ public class MetricCollator {
       	} );
 	}
 	
-	public MetricRange group( final ParameterizedRunnableWithResult<Metric,List<MetricRange>> closure ) throws Exception {
+	public MetricRange group( final ParameterizedRunnableWithResult<Metric,List<? extends MetricRange>> closure ) throws Exception {
 		
 	    // Preload collections to store values from the grouping. We try to reuse these temporary collections
 	    // as much as possible instead of constantly allocating new ones since the given closure will not
 	    // be retaining what we supply it.  
-		final List<MetricRange> rangesByReferenceNumber = new ArrayList<MetricRange>(ranges.size());
+		final List<ListBackedMetricRange> rangesByReferenceNumber = new ArrayList<ListBackedMetricRange>(ranges.size());
 	    final List<List<Metric>> metricsByReferenceNumber = new ArrayList<List<Metric>>(ranges.size());
 	    
 	    for( MetricRange range : ranges ) {
@@ -116,6 +117,10 @@ public class MetricCollator {
 	              	//
 		          	metricsByReferenceNumber.get(metric.getAssociate()).add( metric );
 	          	}
+    			for( ListBackedMetricRange lb : rangesByReferenceNumber ) {
+    				lb.setStart( range.getStart() );
+    				lb.setEnd( range.getEnd() );
+    			}
     			Metric result = closure.run( rangesByReferenceNumber );
          
     			// Clear and reuse instead of making GC bear the brunt 
@@ -161,7 +166,10 @@ public class MetricCollator {
 			        LOGGER.trace( "collate: processed bucket: " + dt + "(" + bstart + "), result: " + result + ", block: " + block ); 
 			    }
 		        if( result != null ) {
-		          ret.add( result );  
+		        	if( result.getValue() == Float.NaN ) {
+		        		throw new MetricException( "Computation generated an invalid number for metrics: " + block );
+		        	}
+		        	ret.add( result );  
 		        }
 		        block.clear();
 		    }
@@ -178,6 +186,9 @@ public class MetricCollator {
 		    	LOGGER.trace( "collate: processed bucket: " + dt + "(" + begin + "), result: " + result + ", block: " + block ); 
 		    }
 			if( result != null ) {
+	        	if( result.getValue() == Float.NaN ) {
+	        		throw new MetricException( "Computation generated an invalid number for metrics: " + block );
+	        	}
 				ret.add( result );  
 			}
 		}
