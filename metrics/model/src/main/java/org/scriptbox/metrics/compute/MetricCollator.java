@@ -223,6 +223,7 @@ public class MetricCollator {
 	    	metricsByReferenceNumber[i] = metrics;    
 	    	rangesByReferenceNumber[i] = new ListBackedMetricRange(
 	    		range.getName(),range.getId(), range.getFullDateRange(),0,0,metrics);
+	    	i++;
 	    }
 	     
 	    return collate( true, new ParameterizedRunnableWithResult<Metric,MetricRange>() {
@@ -256,6 +257,7 @@ public class MetricCollator {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public MetricRange collate( boolean associate, ParameterizedRunnableWithResult<Metric,MetricRange> closure ) throws Exception {
 
 		int chunk = seconds * 1000;
@@ -265,7 +267,7 @@ public class MetricCollator {
 		
 		int i=0;
 		for( MetricRange range : ranges ) {
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "collate: range[" + i + "]=" + range ); }
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "collate: range[" + i + "]=" + range + ", metrics=" + range.getMetrics(chunk) ); }
 			Iterator<Metric> iter = range.getIterator( seconds );
 			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i,iter) : iter );
 			i++;

@@ -29,7 +29,7 @@ public class AverageQueryExp implements MetricQueryExp {
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getChunk());
-				long total = 0;
+				float total = 0;
 				int count = 0;
 				while (iter.hasNext()) {
 					Metric metric = iter.next();

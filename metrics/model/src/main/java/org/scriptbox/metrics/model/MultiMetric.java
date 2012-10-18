@@ -42,6 +42,15 @@ public class MultiMetric implements Serializable {
 	}
 	
 	public String toString() {
-		return "MultiMetric{ millis=" + millis + ", values=" + values + " }";
+		StringBuilder builder = new StringBuilder();
+		if( values != null ) {
+			for( float value : values ) {
+				if( builder.length() > 0 ) {
+					builder.append( "," );
+				}
+				builder.append( value );
+			}
+		}
+		return "MultiMetric{ millis=" + millis + ", values=[" + builder.toString() + "] }";
 	}
 }

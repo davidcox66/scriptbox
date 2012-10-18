@@ -24,7 +24,7 @@ public abstract class BinaryQueryExp implements MetricQueryExp {
 		Object rresult = rhs.evaluate(ctx);
 		Object ret = process(lresult, rresult, ctx);
 		if (LOGGER.isTraceEnabled()) {
-			LOGGER.trace("evaluate(binary): " + toString() + "lresult=" + lresult + ", rresult=" + rresult + ", result=" + ret);
+			LOGGER.trace("evaluate(binary): " + toString() + ", lresult=" + lresult + ", rresult=" + rresult + ", result=" + ret);
 		}
 		return ret;
 	}

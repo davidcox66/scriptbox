@@ -34,5 +34,8 @@ public class MetricWithAssociation<X> implements Serializable {
 	public void setAssociate(X associate) {
 		this.associate = associate;
 	}
-	
+
+	public String toString() {
+		return "MetricWithAssociation{ metric=" + metric + ", associate=" + associate + " }";
+	}
 }
