@@ -187,9 +187,9 @@ public class ChartsPanel extends ContentPanel {
 	}
 	
 	public static native BodyElement getBodyElement() /*-{
-        var win = window.open("", "win", "width=940,height=400,status=1,resizeable=1,scrollbars=1"); // a window object
-        win.document.open("text/html", "replace");
-		win.document.write("<HTML><HEAD></HEAD><BODY><div class=\"mainpanel\"><div style=\"width: 100%; height: 54px;\"><div id=\"mainbody\"class=\"mainbody\" style=\"width: 100%;\"></div></div></div></BODY></HTML>");
+        var win = window.open("", "win", "width=900,height=400,status=1,resizeable=1,scrollbars=1"); 
+        win.document.open("text/html", "print");
+		win.document.write("<HTML><HEAD></HEAD><BODY></BODY></HTML>");
         win.document.close(); 
         win.focus();
         return win.document.body;

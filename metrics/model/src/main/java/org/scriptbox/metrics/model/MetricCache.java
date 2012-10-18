@@ -4,6 +4,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is used to retain queried metrics for a short duration - typically the duration of a single client request.
+ * Queries of this kind may happen regularly as reports often show different representation (min, max, avg, etc)
+ * of the same underlying data. Caching saves repeated round trips to the underlying data store. 
+ * 
+ * Also, implementations of a metric store and its related classes may use this as their means of retaining
+ * collected metrics instead of holding them as properties of their own data structures. This makes sense because
+ * the need to retain the values themselves may be short-lived though the other parts of the
+ * metric hierarchy are more long-lived.
+ * 
+ * @author david
+ */
 public class MetricCache {
 
 	private static ThreadLocal<Map<CacheKey,List<Metric>>> cache = new ThreadLocal<Map<CacheKey,List<Metric>>>();
@@ -47,9 +59,17 @@ public class MetricCache {
 		
 	}
 	
+	/**
+	 * Called at the beginning of an interaction with the metric store to create a fresh cache
+	 * for newly created values.
+	 */
 	public static void begin() {
 		cache.set( new HashMap<CacheKey,List<Metric>>() );
 	}
+	
+	/**
+	 * Discards all cached values at the end of client interaction.
+	 */
 	public static void end() {
 		cache.remove();
 	}

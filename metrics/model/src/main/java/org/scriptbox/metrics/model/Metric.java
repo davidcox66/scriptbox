@@ -3,6 +3,11 @@ package org.scriptbox.metrics.model;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * An immutable object to hold a single collected metric value and the timestamp in which it occurred.
+ * 
+ * @author david
+ */
 public class Metric implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -29,11 +34,7 @@ public class Metric implements Serializable {
 	public float getValue() {
 		return value;
 	}
-	
-	public boolean isBetween( long start, long end ) {
-		return start <= millis && millis <= end;
-	}
-	
+
 	public String toString() {
 		return "Metric{ millis=" + millis + ", date=" + getDate() + ", value=" + value + " }";
 	}

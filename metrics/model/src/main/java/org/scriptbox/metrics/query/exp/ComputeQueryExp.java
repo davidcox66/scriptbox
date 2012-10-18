@@ -48,12 +48,12 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	      metrics.add( range2 );
 	      
 			MetricCollator collator = new MetricCollator(name, name, chunk, metrics);
-			return collator.group(new ParameterizedRunnableWithResult<Metric, List<? extends MetricRange>>() {
-				public Metric run(List<? extends MetricRange> ranges) {
-					float val1 = compute( ranges.get(0) );
-					float val2 = compute( ranges.get(1) );
+			return collator.group(new ParameterizedRunnableWithResult<Metric, MetricRange[]>() {
+				public Metric run(MetricRange[] ranges) {
+					float val1 = compute( ranges[0] );
+					float val2 = compute( ranges[1] );
 					float result = compute( val1, val2 );;
-					long millis = ranges.get(0).getStart();
+					long millis = ranges[0].getStart();
 					if( LOGGER.isTraceEnabled() ) {
 						Date dt = new Date(millis);
 						LOGGER.trace( "evaluate: group - name: " + name + " " + dt + "(" + millis + ") - " + val1 + " " + operator + " " + val2 + " = " + result );

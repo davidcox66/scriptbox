@@ -6,6 +6,12 @@ import java.util.List;
 
 import org.scriptbox.metrics.query.main.MetricProvider;
 
+/**
+ * An abstraction which represents a subset of metrics within a specified time range. This is the
+ * primary means in which most of the metric APIs work with values in mass.
+ * 
+ * @author david
+ */
 public abstract class MetricRange implements MetricProvider {
 
 	protected long start;
@@ -16,10 +22,38 @@ public abstract class MetricRange implements MetricProvider {
 		this.end = end;
 	}
 
+	/** 
+	 * Gets an value which uniquely identifies this range within the system. This look likely be the id
+	 * of the corresponding metric tree node.
+	 */
 	public abstract String getId(); 
+	
+	/**
+	 * A displayable value for this range
+	 */
 	public abstract String getName();
-	public abstract List<Metric> getMetrics( int resolution ); 
+
+	
+	/**
+	 * An iterator which will walk through the underlying sequence of metric in time order. This iterator
+	 * should guarantee that the metrics occur at least once in each specified interval (seconds). This is
+	 * important as various reporting functions work in chunks of time where absent values would skew results.
+	 * 
+	 * @param resolution
+	 * @return
+	 */
 	public abstract Iterator<Metric> getIterator( final int resolution );
+	
+	/**
+	 * Most interaction with individual metrics works in term of the iterator, though occasionally 
+	 * a list is appropriate. A client could iterate over the values to collect them but
+	 * an implementation of the MetricRange which is aware of the underlying storage may be
+	 * able to do so more efficiently.
+	 * 
+	 * @param resolution
+	 * @return
+	 */
+	public abstract List<Metric> getMetrics( int resolution ); 
 	
 	public Date getStartDate() {
 		return new Date( start );

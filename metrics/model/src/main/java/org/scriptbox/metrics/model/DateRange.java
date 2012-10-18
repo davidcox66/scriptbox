@@ -2,6 +2,12 @@ package org.scriptbox.metrics.model;
 
 import java.util.Date;
 
+/**
+ * A simple data object to retain the start and end of a date range. This is used mostly for
+ * holding the date range of the full sequence of metrics.
+ * 
+ * @author david
+ */
 public class DateRange {
 
 	private Date start;

@@ -19,9 +19,56 @@ import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This walks through multiple MetricRanges simultaneously in specified intervals of time, processing all of the
+ * metrics in each of these blocks as units, applying various computations on these blocks of metrics. All of the
+ * reporting functionality is dependent upon this as most, if not all, function require working in these units.
+ * More simple examples of this would be min, max, average which calculate their respective values on these 
+ * chunks of values. 
+ * 
+ * This functionality is highly dependent on the contract of the MetricRange which guarantees metrics will 
+ * be retrieved at the specified resolution or better. Failing to do so would skew results as values would be missing
+ * in calculations.
+ * 
+ * @author david
+ */
 public class MetricCollator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( MetricCollator.class );
+
+	/**
+	 * Used by the common-lang ColattingIterator to retrieve Metrics in order by time
+	 */
+	private static final Comparator<Metric> metricComparator = new Comparator<Metric>() {
+		public int compare( Metric mv1, Metric mv2 ) {
+	        return (int)(mv1.getMillis() - mv2.getMillis());
+		}
+	};
+	
+	/**
+	 * Used by the common-lang ColattingIterator to retrieve MetricsWithAssociation in order by time
+	 */
+	private static final Comparator<MetricWithAssociation<Integer>> metricWithAssociationComparator = new Comparator<MetricWithAssociation<Integer>>() {
+		public int compare( MetricWithAssociation<Integer> mv1, MetricWithAssociation<Integer> mv2 ) {
+	        return (int)(mv1.getMetric().getMillis() - mv2.getMetric().getMillis());
+		}
+	};
+	
+	interface MetricAdapter {
+		public long getMillis( Object obj );
+	}
+	
+	private static MetricAdapter metricAdapter = new MetricAdapter() {
+		public long getMillis( Object obj ) {
+			return ((Metric)obj).getMillis();
+		}
+	};
+	
+	private static MetricAdapter metricWithAssociationAdapter = new MetricAdapter() {
+		public long getMillis( Object obj ) {
+			return ((MetricWithAssociation<Integer>)obj).getMetric().getMillis();
+		}
+	};
 	
 	/**
 	 * A safeguard against possible accidental overrun of date ranges. If you've gotten this far
@@ -29,15 +76,46 @@ public class MetricCollator {
 	 */
 	private static int MAX_METRICS = 50000; 
 	
+	/**
+	 * A name to assign to computed MetricRanges
+	 */
 	private String name;
+	
+	/**
+	 * An id to assign the computed MetricRanges
+	 */
 	private String id;
+	
+	/**
+	 * The block of time in which metrics are collated 
+	 */
 	private int seconds;
+	
 	private Collection<? extends MetricRange> ranges;
 
+	/**
+	 * The earliest first time of the all the ranges
+	 */
 	private long first;
+	
+	/** 
+	 * The latest last time of all the ranges
+	 */
 	private long last;
+	
+	/**
+	 * The earliest start time of all the ranges
+	 */
 	private long start;
+	
+	/** 
+	 * The latest end time of all the ranges
+	 */
 	private long end;
+	
+	/**
+	 * A date range of the earliest first time and latest last time
+	 */
 	private DateRange dates;
 	
 	public MetricCollator( String name, String id, int seconds, Collection<? extends MetricRange> ranges ) {
@@ -60,6 +138,20 @@ public class MetricCollator {
 	    }
 	    start = Math.max(start, first);
 	    end = Math.min(end, last);
+	    
+	    if( first == Long.MIN_VALUE ) {
+	    	throw new IllegalArgumentException( "First cannot be Long.MIN_VALUE" );
+	    }
+	    if( start == Long.MIN_VALUE ) {
+	    	throw new IllegalArgumentException( "Start cannot be Long.MIN_VALUE" );
+	    }
+	    if( end == Long.MAX_VALUE ) {
+	    	throw new IllegalArgumentException( "End cannot be Long.MAX_VALUE" );
+	    }
+	    if( last == Long.MAX_VALUE ) {
+	    	throw new IllegalArgumentException( "Last cannot be Long.MIN_VALUE" );
+	    }
+	    
 	    dates = new DateRange( new Date(first), new Date(last) ); 
 	    if( LOGGER.isDebugEnabled() ) {
 	    	LOGGER.debug( "MetricCollator: name=" + name + ", id=" + id + ", seconds=" + seconds + ", ranges=" + ranges +
@@ -67,23 +159,29 @@ public class MetricCollator {
 	    }
 	}
 
+	/**
+	 * This walks a collection of MetricRanges, converting each block of Metrics into a single MultiMetric with the average
+	 * of values. This is required for GXT multi-series charts as their models are a list of objects where each object
+	 * contains a value for each series. Unlike the other methods in MetricCollector, this does no retain or return
+	 * the computed values. Instead the given closure is responsible for collecting the data in whatever form it
+	 * chooses.
+	 *  
+	 * @param closure
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void multi( final ParameterizedRunnable<MultiMetric> closure ) throws Exception {
 		
 	    final float[] totals = new float[ ranges.size() ];
 	    final int[] counts = new int[ ranges.size() ];
 	    
 	    collate( true, new ParameterizedRunnableWithResult<Metric,MetricRange>() {
-	    	public Metric run( MetricRange range ) throws Exception {
+			public Metric run( MetricRange range ) throws Exception {
 	    		Iterator<MetricWithAssociation<Integer>> iter = (Iterator)range.getIterator(seconds);
     			while( iter.hasNext() ) {
-    				MetricWithAssociation<Integer> metric = iter.next();
-    				//
-	              	// Filter each metric back into individual collections for each supplied list of metrics.
-	              	// This is done by using the MetricValue.reference which was assigned an incrementing
-	              	// number above.
-	              	//
-    				int ind = metric.getAssociate();
-    				totals[ind] += metric.getValue();
+    				MetricWithAssociation<Integer> ma = iter.next();
+    				int ind = ma.getAssociate();
+    				totals[ind] += ma.getMetric().getValue();
     				counts[ind]++;
 	          	}
     			float[] avg = new float[ totals.length ];
@@ -100,32 +198,39 @@ public class MetricCollator {
       	} );
 	}
 	
-	public MetricRange group( final ParameterizedRunnableWithResult<Metric,List<? extends MetricRange>> closure ) throws Exception {
+	/**
+	 * This builds upon the functionality of the collate() method which walks through multiple MetricRanges in chunks of time.
+	 * Whereas collate() does not differentiate between which MetricRange each originate from, this retains that 
+	 * association and keeps the collated metric for each MetricRange together. This allows for computation that compare
+	 * and contract the MetricRanges with one another.
+	 * 
+	 * @param closure
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public MetricRange group( final ParameterizedRunnableWithResult<Metric,MetricRange[]> closure ) throws Exception {
 		
 	    // Preload collections to store values from the grouping. We try to reuse these temporary collections
 	    // as much as possible instead of constantly allocating new ones since the given closure will not
 	    // be retaining what we supply it.  
-		final List<ListBackedMetricRange> rangesByReferenceNumber = new ArrayList<ListBackedMetricRange>(ranges.size());
-	    final List<List<Metric>> metricsByReferenceNumber = new ArrayList<List<Metric>>(ranges.size());
+		final ListBackedMetricRange[] rangesByReferenceNumber = new ListBackedMetricRange[ranges.size()];
+	    final List[] metricsByReferenceNumber = new List[ranges.size()];
 	    
+	    int i=0;
 	    for( MetricRange range : ranges ) {
 	    	List<Metric> metrics = new ArrayList<Metric>();    
-	    	metricsByReferenceNumber.add( metrics );    
-	    	rangesByReferenceNumber.add( new ListBackedMetricRange(
-	    		range.getName(),range.getId(), range.getFullDateRange(),range.getStart(),range.getEnd(),metrics) );
+	    	metricsByReferenceNumber[i] = metrics;    
+	    	rangesByReferenceNumber[i] = new ListBackedMetricRange(
+	    		range.getName(),range.getId(), range.getFullDateRange(),0,0,metrics);
 	    }
 	     
 	    return collate( true, new ParameterizedRunnableWithResult<Metric,MetricRange>() {
-	    	public Metric run( MetricRange range ) throws Exception {
+			public Metric run( MetricRange range ) throws Exception {
 	    		Iterator<MetricWithAssociation<Integer>> iter = (Iterator)range.getIterator(seconds);
     			while( iter.hasNext() ) {
-    				MetricWithAssociation<Integer> metric = iter.next();
-    				//
-	              	// Filter each metric back into individual collections for each supplied list of metrics.
-	              	// This is done by using the MetricValue.reference which was assigned an incrementing
-	              	// number above.
-	              	//
-		          	metricsByReferenceNumber.get(metric.getAssociate()).add( metric );
+    				MetricWithAssociation<Integer> ma = iter.next();
+		          	metricsByReferenceNumber[ma.getAssociate()].add( ma.getMetric() );
 	          	}
     			for( ListBackedMetricRange lb : rangesByReferenceNumber ) {
     				lb.setStart( range.getStart() );
@@ -142,15 +247,22 @@ public class MetricCollator {
       	} );
 	}
 
+	/**
+	 * Walks through all of the supplied MetricRanges in chunks of time in the specified number of seconds. This is the
+	 * building block upon which much of the reporting functionality works. Multiple MetricRanges are subdivided by time
+	 * and computations are performed on these blocks
+	 * @param associate
+	 * @param closure
+	 * @return
+	 * @throws Exception
+	 */
 	public MetricRange collate( boolean associate, ParameterizedRunnableWithResult<Metric,MetricRange> closure ) throws Exception {
 
-		final List<Metric> ret = new ArrayList<Metric>();
-		CollatingIterator citer = new CollatingIterator( new Comparator<Metric>() {
-			public int compare( Metric mv1, Metric mv2 ) {
-		        return (int)(mv1.getMillis() - mv2.getMillis());
-			}
-		} );
-	
+		int chunk = seconds * 1000;
+		final List<Metric> ret = new ArrayList<Metric>( (int)(end - start) / chunk );
+		CollatingIterator citer = new CollatingIterator( associate ? metricWithAssociationComparator : metricComparator ); 
+		MetricAdapter adapter = associate ? metricWithAssociationAdapter : metricAdapter;		
+		
 		int i=0;
 		for( MetricRange range : ranges ) {
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "collate: range[" + i + "]=" + range ); }
@@ -159,13 +271,12 @@ public class MetricCollator {
 			i++;
 		}
 		
-		final List<Metric> block = new ArrayList<Metric>();
+		final List block = new ArrayList();
 		final ListBackedMetricRange tmp = new ListBackedMetricRange(null,null,dates,0,0,block );
 		long current = 0;
-		int chunk = seconds * 1000;
 		while( citer.hasNext() ) {
-			Metric mv = (Metric)citer.next();
-		    long bucket = mv.getMillis() / chunk;     
+			Object mv = citer.next();
+		    long bucket = adapter.getMillis(mv) / chunk;     
 		    if( current != 0 && bucket != current ) {
 		    	call( closure, current, chunk, tmp, ret );
 		    }

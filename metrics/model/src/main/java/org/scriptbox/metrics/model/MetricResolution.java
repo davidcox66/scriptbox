@@ -5,6 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Metrics may be collected in various intervals of time simultaneously. This is done so that
+ * we can see both very fine detail and high-level overview in time without incurring a 
+ * cost of sifting through large volumes of fine detail to obtain higher levels of overview.
+ * 
+ * This class encapsulates these time intervals in seconds with potentially other policies
+ * such as TTL which may be enforced.
+ * 
+ * @author david
+ */
 public class MetricResolution implements Serializable, Comparable<MetricResolution> {
 
 	private static final long serialVersionUID = 1L;
