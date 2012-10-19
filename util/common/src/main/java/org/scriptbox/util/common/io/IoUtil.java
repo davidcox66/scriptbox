@@ -1,5 +1,6 @@
 package org.scriptbox.util.common.io;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,27 @@ public class IoUtil {
 		}
 	}
 	
+	public static void closeQuietly( Reader reader ) {
+		if( reader != null ) {
+			try {
+				reader.close();
+			}
+			catch( Exception ex ) {
+				LOGGER.error( "Error closing reader: " + reader, ex );
+			}
+		}
+	}
+	public static void closeQuietly( Writer writer ) {
+		if( writer != null ) {
+			try {
+				writer.close();
+			}
+			catch( Exception ex ) {
+				LOGGER.error( "Error closing writer: " + writer, ex );
+			}
+		}
+	}
+	
 	public static void consumeAllOutput( BufferedReader reader ) {
 		try {
 			if( reader != null ) { 
@@ -64,5 +87,41 @@ public class IoUtil {
 			LOGGER.error( "consumeAllOutput: error consuming output", ex );
 		}
 	}
-	
+
+	public static Thread consumeProcessErrorStream(Process process, OutputStream err) {
+		Thread thread = new Thread(new ByteDumper(process.getErrorStream(), err));
+		thread.start();
+		return thread;
+	}
+
+	public static Thread consumeProcessOutputStream(Process process, OutputStream output) {
+		Thread thread = new Thread( new ByteDumper(process.getInputStream(), output));
+		thread.start();
+		return thread;
+	}
+
+	private static class ByteDumper implements Runnable {
+		InputStream in;
+		OutputStream out;
+
+		public ByteDumper(InputStream in, OutputStream out) {
+			this.in = new BufferedInputStream(in);
+			this.out = out;
+		}
+
+		public void run() {
+			byte[] buf = new byte[8192];
+			int next;
+			try {
+				while ((next = in.read(buf)) != -1) {
+					if (out != null) {
+						out.write(buf, 0, next);
+					}
+				}
+			} 
+			catch (IOException e) {
+				throw new RuntimeException( "Exception while dumping process stream", e);
+			}
+		}
+	}
 }

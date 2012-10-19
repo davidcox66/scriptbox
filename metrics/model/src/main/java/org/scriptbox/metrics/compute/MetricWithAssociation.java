@@ -3,8 +3,9 @@ package org.scriptbox.metrics.compute;
 import java.io.Serializable;
 
 import org.scriptbox.metrics.model.Metric;
+import org.scriptbox.metrics.model.Timed;
 
-public class MetricWithAssociation<X> implements Serializable {
+public final class MetricWithAssociation<X> implements Serializable, Timed {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -19,19 +20,23 @@ public class MetricWithAssociation<X> implements Serializable {
 		this.associate = associate;
 	}
 
-	public Metric getMetric() {
+	public final long getMillis() {
+		return metric.getMillis();
+	}
+	
+	public final Metric getMetric() {
 		return metric;
 	}
 
-	public void setMetric(Metric metric) {
+	public final void setMetric(Metric metric) {
 		this.metric = metric;
 	}
 
-	public X getAssociate() {
+	public final X getAssociate() {
 		return associate;
 	}
 
-	public void setAssociate(X associate) {
+	public final void setAssociate(X associate) {
 		this.associate = associate;
 	}
 

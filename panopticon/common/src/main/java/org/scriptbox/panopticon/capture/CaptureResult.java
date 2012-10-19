@@ -39,6 +39,7 @@ public class CaptureResult {
 	    this.attribute = attribute;
 	    this.statistic = statistic;
 	    this.value = value;
+	    this.millis = System.currentTimeMillis();
 	  }
 	  
 	  public CaptureResult( GenericProcess process, String attribute, String statistic, Object value, long millis ) {

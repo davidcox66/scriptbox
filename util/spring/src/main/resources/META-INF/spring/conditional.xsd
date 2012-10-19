@@ -10,13 +10,22 @@
 	<xsd:element name="test">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="expression" type="xsd:string"
-					minOccurs="0" />
+				<xsd:element name="expression" type="xsd:string" minOccurs="0" />
 				<xsd:any minOccurs="0" maxOccurs="unbounded" />
 			</xsd:sequence>
 			<xsd:attribute name="property" type="xsd:string" />
 			<xsd:attribute name="value" type="xsd:string" />
 			<xsd:attribute name="expression" type="xsd:string" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="present">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:any minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+			<xsd:attribute name="property" type="xsd:string" />
+			<xsd:attribute name="set" type="xsd:boolean" />
 		</xsd:complexType>
 	</xsd:element>
 

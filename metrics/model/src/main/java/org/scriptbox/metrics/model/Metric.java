@@ -8,7 +8,7 @@ import java.util.Date;
  * 
  * @author david
  */
-public class Metric implements Serializable {
+public final class Metric implements Serializable, Timed {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,15 +23,15 @@ public class Metric implements Serializable {
 		this.value = value;
 	}
 
-	public Date getDate() {
+	public final Date getDate() {
 		return new Date( millis );
 	}
 	
-	public long getMillis() {
+	public final long getMillis() {
 		return millis;
 	}
 
-	public float getValue() {
+	public final float getValue() {
 		return value;
 	}
 

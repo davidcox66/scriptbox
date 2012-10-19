@@ -1,5 +1,6 @@
 package org.scriptbox.panopticon.capture;
 
+import me.prettyprint.cassandra.service.tx.HTransactionManager;
 import me.prettyprint.cassandra.service.tx.HTransactionTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -102,6 +103,9 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 		} );
 	}
 
+	public void flush() throws Exception {
+		HTransactionManager.getInstance().flushAll();
+	}
 	
 	private void store( final MetricTree tree, final CaptureResult result ) {
 		JmxTypeWalker walker = new JmxTypeWalker( new JmxTypeVisitor() {

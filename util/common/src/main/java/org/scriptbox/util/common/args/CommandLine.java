@@ -105,6 +105,19 @@ public class CommandLine {
 		return false;
 	}
 
+	public int consumeArgValueAsInt( String name, int defaultValue ) throws CommandLineException {
+		String value = consumeArgValue( name, false );
+		if( !isBlank(value) ) {
+			try {
+				return Integer.parseInt( value );
+			}
+			catch( Exception ex ) {
+				throw new CommandLineException( "Invalid integer parameter: '" + value + "'");
+			}
+		}
+		return defaultValue;
+	}
+	
 	public int consumeArgValueAsInt( String name, boolean required ) throws CommandLineException {
 		String value = consumeArgValue( name, required );
 		if( !isBlank(value) ) {
@@ -116,6 +129,14 @@ public class CommandLine {
 			}
 		}
 		return 0;
+	}
+	
+	public String consumeArgValue( String name, String defaultValue ) throws CommandLineException {
+		String val = consumeArgValue( name, false );
+		if( isBlank(val) ) {
+			val = defaultValue;
+		}
+		return val;
 	}
 	
 	public String consumeArgValue( String name, boolean required ) throws CommandLineException {

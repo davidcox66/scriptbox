@@ -52,6 +52,10 @@ public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxConte
 	public void executingScript( BoxInvocationContext invocation ) throws Exception {
 		invocation.next();
 	}
+
+	public void flush() {
+		output.flush();
+	}
 	
 	@Override
 	public void store(CaptureResult result) throws Exception {

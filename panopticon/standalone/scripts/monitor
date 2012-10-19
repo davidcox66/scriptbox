@@ -14,21 +14,6 @@ else
 	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
 fi
 
-if [[ -n $1 ]] ; then 
-	INSTANCE_ARGS="-Dmetrics.instance=$1"
-else 
-	echo "Usage: $0 <instance> [cassandra host] [listen address] [port]"
-	exit 1
-fi
-
-if [[ -n $2 ]] ; then
-    DB_ARGS=-Dcassandra.host=$2
-fi
-
-listen_host=${3:-$ip}
-port=${4:-7800}
-jmx_port=$((port + 1))
-
 # So com.sun virtual machine apis will work
 if [[ -f $JAVA_HOME/lib/tools.jar ]] ; then
 	echo "Added tools.jar to classpath"
@@ -42,12 +27,7 @@ CP="$CP:$root/$jar"
 
 set -x
 JAVA_OPTS="\
-        $INSTANCE_ARGS \
-        $DB_ARGS \
         -Dlogback.configurationFile=panopticon-logback.xml \
-        -Djetty.hostname=${listen_host} \
-        -Djetty.port=${port} \
-        -Dcom.sun.management.jmxremote.port=$jmx_port \
-    -Dcom.sun.management.jmxremote.ssl=false \
-    -Dcom.sun.management.jmxremote.authenticate=false"
-java $JAVA_OPTS -cp $CP org.scriptbox.panopticon.main.MonitorMain "$@"
+    	-Dcom.sun.management.jmxremote.ssl=false \
+    	-Dcom.sun.management.jmxremote.authenticate=false"
+java $JAVA_OPTS -cp $CP org.scriptbox.panopticon.main.MonitorMain --address=$ip "$@"

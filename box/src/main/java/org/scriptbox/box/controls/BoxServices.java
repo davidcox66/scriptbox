@@ -13,7 +13,13 @@ public class BoxServices {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger( BoxServices.class );
 	
-	public static Errors<BoxService> start( Collection<BoxService> services, final List arguments ) throws Exception {
+	public static Errors<BoxService> start( final Collection<BoxService> services, final List arguments, final Collection<BoxServiceListener> listeners ) throws Exception {
+		Iterators.callAndCollectExceptions( listeners, new ParameterizedRunnable<BoxServiceListener>() {
+			public void run( BoxServiceListener listener ) throws Exception {
+				listener.starting( arguments );
+			}
+		} ).raiseException( "Error notifying listeners of start");
+		
 		return Iterators.callAndCollectExceptions( services, new ParameterizedRunnable<BoxService>() {
 			public void run( BoxService service ) throws Exception {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "start: service=" + service + ", arguments=" + arguments ); }
@@ -22,7 +28,13 @@ public class BoxServices {
 		} );
 	}
 	
-	public static Errors<BoxService> stop( Collection<BoxService> services ) throws Exception {
+	public static Errors<BoxService> stop( final Collection<BoxService> services, final Collection<BoxServiceListener> listeners ) throws Exception {
+		Iterators.callAndCollectExceptions( listeners, new ParameterizedRunnable<BoxServiceListener>() {
+			public void run( BoxServiceListener listener ) throws Exception {
+				listener.stopping();
+			}
+		} ).logError( "Error notifying listeners of start", LOGGER);
+		
 		return Iterators.callAndCollectExceptions( services, new ParameterizedRunnable<BoxService>() {
 			public void run( BoxService service ) throws Exception {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "stop: service=" + service ); }
@@ -30,7 +42,23 @@ public class BoxServices {
 			}
 		} );
 	}
-	public static Errors<BoxService> shutdown( Collection<BoxService> services ) throws Exception {
+	public static Errors<BoxService> shutdown( final Collection<BoxService> services, final Collection<BoxServiceListener> listeners ) throws Exception {
+		Iterators.callAndCollectExceptions( listeners, new ParameterizedRunnable<BoxServiceListener>() {
+			public void run( BoxServiceListener listener ) throws Exception {
+				listener.stopping();
+			}
+		} ).logError( "Error notifying listeners of start", LOGGER);
+		
+		if( listeners != null && listeners.size() > 0 ) {
+			for( BoxServiceListener listener : listeners ) {
+				try {
+					listener.shutdown();
+				}
+				catch( Exception ex ) {
+					LOGGER.error( "callListeners: error notifying BoxServiceListener of shutdown", ex );
+				}
+			}
+		}
 		return Iterators.callAndCollectExceptions( services, new ParameterizedRunnable<BoxService>() {
 			public void run( BoxService service ) throws Exception {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "stop: service=" + service ); }

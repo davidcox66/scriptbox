@@ -1,8 +1,12 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
+import java.io.Serializable;
 
-public class TcpEndpoint extends Endpoint {
 
+public class TcpEndpoint extends Endpoint implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
 	private String host;
 	private int port;
 	

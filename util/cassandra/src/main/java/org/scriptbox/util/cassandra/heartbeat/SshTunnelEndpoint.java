@@ -1,8 +1,12 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
+import java.io.Serializable;
 
-public class SshTunnelEndpoint extends TcpEndpoint {
 
+public class SshTunnelEndpoint extends TcpEndpoint implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
 	private String tunnelHost;
 	private int tunnelPort;
 	

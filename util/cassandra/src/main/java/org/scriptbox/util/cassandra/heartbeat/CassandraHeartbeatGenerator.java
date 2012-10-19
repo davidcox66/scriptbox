@@ -1,6 +1,7 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
@@ -80,6 +81,16 @@ public abstract class CassandraHeartbeatGenerator<X> {
 	public List<String> getTags() {
 		return tags;
 	}
+	public void setTags( String tags ) {
+		if( tags != null ) {
+			String[] elems = tags.split( "," );
+			this.tags = Arrays.asList(elems);
+		}
+		else {
+			this.tags = null;
+		}
+	}
+	
 	public void setTags(List<String> tags) {
 		this.tags = tags;
 	}

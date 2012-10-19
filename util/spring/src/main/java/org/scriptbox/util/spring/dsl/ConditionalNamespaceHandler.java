@@ -14,6 +14,7 @@ public class ConditionalNamespaceHandler
   public void init()
   {
     super.registerBeanDefinitionParser("test", new ConditionalTestDefinitionParser());
+    super.registerBeanDefinitionParser("present", new ConditionalPresentDefinitionParser());
     super.registerBeanDefinitionParser("import", new ConditionalImportDefinitionParser());
     super.registerBeanDefinitionParser("switch", new ConditionalSwitchDefinitionParser());
     super.registerBeanDefinitionParser("dependency", new ConditionalDependencyDefinitionParser());

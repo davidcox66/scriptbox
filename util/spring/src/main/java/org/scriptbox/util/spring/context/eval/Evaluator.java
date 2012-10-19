@@ -54,6 +54,19 @@ public class Evaluator
     }
     return ret;
   }
+  
+  public static boolean evaluateElementPresent( Element element ) {
+    String property = element.getAttribute("property");
+    String setstr = element.getAttribute("set");
+    boolean set = StringUtils.isNotEmpty(setstr) ? Boolean.valueOf(setstr).booleanValue() : true;
+    
+    String value = getPropertyOrEnvValue(property);
+    boolean ret = StringUtils.isNotEmpty(value) == set;
+    if( LOGGER.isDebugEnabled() ) { 
+      LOGGER.debug( "evaluateElementPresent: property=" + property + ", set=" + set + ", value=" + value + ", ret=" + ret); 
+    }
+    return ret;
+  }
  
   /**
    * Evaluates the given Spring EL expression, if supplied, or compares the given system property/environment

@@ -13,6 +13,7 @@ import org.scriptbox.metrics.model.DateRange;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MultiMetric;
+import org.scriptbox.metrics.model.Timed;
 import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
@@ -39,36 +40,12 @@ public class MetricCollator {
 	/**
 	 * Used by the common-lang ColattingIterator to retrieve Metrics in order by time
 	 */
-	private static final Comparator<Metric> metricComparator = new Comparator<Metric>() {
-		public int compare( Metric mv1, Metric mv2 ) {
+	private static final Comparator<Timed> comparator = new Comparator<Timed>() {
+		public int compare( Timed mv1, Timed mv2 ) {
 	        return (int)(mv1.getMillis() - mv2.getMillis());
 		}
 	};
 	
-	/**
-	 * Used by the common-lang ColattingIterator to retrieve MetricsWithAssociation in order by time
-	 */
-	private static final Comparator<MetricWithAssociation<Integer>> metricWithAssociationComparator = new Comparator<MetricWithAssociation<Integer>>() {
-		public int compare( MetricWithAssociation<Integer> mv1, MetricWithAssociation<Integer> mv2 ) {
-	        return (int)(mv1.getMetric().getMillis() - mv2.getMetric().getMillis());
-		}
-	};
-	
-	interface MetricAdapter {
-		public long getMillis( Object obj );
-	}
-	
-	private static MetricAdapter metricAdapter = new MetricAdapter() {
-		public long getMillis( Object obj ) {
-			return ((Metric)obj).getMillis();
-		}
-	};
-	
-	private static MetricAdapter metricWithAssociationAdapter = new MetricAdapter() {
-		public long getMillis( Object obj ) {
-			return ((MetricWithAssociation<Integer>)obj).getMetric().getMillis();
-		}
-	};
 	
 	/**
 	 * A safeguard against possible accidental overrun of date ranges. If you've gotten this far
@@ -261,9 +238,8 @@ public class MetricCollator {
 	public MetricRange collate( boolean associate, ParameterizedRunnableWithResult<Metric,MetricRange> closure ) throws Exception {
 
 		int chunk = seconds * 1000;
-		final List<Metric> ret = new ArrayList<Metric>( (int)(end - start) / chunk );
-		CollatingIterator citer = new CollatingIterator( associate ? metricWithAssociationComparator : metricComparator ); 
-		MetricAdapter adapter = associate ? metricWithAssociationAdapter : metricAdapter;		
+		final List<Metric> ret = new ArrayList<Metric>( (int)(end - start) / chunk ); // a reaonsable guess for the initial size
+		CollatingIterator citer = new CollatingIterator( comparator ); 
 		
 		int i=0;
 		for( MetricRange range : ranges ) {
@@ -277,8 +253,8 @@ public class MetricCollator {
 		final ListBackedMetricRange tmp = new ListBackedMetricRange(null,null,dates,0,0,block );
 		long current = 0;
 		while( citer.hasNext() ) {
-			Object mv = citer.next();
-		    long bucket = adapter.getMillis(mv) / chunk;     
+			Timed mv = (Timed)citer.next();
+		    long bucket = mv.getMillis() / chunk;     
 		    if( current != 0 && bucket != current ) {
 		    	call( closure, current, chunk, tmp, ret );
 		    }

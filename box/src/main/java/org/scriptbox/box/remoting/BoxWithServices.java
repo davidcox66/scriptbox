@@ -1,6 +1,7 @@
 package org.scriptbox.box.remoting;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,7 @@ import org.scriptbox.box.container.Box;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.StatusProvider;
 import org.scriptbox.box.controls.BoxService;
+import org.scriptbox.box.controls.BoxServiceListener;
 import org.scriptbox.box.controls.BoxServices;
 import org.scriptbox.util.common.error.Errors;
 import org.scriptbox.util.common.error.ExceptionHelper;
@@ -33,12 +35,14 @@ public class BoxWithServices implements BoxInterface {
 	public void start() throws Exception {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "start: box=" + box ); }
 		box.start();
-		BoxServices.start(getBoxServices(), null).raiseException( "Error starting services");
+		Collection<BoxServiceListener> listeners = box.getBeans().getAll(BoxServiceListener.class);
+		BoxServices.start(getBoxServices(), null, listeners).raiseException( "Error starting services");
 	}
 	
 	public void shutdown() throws Exception {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "shutdown: box=" + box ); }
-		Errors<BoxService> errors = BoxServices.shutdown(getBoxServices()).logError( "Error stopping services", LOGGER );
+		Collection<BoxServiceListener> listeners = box.getBeans().getAll(BoxServiceListener.class);
+		Errors<BoxService> errors = BoxServices.shutdown(getBoxServices(),listeners).logError( "Error stopping services", LOGGER );
 		box.shutdown();
 		errors.raiseException( "Error stopping services" );
 	}
@@ -50,7 +54,8 @@ public class BoxWithServices implements BoxInterface {
 		}
 		BoxContext existing = box.getContext( contextName );
 		if( existing != null ) {
-			BoxServices.shutdown(getContextServices(contextName)).raiseException( "Error shutting down services");
+			Collection<BoxServiceListener> listeners = existing.getBeans().getAll(BoxServiceListener.class);
+			BoxServices.shutdown(getContextServices(contextName),listeners).raiseException( "Error shutting down services");
 		}
 		box.createContext( language, contextName );
 	}
@@ -60,19 +65,22 @@ public class BoxWithServices implements BoxInterface {
 		if( LOGGER.isDebugEnabled() ) { 
 			LOGGER.debug( "startContext: box=" + box + ", contextName=" + contextName + ", arguments=" + arguments); 
 		}
-		BoxServices.start(getContextServices(contextName), arguments).raiseException( "Error starting services");
+		Collection<BoxServiceListener> listeners = box.getContextEx(contextName).getBeans().getAll(BoxServiceListener.class);
+		BoxServices.start(getContextServices(contextName), arguments,listeners).raiseException( "Error starting services");
 	}
 	
 	@Override
 	public void stopContext(String contextName ) throws Exception {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "stopContext: box=" + box + ", contextName=" + contextName); }
-		BoxServices.stop(getContextServices(contextName)).raiseException( "Error suspending services");
+		Collection<BoxServiceListener> listeners = box.getContextEx(contextName).getBeans().getAll(BoxServiceListener.class);
+		BoxServices.stop(getContextServices(contextName),listeners).raiseException( "Error suspending services");
 	}
 
 	@Override
 	public void shutdownContext(String contextName) throws Exception {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "shutdownContext: box=" + box + ", contextName=" + contextName); }
-		Errors<BoxService> errors = BoxServices.shutdown(getContextServices(contextName));
+		Collection<BoxServiceListener> listeners = box.getContextEx(contextName).getBeans().getAll(BoxServiceListener.class);
+		Errors<BoxService> errors = BoxServices.shutdown(getContextServices(contextName),listeners);
 		errors.logError( "Error", LOGGER);
 		box.shutdownContext( contextName );
 		errors.raiseException( "Error shutting down services");
@@ -83,7 +91,8 @@ public class BoxWithServices implements BoxInterface {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "shutdownAllContexts: box=" + box ); }
 		Errors<BoxService> errors = new Errors<BoxService>();
 		for( BoxContext context : box.getContexts().values() ) {
-			errors.addAll( BoxServices.shutdown(context.getBeans().getAll(BoxService.class)) );
+			Collection<BoxServiceListener> listeners = context.getBeans().getAll(BoxServiceListener.class);
+			errors.addAll( BoxServices.shutdown(context.getBeans().getAll(BoxService.class),listeners) );
 		}
 		errors.logError( "Error", LOGGER);
 		box.shutdownAllContexts();
