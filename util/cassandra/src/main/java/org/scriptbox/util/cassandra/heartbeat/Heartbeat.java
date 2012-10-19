@@ -1,44 +1,47 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-class Heartbeat {
 
-    private int ttl;
+class Heartbeat<X> {
+
     private String group;
     private String id;
-    private Map<String,String> parameters = new HashMap<String,String>();
+    private String type;
+    private List<String> tags;
+    private X data;
     
-	public Heartbeat( String group, String id, int ttl ) {
+	public Heartbeat( String group, String type, String id, List<String> tags, X data ) {
 		this.group = group;
+		this.type = type;
 		this.id = id;
-		this.ttl = ttl;
+		this.tags = tags;
+		this.data = data;
 	}
-    
 	
-    public int getTtl() {
-		return ttl;
-	}
-
 
 	public String getGroup() {
 		return group;
 	}
 
+	public String getType() {
+		return type;
+	}
 
 	public String getId() {
 		return id;
 	}
 
-
-	public Map<String, String> getParameters() {
-		return parameters;
+	public List<String> getTags() {
+		return tags;
 	}
 
+	public Object getData() {
+		return data;
+	}
 
 	public String toString() {
-        return "Heartbeat{ group=" + group + ", id=" + id + " , ttl=" + ttl + ", parameters=" + parameters + " }";
+        return "Heartbeat{ group=" + group + ", type=" + type + ", id=" + id + ", tags=" + tags + ", data=" + data + " }";
     }
 }
 

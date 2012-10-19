@@ -2,8 +2,8 @@ package org.scriptbox.util.cassandra.heartbeat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.template.SuperCfTemplate;
 import me.prettyprint.cassandra.service.template.ThriftSuperCfTemplate;
@@ -21,16 +21,19 @@ import org.scriptbox.util.cassandra.ColumnFamilyDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CassandraHeartbeatGenerator {
+public abstract class CassandraHeartbeatGenerator<X> {
     private static final Logger LOGGER = LoggerFactory.getLogger( CassandraHeartbeatGenerator.class );
     
 	public static final String HEARTBEATS_CF = "Heartbeats";
  
 	private Cluster cluster;
     private Keyspace keyspace;
-   
+    private String columnFamilyName = HEARTBEATS_CF;
+    
     private String group;
     private String id;
+    private String type;
+    private List<String> tags;
     private int ttl;
     private int interval;
     
@@ -42,7 +45,7 @@ public abstract class CassandraHeartbeatGenerator {
     public CassandraHeartbeatGenerator() {
     }
    
-    public abstract void populate( Heartbeat beat );
+    public abstract X data();
    
     public Cluster getCluster() {
 		return cluster;
@@ -56,11 +59,30 @@ public abstract class CassandraHeartbeatGenerator {
 	public void setKeyspace(Keyspace keyspace) {
 		this.keyspace = keyspace;
 	}
+	public String getColumnFamilyName() {
+		return columnFamilyName;
+	}
+
+	public void setColumnFamilyName(String columnFamilyName) {
+		this.columnFamilyName = columnFamilyName;
+	}
 	public String getGroup() {
 		return group;
 	}
 	public void setGroup(String group) {
 		this.group = group;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public List<String> getTags() {
+		return tags;
+	}
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 	public String getId() {
 		return id;
@@ -81,6 +103,7 @@ public abstract class CassandraHeartbeatGenerator {
 		this.interval = interval;
 	}
 	
+	
 	public void stop() {
     	running = false;
     }
@@ -89,8 +112,17 @@ public abstract class CassandraHeartbeatGenerator {
         if( StringUtils.isEmpty(group) ) {
             throw new IllegalArgumentException( "Group cannot be null");
         }
+        if( StringUtils.isEmpty(type) ) {
+            throw new IllegalArgumentException( "Type cannot be null");
+        }
         if( StringUtils.isEmpty(id) ) {
             throw new IllegalArgumentException( "ID cannot be null");
+        }
+        if( tags == null || tags.size() == 0 ) {
+            throw new IllegalArgumentException( "Tags cannot be empty");
+        }
+        if( StringUtils.isEmpty(columnFamilyName) ) {
+        	throw new IllegalArgumentException( "Column family name cannot be empty" );
         }
         if( interval > ttl ) {
             throw new IllegalArgumentException( "Interval cannot be greater than TTL");
@@ -106,7 +138,7 @@ public abstract class CassandraHeartbeatGenerator {
         }
         
         StringSerializer ser = StringSerializer.get();
-        this.tmpl = new ThriftSuperCfTemplate<String,String,String>( keyspace, HEARTBEATS_CF, ser, ser, ser );
+        this.tmpl = new ThriftSuperCfTemplate<String,String,String>( keyspace, columnFamilyName, ser, ser, ser );
     	this.running = true;
     	
         Thread thread = new Thread(new Runnable() { 
@@ -125,10 +157,9 @@ public abstract class CassandraHeartbeatGenerator {
             down.invoke( new Runnable() {
             	public void run() { 
             		initializeColumnFamilyIfNeeded();
-				    Heartbeat beat = new Heartbeat( group, id, ttl );
 				    try {
-	                    populate( beat );
-	                    send( beat );
+	                    X data = data();
+	                    send( data );
 				    }
 				    catch( Exception ex ) {
 				    	throw new RuntimeException( "Error sending heartbeat", ex );
@@ -145,9 +176,9 @@ public abstract class CassandraHeartbeatGenerator {
     private void initializeColumnFamilyIfNeeded() {
 		if( !initialized ) {
     		Cassandra.createKeyspaceIfNeeded(cluster, keyspace.getKeyspaceName());
-    		if( !Cassandra.isExistingColumnFamily(cluster, keyspace.getKeyspaceName(), HEARTBEATS_CF) ) {
+    		if( !Cassandra.isExistingColumnFamily(cluster, keyspace.getKeyspaceName(), columnFamilyName) ) {
 				ColumnFamilyDefinition tree = new ColumnFamilyDefinition();
-				tree.setColumnFamilyName(HEARTBEATS_CF);
+				tree.setColumnFamilyName(columnFamilyName);
 				tree.setComparator(ComparatorType.UTF8TYPE);
 				tree.setSubComparator(ComparatorType.UTF8TYPE);
 				tree.create( cluster, keyspace.getKeyspaceName() );
@@ -156,16 +187,21 @@ public abstract class CassandraHeartbeatGenerator {
 		}
     	
     }
-    private void send( final Heartbeat beat ) {
+    private void send( final X data ) {
       HTransactionTemplate.execute( new Runnable() {
     	  public void run() {
-    		  StringSerializer ser = StringSerializer.get();
-    		  List<HColumn<String,String>> cols = new ArrayList<HColumn<String,String>>();
-    		  for( Map.Entry<String,String> entry : beat.getParameters().entrySet() ) {
-    			  cols.add( HFactory.createColumn(entry.getKey(), entry.getValue(), beat.getTtl(), ser, ser) );
+    		  try {
+	    		  StringSerializer sser = StringSerializer.get();
+	    		  ObjectSerializer oser = ObjectSerializer.get();
+	    		  List<HColumn<String,Object>> cols = new ArrayList<HColumn<String,Object>>();
+				  cols.add( HFactory.createColumn("data", data, ttl, sser, oser) );
+				  tmpl.createMutator().addInsertion(group, columnFamilyName, 
+					  HFactory.createSuperColumn(id, cols, sser, sser, oser) );
     		  }
-			  tmpl.createMutator().addInsertion(beat.getGroup(), HEARTBEATS_CF, 
-			      HFactory.createSuperColumn(beat.getId(), cols, ser, ser, ser) );
+    		  catch( Exception ex ) {
+    			  throw new RuntimeException( "Error saving heartbeat - " +
+    			      "group: " + group + ", type: " + type + ", id: " + id + ", tags: " + tags + ", data: " + data, ex );
+    		  }
     	  }
       } );
     }
