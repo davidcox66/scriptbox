@@ -62,7 +62,6 @@ public abstract class CassandraHeartbeatGenerator<X> {
 	public String getColumnFamilyName() {
 		return columnFamilyName;
 	}
-
 	public void setColumnFamilyName(String columnFamilyName) {
 		this.columnFamilyName = columnFamilyName;
 	}
@@ -102,7 +101,6 @@ public abstract class CassandraHeartbeatGenerator<X> {
 	public void setInterval(int interval) {
 		this.interval = interval;
 	}
-	
 	
 	public void stop() {
     	running = false;
@@ -193,10 +191,17 @@ public abstract class CassandraHeartbeatGenerator<X> {
     		  try {
 	    		  StringSerializer sser = StringSerializer.get();
 	    		  ObjectSerializer oser = ObjectSerializer.get();
-	    		  List<HColumn<String,Object>> cols = new ArrayList<HColumn<String,Object>>();
-				  cols.add( HFactory.createColumn("data", data, ttl, sser, oser) );
+	    		  
+	    		  List<HColumn<String,String>> scols = new ArrayList<HColumn<String,String>>();
+				  scols.add( HFactory.createColumn("type", type, ttl, sser, sser) );
 				  tmpl.createMutator().addInsertion(group, columnFamilyName, 
-					  HFactory.createSuperColumn(id, cols, sser, sser, oser) );
+					  HFactory.createSuperColumn(id, scols, sser, sser, sser) );
+				  
+	    		  List<HColumn<String,Object>> dcols = new ArrayList<HColumn<String,Object>>();
+				  dcols.add( HFactory.createColumn("data", data, ttl, sser, oser) );
+				  dcols.add( HFactory.createColumn("tags", tags, ttl, sser, oser) );
+				  tmpl.createMutator().addInsertion(group, columnFamilyName, 
+					  HFactory.createSuperColumn(id, dcols, sser, sser, oser) );
     		  }
     		  catch( Exception ex ) {
     			  throw new RuntimeException( "Error saving heartbeat - " +

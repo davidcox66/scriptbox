@@ -3,22 +3,33 @@ package org.scriptbox.util.cassandra.heartbeat;
 
 public class SshTunnelEndpoint extends TcpEndpoint {
 
-	private String tunnel;
+	private String tunnelHost;
+	private int tunnelPort;
 	
 	public SshTunnelEndpoint() {
 	}
 	
-	public SshTunnelEndpoint( String tunnel, String host, int port ) {
+	public SshTunnelEndpoint( String tunnelHost, int tunnelPort, String host, int port ) {
 		super( host, port );
-		this.tunnel = tunnel;
+		this.tunnelHost = tunnelHost;
+		this.tunnelPort = tunnelPort;
 	}
 
-	public String getTunnel() {
-		return tunnel;
+	public String getTunnelHost() {
+		return tunnelHost;
 	}
 
-	public void setTunnel(String tunnel) {
-		this.tunnel = tunnel;
+	public void setTunnelHost(String tunnelHost) {
+		this.tunnelHost = tunnelHost;
 	}
+
+	public int getTunnelPort() {
+		return tunnelPort;
+	}
+
+	public void setTunnelPort(int tunnelPort) {
+		this.tunnelPort = tunnelPort;
+	}
+
 	
 }
