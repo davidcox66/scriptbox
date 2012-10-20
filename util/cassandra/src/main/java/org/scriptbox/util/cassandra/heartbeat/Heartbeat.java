@@ -1,11 +1,14 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
+import java.io.Serializable;
 import java.util.List;
 
 
-class Heartbeat<X> {
+public class Heartbeat<X> implements Serializable {
 
-    private String group;
+	private static final long serialVersionUID = 1L;
+	
+	private String group;
     private String id;
     private String type;
     private List<String> tags;

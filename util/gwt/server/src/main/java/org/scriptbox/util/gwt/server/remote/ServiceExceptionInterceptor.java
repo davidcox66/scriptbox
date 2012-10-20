@@ -28,16 +28,29 @@ public class ServiceExceptionInterceptor implements MethodInterceptor {
 			return invocation.proceed();
 		}
 		catch( ServiceException ex ) {
-			if( isStackTracesEnabled() && ex.getExceptionTraceString() == null )  {
-				ex.setExceptionTraceString( ExceptionHelper.toString(ex) );
+			String msg = "Unhandled exception in service: " + invocation.getMethod();
+			LOGGER.error( msg, ex );
+			if( ex.getCause() != null ) {
+				ServiceException sex = new ServiceException( ex.getMessage() );
+				if( isStackTracesEnabled() )  {
+					ex.setExceptionTraceString( ExceptionHelper.toString(ex) );
+				}
+				throw sex;
 			}
-			throw ex;
+			else {
+				if( isStackTracesEnabled() )  {
+					ex.setExceptionTraceString( ExceptionHelper.toString(ex) );
+				}
+				throw ex;
+			}
 		}
 		catch( Exception ex ) {
 			String msg = "Unhandled exception in service: " + invocation.getMethod();
 			LOGGER.error( msg, ex );
-			ServiceException sex =  new ServiceException( msg, ex );
-			sex.setExceptionTraceString( ExceptionHelper.toString(sex) );
+			ServiceException sex =  new ServiceException( ex.getMessage() );
+			if( isStackTracesEnabled() ) {
+				sex.setExceptionTraceString( ExceptionHelper.toString(ex) );
+			}
 			throw sex;
 		}
 	}
