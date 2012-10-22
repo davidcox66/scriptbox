@@ -36,12 +36,15 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	      MetricProvider provider1 = MetricQueries.provider(ctx, child1 );
 	      MetricProvider provider2 = MetricQueries.provider(ctx, child2 );
 
+	      if( LOGGER.isDebugEnabled() ) {
+	    	  LOGGER.debug( "evaluate: name=" + name + ", provider1=" + provider1 + ", provider2=" + provider2 );
+	      }
 	      MetricRange range1 = provider1.getMetrics( ctx );
 	      MetricRange range2 = provider2.getMetrics( ctx );
 	     
 	      if( LOGGER.isTraceEnabled() ) {
-	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range[1]: " + range1 + ", metrics: " + range1.getMetrics(ctx.getChunk()) );
-	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range[2]: " + range2 + ", metrics: " + range2.getMetrics(ctx.getChunk()) );
+	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range1: " + range1 + ", metrics: " + range1.getMetrics(ctx.getChunk()) );
+	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range2: " + range2 + ", metrics: " + range2.getMetrics(ctx.getChunk()) );
 	      }
 	      List<MetricRange> metrics = new ArrayList<MetricRange>(2);
 	      metrics.add( range1 );

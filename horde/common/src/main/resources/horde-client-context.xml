@@ -22,9 +22,9 @@
 	<bean id="connectionFactory" class="org.scriptbox.util.remoting.endpoint.CompositeEndpointConnectionFactory" >
 		<property name="factories">
 			<list>
-				<bean class="org.scriptbox.box.remoting.client.BoxDirectConnectionFactory" 
-					p:format="http://%host%:%port%/remoting/gen/" />
 				<bean class="org.scriptbox.box.remoting.client.BoxTunnelConnectionFactory" 
+					p:format="http://%host%:%port%/remoting/gen/" />
+				<bean class="org.scriptbox.box.remoting.client.BoxDirectConnectionFactory" 
 					p:format="http://%host%:%port%/remoting/gen/" />
 			</list>
 		</property>
