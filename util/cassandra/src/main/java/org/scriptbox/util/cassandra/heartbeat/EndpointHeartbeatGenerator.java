@@ -1,5 +1,7 @@
 package org.scriptbox.util.cassandra.heartbeat;
 
+import org.scriptbox.util.remoting.endpoint.Endpoint;
+
 
 public class EndpointHeartbeatGenerator<X extends Endpoint> extends
 		CassandraHeartbeatGenerator<X> {

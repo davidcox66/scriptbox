@@ -1,9 +1,9 @@
 package org.scriptbox.panopticon.main;
 
-import org.scriptbox.util.remoting.jetty.JettyService;
+import org.scriptbox.box.remoting.server.BoxServerCliHelper;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
-import org.apache.commons.lang.StringUtils;
+import org.scriptbox.util.remoting.jetty.JettyService;
 
 public class MonitorMain {
 
@@ -11,26 +11,9 @@ public class MonitorMain {
 		
 		try {
 			CommandLine cmd = new CommandLine( args ) ;
-			String instance = cmd.consumeArgValue( "instance", true );
-			String address = cmd.consumeArgValue( "address", "localhost" );
-			int port = cmd.consumeArgValueAsInt( "port", 7800 );
-			int jmxport = cmd.consumeArgValueAsInt( "jmxport", port+1 );
-			String db = cmd.consumeArgValue( "db", "localhost" );
-			String tags = cmd.consumeArgValue( "tags", "local" );
-			
-			System.setProperty( "metrics.instance", instance );
-			System.setProperty( "jetty.hostname", address );
-			System.setProperty( "jetty.port", ""+port );
-			System.setProperty( "cassandra.host", db );
-			System.setProperty( "heartbeat.tags", tags );
-			System.setProperty( "com.sun.management.jmxremote.port", ""+jmxport );
-			
-			String sshhost = cmd.consumeArgValue( "sshhost", false );
-			int sshport = cmd.consumeArgValueAsInt( "sshport", 22 );
-			if( StringUtils.isNotEmpty(sshhost) ) {
-				System.setProperty( "ssh.host", sshhost );
-				System.setProperty( "ssh.port", ""+sshport );
-			}
+			BoxServerCliHelper.consumeMainArgs( cmd, 7800 );
+			BoxServerCliHelper.consumeDatabaseArgs( cmd );
+			BoxServerCliHelper.consumeTunnelArgs( cmd );
 			cmd.checkUnusedArgs();
 			
 			JettyService jetty = new JettyService( "classpath:panopticon-context.xml" );
@@ -49,10 +32,9 @@ public class MonitorMain {
 			System.exit( 1 );
 		}
 	}
-	
+
 	private static void usage() {
-		System.err.println( "Usage: MonitorMain --instance=<instance> [--address=[localhost]] [--port=[7800]] [--db=[localhost]] " +
-			"[--tags=<tag1,tag2,...>] [--sshhost=<host> [--sshport=[22]] [--jmxport=<port>]");
+		BoxServerCliHelper.usage( "MonitorMain", 7800 );
 		System.exit( 1 );
 	}
 }

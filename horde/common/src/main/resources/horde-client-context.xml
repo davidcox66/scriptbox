@@ -18,7 +18,7 @@
 	
 	<bean id="monitor" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
 	    <property name="serviceUrl" value="http://${agent.host}:${agent.port}/remoting/gen/"/>
-	    <property name="serviceInterface" value="org.scriptbox.box.remoting.BoxInterface"/>
+	    <property name="serviceInterface" value="org.scriptbox.box.remoting.server.BoxInterface"/>
 	</bean>
 
 </beans>

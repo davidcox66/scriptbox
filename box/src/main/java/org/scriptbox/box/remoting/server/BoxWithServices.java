@@ -1,4 +1,4 @@
-package org.scriptbox.box.remoting;
+package org.scriptbox.box.remoting.server;
 
 
 import java.util.Collection;

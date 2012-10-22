@@ -1,4 +1,4 @@
-package org.scriptbox.box.remoting;
+package org.scriptbox.box.remoting.client;
 
 import java.io.File;
 
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.scriptbox.box.jmx.conn.HostPort;
+import org.scriptbox.box.remoting.server.BoxInterface;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.common.error.ExceptionHelper;
@@ -19,9 +20,9 @@ import org.springframework.context.ApplicationContext;
 import org.scriptbox.util.remoting.tunnel.Tunnel;
 import org.scriptbox.util.remoting.tunnel.TunnelCredentials;
 
-public class BoxCliHelper {
+public class BoxClientCliHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( BoxCliHelper.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( BoxClientCliHelper.class );
 	
 	private CommandLine cmd;
 	private String agentBeanName;
@@ -33,7 +34,7 @@ public class BoxCliHelper {
 	private int tunnelPort;
 	private TunnelCredentials credentials;
 	
-	public BoxCliHelper( String[] args, String agentBeanName, String[] contextLocations, int defaultAgentPort ) throws CommandLineException {
+	public BoxClientCliHelper( String[] args, String agentBeanName, String[] contextLocations, int defaultAgentPort ) throws CommandLineException {
 		this.agentBeanName = agentBeanName;
 		this.contextLocations = contextLocations;
 		this.defaultAgentPort = defaultAgentPort;
@@ -172,75 +173,6 @@ public class BoxCliHelper {
 		}
 	}
 	
-	private List<Thread> forEachAgent( 
-		String preMessage,
-		String postMessage, 
-		ParameterizedRunnable<Agent> runner )
-			throws Exception
-	{
-		final List<Thread> ret = new ArrayList<Thread>();
-		for( HostPort agent : agents ) {
-			ret.add( invokeAgent(agent, runner, preMessage, postMessage) );
-		}
-		return ret;
-	}
-	
-	private Thread invokeAgent( 
-		final HostPort hostPort, 
-		final ParameterizedRunnable<Agent> runner, 
-		final String preMessage,
-		final String postMessage ) 
-	{
-		Thread ret = new Thread(new Runnable() {
-			public void run() {
-				Tunnel tunnel = null;
-	            try {
-	            	HostPort hp = hostPort;
-	            	if( credentials != null ) {
-	            		tunnel = new Tunnel();
-	            		tunnel.setCredentials( credentials );
-	            		tunnel.setTunnelHost( tunnelHost );
-	            		tunnel.setTunnelPort( tunnelPort );
-	            		tunnel.setRemoteHost( hp.getHost() );
-	            		tunnel.setRemotePort( hp.getPort() );
-	            		int localPort = tunnel.connect();
-	            		hp = new HostPort( "localhost", localPort );
-	            		
-	            		System.out.println(hostPort.getHost() + ":" + hostPort.getPort() + " : " +
-	            			"established tunnel to: " + 
-	            		    hostPort.getHost() + ":" + hostPort.getPort() + " through: " + localPort );
-	            	}
-					ApplicationContext ctx = ContextBuilder.create( agentBeanName, hp, contextLocations );	
-					BoxInterface box = ctx.getBean( "monitor", BoxInterface.class );
-					Agent agent = new Agent( hostPort, box );
-					
-			        System.out.println(hostPort.getHost() + ":" + hostPort.getPort() + " : " + preMessage + " ..." );
-			        runner.run( agent );
-	                if( postMessage != null ) {
-	                	System.out.println( hostPort.getHost() + ":" + hostPort.getPort() + " : " + postMessage );
-	                }
-	            }
-	            catch( Exception ex ) {
-	                LOGGER.error( "Error from " + hostPort.getHost() + ":" + hostPort.getPort(), ex );
-	                String exstr = ExceptionHelper.toString( ex );
-	                System.out.println( prefixLines(hostPort,exstr) );
-	            }
-	            finally {
-	            	if( tunnel != null ) {
-	            		try {
-		            		tunnel.disconnect();
-	            		}
-	            		catch( Exception ex ) {
-	            			LOGGER.error( "Error disconnecting tunnel: " + tunnel.getRemoteHost() + ":" + tunnel.getRemotePort() );
-	            		}
-	            	}
-	            }
-			}
-        }, hostPort.getHost() + ":" + hostPort.getPort() );
-		ret.start();
-		return ret;
-	}
-	
 	private List<HostPort> getAgentHostPorts( CommandLine cmd ) throws CommandLineException {
 		List<HostPort> ret = new ArrayList<HostPort>();
 		
@@ -272,16 +204,5 @@ public class BoxCliHelper {
             builder.append( agent.getHost() + ":" + agent.getPort() + " : " + line + "\n" );
         }
         return builder.toString();
-	}
-	
-	private static class Agent
-	{
-		public HostPort hostPort;
-		public BoxInterface box;
-		
-		public Agent( HostPort hostPort, BoxInterface box ) {
-			this.hostPort = hostPort;
-			this.box = box;
-		}
 	}
 }

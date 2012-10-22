@@ -56,7 +56,7 @@
     <bean name="jmxConnections" class="org.scriptbox.box.jmx.conn.JmxConnections"
     	p:builder-ref="vmJmxConnectionBuilder" />
   
-	<bean name="monitorImpl" class="org.scriptbox.box.remoting.BoxWithServices" init-method="start"
+	<bean name="monitorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start"
 		p:box-ref="box" />
 
 	<bean id="serviceErrorHandler" class="org.scriptbox.util.spring.aop.ServiceErrorHandler" />
@@ -72,25 +72,25 @@
 	
   	<bean name="/lm/" class="org.springframework.remoting.caucho.HessianServiceExporter"
   		p:service-ref="monitor"
-  		p:serviceInterface="org.scriptbox.box.remoting.BoxInterface" />
+  		p:serviceInterface="org.scriptbox.box.remoting.server.BoxInterface" />
 
-	<bean name="tunnelCredentials" class="org.scriptbox.util.remoting.tunnel.TunnelCredentials" 
-		p:user="${tunnel.user}"
-		p:password="${tunnel.password}"
-		p:passphrase="${tunnel.passphrase}" />
+	<bean name="cassandraTunnelCredentials" class="org.scriptbox.util.remoting.tunnel.TunnelCredentials" 
+		p:user="${cassandra.tunnel.user}"
+		p:password="${cassandra.tunnel.password}"
+		p:passphrase="${cassandra.tunnel.passphrase}" />
 		
-	<bean name="tunnel" class="org.scriptbox.util.remoting.tunnel.Tunnel" 
-		p:tunnelHost="${tunnel.host}"
-		p:tunnelPort="${tunnel.port}"
+	<bean name="cassandraTunnel" class="org.scriptbox.util.remoting.tunnel.Tunnel" 
+		p:tunnelHost="${cassandra.tunnel.host}"
+		p:tunnelPort="${cassandra.tunnel.port}"
 		p:remoteHost="${cassandra.host}"
 		p:remotePort="${cassandra.port}" 
-		p:credentials-ref="tunnelCredentials" />
+		p:credentials-ref="cassandraTunnelCredentials" />
 		
   	<bean name="clusterFactory" class="org.scriptbox.util.cassandra.CassandraClusterFactory"
                 p:name="Test Cluster"
                 p:host="${cassandra.host}"
                 p:port="${cassandra.port}"
-                p:tunnel-ref="tunnel" />
+                p:tunnel-ref="cassandraTunnel" />
                 
     <bean name="cluster"
         factory-bean="clusterFactory"
@@ -117,13 +117,15 @@
     <bean name="store" class="org.scriptbox.panopticon.capture.CassandraCaptureStore"
     	p:cluster-ref="cluster"
     	p:keyspace-ref="keyspace"
-    	p:instance="${metrics.instance}" 
+    	p:instance="${box.instance}" 
     	p:nameSplitter-ref="nameSplitter" />
 
 	<conditional:present property="ssh.host" set="true" >
 	 	<bean name="endpoint" class="org.scriptbox.util.cassandra.heartbeat.SshTunnelEndpoint" 
 	    	p:tunnelHost="${ssh.host}"
 	    	p:tunnelPort="${ssh.port}" 
+	    	p:user="${ssh.user}" 
+	    	p:password="${ssh.password}" 
 	    	p:host="${jetty.hostname}"
 	    	p:port="${jetty.port}" />
 	</conditional:present>
@@ -142,7 +144,7 @@
     	p:ttl="120"
     	p:group="panopticon"
     	p:type="monitor"
-    	p:id="${metrics.instance}"
+    	p:id="${box.instance}"
     	p:tags="${heartbeat.tags}"
     	p:endpoint-ref="endpoint" />
     	
