@@ -1,8 +1,10 @@
 package org.scriptbox.box.remoting.client;
 
 import java.io.File;
+import org.springframework.beans.factory.InitializingBean;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.scriptbox.box.remoting.server.BoxInterface;
@@ -16,27 +18,77 @@ import org.scriptbox.util.remoting.endpoint.EndpointConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BoxAgentHelper {
+public class BoxAgentHelper implements InitializingBean {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( BoxAgentHelper.class );
 
 	private static ThreadLocal<PrintStream> outputs = new ThreadLocal<PrintStream>();
 	
 	private List<Endpoint> endpoints;
-	private EndpointConnectionFactory<BoxInterface> factory;
-	private List<Thread> threads = new ArrayList<Thread>();
-	private PrintStreamFactory streams;
+	private EndpointConnectionFactory<BoxInterface> endpointConnectionFactory;
+	private PrintStreamFactory streamFactory;
 	
-	public BoxAgentHelper( EndpointConnectionFactory<BoxInterface> factory, List<Endpoint> endpoints, PrintStreamFactory streams ) throws CommandLineException {
-		this.factory = factory;
+	private List<Thread> threads = new ArrayList<Thread>();
+	private List<Connection<BoxInterface>> connections = Collections.synchronizedList( new ArrayList<Connection<BoxInterface>>());
+	
+	public BoxAgentHelper() {
+	}
+	
+	public BoxAgentHelper( 
+		EndpointConnectionFactory<BoxInterface> endpointConnectionFactory, 
+		List<Endpoint> endpoints, 
+		PrintStreamFactory streamFactory ) 
+			throws CommandLineException 
+	{
+		this.endpointConnectionFactory = endpointConnectionFactory;
 		this.endpoints = endpoints;
-		this.streams = streams;
+		this.streamFactory = streamFactory;
+	}
+
+	public List<Endpoint> getEndpoints() {
+		return endpoints;
+	}
+	public void setEndpoints(List<Endpoint> endpoints) {
+		this.endpoints = endpoints;
+	}
+	public EndpointConnectionFactory<BoxInterface> getEndpointConnectionFactory() {
+		return endpointConnectionFactory;
+	}
+	public void setEndpointConnectionFactory(
+			EndpointConnectionFactory<BoxInterface> endpointConnectionFactory) {
+		this.endpointConnectionFactory = endpointConnectionFactory;
+	}
+	public PrintStreamFactory getStreamFactory() {
+		return streamFactory;
+	}
+	public void setStreamFactory(PrintStreamFactory streamFactory) {
+		this.streamFactory = streamFactory;
+	}
+	
+	public void afterPropertiesSet() throws Exception {
+		if( endpointConnectionFactory == null ) {
+			throw new IllegalArgumentException( "EndpointConnectionFactory must be specified");
+		}
+		if( endpoints == null ) {
+			throw new IllegalArgumentException( "Endpoints must be specified");
+		}
+		if( streamFactory == null ) {
+			throw new IllegalArgumentException( "StreamFactory must be specified");
+		}
 	}
 	
 	public void join() throws Exception {
 		if( threads != null ) {
             for( Thread thread : threads ) {
                 thread.join();
+            }
+            for( Connection<BoxInterface> conn : connections ) {
+            	try {
+            		conn.close();
+            	}
+            	catch( Exception ex ) {
+            		LOGGER.error( "Error closing connection: " + conn, ex );
+            	}
             }
 		}
 	}
@@ -73,7 +125,7 @@ public class BoxAgentHelper {
 		} );
 	}
 	
-	public void shutdownAllContext() throws Exception {
+	public void shutdownAllContexts() throws Exception {
 		forEachAgent( "Shutting down all contexts", "All contexts shutdown", new ParameterizedRunnable<Connection<BoxInterface>>() {
 			public void run( Connection<BoxInterface> conn ) throws Exception {
 				conn.getProxy().shutdownAllContexts();
@@ -128,13 +180,14 @@ public class BoxAgentHelper {
 		Thread ret = new Thread(new Runnable() {
 			public void run() {
 				Connection<BoxInterface> conn = null;
-				PrintStream stream = streams.getOutputStream( endpoint );
+				PrintStream stream = streamFactory.create( endpoint );
 				outputs.set( stream );
 	            try {
-					conn = factory.create( endpoint );
+					conn = endpointConnectionFactory.create( endpoint );
 					if( conn == null ) {
 						throw new Exception( "Could not create endpoint " + endpoint.getIdentifier() );
 					}
+					connections.add( conn );
 			        stream.println( preMessage + " ..." );
 			        runner.run( conn );
 	                if( postMessage != null ) {

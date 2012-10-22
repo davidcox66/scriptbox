@@ -6,5 +6,5 @@ import org.scriptbox.util.remoting.endpoint.Endpoint;
 
 public interface PrintStreamFactory {
 
-	public PrintStream getOutputStream( Endpoint endpoint );
+	public PrintStream create( Endpoint endpoint );
 }
