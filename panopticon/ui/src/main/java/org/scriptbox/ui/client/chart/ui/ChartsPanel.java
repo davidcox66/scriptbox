@@ -43,7 +43,7 @@ public class ChartsPanel extends ContentPanel {
 	private static final Logger logger = Logger.getLogger("ChartsPanel");
 
 	private static final int HEIGHT = 350;
-	private static final int HEADER = 15;
+	private static final int HEADER = 5;
 	private static final int EXTRA = 20;
 	
 	private ChartGWTServiceAsync service;

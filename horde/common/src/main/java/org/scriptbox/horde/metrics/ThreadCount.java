@@ -3,7 +3,7 @@ package org.scriptbox.horde.metrics;
 public class ThreadCount extends ScriptMetric {
 
     @Override
-    public int getValue() {
+    public float getValue() {
         return script.getNumRunners();
     }
 

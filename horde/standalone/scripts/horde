@@ -1,12 +1,33 @@
-root=$(dirname $0)/..
-set -x
-port=${1:-7900}
-jmx_port=$((port + 1))
+#!/bin/bash
 
+jar=horde.sa-1.0-SNAPSHOT-standalone-distro.jar
+dir=$(dirname $0)
+if [[ -f $jar ]] ; then
+	root=$dir
+else
+	root=$dir/../target
+fi	
+
+if [[ $(uname) = "Darwin" ]] ; then
+	ip=$(/sbin/ifconfig en0 | grep 'inet ' | cut -d' ' -f2)
+else 
+	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+fi
+
+# So com.sun virtual machine apis will work
+if [[ -f $JAVA_HOME/lib/tools.jar ]] ; then
+	echo "Added tools.jar to classpath"
+	tools=$JAVA_HOME/lib/tools.jar
+fi
+
+CP= 
+CP="$CP:$dir"
+CP="$CP:$tools"
+CP="$CP:$root/$jar"
+
+set -x
 JAVA_OPTS="\
-	-Dlogback.configurationFile=horde-logback.xml 
-	-Djetty.port=${port} \
-	-Dcom.sun.management.jmxremote.port=$jmx_port \
-    -Dcom.sun.management.jmxremote.ssl=false \
-    -Dcom.sun.management.jmxremote.authenticate=false"
-java $JAVA_OPTS -cp $root/target/horde.sa-1.0-SNAPSHOT-standalone-distro.jar org.scriptbox.horde.main.HordeMain "$@"
+        -Dlogback.configurationFile=horde-logback.xml \
+    	-Dcom.sun.management.jmxremote.ssl=false \
+    	-Dcom.sun.management.jmxremote.authenticate=false"
+java $JAVA_OPTS -cp $CP org.scriptbox.horde.main.HordeMain --address=$ip "$@"

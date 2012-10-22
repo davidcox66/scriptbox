@@ -21,6 +21,7 @@
 		  </list>
 		</property>
     	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+    	<property name="ignoreUnresolvablePlaceholders" value="true" />
   	</bean>
 	
 	<conditional:dependency classes="groovy.lang.GroovyShell" >
@@ -121,7 +122,7 @@
     	p:nameSplitter-ref="nameSplitter" />
 
 	<conditional:present property="ssh.host" set="true" >
-	 	<bean name="endpoint" class="org.scriptbox.util.cassandra.heartbeat.SshTunnelEndpoint" 
+	 	<bean name="endpoint" class="org.scriptbox.util.remoting.endpoint.SshTunnelEndpoint" 
 	    	p:tunnelHost="${ssh.host}"
 	    	p:tunnelPort="${ssh.port}" 
 	    	p:user="${ssh.user}" 
@@ -131,7 +132,7 @@
 	</conditional:present>
 	 
 	<conditional:present property="ssh.host" set="false" >
-	 	<bean name="endpoint" class="org.scriptbox.util.cassandra.heartbeat.TcpEndpoint" 
+	 	<bean name="endpoint" class="org.scriptbox.util.remoting.endpoint.TcpEndpoint" 
 	    	p:host="${jetty.hostname}"
 	    	p:port="${jetty.port}" />
 	 </conditional:present>

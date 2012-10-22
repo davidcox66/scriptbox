@@ -11,11 +11,7 @@ public class MonitorMain {
 		
 		try {
 			CommandLine cmd = new CommandLine( args ) ;
-			BoxServerCliHelper.consumeMainArgs( cmd, 7800 );
-			BoxServerCliHelper.consumeDatabaseArgs( cmd );
-			BoxServerCliHelper.consumeTunnelArgs( cmd );
-			cmd.checkUnusedArgs();
-			
+			BoxServerCliHelper.consumeAllArgs( cmd, 7800 );
 			JettyService jetty = new JettyService( "classpath:panopticon-context.xml" );
 			jetty.start();
 			while( true ) {

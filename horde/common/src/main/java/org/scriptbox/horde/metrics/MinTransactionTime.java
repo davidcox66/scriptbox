@@ -18,7 +18,7 @@ public class MinTransactionTime extends ActionMetric {
         min = (int)Math.min( min, millis );
     }
     
-    synchronized public int getValue() {
+    synchronized public float getValue() {
         int val = min;
         min = Integer.MAX_VALUE;
         return val != Integer.MAX_VALUE ? val : 0;

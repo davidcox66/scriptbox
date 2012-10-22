@@ -13,7 +13,7 @@ public abstract class AbstractMetric {
     
     public abstract String getName();
     public abstract String getDescription();
-    public abstract int getValue();
+    public abstract float getValue();
     
     public String toString() { 
         return getClass().getName() + "{ name=" + getName() + " }";

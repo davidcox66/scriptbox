@@ -52,22 +52,22 @@ public class CommandLine {
 	
 	public void checkParameters( int count ) throws CommandLineException {
 		if( parameters.size() != count ) {
-			throw new CommandLineException( "Expected " + count + "parameters" );
+			throw new CommandLineException( "Expected " + count + " parameters" );
 		}
 	}
 	
 	public void checkParameters( String name, int count ) throws CommandLineException {
 		if( parameters.size() != count ) {
-			throw new CommandLineException( "Expected " + count + "parameters for " + name );
+			throw new CommandLineException( "Expected " + count + " parameters for " + name );
 		}
 	}
 	
 	public void checkParameters( String name, int min, int max ) throws CommandLineException {
 		if( min > 0 && parameters.size() < min ) {
-			throw new CommandLineException( "Expected at least " + min + "parameters for " + name );
+			throw new CommandLineException( "Expected at least " + min + " parameters for " + name );
 		}
 		if( max > 0 && parameters.size() > max ) {
-			throw new CommandLineException( "Expected no more than" + max + "parameters for " + name );
+			throw new CommandLineException( "Expected no more than" + max + " parameters for " + name );
 		}
 	}
 	

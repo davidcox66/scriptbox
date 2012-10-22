@@ -106,7 +106,7 @@ public abstract class AbstractDynamicMetricMBean implements DynamicMBean {
         for( AbstractMetric metric : metrics.values() ) {
             attrs[i++] = new MBeanAttributeInfo(
                     metric.getName(),
-                    "java.lang.Integer",
+                    "java.lang.Float",
                     metric.getDescription(),
                     true,   // isReadable
                     false,   // isWritable

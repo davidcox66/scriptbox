@@ -8,7 +8,8 @@ public class HordeCli {
 	public static void main( String[] args ) {
 	
 		try {
-			BoxClientCliHelper helper = new BoxClientCliHelper( "HordeCli", args, 7900 );
+			BoxClientCliHelper helper = new BoxClientCliHelper( "HordeCli", args, 7900, 
+				new String[] { "classpath:horde-client-context.xml" } );
 			helper.process();
 		}
 		catch( CommandLineException ex ) {

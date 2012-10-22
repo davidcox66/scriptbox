@@ -21,7 +21,7 @@ public class TransactionCount extends ActionMetric {
         transactionCount.addAndGet( 1 );
     }
     
-    synchronized public int getValue() {
+    synchronized public float getValue() {
         return transactionCount.getAndSet( 0 );
     }
 }

@@ -1,18 +1,18 @@
 package org.scriptbox.box.remoting.client;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.scriptbox.box.remoting.server.BoxInterface;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
-import org.scriptbox.util.remoting.endpoint.CompositeEndpointConnectionFactory;
 import org.scriptbox.util.remoting.endpoint.Endpoint;
 import org.scriptbox.util.remoting.endpoint.SshTunnelEndpoint;
 import org.scriptbox.util.remoting.endpoint.TcpEndpoint;
+import org.scriptbox.util.remoting.endpoint.EndpointConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class BoxClientCliHelper {
 
@@ -28,20 +28,14 @@ public class BoxClientCliHelper {
 	private String password;
 	private BoxAgentHelper agentHelper;
 	
-	public BoxClientCliHelper( String name, String[] args, int defaultAgentPort ) throws CommandLineException {
+	public BoxClientCliHelper( String name, String[] args, int defaultAgentPort, String[] contextConfigLocations ) throws CommandLineException {
 		this.name = name;
 		this.defaultAgentPort = defaultAgentPort;
-		
+	
+		ApplicationContext ctx = new ClassPathXmlApplicationContext( contextConfigLocations );
 		agentHelper = new BoxAgentHelper();
-		agentHelper.setStreamFactory( new PrintStreamFactory() {
-			public PrintStream create( Endpoint endpoint ) {
-				return new LinePrefixingPrintStream( System.out, endpoint.getIdentifier() );
-			}
-		} );
-		CompositeEndpointConnectionFactory<BoxInterface> connectionFactory = new CompositeEndpointConnectionFactory<BoxInterface>();
-		connectionFactory.add( new BoxDirectConnectionFactory() );
-		connectionFactory.add( new BoxTunnelConnectionFactory() );
-		agentHelper.setEndpointConnectionFactory( connectionFactory );
+		agentHelper.setStreamFactory( ctx.getBean("streamFactory",PrintStreamFactory.class) );
+		agentHelper.setEndpointConnectionFactory( ctx.getBean("connectionFactory",EndpointConnectionFactory.class) );
 		
 		cmd = new CommandLine( args );
 		processTunnel();

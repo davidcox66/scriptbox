@@ -2,6 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+  	   xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context
@@ -15,10 +16,18 @@
 		</property>
     	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   	</bean>
-	
-	<bean id="monitor" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-	    <property name="serviceUrl" value="http://${agent.host}:${agent.port}/remoting/lm/"/>
-	    <property name="serviceInterface" value="org.scriptbox.box.remoting.server.BoxInterface"/>
+
+	<bean id="streamFactory" class="org.scriptbox.box.remoting.client.EndpointPrefixingStreamFactory" />
+		
+	<bean id="connectionFactory" class="org.scriptbox.util.remoting.endpoint.CompositeEndpointConnectionFactory" >
+		<property name="factories">
+			<list>
+				<bean class="org.scriptbox.box.remoting.client.BoxDirectConnectionFactory" 
+					p:format="http://%host%:%port%/remoting/lm/" />
+				<bean class="org.scriptbox.box.remoting.client.BoxTunnelConnectionFactory" 
+					p:format="http://%host%:%port%/remoting/lm/" />
+			</list>
+		</property>
 	</bean>
 
 </beans>

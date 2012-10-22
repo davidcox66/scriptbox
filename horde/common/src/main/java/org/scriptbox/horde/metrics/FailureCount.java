@@ -23,7 +23,7 @@ public class FailureCount extends ActionMetric {
         }
     }
     
-    public int getValue() {
+    public float getValue() {
         return failures.getAndSet( 0 );    
     }
 }

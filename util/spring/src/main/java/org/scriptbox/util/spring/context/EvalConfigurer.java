@@ -18,6 +18,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -27,21 +28,36 @@ public class EvalConfigurer extends PropertyPlaceholderConfigurer {
 
 	private boolean environmentAware;
 	private Resource[] locations;
-	private boolean ignoreResourceNotFound = false;
 	private BeanFactory beanFactory;
+	private boolean ignoreUnresolvablePlaceholders;
 	
+	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
+		super.setIgnoreUnresolvablePlaceholders(ignoreUnresolvablePlaceholders);
+		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+	}
+		
 	protected String resolvePlaceholder(final String placeholder, Properties props, int systemPropertiesMode) {
 		String ret = super.resolvePlaceholder(placeholder, props, systemPropertiesMode);
 		if( ret == null ) {
-			ExpressionParser parser = new SpelExpressionParser();
-		    Expression exp = parser.parseExpression( placeholder );
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-		    ctx.addPropertyAccessor( new BeanPropertyAccessor(beanFactory) );
-		    ctx.addPropertyAccessor( new JsonPropertyAccessor() );
-		    // ctx.addPropertyAccessor( new ContextBeansAccessor() );
-			String result = exp.getValue(ctx,String.class);
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "resolvePlaceholder: placeholder=" + placeholder + ", result=" + result ); }
-			return result;
+			try { 
+				ExpressionParser parser = new SpelExpressionParser();
+			    Expression exp = parser.parseExpression( placeholder );
+				StandardEvaluationContext ctx = new StandardEvaluationContext();
+			    ctx.addPropertyAccessor( new BeanPropertyAccessor(beanFactory) );
+			    ctx.addPropertyAccessor( new JsonPropertyAccessor() );
+			    // ctx.addPropertyAccessor( new ContextBeansAccessor() );
+				String result = exp.getValue(ctx,String.class);
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "resolvePlaceholder: placeholder=" + placeholder + ", result=" + result ); }
+				return result;
+			}
+			catch( SpelEvaluationException ex ) {
+				if( ignoreUnresolvablePlaceholders ) {
+					if( LOGGER.isInfoEnabled() ) { LOGGER.info( "resolvePlaceholder: placeholder could not be resolved - placeholder=" + placeholder); }
+				}
+				else {
+					throw ex;
+				}
+			}
 		}
 		return ret;
 	}
@@ -122,7 +138,6 @@ public class EvalConfigurer extends PropertyPlaceholderConfigurer {
 		super.setLocations( locations );
 	}
 	public void setIgnoreResourceNotFound(boolean ignoreResourceNotFound) {
-		this.ignoreResourceNotFound = ignoreResourceNotFound;
 		super.setIgnoreResourceNotFound(ignoreResourceNotFound);
 	}
 	public void setBeanFactory(BeanFactory beanFactory) {

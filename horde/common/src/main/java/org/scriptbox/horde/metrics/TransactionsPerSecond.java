@@ -28,20 +28,13 @@ public class TransactionsPerSecond extends ActionMetric {
         transactionCount++;
     }
     
-    synchronized public int getValue() {
+    synchronized public float getValue() {
         long now = System.currentTimeMillis();
         try {
         	if( lastChecked > 0 ) {
 	        	double divisor = (now - lastChecked) / 1000;
-	            int ret = divisor > 0 ? (int)(transactionCount / divisor) : 0;
-	        	// if( LOGGER.isDebugEnabled() ) {
-	        		// LOGGER.debug( "getValue: now=" + now + ", lastChecked=" + lastChecked + ", divisor=" + divisor + ", ret=" + ret );
-	        	// }
-	            return ret;
+	        	return divisor > 0 ? (float)(transactionCount / divisor) : 0.0F;
         	}
-        	// else {
-        		// LOGGER.warn( "getValue: attempting to get TPS without ever recording values" );
-        	// }
         }
         catch( Exception ex ) {
         	LOGGER.error( "getValue: error computing transactions per second", ex );
