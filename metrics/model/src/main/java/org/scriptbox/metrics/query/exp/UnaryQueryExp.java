@@ -1,5 +1,6 @@
 package org.scriptbox.metrics.query.exp;
 
+import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,9 @@ public abstract class UnaryQueryExp implements MetricQueryExp {
 
 	public Object evaluate(MetricQueryContext ctx) throws Exception {
 		Object result = child.evaluate(ctx);
+		if( result == null ) {
+			throw new MetricException( "No metrics for child: " + child );
+		}
 		Object ret = process(result, ctx);
 		if (LOGGER.isTraceEnabled()) {
 			LOGGER.trace("evaluate(unary): " + toString() + " result=" + ret);

@@ -31,6 +31,7 @@ public class ReportChartController {
 	private RpcProxy<ReportQueryDto, MetricReportDto> proxy;
 	private String treeName;
 	private String reportName;
+	private int resolution;
 	
 	public ReportChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -42,13 +43,15 @@ public class ReportChartController {
 		};
 	}
 
-	public void load( final String treeName, final String reportName, final Runnable callback ) {
+	public void load( final String treeName, final String reportName, final int resolution, final Runnable callback ) {
 		this.treeName = treeName;
 		this.reportName = reportName;
+		this.resolution = resolution;
 		
 		ReportQueryDto query = new ReportQueryDto();
 		query.setTreeName( treeName );
 		query.setReportName( reportName );
+		query.setResolution( resolution );
 		
 		TimeBasedLoader<ReportQueryDto, MetricReportDto> loader= new TimeBasedLoader<ReportQueryDto, MetricReportDto>(proxy);
 		loader.addLoadHandler(new LoadHandler<ReportQueryDto, MetricReportDto>() {
@@ -83,6 +86,7 @@ public class ReportChartController {
 		ReportQueryDto query = new ReportQueryDto();
 		query.setTreeName( treeName );
 		query.setReportName( reportName );
+		query.setResolution( resolution );
 
 		final Map<String,MultiLineChart> chartsByTitle = new HashMap<String,MultiLineChart>();
 		for( MultiLineChart chart : charts ) {

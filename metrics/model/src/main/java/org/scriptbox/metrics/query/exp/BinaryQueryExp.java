@@ -1,6 +1,6 @@
 package org.scriptbox.metrics.query.exp;
 
-import org.apache.commons.collections.Closure;
+import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +22,12 @@ public abstract class BinaryQueryExp implements MetricQueryExp {
 	public Object evaluate(MetricQueryContext ctx) throws Exception {
 		Object lresult = lhs.evaluate(ctx);
 		Object rresult = rhs.evaluate(ctx);
+		if( lresult == null ) {
+			throw new MetricException( "No metrics for lhs: " + lhs );
+		}
+		if( rresult == null ) {
+			throw new MetricException( "No metrics for rhs: " + rhs );
+		}
 		Object ret = process(lresult, rresult, ctx);
 		if (LOGGER.isTraceEnabled()) {
 			LOGGER.trace("evaluate(binary): " + toString() + ", lresult=" + lresult + ", rresult=" + rresult + ", result=" + ret);

@@ -66,7 +66,7 @@ public class LineChartBuilder extends ChartBuilder {
 		series.setYField(valueProvider);
 		SeriesToolTipConfig<Metric> toolTip = new SeriesToolTipConfig<Metric>();
 	    toolTip.setTrackMouse(true);
-	    toolTip.setHideDelay(2);
+	    // toolTip.setHideDelay(2);
 	    toolTip.setLabelProvider(new SeriesLabelProvider<Metric>() {
 	      @Override
 	      public String getLabel(Metric item, ValueProvider<? super Metric, ? extends Number> valueProvider) {

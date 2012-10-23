@@ -143,7 +143,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 				dr.getEnd().getTime(), 
 				range.getStart(), 
 				range.getEnd(), 
-				range.getMetrics(30) );
+				range.getMetrics(query.getResolution()) );
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getMetrics: node=" + node + ", metrics.size()=" + ret.getData().size() ); }
 			return ret;
 		}
@@ -213,7 +213,8 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			MetricReportDto reportDto = new MetricReportDto();
 			for( ReportElement element : report.getElements() ) {
 				Map<? extends MetricProvider,? extends MetricRange> result = MetricQueries.query(
-					store, tree, element.getExpression(), report.getStart(), report.getEnd(), report.getChunk());
+					store, tree, element.getExpression(), report.getStart(), report.getEnd(), 
+					report.getChunk() > 0 ? report.getChunk() : query.getResolution() );
 	
 				if( LOGGER.isDebugEnabled() ) {
 					LOGGER.debug( "getReport: result.size()=" + result.size() );

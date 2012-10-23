@@ -50,6 +50,7 @@ public class ChartPortletPanel extends ContentPanel {
 	private PortalLayoutContainer portal;
 	private List<Portlet> portlets = new ArrayList<Portlet>();
 	private	NumberField<Integer> limit;
+	private	NumberField<Integer> resolution;
 	private MetricTreeDto tree;
 	
 	public ChartPortletPanel( ChartGWTServiceAsync service ) {
@@ -73,7 +74,7 @@ public class ChartPortletPanel extends ContentPanel {
 	public void load( final MetricTreeNodeDto node ) {
 		final LineChartController controller = new LineChartController( service );
 		enforceChartLimit( 1, null );
-		controller.load( node, new Runnable() {
+		controller.load( node, getResolution(), new Runnable() {
 			public void run() {
 				Chart<Metric> chart = controller.getChart().getChart();
 				chart.setDefaultInsets(10);
@@ -97,7 +98,7 @@ public class ChartPortletPanel extends ContentPanel {
 		if( tree != null ) {
 			final ReportChartController controller = new ReportChartController( service );
 			enforceChartLimit( 1, null );
-			controller.load( tree.getTreeName(), report.getName(), new Runnable() {
+			controller.load( tree.getTreeName(), report.getName(), getResolution(), new Runnable() {
 				public void run() {
 					List<MultiLineChart> charts = controller.getCharts();
 					VerticalLayoutContainer layout = new VerticalLayoutContainer();
@@ -137,11 +138,17 @@ public class ChartPortletPanel extends ContentPanel {
 		buildPrint( bar );
 		buildRemoveAll( bar );
 		buildCollapseAll( bar );
+		bar.add( separator(20) );
+		buildLimit( bar );
+		bar.add( separator(20) );
+		buildResolution( bar );
+		vertical.add( bar, new VerticalLayoutData(1,-1) );
+	}
+
+	private SeparatorToolItem separator( int width ) {
 		SeparatorToolItem sep = new SeparatorToolItem();
 		sep.setWidth(20);
-		bar.add( sep );
-		buildLimit( bar );
-		vertical.add( bar, new VerticalLayoutData(1,-1) );
+		return sep;
 	}
 	
 	private void buildPrint( ToolBar bar ) {
@@ -193,6 +200,16 @@ public class ChartPortletPanel extends ContentPanel {
 	    
 		FieldLabel label = new FieldLabel(limit, "Limit");
 		label.setLabelWidth( 40 );
+		bar.add( label );
+	}
+	
+	private void buildResolution( ToolBar bar ) {
+		resolution = new NumberField<Integer>(new IntegerPropertyEditor());
+		resolution.setWidth( 50 );
+	    resolution.setAllowBlank(false);
+	    
+		FieldLabel label = new FieldLabel(resolution, "Resolution");
+		label.setLabelWidth( 70 );
 		bar.add( label );
 	}
 	
@@ -276,5 +293,10 @@ public class ChartPortletPanel extends ContentPanel {
 			}
 		} );
 		*/
+	}
+	
+	private int getResolution() {
+		Integer res = resolution.getValue();
+		return res != null && res >= 30 ? res : 30;
 	}
 }

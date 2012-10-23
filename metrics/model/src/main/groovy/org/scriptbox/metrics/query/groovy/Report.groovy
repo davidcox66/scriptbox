@@ -14,7 +14,7 @@ class Report
   String tree;
   Date start = new Date(Long.MIN_VALUE);
   Date end = new Date(Long.MAX_VALUE);
-  int chunk = 60;
+  int chunk;
   List<ReportElement> elements = new ArrayList<ReportElement>();
 
   Report() {

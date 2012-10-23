@@ -26,6 +26,7 @@ public class LineChartController {
 	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private LineChart chart;
 	private MetricTreeNodeDto node;
+	private int resolution;
 	
 	public LineChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -41,10 +42,12 @@ public class LineChartController {
 		return chart;
 	}
 	
-	public void load( MetricTreeNodeDto node, final Runnable callback ) {
+	public void load( MetricTreeNodeDto node, int resolution, final Runnable callback ) {
 		this.node = node;
+		this.resolution = resolution;
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
+		query.setResolution( resolution );
 		query.setStart( new Date() );
 		query.setEnd( new Date() );
 		
@@ -68,6 +71,7 @@ public class LineChartController {
 	public void reload( final Runnable callback ) {
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
+		query.setResolution( resolution );
 		query.setStart( new Date() );
 		query.setEnd( new Date() );
 		

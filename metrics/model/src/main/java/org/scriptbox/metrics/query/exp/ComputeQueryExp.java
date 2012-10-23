@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.scriptbox.metrics.compute.MetricCollator;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricException;
 import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ComputeQueryExp implements MetricQueryExp {
 
@@ -36,6 +36,13 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	      MetricProvider provider1 = MetricQueries.provider(ctx, child1 );
 	      MetricProvider provider2 = MetricQueries.provider(ctx, child2 );
 
+	      if( provider1 == null ) {
+	    	  throw new MetricException( "No metrics for " + name + ".child1: " + child1 );
+	      }
+	      if( provider2 == null ) {
+	    	  throw new MetricException( "No metrics for " + name + ".child2: " + child2 );
+	      }
+	      
 	      if( LOGGER.isDebugEnabled() ) {
 	    	  LOGGER.debug( "evaluate: name=" + name + ", provider1=" + provider1 + ", provider2=" + provider2 );
 	      }
