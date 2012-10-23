@@ -38,9 +38,9 @@ import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
-public class ChartsPanel extends ContentPanel {
+public class ChartPortletPanel extends ContentPanel {
 
-	private static final Logger logger = Logger.getLogger("ChartsPanel");
+	private static final Logger logger = Logger.getLogger("ChartPortletPanel");
 
 	private static final int HEIGHT = 350;
 	private static final int HEADER = 5;
@@ -52,7 +52,7 @@ public class ChartsPanel extends ContentPanel {
 	private	NumberField<Integer> limit;
 	private MetricTreeDto tree;
 	
-	public ChartsPanel( ChartGWTServiceAsync service ) {
+	public ChartPortletPanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		setHeadingText("Chart");
 		

@@ -20,9 +20,9 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
-public class TreePanel extends VerticalLayoutContainer {
+public class MetricTreePanel extends VerticalLayoutContainer {
 
-	private static final Logger logger = Logger.getLogger("TreePanel");
+	private static final Logger logger = Logger.getLogger("MetricTreePanel");
 
 	private ChartGWTServiceAsync service; 
 	private Tree<MetricTreeNodeDto,String> tree;
@@ -33,7 +33,7 @@ public class TreePanel extends VerticalLayoutContainer {
 		tree.getSelectionModel().addSelectionHandler( handler );
 	}
 	
-	public TreePanel( ChartGWTServiceAsync service ) {
+	public MetricTreePanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		buildStore();
 		buildToolBar();

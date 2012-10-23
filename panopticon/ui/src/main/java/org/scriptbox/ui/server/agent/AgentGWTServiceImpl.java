@@ -2,6 +2,7 @@ package org.scriptbox.ui.server.agent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,15 +17,22 @@ import org.scriptbox.box.remoting.client.BoxDirectConnectionFactory;
 import org.scriptbox.box.remoting.client.BoxTunnelConnectionFactory;
 import org.scriptbox.box.remoting.client.PrintStreamFactory;
 import org.scriptbox.box.remoting.server.BoxInterface;
+import org.scriptbox.ui.shared.agent.Agent;
 import org.scriptbox.ui.shared.agent.AgentGWTService;
 import org.scriptbox.util.cassandra.heartbeat.CassandraHeartbeatReader;
 import org.scriptbox.util.cassandra.heartbeat.Heartbeat;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
+import org.scriptbox.util.gwt.server.remote.ExportableService;
+import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.scriptbox.util.gwt.server.remote.shared.ServiceException;
 import org.scriptbox.util.remoting.endpoint.CompositeEndpointConnectionFactory;
 import org.scriptbox.util.remoting.endpoint.Endpoint;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+@ExportableService(value="agentService",scope=ServiceScope.SESSION)
 public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 
 	private Cluster cluster;
@@ -32,7 +40,10 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 	private String columnFamilyName = CassandraHeartbeatReader.HEARTBEATS_CF;
 	
 	private CassandraHeartbeatReader<Endpoint> reader;
-
+	private Map<Agent,Heartbeat<Endpoint>> agentHeartbeatMapping;
+	private Map<Endpoint,Agent> endpointAgentMapping;
+	
+	
 	public Cluster getCluster() {
 		return cluster;
 	}
@@ -65,12 +76,19 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		reader = new CassandraHeartbeatReader<Endpoint>( cluster, keyspace, columnFamilyName, Endpoint.class );
 	}
 
-	public Map<String, List<Heartbeat<Endpoint>>> getAgentHeartbeats( List<String> groups) throws ServiceException {
+	public List<Agent> getAgents( List<String> groups ) throws ServiceException {
 		try {
-			Map<String,List<Heartbeat<Endpoint>>> ret = new HashMap<String,List<Heartbeat<Endpoint>>>();
+			agentHeartbeatMapping = new HashMap<Agent,Heartbeat<Endpoint>>();
+			endpointAgentMapping = new HashMap<Endpoint,Agent>();
+			List<Agent> ret = new ArrayList<Agent>();
 			for( String group : groups ) {
 				List<Heartbeat<Endpoint>> beats = reader.list( group );
-				ret.put( group, beats );
+				for( Heartbeat<Endpoint> heartbeat : beats ) {
+					Agent agent = new Agent( heartbeat.getGroup(), heartbeat.getType(), heartbeat.getId(), heartbeat.getTags(), heartbeat.getData().getIdentifier() );
+					agentHeartbeatMapping.put( agent, heartbeat );
+					endpointAgentMapping.put( heartbeat.getData(), agent );
+					ret.add( agent );
+				}
 			}
 			return ret;
 		}
@@ -79,7 +97,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		}
 	}
 	
-	public Map<Endpoint,String> createContext( final List<Endpoint> endpoints, final String language, final String contextName ) 
+	public Map<Agent,String> createContext( final List<Agent> endpoints, final String language, final String contextName ) 
 		throws ServiceException 
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -89,7 +107,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> startContext( final List<Endpoint> endpoints, final String contextName, final List arguments ) 
+	public Map<Agent,String> startContext( final List<Agent> endpoints, final String contextName, final List arguments ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -99,7 +117,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> stopContext( final List<Endpoint> endpoints, final String contextName ) 
+	public Map<Agent,String> stopContext( final List<Agent> endpoints, final String contextName ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -109,7 +127,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> shutdownContext( final List<Endpoint> endpoints, final String contextName ) 
+	public Map<Agent,String> shutdownContext( final List<Agent> endpoints, final String contextName ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -119,7 +137,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 
-	public Map<Endpoint,String> shutdownAllContexts( List<Endpoint> endpoints ) 
+	public Map<Agent,String> shutdownAllContexts( List<Agent> endpoints ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -129,8 +147,8 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> loadScript( 
-		final List<Endpoint> endpoints, 
+	public Map<Agent,String> loadScript( 
+		final List<Agent> endpoints, 
 		final String contextName, 
 		final String scriptName, 
 		final String fileName, 
@@ -144,8 +162,8 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> startScript( 
-		final List<Endpoint> endpoints, 
+	public Map<Agent,String> startScript( 
+		final List<Agent> endpoints, 
 		final String language, 
 		final String contextName, 
 		final String scriptName, 
@@ -160,7 +178,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Endpoint,String> status( List<Endpoint> endpoints ) 
+	public Map<Agent,String> status( List<Agent> endpoints ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -168,12 +186,11 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 				helper.status();
 			}
 		} );
-		
 	}
 
-	private Map<Endpoint,String> runAgents( List<Endpoint> endpoints, ParameterizedRunnable<BoxAgentHelper> runnable ) throws ServiceException {
+	private Map<Agent,String> runAgents( List<Agent> endpoints, ParameterizedRunnable<BoxAgentHelper> runnable ) throws ServiceException {
 		try {
-			Map<Endpoint,ByteArrayOutputStream> streams = createAgentStreams();
+			Map<Agent,ByteArrayOutputStream> streams = createAgentStreams();
 			BoxAgentHelper helper = createAgentHelper( endpoints, streams );
 			runnable.run( helper );
 			helper.join();
@@ -184,23 +201,23 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		}
 		
 	}
-	private Map<Endpoint,ByteArrayOutputStream> createAgentStreams() {
-		return Collections.synchronizedMap( new HashMap<Endpoint,ByteArrayOutputStream>() );
+	private Map<Agent,ByteArrayOutputStream> createAgentStreams() {
+		return Collections.synchronizedMap( new HashMap<Agent,ByteArrayOutputStream>() );
 	}
 
-	private Map<Endpoint,String> getAgentOutput( Map<Endpoint,ByteArrayOutputStream> streams ) {
-		Map<Endpoint,String> ret = new HashMap<Endpoint,String>();
-		for( Map.Entry<Endpoint,ByteArrayOutputStream> entry : streams.entrySet() ) {
+	private Map<Agent,String> getAgentOutput( Map<Agent,ByteArrayOutputStream> streams ) {
+		Map<Agent,String> ret = new HashMap<Agent,String>();
+		for( Map.Entry<Agent,ByteArrayOutputStream> entry : streams.entrySet() ) {
 			ret.put( entry.getKey(), entry.getValue().toString() );
 		}
 		return ret;
 	}
-	private BoxAgentHelper createAgentHelper( final List<Endpoint> endpoints, final Map<Endpoint,ByteArrayOutputStream> streams ) {
+	private BoxAgentHelper createAgentHelper( final List<Agent> agents, final Map<Agent,ByteArrayOutputStream> streams ) {
 		BoxAgentHelper agentHelper = new BoxAgentHelper();
 		agentHelper.setStreamFactory( new PrintStreamFactory() {
 			public PrintStream create( Endpoint endpoint ) {
 				ByteArrayOutputStream bstream = new ByteArrayOutputStream();
-				streams.put( endpoint, bstream );
+				streams.put( getAgent(endpoint), bstream );
 				return new PrintStream( bstream );
 			}
 		} );
@@ -209,8 +226,38 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		connectionFactory.add( new BoxTunnelConnectionFactory() );
 		agentHelper.setEndpointConnectionFactory( connectionFactory );
 	
-		agentHelper.setEndpoints( endpoints );
+		agentHelper.setEndpoints( getEndpoints(agents) );
 		
 		return agentHelper;
+	}
+	
+	private List<Endpoint> getEndpoints( List<Agent> agents ) {
+		List<Endpoint> endpoints = new ArrayList<Endpoint>( agents.size() );
+		for( Agent agent : agents ) {
+			endpoints.add( getEndpoint(agent) );
+		}
+		return endpoints;
+	}
+	
+	private Endpoint getEndpoint( Agent agent ) {
+		if( agentHeartbeatMapping == null ) {
+			throw new RuntimeException( "Agents not loaded" );
+		}
+		Heartbeat<Endpoint> heartbeat = agentHeartbeatMapping.get( agent );
+		if( heartbeat == null ) { 
+			throw new RuntimeException( "No agent found: " + agent );
+		}
+		return heartbeat.getData();
+	}
+	
+	private Agent getAgent( Endpoint endpoint ) {
+		if( endpointAgentMapping == null ) {
+			throw new RuntimeException( "Endpoints not loaded" );
+		}
+		Agent agent = endpointAgentMapping.get( endpoint );
+		if( agent == null ) { 
+			throw new RuntimeException( "No endpoint found: " + endpoint );
+		}
+		return agent;
 	}
 }

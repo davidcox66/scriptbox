@@ -3,7 +3,10 @@ package org.scriptbox.ui.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.scriptbox.ui.client.agent.AgentPerspective;
 import org.scriptbox.ui.client.chart.ui.ChartPerspective;
+import org.scriptbox.ui.shared.agent.AgentGWTService;
+import org.scriptbox.ui.shared.agent.AgentGWTServiceAsync;
 import org.scriptbox.ui.shared.chart.ChartGWTService;
 import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
 
@@ -33,9 +36,12 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 	private static final Logger logger = Logger.getLogger("PanopticonUI");
 
 	private CardLayoutContainer cards;
-	private ChartPerspective chartView;
+	private ChartPerspective chartPerspective;
+	private AgentPerspective agentPerspective;
 	private Menu viewMenu ;
-	private ChartGWTServiceAsync service; 
+	
+	private ChartGWTServiceAsync chartService; 
+	private AgentGWTServiceAsync agentService; 
 	
 	@Override
 	public Widget asWidget() {
@@ -49,8 +55,8 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 		parent.add( tools, new VerticalLayoutData(1,-1) );
 		parent.add( cards, new VerticalLayoutData(1,1) );
 		
-		buildViewItem( "Charts", chartView.asWidget() );
-		buildViewItem( "Agents", new ContentPanel() );
+		buildViewItem( "Charts", chartPerspective.asWidget() );
+		buildViewItem( "Agents", agentPerspective.asWidget() );
 		buildViewItem( "Maintenance", new ContentPanel() );
 		
 		return parent;
@@ -74,9 +80,13 @@ public class PanopticonUI implements IsWidget, EntryPoint {
 				error( ex );
 			}
 		} );
-		service = GWT.create(ChartGWTService.class);
-		chartView = new ChartPerspective( service );
-		chartView.load();
+		chartService = GWT.create(ChartGWTService.class);
+		chartPerspective = new ChartPerspective( chartService );
+		chartPerspective.load();
+		
+		agentService = GWT.create(AgentGWTService.class);
+		agentPerspective = new AgentPerspective( agentService );
+		agentPerspective.load();
 		
 	    Viewport viewport = new Viewport();
 	    viewport.add( asWidget() );

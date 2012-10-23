@@ -23,17 +23,17 @@ public class ChartPerspective implements IsWidget {
 
 	private static final Logger logger = Logger.getLogger("ChartPerspective");
 
-	private ListPanel listPanel;
-	private TreePanel treePanel;
+	private MetricListPanel listPanel;
+	private MetricTreePanel treePanel;
 	private ReportPanel reportPanel;
-	private ChartsPanel chartListPanel;
+	private ChartPortletPanel chartListPanel;
 	
 	public ChartPerspective( ChartGWTServiceAsync service ) {
 		
-		listPanel = new ListPanel( service );
-		treePanel = new TreePanel( service );
+		listPanel = new MetricListPanel( service );
+		treePanel = new MetricTreePanel( service );
 		reportPanel = new ReportPanel( service );
-		chartListPanel = new ChartsPanel( service );
+		chartListPanel = new ChartPortletPanel( service );
 		
 		listPanel.addSelectionHandler(new SelectionHandler<MetricTreeDto>() {
 	        @Override

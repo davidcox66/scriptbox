@@ -28,9 +28,9 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
-public class ListPanel extends VerticalLayoutContainer {
+public class MetricListPanel extends VerticalLayoutContainer {
 
-	private static final Logger logger = Logger.getLogger("TreePanel");
+	private static final Logger logger = Logger.getLogger("MetricTreePanel");
 	
 	public interface MetricTreeDtoAccess extends PropertyAccess<MetricTreeDto> {
 		@Path("treeName")
@@ -43,7 +43,7 @@ public class ListPanel extends VerticalLayoutContainer {
 	private ListView<MetricTreeDto,String> list;
 	private ListStore<MetricTreeDto> store;
 	
-	public ListPanel( ChartGWTServiceAsync service ) {
+	public MetricListPanel( ChartGWTServiceAsync service ) {
 		this.service = service;
 		
 		MetricTreeDtoAccess access = GWT.create(MetricTreeDtoAccess.class);

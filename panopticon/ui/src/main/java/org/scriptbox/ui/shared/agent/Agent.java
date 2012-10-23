@@ -1,10 +1,10 @@
-package org.scriptbox.util.cassandra.heartbeat;
+package org.scriptbox.ui.shared.agent;
 
 import java.io.Serializable;
 import java.util.List;
 
 
-public class Heartbeat<X> implements Serializable {
+public class Agent implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -12,16 +12,19 @@ public class Heartbeat<X> implements Serializable {
     private String id;
     private String type;
     private List<String> tags;
-    private X data;
+    private String data;
+   
+    // for GWT
+    public Agent() {
+    }
     
-	public Heartbeat( String group, String type, String id, List<String> tags, X data ) {
+	public Agent( String group, String type, String id, List<String> tags, String data ) {
 		this.group = group;
 		this.type = type;
 		this.id = id;
 		this.tags = tags;
 		this.data = data;
 	}
-	
 
 	public String getGroup() {
 		return group;
@@ -39,12 +42,12 @@ public class Heartbeat<X> implements Serializable {
 		return tags;
 	}
 
-	public X getData() {
+	public String getData() {
 		return data;
 	}
 
 	public String toString() {
-        return "Heartbeat{ group=" + group + ", type=" + type + ", id=" + id + ", tags=" + tags + ", data=" + data + " }";
+        return "Agent{ group=" + group + ", type=" + type + ", id=" + id + ", tags=" + tags + ", data=" + data + " }";
     }
 
 
@@ -69,7 +72,7 @@ public class Heartbeat<X> implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Heartbeat other = (Heartbeat) obj;
+		Agent other = (Agent) obj;
 		if (data == null) {
 			if (other.data != null)
 				return false;
