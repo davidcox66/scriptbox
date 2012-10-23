@@ -25,6 +25,7 @@ public class LineChartController {
 	private ChartGWTServiceAsync service; 
 	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private LineChart chart;
+	private MetricTreeNodeDto node;
 	
 	public LineChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -41,6 +42,7 @@ public class LineChartController {
 	}
 	
 	public void load( MetricTreeNodeDto node, final Runnable callback ) {
+		this.node = node;
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
 		query.setStart( new Date() );
@@ -54,7 +56,32 @@ public class LineChartController {
 					", values.size()=" + loaded.getData().size() ); 
 				
 				chart = new LineChart( loaded );
-			    callback.run();
+				if( callback != null ) {
+				    callback.run();
+				}
+				chart.getChart().redrawChart();
+			}
+		} );
+		loader.load( query );
+	}
+	
+	public void reload( final Runnable callback ) {
+		MetricQueryDto query = new MetricQueryDto();
+		query.setNode( node );
+		query.setStart( new Date() );
+		query.setEnd( new Date() );
+		
+		TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader= new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
+		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
+			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
+				MetricRangeDto loaded = event.getLoadResult();
+				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
+					", values.size()=" + loaded.getData().size() ); 
+				
+				chart.setData( loaded );
+				if( callback != null ) {
+				    callback.run();
+				}
 				chart.getChart().redrawChart();
 			}
 		} );

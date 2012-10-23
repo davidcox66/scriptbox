@@ -1,5 +1,6 @@
 package org.scriptbox.ui.client.chart.model;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
@@ -43,6 +44,12 @@ public class LineChart {
 		chart.addAxis(timeAxis);
 		chart.addAxis(valueAxis);
 		chart.addSeries(series);
+	}
+
+	public void setData( MetricRangeDto dto) {
+	    timeAxis.setStartDate(dto.getStart());
+        timeAxis.setEndDate(dto.getEnd());
+        store.replaceAll(dto.getData());
 	}
 
 	public Chart<Metric> getChart() {

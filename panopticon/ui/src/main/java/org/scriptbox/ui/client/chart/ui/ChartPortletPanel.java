@@ -77,11 +77,22 @@ public class ChartPortletPanel extends ContentPanel {
 			public void run() {
 				Chart<Metric> chart = controller.getChart().getChart();
 				chart.setDefaultInsets(10);
-				addChartPortlet( node.getId(), chart, HEIGHT );
+				Portlet portlet = addChartPortlet( node.getId(), chart, HEIGHT );
+				addMetricReload( controller, portlet );
 			}
 		} );
 	}
 
+	private void addMetricReload( final LineChartController controller, final Portlet portlet )
+	{
+		portlet.getHeader().addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				controller.reload( null );
+			}
+		}));
+	}
+	
 	public void load( final MetricReportSummaryDto report ) {
 		if( tree != null ) {
 			final ReportChartController controller = new ReportChartController( service );
@@ -99,7 +110,8 @@ public class ChartPortletPanel extends ContentPanel {
 						panel.add( ch );
 						layout.add( panel, new VerticalLayoutData(1,HEIGHT) );
 					}
-					addChartPortlet( tree.getTreeName() + " : " + report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
+					Portlet portlet = addChartPortlet( tree.getTreeName() + " : " + report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
+					addReportReload( controller, portlet );
 				}
 			} );
 		}
@@ -108,6 +120,16 @@ public class ChartPortletPanel extends ContentPanel {
 			config.setDisplay( 5000 );
 			Info.display( config );
 		}
+	}
+
+	private void addReportReload( final ReportChartController controller, final Portlet portlet )
+	{
+		portlet.getHeader().addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				controller.reload( null );
+			}
+		}));
 	}
 	
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
@@ -196,7 +218,7 @@ public class ChartPortletPanel extends ContentPanel {
     }-*/;
 
 
-	private void addChartPortlet( String title, Widget widget, int height ) {
+	private Portlet addChartPortlet( String title, Widget widget, int height ) {
 	    Portlet portlet = new Portlet();
 	    portlet.setHeadingText( title );
 	    configPortlet( portlet );
@@ -206,6 +228,7 @@ public class ChartPortletPanel extends ContentPanel {
 	    }
 	    portal.insert(portlet, 0, 0);
 		portlets.add( 0, portlet );
+		return portlet;
 	}
 	
 	private void enforceChartLimit( int adding, Portlet excluded ) {
@@ -238,7 +261,7 @@ public class ChartPortletPanel extends ContentPanel {
 	private void configPortlet(final Portlet panel) {
 		panel.setCollapsible(true);
 		panel.setAnimCollapse(false);
-		panel.getHeader().addTool(new ToolButton(ToolButton.GEAR));
+		
 		panel.getHeader().addTool(new ToolButton(ToolButton.CLOSE, new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {

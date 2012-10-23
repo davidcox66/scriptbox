@@ -55,7 +55,7 @@ public class CassandraHeartbeatReader<X> {
     			  List<String> tags = (List<String>)ObjectSerializer.get().fromByteBuffer(tcol.getValue());
     			  Object data = ObjectSerializer.get().fromByteBuffer(dcol.getValue());
     			  
-    			  Heartbeat<X> beat = new Heartbeat<X>( group, id, type, tags, dataClass.cast(data) );
+    			  Heartbeat<X> beat = new Heartbeat<X>( id, group, type, tags, dataClass.cast(data) );
 				  ret.add( beat );
     		  }
     	  }

@@ -18,10 +18,10 @@ public class Agent implements Serializable {
     public Agent() {
     }
     
-	public Agent( String group, String type, String id, List<String> tags, String data ) {
+	public Agent( String id, String group, String type, List<String> tags, String data ) {
+		this.id = id;
 		this.group = group;
 		this.type = type;
-		this.id = id;
 		this.tags = tags;
 		this.data = data;
 	}

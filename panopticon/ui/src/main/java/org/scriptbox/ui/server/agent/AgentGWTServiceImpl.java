@@ -27,6 +27,8 @@ import org.scriptbox.util.gwt.server.remote.ServiceScope;
 import org.scriptbox.util.gwt.server.remote.shared.ServiceException;
 import org.scriptbox.util.remoting.endpoint.CompositeEndpointConnectionFactory;
 import org.scriptbox.util.remoting.endpoint.Endpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -35,6 +37,8 @@ import org.springframework.context.annotation.Scope;
 @ExportableService(value="agentService",scope=ServiceScope.SESSION)
 public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( AgentGWTServiceImpl.class );
+	
 	private Cluster cluster;
 	private Keyspace keyspace;
 	private String columnFamilyName = CassandraHeartbeatReader.HEARTBEATS_CF;
@@ -78,18 +82,21 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 
 	public List<Agent> getAgents( List<String> groups ) throws ServiceException {
 		try {
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getAgents: groups=" + groups ); }
 			agentHeartbeatMapping = new HashMap<Agent,Heartbeat<Endpoint>>();
 			endpointAgentMapping = new HashMap<Endpoint,Agent>();
 			List<Agent> ret = new ArrayList<Agent>();
 			for( String group : groups ) {
 				List<Heartbeat<Endpoint>> beats = reader.list( group );
 				for( Heartbeat<Endpoint> heartbeat : beats ) {
-					Agent agent = new Agent( heartbeat.getGroup(), heartbeat.getType(), heartbeat.getId(), heartbeat.getTags(), heartbeat.getData().getIdentifier() );
+					Agent agent = new Agent( heartbeat.getId(), heartbeat.getGroup(), heartbeat.getType(), heartbeat.getTags(), heartbeat.getData().getIdentifier() );
 					agentHeartbeatMapping.put( agent, heartbeat );
 					endpointAgentMapping.put( heartbeat.getData(), agent );
 					ret.add( agent );
+					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getAgents: agent=" + agent ); }
 				}
 			}
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getAgents: agent.size()=" + ret.size() ); }
 			return ret;
 		}
 		catch( Exception ex ) {
@@ -107,7 +114,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		} );
 	}
 	
-	public Map<Agent,String> startContext( final List<Agent> endpoints, final String contextName, final List arguments ) 
+	public Map<Agent,String> startContext( final List<Agent> endpoints, final String contextName, final List<String> arguments ) 
 		throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -152,7 +159,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		final String contextName, 
 		final String scriptName, 
 		final String fileName, 
-		final List arguments ) 
+		final List<String> arguments ) 
 			throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
@@ -168,7 +175,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 		final String contextName, 
 		final String scriptName, 
 		final String fileName, 
-		final List arguments ) 
+		final List<String> arguments ) 
 			throws ServiceException
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {

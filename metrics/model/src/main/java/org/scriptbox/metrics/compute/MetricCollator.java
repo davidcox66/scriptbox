@@ -243,7 +243,7 @@ public class MetricCollator {
 		
 		int i=0;
 		for( MetricRange range : ranges ) {
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "collate: range[" + i + "]=" + range + ", metrics=" + range.getMetrics(chunk) ); }
+			if( LOGGER.isTraceEnabled() ) { LOGGER.trace( "collate: range[" + i + "]=" + range + ", metrics=" + range.getMetrics(chunk) ); }
 			Iterator<Metric> iter = range.getIterator( seconds );
 			citer.addIterator( associate ? new MetricWithAssociationIterator<Integer>(i,iter) : iter );
 			i++;

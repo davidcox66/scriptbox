@@ -86,11 +86,11 @@ public class AgentListPanel extends VerticalLayoutContainer {
 		
 		store = new ListStore<Agent>(access.key());
 
-		ColumnConfig<Agent, String> idCol = new ColumnConfig<Agent, String>(access.id(), 200, "ID");
-	    ColumnConfig<Agent, String> groupCol = new ColumnConfig<Agent, String>(access.group(), 100, "Group");
-	    ColumnConfig<Agent, String> typeCol = new ColumnConfig<Agent, String>(access.type(), 75, "Type");
-	    ColumnConfig<Agent, String> tagsCol = new ColumnConfig<Agent, String>(tagsProvider, 75, "Tags");
-	    ColumnConfig<Agent, String> infoCol = new ColumnConfig<Agent, String>(infoProvider, 75, "Information");
+		ColumnConfig<Agent, String> idCol = new ColumnConfig<Agent, String>(access.id(), 150, "ID");
+	    ColumnConfig<Agent, String> groupCol = new ColumnConfig<Agent, String>(access.group(), 120, "Group");
+	    ColumnConfig<Agent, String> typeCol = new ColumnConfig<Agent, String>(access.type(), 120, "Type");
+	    ColumnConfig<Agent, String> tagsCol = new ColumnConfig<Agent, String>(tagsProvider, 200, "Tags");
+	    ColumnConfig<Agent, String> infoCol = new ColumnConfig<Agent, String>(infoProvider, 200, "Information");
 
 	    List<ColumnConfig<Agent, ?>> colList = new ArrayList<ColumnConfig<Agent, ?>>();
 	    colList.add( idCol );
@@ -124,6 +124,7 @@ public class AgentListPanel extends VerticalLayoutContainer {
 				 logger.info( "Failed getting agents: " + ex );
 			 }
 			 public void onSuccess(List<Agent> result) {
+				 logger.info( "Loaded agents: " + result );
 				 store.replaceAll( result );
 			 }
 		} );

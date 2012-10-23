@@ -14,10 +14,10 @@ public class Heartbeat<X> implements Serializable {
     private List<String> tags;
     private X data;
     
-	public Heartbeat( String group, String type, String id, List<String> tags, X data ) {
+	public Heartbeat( String id, String group, String type, List<String> tags, X data ) {
+		this.id = id;
 		this.group = group;
 		this.type = type;
-		this.id = id;
 		this.tags = tags;
 		this.data = data;
 	}

@@ -1,7 +1,7 @@
 set -x
-export JAVA_OPTS="\
-		-Dlogback.debug=true \
-		-Dmetrics.level=TRACE"
+#export JAVA_OPTS="\
+#		-Dlogback.debug=true \
+#		-Dmetrics.level=TRACE"
 
 $TOMCAT_HOME/bin/shutdown.sh
 rm -rf $TOMCAT_HOME/webapps/panopticon*

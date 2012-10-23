@@ -78,6 +78,12 @@ public class MultiLineChart {
 		}
 	}
 
+	public void setData( MultiMetricRangeDto dto, Date start, Date end ) {
+		timeAxis.setStartDate(start);
+		timeAxis.setEndDate( end );
+		store.replaceAll(dto.getData());
+	}
+	
 	public String getTitle() {
 		return title;
 	}
