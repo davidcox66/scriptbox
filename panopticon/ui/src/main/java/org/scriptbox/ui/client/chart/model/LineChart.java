@@ -51,6 +51,11 @@ public class LineChart {
         timeAxis.setEndDate(dto.getEnd());
         store.replaceAll(dto.getData());
 	}
+	
+	public void addData( MetricRangeDto dto) {
+        timeAxis.setEndDate(dto.getEnd());
+        store.addAll(dto.getData());
+	}
 
 	public Chart<Metric> getChart() {
 		return chart;

@@ -1,12 +1,13 @@
 package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.SystemConfiguration;
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MultiMetric;
+import org.scriptbox.ui.client.chart.controller.ChartController;
 import org.scriptbox.ui.client.chart.controller.LineChartController;
 import org.scriptbox.ui.client.chart.controller.ReportChartController;
 import org.scriptbox.ui.client.chart.model.MultiLineChart;
@@ -18,12 +19,14 @@ import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
 import com.google.gwt.dom.client.BodyElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Portlet;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.button.ToggleButton;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.PortalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -48,10 +51,14 @@ public class ChartPortletPanel extends ContentPanel {
 	
 	private ChartGWTServiceAsync service;
 	private PortalLayoutContainer portal;
-	private List<Portlet> portlets = new ArrayList<Portlet>();
+	private List<ChartPortlet> portlets = new ArrayList<ChartPortlet>();
 	private	NumberField<Integer> limit;
 	private	NumberField<Integer> resolution;
 	private MetricTreeDto tree;
+
+	private Timer timer;
+	private ToggleButton update;
+	private List<ChartController> controllers = new ArrayList<ChartController>();
 	
 	public ChartPortletPanel( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -61,6 +68,16 @@ public class ChartPortletPanel extends ContentPanel {
 		buildToolBar( vertical );
 		buildPortal( vertical );
 		add( vertical );
+		
+	    timer = new Timer() {
+	        @Override
+	        public void run() {
+	          for( ChartController controller : controllers ) {
+	        	  controller.reload();
+	          }
+	        }
+	      };
+	   
 	}
 
 	public MetricTreeDto getTree() {
@@ -74,11 +91,11 @@ public class ChartPortletPanel extends ContentPanel {
 	public void load( final MetricTreeNodeDto node ) {
 		final LineChartController controller = new LineChartController( service );
 		enforceChartLimit( 1, null );
-		controller.load( node, getResolution(), new Runnable() {
+		controller.load( node, new Date(Long.MIN_VALUE), new Date(Long.MAX_VALUE), getResolution(), new Runnable() {
 			public void run() {
 				Chart<Metric> chart = controller.getChart().getChart();
 				chart.setDefaultInsets(10);
-				Portlet portlet = addChartPortlet( node.getId(), chart, HEIGHT );
+				ChartPortlet portlet = addChartPortlet( controller, node.getId(), chart, HEIGHT );
 				addMetricReload( controller, portlet );
 			}
 		} );
@@ -89,7 +106,7 @@ public class ChartPortletPanel extends ContentPanel {
 		portlet.getHeader().addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				controller.reload( null );
+				controller.reload();
 			}
 		}));
 	}
@@ -98,7 +115,7 @@ public class ChartPortletPanel extends ContentPanel {
 		if( tree != null ) {
 			final ReportChartController controller = new ReportChartController( service );
 			enforceChartLimit( 1, null );
-			controller.load( tree.getTreeName(), report.getName(), getResolution(), new Runnable() {
+			controller.load( tree.getTreeName(), report.getName(), new Date(Long.MIN_VALUE), new Date(Long.MAX_VALUE), getResolution(), new Runnable() {
 				public void run() {
 					List<MultiLineChart> charts = controller.getCharts();
 					VerticalLayoutContainer layout = new VerticalLayoutContainer();
@@ -111,7 +128,7 @@ public class ChartPortletPanel extends ContentPanel {
 						panel.add( ch );
 						layout.add( panel, new VerticalLayoutData(1,HEIGHT) );
 					}
-					Portlet portlet = addChartPortlet( tree.getTreeName() + " : " + report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
+					Portlet portlet = addChartPortlet( controller, tree.getTreeName() + " : " + report.getName(), layout, charts.size() * (HEIGHT+HEADER) + EXTRA );
 					addReportReload( controller, portlet );
 				}
 			} );
@@ -128,7 +145,7 @@ public class ChartPortletPanel extends ContentPanel {
 		portlet.getHeader().addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				controller.reload( null );
+				controller.reload();
 			}
 		}));
 	}
@@ -188,14 +205,6 @@ public class ChartPortletPanel extends ContentPanel {
 				enforceChartLimit(0,null);
 			}
 		} );
-		/*
-	    limit.addParseErrorHandler(new ParseErrorHandler() {
-	      @Override
-	      public void onParseError(ParseErrorEvent event) {
-	        Info.display("Parse Error", event.getErrorValue() + " could not be parsed as a number");
-	      }
-	    });
-	    */
 	    limit.setAllowBlank(false);
 	    
 		FieldLabel label = new FieldLabel(limit, "Limit");
@@ -211,6 +220,21 @@ public class ChartPortletPanel extends ContentPanel {
 		FieldLabel label = new FieldLabel(resolution, "Resolution");
 		label.setLabelWidth( 70 );
 		bar.add( label );
+	}
+	
+	private void buildUpdate( ToolBar bar ) {
+		update = new ToggleButton("Update");
+		update.addSelectHandler( new SelectHandler() {
+			public void onSelect(SelectEvent event) {
+				if( update.getValue() ) {
+					timer.scheduleRepeating(30*1000);
+				}
+				else {
+					timer.cancel();
+				}
+			}
+		});
+		bar.add( update );
 	}
 	
 	private void buildPortal( VerticalLayoutContainer vertical ) {
@@ -235,8 +259,8 @@ public class ChartPortletPanel extends ContentPanel {
     }-*/;
 
 
-	private Portlet addChartPortlet( String title, Widget widget, int height ) {
-	    Portlet portlet = new Portlet();
+	private ChartPortlet addChartPortlet( ChartController controller, String title, Widget widget, int height ) {
+	    ChartPortlet portlet = new ChartPortlet( this, controller );
 	    portlet.setHeadingText( title );
 	    configPortlet( portlet );
 	    portlet.add( widget );
@@ -245,6 +269,7 @@ public class ChartPortletPanel extends ContentPanel {
 	    }
 	    portal.insert(portlet, 0, 0);
 		portlets.add( 0, portlet );
+		controllers.add( controller );
 		return portlet;
 	}
 	
@@ -253,8 +278,8 @@ public class ChartPortletPanel extends ContentPanel {
 		if( lim != null && lim.intValue() > 0 ) {
 			int l = lim.intValue() - adding;
 			// Only consider open ones for closing
-			List<Portlet> opened = new ArrayList<Portlet>();
-			for( Portlet portlet : portlets ) {
+			List<ChartPortlet> opened = new ArrayList<ChartPortlet>();
+			for( ChartPortlet portlet : portlets ) {
 				if( !portlet.isCollapsed() ) {
 					opened.add( portlet );
 				}
@@ -263,11 +288,12 @@ public class ChartPortletPanel extends ContentPanel {
 			int fromEnd = 0;
 			while( opened.size() - fromEnd > l ) {
 				int ind = opened.size() - 1 - fromEnd;
-				Portlet rm = opened.get( ind );
+				ChartPortlet rm = opened.get( ind );
 				if( excluded == null || rm != excluded ) {
+					rm.removeFromParent();
 					opened.remove(ind);
 					portlets.remove(rm);
-					rm.removeFromParent();
+					controllers.remove( rm.getController() );
 				}
 				else if( rm == excluded ) {
 					fromEnd++;
@@ -275,24 +301,18 @@ public class ChartPortletPanel extends ContentPanel {
 			}
 		}
 	}
-	private void configPortlet(final Portlet panel) {
-		panel.setCollapsible(true);
-		panel.setAnimCollapse(false);
+	private void configPortlet(final ChartPortlet portlet) {
+		portlet.setCollapsible(true);
+		portlet.setAnimCollapse(false);
 		
-		panel.getHeader().addTool(new ToolButton(ToolButton.CLOSE, new SelectHandler() {
+		portlet.getHeader().addTool(new ToolButton(ToolButton.CLOSE, new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
-				panel.removeFromParent();
-				portlets.remove( panel );
+				portlet.removeFromParent();
+				portlets.remove( portlet );
+				controllers.remove( portlet.getController() );
 			}
 		}));
-		/*
-		panel.addExpandHandler( new ExpandHandler() {
-			public void onExpand( ExpandEvent event ) {
-				enforceChartLimit( 0, panel );
-			}
-		} );
-		*/
 	}
 	
 	private int getResolution() {
