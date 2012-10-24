@@ -91,7 +91,7 @@ public class ChartPortletPanel extends ContentPanel {
 	public void load( final MetricTreeNodeDto node ) {
 		final LineChartController controller = new LineChartController( service );
 		enforceChartLimit( 1, null );
-		controller.load( node, new Date(Long.MIN_VALUE), new Date(Long.MAX_VALUE), getResolution(), new Runnable() {
+		controller.load( node, null, null, getResolution(), new Runnable() {
 			public void run() {
 				Chart<Metric> chart = controller.getChart().getChart();
 				chart.setDefaultInsets(10);
@@ -115,7 +115,7 @@ public class ChartPortletPanel extends ContentPanel {
 		if( tree != null ) {
 			final ReportChartController controller = new ReportChartController( service );
 			enforceChartLimit( 1, null );
-			controller.load( tree.getTreeName(), report.getName(), new Date(Long.MIN_VALUE), new Date(Long.MAX_VALUE), getResolution(), new Runnable() {
+			controller.load( tree.getTreeName(), report.getName(), null, null, getResolution(), new Runnable() {
 				public void run() {
 					List<MultiLineChart> charts = controller.getCharts();
 					VerticalLayoutContainer layout = new VerticalLayoutContainer();

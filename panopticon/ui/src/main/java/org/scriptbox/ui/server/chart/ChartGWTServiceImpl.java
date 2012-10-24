@@ -137,7 +137,17 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			MetricSequence seq = node.getMetricSequence();
 			// MetricRange range = seq.getRange(query.getStart().getTime(), query.getEnd().getTime(), 30 );
 			DateRange dr = seq.getFullDateRange();
-			MetricRange range = seq.getRange(dr.getStart().getTime(), dr.getEnd().getTime() );
+			Date qstart = query.getStart() != null ? query.getStart() : new Date(Long.MIN_VALUE);
+			Date qend = query.getEnd() != null ? query.getEnd() : new Date(Long.MAX_VALUE);
+			long start = Math.max(dr.getStart().getTime(),qstart.getTime());
+			long end = Math.min(dr.getEnd().getTime(),qend.getTime());
+			
+			if( LOGGER.isDebugEnabled() ) {
+				LOGGER.debug( "getMetrics: seq.start=" + dr.getStart() + ", seq.end=" + dr.getEnd() +
+					", query.start=" + query.getStart() + ", query.end=" + query.getEnd() +
+					", start=" + new Date(start) + ", end=" + new Date(end) );
+			}
+			MetricRange range = seq.getRange( start, end );
 			MetricRangeDto ret = new MetricRangeDto( 
 				dr.getStart().getTime(), 
 				dr.getEnd().getTime(), 
@@ -210,11 +220,22 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			long first = Long.MAX_VALUE;
 			long last = Long.MIN_VALUE;
 			
+			Date qstart = query.getStart() != null ? query.getStart() : new Date(Long.MIN_VALUE);
+			Date qend = query.getEnd() != null ? query.getEnd() : new Date(Long.MAX_VALUE);
+			Date start = report.getStart() != null ? report.getStart() : qstart;
+			Date end =	report.getEnd() != null ? report.getEnd() : qend;
+			int resolution = report.getResolution() > 0 ? report.getResolution() : query.getResolution();
+			
+			if( LOGGER.isDebugEnabled() ) {
+				LOGGER.debug( "getReport: " +
+					"report.start=" + report.getStart() + ", report.end=" + report.getEnd() + ", report.resolution=" + report.getResolution() +
+					", query.start=" + query.getStart() + ", query.end=" + query.getEnd() + ", query.resolution=" + query.getResolution() + 
+					", start=" + start + ", end=" + end + ", resolution=" + resolution );
+			}
 			MetricReportDto reportDto = new MetricReportDto();
 			for( ReportElement element : report.getElements() ) {
 				Map<? extends MetricProvider,? extends MetricRange> result = MetricQueries.query(
-					store, tree, element.getExpression(), report.getStart(), report.getEnd(), 
-					report.getChunk() > 0 ? report.getChunk() : query.getResolution() );
+					store, tree, element.getExpression(), start, end, resolution ); 
 	
 				if( LOGGER.isDebugEnabled() ) {
 					LOGGER.debug( "getReport: result.size()=" + result.size() );

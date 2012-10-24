@@ -32,7 +32,7 @@ public class DivideQueryExp implements MetricQueryExp {
 		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 		for (MetricRange range : metrics.values() ) {
 			List<Metric> values = new ArrayList<Metric>();
-			Iterator<Metric> iter = range.getIterator(ctx.getChunk());
+			Iterator<Metric> iter = range.getIterator(ctx.getResolution());
 			while (iter.hasNext()) {
 				Metric metric = iter.next();
 				values.add(new Metric(metric.getMillis(), metric.getValue() / divisor));

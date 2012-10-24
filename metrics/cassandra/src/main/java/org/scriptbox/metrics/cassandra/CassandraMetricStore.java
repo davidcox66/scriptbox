@@ -92,7 +92,7 @@ public class CassandraMetricStore implements MetricStore {
 	
 		final long start = ctx.getStart();
 		final long end = ctx.getEnd();
-		final int seconds = ctx.getChunk();
+		final int seconds = ctx.getResolution();
 		
 	    List<String> toQueryIds = new ArrayList<String>();
 	    Map<MetricProvider,MetricRange> ret = new HashMap<MetricProvider,MetricRange>();

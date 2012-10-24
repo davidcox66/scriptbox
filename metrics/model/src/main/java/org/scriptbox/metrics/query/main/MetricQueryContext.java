@@ -9,14 +9,14 @@ public class MetricQueryContext {
 	private MetricTree tree;
 	private long start;
 	private long end;
-	private int chunk;
+	private int resolution;
 	
-	public MetricQueryContext( MetricStore store, MetricTree tree, long start, long end, int chunk ) {
+	public MetricQueryContext( MetricStore store, MetricTree tree, long start, long end, int resolution ) {
 		this.store = store;
 		this.tree = tree;
 		this.start = start;
 		this.end = end;
-		this.chunk = chunk;
+		this.resolution = resolution;
 	}
 
 	public MetricStore getStore() {
@@ -31,8 +31,8 @@ public class MetricQueryContext {
 	public long getEnd() {
 		return end;
 	}
-	public int getChunk() {
-		return chunk;
+	public int getResolution() {
+		return resolution;
 	}
 	
 }

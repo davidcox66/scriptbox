@@ -25,10 +25,10 @@ public class AverageQueryExp implements MetricQueryExp {
 
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
 	    Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
-		MetricCollator collator = new MetricCollator("average", "average", ctx.getChunk(),metrics.values());
+		MetricCollator collator = new MetricCollator("average", "average", ctx.getResolution(),metrics.values());
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
-				Iterator<Metric> iter = range.getIterator(ctx.getChunk());
+				Iterator<Metric> iter = range.getIterator(ctx.getResolution());
 				float total = 0;
 				int count = 0;
 				while (iter.hasNext()) {

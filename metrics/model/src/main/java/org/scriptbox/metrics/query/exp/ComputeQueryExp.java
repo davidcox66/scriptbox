@@ -50,8 +50,8 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	      MetricRange range2 = provider2.getMetrics( ctx );
 	     
 	      if( LOGGER.isTraceEnabled() ) {
-	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range1: " + range1 + ", metrics: " + range1.getMetrics(ctx.getChunk()) );
-	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range2: " + range2 + ", metrics: " + range2.getMetrics(ctx.getChunk()) );
+	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range1: " + range1 + ", metrics: " + range1.getMetrics(ctx.getResolution()) );
+	    	  LOGGER.trace( "evaluate: range - name: " + name + ", range2: " + range2 + ", metrics: " + range2.getMetrics(ctx.getResolution()) );
 	      }
 	      List<MetricRange> metrics = new ArrayList<MetricRange>(2);
 	      metrics.add( range1 );

@@ -31,7 +31,7 @@ public class DeltaQueryExp implements MetricQueryExp {
 		  for (MetricRange range : metrics.values() ) {
 			  List<Metric> deltas = new ArrayList<Metric>();
 		      Metric prev = null;
-		      Iterator<Metric> iter = range.getIterator( ctx.getChunk() );
+		      Iterator<Metric> iter = range.getIterator( ctx.getResolution() );
 		      while( iter.hasNext() ) {
 		    	 Metric metric = iter.next(); 
 		    	 if( prev != null ) {
