@@ -4,23 +4,20 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.ui.client.PanopticonUI;
 import org.scriptbox.ui.client.chart.model.LineChart;
 import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
 import org.scriptbox.ui.shared.chart.MetricQueryDto;
 import org.scriptbox.ui.shared.chart.MetricRangeDto;
-import org.scriptbox.ui.shared.chart.MetricReportDto;
 import org.scriptbox.ui.shared.chart.MetricTreeNodeDto;
-import org.scriptbox.ui.shared.chart.ReportQueryDto;
 import org.scriptbox.ui.shared.timed.TimeBasedLoader;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadExceptionEvent;
-import com.sencha.gxt.data.shared.loader.LoadHandler;
 import com.sencha.gxt.data.shared.loader.LoadExceptionEvent.LoadExceptionHandler;
+import com.sencha.gxt.data.shared.loader.LoadHandler;
 
 public class LineChartController extends ChartController {
 
@@ -66,9 +63,9 @@ public class LineChartController extends ChartController {
 		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
 			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
 				MetricRangeDto loaded = event.getLoadResult();
+				last = loaded.getLast();
 				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
 					", values.size()=" + loaded.getData().size() ); 
-				last = loaded.getLast();
 				chart = new LineChart( loaded );
 				if( callback != null ) {
 				    callback.run();
@@ -84,13 +81,14 @@ public class LineChartController extends ChartController {
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
 		query.setStart( last != null ? new Date(last.getTime()+(resolution*1000)) : start );
-		query.setEnd( new Date(Long.MAX_VALUE) );
+		query.setEnd( null );
 		query.setResolution( resolution );
 		
 		TimeBasedLoader<MetricQueryDto, MetricRangeDto> loader= new TimeBasedLoader<MetricQueryDto, MetricRangeDto>(proxy);
 		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
 			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
 				MetricRangeDto loaded = event.getLoadResult();
+				last = loaded.getLast();
 				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
 					", values.size()=" + loaded.getData().size() ); 
 				
@@ -116,9 +114,9 @@ public class LineChartController extends ChartController {
 		loader.addLoadHandler(new LoadHandler<MetricQueryDto, MetricRangeDto>() {
 			public void onLoad(LoadEvent<MetricQueryDto, MetricRangeDto> event) {
 				MetricRangeDto loaded = event.getLoadResult();
+				last = loaded.getLast();
 				logger.log( Level.INFO, "onLoad: start=" + loaded.getStart() + ", end=" + loaded.getEnd() + 
 					", values.size()=" + loaded.getData().size() ); 
-				last = loaded.getLast();
 				
 				chart.setData( loaded );
 				chart.getChart().redrawChart();

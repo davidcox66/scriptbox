@@ -89,7 +89,7 @@ public class ReportChartController extends ChartController {
 		query.setTreeName( treeName );
 		query.setReportName( reportName );
 		query.setStart( last != null ? new Date(last.getTime()+(resolution*1000)) : start );
-		query.setEnd( new Date(Long.MAX_VALUE) );
+		query.setEnd( null );
 		query.setResolution( resolution );
 
 		final Map<String,MultiLineChart> chartsByTitle = getTitleChartMap();

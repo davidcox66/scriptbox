@@ -152,6 +152,7 @@ public class ChartPortletPanel extends ContentPanel {
 	
 	private void buildToolBar( VerticalLayoutContainer vertical ) {
 		ToolBar bar = new ToolBar();
+		buildUpdate( bar );
 		buildPrint( bar );
 		buildRemoveAll( bar );
 		buildCollapseAll( bar );
