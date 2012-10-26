@@ -264,7 +264,8 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 					first = Math.min(first, metrics.get(0).getMillis() );
 					last = Math.max(last, metrics.get(metrics.size()-1).getMillis() );
 				}
-				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), descriptions, metrics );
+				MultiMetricRangeDto range = new MultiMetricRangeDto( element.getTitle(), descriptions, metrics,
+					(String)((Map)element.getParams()).get("presentation") );
 				reportDto.addChart( range );
 			}
 			reportDto.setStart( new Date(first) );

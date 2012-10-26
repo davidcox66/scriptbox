@@ -15,30 +15,17 @@ import com.sencha.gxt.chart.client.chart.Legend;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
 import com.sencha.gxt.chart.client.chart.axis.TimeAxis;
 import com.sencha.gxt.chart.client.chart.series.LineSeries;
+import com.sencha.gxt.chart.client.chart.series.Series;
 import com.sencha.gxt.chart.client.draw.RGB;
 import com.sencha.gxt.data.shared.ListStore;
 
 public class MultiLineChart {
 
-	private static RGB[] COLORS = {
-		new RGB( 0xFF,0x00, 0x00 ),
-		new RGB( 0xFF,0x80, 0x00 ),
-		new RGB( 0xFF,0xFF, 0x00 ),
-		new RGB( 0x80,0xFF, 0x00 ),
-		new RGB( 0x00,0xFF, 0x00 ),
-		new RGB( 0x00,0xFF, 0x80 ),
-		new RGB( 0x00,0xFF, 0xFF ),
-		new RGB( 0x00,0x80, 0xFF ),
-		new RGB( 0x00,0x00, 0xFF ),
-		new RGB( 0x80,0x00, 0xFF ),
-		new RGB( 0xFF,0x00, 0xFF ),
-		new RGB( 0xFF,0x00, 0x80 ),
-	};
-	
+
 	private Chart<MultiMetric> chart;
 	private NumericAxis<MultiMetric> valueAxis;
 	private TimeAxis<MultiMetric> timeAxis;
-	private List<LineSeries<MultiMetric>> series;
+	private List<Series<MultiMetric>> series;
 	private ListStore<MultiMetric> store;
 	private Legend<MultiMetric> legend;
 	private String title;
@@ -68,13 +55,13 @@ public class MultiLineChart {
 		    chart.setLegend(legend);
 		}
 
-		series = new ArrayList<LineSeries<MultiMetric>>();
-		int i=0;
-		for( String line : lines ) {
-			LineSeries<MultiMetric> ls = MultiLineChartBuilder.buildValueSeries(line, i, COLORS[i % COLORS.length]);
-			series.add(ls);
-			chart.addSeries(ls);
-			i++;
+		boolean stacked = "stacked".equals(dto.getPresentation());
+		series = stacked ? 
+			MultiLineChartBuilder.buildValueAreaSeries(lines) :
+			MultiLineChartBuilder.buildValueLineSeries(lines);
+			
+		for( Series<MultiMetric> ser : series )	 {
+			chart.addSeries(ser);
 		}
 	}
 
@@ -113,7 +100,7 @@ public class MultiLineChart {
 		return timeAxis;
 	}
 
-	public List<LineSeries<MultiMetric>> getSeries() {
+	public List<Series<MultiMetric>> getSeries() {
 		return series;
 	}
 
