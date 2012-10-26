@@ -14,6 +14,17 @@ else
 	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
 fi
 
+JAVA=$(which java)
+if [[ -z $JAVA ]] ; then
+	echo "java not found in path"
+	exit 1
+fi
+
+if [[ -z $JAVA_HOME ]] ; then
+	export JAVA_HOME=${JAVA%%/bin/java}
+	echo "Usage JAVA_HOME: $JAVA_HOME"
+fi
+
 # So com.sun virtual machine apis will work
 if [[ -f $JAVA_HOME/lib/tools.jar ]] ; then
 	echo "Added tools.jar to classpath"

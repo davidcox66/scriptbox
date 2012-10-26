@@ -1,6 +1,9 @@
 package org.scriptbox.box.plugins.quartz;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.scriptbox.box.container.BoxContext;
@@ -18,6 +21,8 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 	private BoxContext context;
 	private JobDetail detail;
 
+	private AtomicBoolean busy = new AtomicBoolean();
+	
 	// Only called by quartz
 	public QuartzExecBlock() {
 	}
@@ -47,13 +52,25 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 		} );
 	}
 	public void execute( JobExecutionContext ctx ) {
-		try {
-			QuartzExecBlock block = (QuartzExecBlock)ctx.getJobDetail().getJobDataMap().get("block");
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "execute: block=" + block ); }
-			block.run();
+		
+		JobDataMap map = ctx.getJobDetail().getJobDataMap();
+		int id = map.getInt("id");
+		QuartzExecBlock block = (QuartzExecBlock)map.get("block");
+		
+		if( busy.compareAndSet(false, true) ) {
+			try {
+				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "execute: id=" + id + ", block=" + block ); }
+				block.run();
+			}
+			catch( Exception ex ) {
+				LOGGER.error( "Error executing job", ex );
+			}
+			finally {
+				busy.set(false);
+			}
 		}
-		catch( Exception ex ) {
-			LOGGER.error( "Error executing job", ex );
+		else {
+			LOGGER.info( "execute: already in the middle of processing job, will skip this iteration: id=" + id + ", block=" + block );
 		}
 	}
 }

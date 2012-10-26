@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -19,23 +22,30 @@ import org.scriptbox.box.inject.BoxContextInjectingListener;
 
 public class QuartzPlugin extends BoxContextInjectingListener {
 
-	private static final AtomicInteger count = new AtomicInteger();
+	private static final Logger LOGGER = LoggerFactory.getLogger( QuartzPlugin.class );
 	
+	private static final int DEFAULT_THREAD_COUNT = 10;
+	
+	private int threadCount = DEFAULT_THREAD_COUNT;
+	
+	private static final AtomicInteger count = new AtomicInteger();
 	private List<QuartzListener> listeners;
 	
 	public QuartzPlugin() throws SchedulerException {
 	}
 
-	
 	public List<QuartzListener> getListeners() {
 		return listeners;
 	}
-
-
 	public void setListeners(List<QuartzListener> listeners) {
 		this.listeners = listeners;
 	}
-
+	public int getThreadCount() {
+		return threadCount;
+	}
+	public void setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
+	}
 
 	public void contextCreated(BoxContext context) throws Exception {
 		
@@ -44,7 +54,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, context.getName() );
 		props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool" );
 		props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore" );
-		props.put("org.quartz.threadPool.threadCount", "3" );
+		props.put("org.quartz.threadPool.threadCount", "" + threadCount );
 		
 		final Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
 		
@@ -87,8 +97,11 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 		JobDataMap map = detail.getJobDataMap();
 		map.put("id", cnt );
 		map.put("block", block );
-		
 		block.setDetail( detail );
+		
+		if( LOGGER.isDebugEnabled() ) {
+			LOGGER.debug( "configureJob: context=" + context.getName() + ", id=" + cnt + ", trigger=" + trigger + ", block=" + block );
+		}
 		Lookup beans = context.getBeans();
 		beans.getEx( "quartz.blocks", Map.class ).put( cnt, block );
 		beans.getEx( "quartz.scheduler",Scheduler.class).scheduleJob( detail, trigger );

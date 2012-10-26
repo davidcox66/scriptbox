@@ -14,10 +14,25 @@ public class VmJmxConnectionBuilder implements JmxConnectionBuilder {
 	
 	@Override
 	public JmxConnection getForPid(int pid, String command ) throws Exception {
-		VirtualMachine vm = VirtualMachine.attach(String.valueOf(pid));
+		VirtualMachine vm = null;
+		try { 
+			vm = VirtualMachine.attach(String.valueOf(pid));
+		}
+		catch( Exception ex ) {
+			throw new Exception( "Error attaching to VM: pid=" + pid + ", command=" + command, ex );
+		}
+		
 		try {
 			String connectorAddress = VmJmxUtil.getConnectorAddress( vm );
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "getForPid: pid=" + pid + ", command=" + command + ", connectorAddress=" + connectorAddress ); }
+			if( LOGGER.isDebugEnabled() ) { 
+				LOGGER.debug( "getForPid: " +
+					"pid=" + pid + 
+					", command=" + command + 
+					", connectorAddress=" + connectorAddress +
+					", agentProperties=" + vm.getAgentProperties() + 
+					", systemProperties=" + vm.getSystemProperties() +
+					", vm=" + vm); 
+			}
 			return new JmxConnection( connectorAddress );
 		}
 		finally {

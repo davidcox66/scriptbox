@@ -11,7 +11,7 @@ public class JettyService {
 
 	private String hostname="127.0.0.1";
 	private int port=8090;
-	private boolean logging=true;
+	private boolean logging=false;
 	private String logDirectory="/tmp";
 	private String servletMapping="/remoting/*";
 	private boolean jmx;

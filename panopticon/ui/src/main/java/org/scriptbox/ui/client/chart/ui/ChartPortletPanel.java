@@ -1,7 +1,6 @@
 package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -73,7 +72,7 @@ public class ChartPortletPanel extends ContentPanel {
 	        @Override
 	        public void run() {
 	          for( ChartController controller : controllers ) {
-	        	  controller.reload();
+	        	  controller.update();
 	          }
 	        }
 	      };

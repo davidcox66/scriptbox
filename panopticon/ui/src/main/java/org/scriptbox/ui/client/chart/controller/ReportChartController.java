@@ -27,15 +27,10 @@ public class ReportChartController extends ChartController {
 
 	private static final Logger logger = Logger.getLogger("ReportChartController");
 	
-	private ChartGWTServiceAsync service; 
 	private ArrayList<MultiLineChart> charts;
 	private RpcProxy<ReportQueryDto, MetricReportDto> proxy;
 	private String treeName;
 	private String reportName;
-	private Date start;
-	private Date end;
-	private int resolution;
-	private Date last;
 	
 	public ReportChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -88,7 +83,7 @@ public class ReportChartController extends ChartController {
 		ReportQueryDto query = new ReportQueryDto();
 		query.setTreeName( treeName );
 		query.setReportName( reportName );
-		query.setStart( last != null ? new Date(last.getTime()+(resolution*1000)) : start );
+		query.setStart( getUpdateDate() );
 		query.setEnd( null );
 		query.setResolution( resolution );
 

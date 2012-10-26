@@ -41,9 +41,9 @@ public class VmJmxUtil {
 		Map<String, VirtualMachine> result = new HashMap<String, VirtualMachine>();
 		List<VirtualMachineDescriptor> list = VirtualMachine.list();
 		for (VirtualMachineDescriptor vmd: list) {
-			String desc = vmd.toString();
+			String id = vmd.id();
 			try {
-				result.put(desc, VirtualMachine.attach(vmd));
+				result.put(id, VirtualMachine.attach(vmd));
 			} 
 			catch( IOException ex ) {
 				LOGGER.error( "Error getting virtual machine", ex );

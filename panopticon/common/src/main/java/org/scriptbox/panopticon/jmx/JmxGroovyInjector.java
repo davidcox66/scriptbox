@@ -16,8 +16,9 @@ import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.box.jmx.conn.JmxConnections;
-import org.scriptbox.box.jmx.proc.JmxLocalProcessProvider;
 import org.scriptbox.box.jmx.proc.JmxRemoteProcessProvider;
+import org.scriptbox.box.jmx.proc.JmxPsProcessProvider;
+import org.scriptbox.box.jmx.proc.JmxVmProcessProvider;
 import org.scriptbox.panopticon.capture.CaptureContext;
 import org.scriptbox.panopticon.capture.CaptureResult;
 import org.scriptbox.plugins.jmx.MBeanProxy;
@@ -50,30 +51,39 @@ public class JmxGroovyInjector implements JmxInjector {
 	public void inject(BoxContext context) {
 		Lookup vars = context.getScriptVariables();
 		vars.put( "ps", new MethodClosure( this, "ps")  );
+		vars.put( "vms", new MethodClosure( this, "vms")  );
 		vars.put( "remote", new MethodClosure( this, "remote")  );
+		
 		vars.put( "mbeans", new MethodClosure( this, "mbeans")  );
 		vars.put( "mbean", new MethodClosure( this, "mbean")  );
 		vars.put( "capture", new MethodClosure( this, "capture")  );
 	}
 
 	public void ps( String name, Object filter, Closure closure ) throws Exception {
-		final ParameterizedRunnableWithResult<Boolean,ProcessStatus> finder;
+		final ParameterizedRunnableWithResult<Boolean,ProcessStatus> finder = createProcessFinder( filter );
+		add( closure, new JmxPsProcessProvider(connections, name, finder) );
+	}
+	
+	public void vms( String name, Object filter, Closure closure ) throws Exception {
+		final ParameterizedRunnableWithResult<Boolean,ProcessStatus> finder = createProcessFinder( filter );
+		add( closure, new JmxVmProcessProvider(connections, name, finder) );
+	}
+
+	private ParameterizedRunnableWithResult<Boolean,ProcessStatus> createProcessFinder( Object filter ) {
 		if( filter instanceof Closure ) {
 			final Closure fc = (Closure)filter;
-			finder = Closures.toRunnableWithBoolean( fc, ProcessStatus.class );
+			return Closures.toRunnableWithBoolean( fc, ProcessStatus.class );
 		}
 		else {
 			final List<Pattern> patterns = RegexUtil.toPatternCollection(filter);
-			finder = new ParameterizedRunnableWithResult<Boolean,ProcessStatus>() {
+			return new ParameterizedRunnableWithResult<Boolean,ProcessStatus>() {
 				public Boolean run( ProcessStatus status ) throws Exception {
 					return RegexUtil.matchesAny( status.command, patterns );
 				}
 			};
 		}
 		
-		add( closure, new JmxLocalProcessProvider(connections, name, finder) );
 	}
-	
 	public void remote( String name, String host, int port, Closure closure ) throws Exception {
 		add( closure, new JmxRemoteProcessProvider(connections, name, host, port) );
 	}

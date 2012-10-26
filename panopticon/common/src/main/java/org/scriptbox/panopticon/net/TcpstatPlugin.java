@@ -127,7 +127,7 @@ public class TcpstatPlugin extends BoxContextInjectingListener {
    }
 
 	private void store( String attr, String metric, String value ) throws Exception {
-		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: attr=${attr}, metric=${metric}, value=${value}"); }
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: attr=" + attr + ", metric=" + metric + ", value=" + value); }
 	    store.store( new CaptureResult(PROC, attr, metric, Float.parseFloat(value)) );
 	} 
 	

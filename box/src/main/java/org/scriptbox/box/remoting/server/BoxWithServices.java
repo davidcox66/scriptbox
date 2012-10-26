@@ -102,7 +102,7 @@ public class BoxWithServices implements BoxInterface {
 	@Override
 	public void loadScript(String contextName, String scriptName, String script, List arguments) throws Exception{
 		if( LOGGER.isDebugEnabled() ) { 
-			LOGGER.debug( "loadScript: box=" + box + ", contextName=" + contextName + ", scriptName=" + script + ", arguments=" + arguments); 
+			LOGGER.debug( "loadScript: box=" + box + ", contextName=" + contextName + ", scriptName=" + scriptName + ", script=" + script + ", arguments=" + arguments); 
 		}
 		box.run( contextName, scriptName, script, arguments );
 	}

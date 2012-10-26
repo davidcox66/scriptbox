@@ -191,7 +191,7 @@ public class BoxAgentHelper implements InitializingBean {
 			        stream.println( preMessage + " ..." );
 			        runner.run( conn );
 	                if( postMessage != null ) {
-	                	stream.println( endpoint.getIdentifier() + " : " + postMessage );
+	                	stream.println( postMessage );
 	                }
 	            }
 	            catch( Exception ex ) {

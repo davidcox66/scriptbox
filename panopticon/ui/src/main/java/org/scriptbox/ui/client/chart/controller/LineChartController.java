@@ -25,14 +25,9 @@ public class LineChartController extends ChartController {
 	
 	// private Timer update;
 
-	private ChartGWTServiceAsync service; 
 	private RpcProxy<MetricQueryDto, MetricRangeDto> proxy;
 	private LineChart chart;
 	private MetricTreeNodeDto node;
-	private Date start;
-	private Date end;
-	private int resolution;
-	private Date last;
 	
 	public LineChartController( ChartGWTServiceAsync service ) {
 		this.service = service;
@@ -80,7 +75,7 @@ public class LineChartController extends ChartController {
 	public void update() {
 		MetricQueryDto query = new MetricQueryDto();
 		query.setNode( node );
-		query.setStart( last != null ? new Date(last.getTime()+(resolution*1000)) : start );
+		query.setStart( getUpdateDate() );
 		query.setEnd( null );
 		query.setResolution( resolution );
 		

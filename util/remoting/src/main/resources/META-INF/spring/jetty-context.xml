@@ -110,7 +110,7 @@
 		      </property>
 		    </bean>
 		    <!-- log handler -->
-		    <conditional:test expression="${jetty.logging}" >
+		    <!-- 
 			    <bean class="org.eclipse.jetty.server.handler.RequestLogHandler">
 			      <property name="requestLog">
 			        <bean class="org.eclipse.jetty.server.NCSARequestLog">
@@ -122,7 +122,7 @@
 			        </bean>
 			      </property>
 			    </bean>
-			</conditional:test>
+			   -->
 		  </list>
 		  </property>
 		  </bean>

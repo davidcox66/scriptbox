@@ -62,20 +62,21 @@ public abstract class SystemExecRunnable implements ExecRunnable, BoxServiceList
 		}
 		String[] commandArray = new String[command.size()];
 		command.toArray(commandArray);
-		process = Runtime.getRuntime().exec(commandArray);
+		// Use local variable proc in case shutdown method is called
+		Process proc = process = Runtime.getRuntime().exec(commandArray);
 
-		IoUtil.consumeProcessErrorStream(process,System.err);
+		IoUtil.consumeProcessErrorStream(proc,System.err);
 		boolean ret = false;
 		try {
-			ret = run(process);
+			ret = run(proc);
 		} 
 		finally {
 			// gobble up any remaining output so child process doesn't wait for
 			// parent to consume
 			if (!ret) {
-				IoUtil.consumeProcessOutputStream(process,System.out);
+				IoUtil.consumeProcessOutputStream(proc,System.out);
 			}
-			int rvalue = process.waitFor();
+			int rvalue = proc.waitFor();
 			if (rvalue != 0) {
 				LOGGER.error("execute: command terminated abnormally - command=" + command + ", exit status=" + rvalue);
 			} else {

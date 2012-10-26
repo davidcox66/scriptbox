@@ -1,6 +1,7 @@
 package org.scriptbox.ui.client.chart.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.scriptbox.metrics.model.Metric;
@@ -53,8 +54,16 @@ public class LineChart {
 	}
 	
 	public void addData( MetricRangeDto dto) {
+		Date last = timeAxis.getEndDate();
+		long millis = last != null ? last.getTime() : Long.MIN_VALUE;
+		
         timeAxis.setEndDate(dto.getEnd());
-        store.addAll(dto.getData());
+        List<Metric> metrics = dto.getData();
+        for( Metric metric : metrics ) {
+        	if( metric.getMillis() > millis ) {
+        		store.add( metric );
+        	}
+        }
 	}
 
 	public Chart<Metric> getChart() {

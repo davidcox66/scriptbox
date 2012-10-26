@@ -85,8 +85,16 @@ public class MultiLineChart {
 	}
 	
 	public void addData( MultiMetricRangeDto dto, Date end ) {
-		timeAxis.setEndDate( end );
-		store.addAll(dto.getData());
+		Date last = timeAxis.getEndDate();
+		long millis = last != null ? last.getTime() : Long.MIN_VALUE;
+		
+        timeAxis.setEndDate(end);
+        List<MultiMetric> metrics = dto.getData();
+        for( MultiMetric metric : metrics ) {
+        	if( metric.getMillis() > millis ) {
+        		store.add( metric );
+        	}
+        }
 	}
 	
 	public String getTitle() {
