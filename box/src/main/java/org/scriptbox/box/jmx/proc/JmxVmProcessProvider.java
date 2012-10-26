@@ -35,18 +35,18 @@ public class JmxVmProcessProvider extends JmxProcessProvider {
 			int pid = 0;
 			try { 
 				pid = Integer.parseInt(entry.getKey());
+				VirtualMachine vm = entry.getValue();
+				Properties props = vm.getAgentProperties();
+				ProcessStatus ps = new ProcessStatus();
+				ps.pid = pid; 
+				ps.user = vm.getSystemProperties().getProperty("user.name");
+				ps.command = props.getProperty("sun.jvm.args") + " " + props.getProperty("sun.java.command");
+				if( finder.run(ps) ) {
+					procs.add( ps );
+				}
 			}
 			catch( Exception ex ) {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "run: could not parse pid: '" + entry.getKey() + "'" ); }
-			}
-			VirtualMachine vm = entry.getValue();
-			Properties props = vm.getAgentProperties();
-			ProcessStatus ps = new ProcessStatus();
-			ps.pid = pid; 
-			ps.user = vm.getSystemProperties().getProperty("user.name");
-			ps.command = props.getProperty("sun.jvm.args") + " " + props.getProperty("sun.java.command");
-			if( finder.run(ps) ) {
-				procs.add( ps );
 			}
 		}
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "run: matching processes=" + procs ); }
