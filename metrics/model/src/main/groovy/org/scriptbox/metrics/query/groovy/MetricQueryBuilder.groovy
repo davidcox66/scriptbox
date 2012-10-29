@@ -1,4 +1,4 @@
-package org.scriptbox.metrics.query.groovy;
+mb:ackage org.scriptbox.metrics.query.groovy;
 
 import org.scriptbox.metrics.model.MetricTreeNode
 import org.scriptbox.metrics.query.exp.MetricQueryExp
@@ -15,32 +15,14 @@ class MetricQueryBuilder
     if( args.size() < 2 ) {
       throw new Exception( "Invalid and expression");
     }
-    MetricQueryExp ret = null;
-    args.each{ MetricQueryExp exp ->
-      if( ret ) {
-        ret = MetricQueries.and( ret, exp );
-      }
-      else {
-	      ret = exp;   
-      }
-    } 
-    return ret;
+	return MetricQueries.and( args );
   }
   
   public MetricQueryExp or( MetricQueryExp... args ) { 
     if( args.size() < 2 ) {
       throw new Exception( "Invalid or expression");
     }
-    MetricQueryExp ret = null;
-    args.each{ MetricQueryExp exp ->
-      if( ret ) {
-        ret = MetricQueries.or( ret, exp );
-      }
-      else {
-	      ret = exp;   
-      }
-    } 
-    return ret;
+	return MetricQueries.or( args );
   }
   
   public MetricQueryExp not( MetricQueryExp arg, MetricQueryExp nots ) { 

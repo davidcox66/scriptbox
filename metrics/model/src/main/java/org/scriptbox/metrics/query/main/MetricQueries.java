@@ -25,6 +25,7 @@ import org.scriptbox.metrics.query.exp.MetricQueryExp;
 import org.scriptbox.metrics.query.exp.MinQueryExp;
 import org.scriptbox.metrics.query.exp.MultiplierQueryExp;
 import org.scriptbox.metrics.query.exp.MultiplyQueryExp;
+import org.scriptbox.metrics.query.exp.NaryQueryExp;
 import org.scriptbox.metrics.query.exp.PerSecondQueryExp;
 import org.scriptbox.metrics.query.exp.TopAverageQueryExp;
 import org.scriptbox.metrics.query.exp.TopQueryExp;
@@ -140,22 +141,31 @@ public class MetricQueries {
 	    return new TreePathQueryExp( "metric", pattern );
 	}
 
-	public static MetricQueryExp and( MetricQueryExp lhs, MetricQueryExp rhs ) {
-	    return new BinaryQueryExp( "and", lhs, rhs ) {
-	    	public Object process(Object lresult, Object rresult, MetricQueryContext ctx) {
-	    		Set set = new HashSet((Collection)lresult);
-	    		set.retainAll((Collection)rresult);
-	    		return set;
+	public static MetricQueryExp and( MetricQueryExp expressions ) {
+	    return new NaryQueryExp( "and", expressions ) {
+	    	public Object process(List<Object> results, MetricQueryContext ctx) {
+	    		Set ret = null; 
+	    		for( Object result : results ) {
+	    			if( ret == null ) {
+	    				ret = new HashSet((Collection)result);
+	    			}
+	    			else {
+	    				ret.retainAll((Collection)result);
+	    			}
+	    		}
+	    		return ret != null ? ret : new HashSet();
 	    	}
 	    }; 
 	}
 
-	public static MetricQueryExp or( MetricQueryExp lhs, MetricQueryExp rhs ) {
-	    return new BinaryQueryExp( "and", lhs, rhs ) {
-	    	public Object process(Object lresult, Object rresult, MetricQueryContext ctx) {
-	    		Set set = new HashSet((Collection)lresult);
-	    		set.addAll((Collection)rresult);
-	    		return set;
+	public static MetricQueryExp or( MetricQueryExp... expressions ) {
+	    return new NaryQueryExp( "or", expressions ) {
+	    	public Object process(List<Object> results, MetricQueryContext ctx) {
+	    		Set ret = new HashSet(); 
+	    		for( Object result : results ) {
+    				ret.addAll((Collection)result);
+	    		}
+	    		return ret;
 	    	}
 	    }; 
 	}
