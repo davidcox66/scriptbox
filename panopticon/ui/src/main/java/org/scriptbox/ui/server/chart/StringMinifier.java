@@ -5,7 +5,14 @@ import java.util.Collection;
 public class StringMinifier {
 	
 	  public static IntRange getStringCollectionUniqueNamePortion( Collection<String> strings ) {
-	      return new IntRange( findLeadingUniqueCharacterPosition(strings), findTrailingUniqueCharacterPosition(strings) );
+	      IntRange ret = new IntRange( findLeadingUniqueCharacterPosition(strings), findTrailingUniqueCharacterPosition(strings) );
+	      // Check for all strings the same
+	      if( ret.getStart() != Math.abs(ret.getEnd()) ) { 
+	    	 return ret; 
+	      }
+	      else {
+	    	  return new IntRange(0,0);
+	      }
 	  }
 	 
 	  public static int findLeadingUniqueCharacterPosition( Collection<String> collectionOfStrings ) {

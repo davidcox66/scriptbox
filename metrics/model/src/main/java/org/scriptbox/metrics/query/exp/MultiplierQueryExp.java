@@ -8,7 +8,10 @@ import org.scriptbox.metrics.model.MetricRange;
 public class MultiplierQueryExp extends ComputeQueryExp {
 
 	  public MultiplierQueryExp( int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
-		  super( "multiplier", "*", chunk, child1, child2 );
+		  this( "multiplier", chunk, child1, child2 );
+	  }
+	  public MultiplierQueryExp( String name, int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
+		  super( name, "*", chunk, child1, child2 );
 	  }
 
 	  protected float compute( MetricRange range ) {

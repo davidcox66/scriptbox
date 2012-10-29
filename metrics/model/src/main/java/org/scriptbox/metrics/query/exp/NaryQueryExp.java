@@ -13,10 +13,12 @@ public abstract class NaryQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NaryQueryExp.class);
 
+	private String name;
 	private String operator;
 	private List<MetricQueryExp> expressions;
 
-	public NaryQueryExp(String operator, MetricQueryExp...expressions) {
+	public NaryQueryExp(String name, String operator, MetricQueryExp...expressions) {
+		this.name = name;
 		this.operator = operator;
 		this.expressions = Arrays.asList(expressions);
 	}
@@ -40,6 +42,6 @@ public abstract class NaryQueryExp implements MetricQueryExp {
 	public abstract Object process(List<Object> results, MetricQueryContext ctx);
 
 	public String toString() {
-		return operator + "(" + expressions + ")";
+		return name != null ? name : operator + "(" + expressions + ")";
 	}
 }

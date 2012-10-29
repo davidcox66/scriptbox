@@ -17,15 +17,22 @@ public class AverageQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AverageQueryExp.class);
 
+	private String name;
 	private MetricQueryExp child;
 
 	public AverageQueryExp(MetricQueryExp child) {
+		this( null, child );
+	}
+
+	public AverageQueryExp(String name, MetricQueryExp child) {
+		this.name = name;
 		this.child = child;
 	}
 
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
 	    Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
-		MetricCollator collator = new MetricCollator("average", "average", ctx.getResolution(),metrics.values());
+	    String label = toString();
+		MetricCollator collator = new MetricCollator( label, label, ctx.getResolution(),metrics.values());
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getResolution());
@@ -43,6 +50,6 @@ public class AverageQueryExp implements MetricQueryExp {
 	}
 
 	public String toString() {
-		return "average(" + child + ")";
+		return name != null ? name :  "average(" + child + ")";
 	}
 }

@@ -11,7 +11,10 @@ import org.scriptbox.metrics.model.MetricRange;
 public class TopAverageQueryExp extends FilteringQueryExp {
 
 	  public TopAverageQueryExp( int count, MetricQueryExp child ) {
-	    super( "topavg", count, child );
+		  this( "topavg", count, child );
+	  }
+	  public TopAverageQueryExp( String name, int count, MetricQueryExp child ) {
+	    super( name, count, child );
 	  }
 	  float filter( MetricRange range ) {
 		  int count = 0;

@@ -70,7 +70,7 @@ public class LineChartBuilder extends ChartBuilder {
 	    toolTip.setLabelProvider(new SeriesLabelProvider<Metric>() {
 	      @Override
 	      public String getLabel(Metric item, ValueProvider<? super Metric, ? extends Number> valueProvider) {
-	        return dateFormat.format(item.getDate()) + " - " + numberFormat.format(item.getValue());
+	        return dateFormat.format(item.getDate()) + " : " + numberFormat.format(item.getValue());
 	      }
 	    });
 	    series.setToolTipConfig(toolTip);

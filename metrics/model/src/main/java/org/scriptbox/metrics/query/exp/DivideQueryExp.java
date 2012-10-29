@@ -16,10 +16,15 @@ import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class DivideQueryExp implements MetricQueryExp {
 
+	private String name;
 	private MetricQueryExp child;
 	private float divisor;
 
 	public DivideQueryExp(float divisor, MetricQueryExp child) {
+		this( null, divisor, child );
+	}
+	public DivideQueryExp(String name, float divisor, MetricQueryExp child) {
+		this.name = name;
 		this.child = child;
 		this.divisor = divisor;
 		if( divisor == 0 ) {
@@ -37,15 +42,14 @@ public class DivideQueryExp implements MetricQueryExp {
 				Metric metric = iter.next();
 				values.add(new Metric(metric.getMillis(), metric.getValue() / divisor));
 			}
-			ret.add(new ListBackedMetricRange(
-				"divide(" + range.getName() + ")", 
-				"divide(" + range.getId() + ")", 
+			String label = toString();
+			ret.add(new ListBackedMetricRange(label,label,
 				range.getFullDateRange(), range.getStart(), range .getEnd(), values));
 		}
 		return ret;
 	}
 
 	public String toString() {
-		return "divide(" + child + ")";
+		return name != null ? name : "divide(" + child + ")";
 	}
 }

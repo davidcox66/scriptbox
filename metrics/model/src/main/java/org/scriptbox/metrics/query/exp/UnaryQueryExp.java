@@ -9,10 +9,15 @@ public abstract class UnaryQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UnaryQueryExp.class);
 
+	private String name;
 	private String operator;
 	private MetricQueryExp child;
 
 	public UnaryQueryExp(String operator, MetricQueryExp child) {
+		this( null, operator, child );
+	}
+	public UnaryQueryExp(String name, String operator, MetricQueryExp child) {
+		this.name = name;
 		this.operator = operator;
 		this.child = child;
 	}
@@ -32,6 +37,6 @@ public abstract class UnaryQueryExp implements MetricQueryExp {
 	public abstract Object process(Object result, MetricQueryContext ctx);
 
 	public String toString() {
-		return operator + "(" + child + ")";
+		return name != null ? name : operator + "(" + child + ")";
 	}
 }

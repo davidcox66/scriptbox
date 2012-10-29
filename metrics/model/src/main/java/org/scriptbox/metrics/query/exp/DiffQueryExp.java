@@ -8,9 +8,12 @@ import org.scriptbox.metrics.model.MetricRange;
 public class DiffQueryExp extends ComputeQueryExp {
 
 	  public DiffQueryExp( int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
-		  super( "diff", "-", chunk, child1, child2 );
+		  this( "diff", chunk, child1, child2 );
 	  }
 
+	  public DiffQueryExp( String name, int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
+		  super( name, "-", chunk, child1, child2 );
+	  }
 	  protected float compute( MetricRange range ) {
 		  int count = 0;
 	      float accum = 0;

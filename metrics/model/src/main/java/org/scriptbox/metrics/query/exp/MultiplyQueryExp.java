@@ -16,10 +16,16 @@ import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class MultiplyQueryExp implements MetricQueryExp {
 
+	private String name;
 	private MetricQueryExp child;
 	private float multiplier;
 
 	public MultiplyQueryExp(float multiplier, MetricQueryExp child) {
+		this( null, multiplier, child );
+	}
+	
+	public MultiplyQueryExp(String name, float multiplier, MetricQueryExp child) {
+		this.name = name;
 		this.child = child;
 		this.multiplier = multiplier;
 	}
@@ -34,15 +40,14 @@ public class MultiplyQueryExp implements MetricQueryExp {
 				Metric metric = iter.next();
 				values.add(new Metric(metric.getMillis(), metric.getValue() * multiplier));
 			}
-			ret.add(new ListBackedMetricRange(
-				"multiply(" + range.getName() + ")", 
-				"multiply(" + range.getId() + ")", 
+			String label = toString();
+			ret.add(new ListBackedMetricRange( label, label, 
 				range.getFullDateRange(), range.getStart(), range .getEnd(), values));
 		}
 		return ret;
 	}
 
 	public String toString() {
-		return "multiply(" + child + ")";
+		return name != null ? name : "multiply(" + child + ")";
 	}
 }

@@ -11,8 +11,13 @@ import org.scriptbox.metrics.model.MetricRange;
 public class BottomQueryExp extends FilteringQueryExp {
 
 	  public BottomQueryExp( int count, MetricQueryExp child ) {
-	    super( "bottom", count, child );
+	    this( "bottom", count, child );
+		  
 	  }
+	  public BottomQueryExp( String name, int count, MetricQueryExp child ) {
+	    super( name, count, child );
+	  }
+	  
 	  float filter( MetricRange range ) {
 	      float min = Float.MAX_VALUE;
 	      for( Iterator<Metric> iter = range.getIterator(0) ; iter.hasNext() ; ) {

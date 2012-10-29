@@ -13,16 +13,22 @@ import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 
 public class TotalPerSecondQueryExp implements MetricQueryExp {
 
+	private String name;
 	private MetricQueryExp child;
 
 	public TotalPerSecondQueryExp(MetricQueryExp child) {
+		this( null, child );
+	}
+	public TotalPerSecondQueryExp(String name, MetricQueryExp child) {
+		this.name = name;
 		this.child = child;
 	}
 
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
 		final int seconds = ctx.getResolution() / 1000;
 		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
-		MetricCollator collator = new MetricCollator("tps", "tps", ctx.getResolution(), metrics.values());
+		String label = toString();
+		MetricCollator collator = new MetricCollator( label, label, ctx.getResolution(), metrics.values());
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getResolution());
@@ -37,7 +43,7 @@ public class TotalPerSecondQueryExp implements MetricQueryExp {
 	}
 
 	public String toString() {
-		return "tps(" + child + ")";
+		return name != null ? name : "tps(" + child + ")";
 	}
 
 }

@@ -29,7 +29,10 @@ public class MetricDescriptionDto implements Serializable {
 	public void setShortText(String shortText) {
 		this.shortText = shortText;
 	}
-	
+
+	public String toString() {
+		return "MetricDescriptionDto{ short=" + shortText + ", full=" + fullText + " }";
+	}
 	
 	
 	

@@ -41,9 +41,14 @@ public class ReplacementPostProcessor implements MetricDescriptionPostProcessor,
 	
 	public void process( ReportElement element, List<MetricDescriptionDto> descriptions ) {
 		for( MetricDescriptionDto desc : descriptions ) {
-			String text = desc.getShortText();
-			String modified = pattern.matcher(text).replaceAll(replacement);
-			desc.setShortText( modified );
+			try {
+				String text = desc.getShortText();
+				String modified = pattern.matcher(text).replaceAll(replacement);
+				desc.setShortText( modified );
+			}
+			catch( Exception ex ) {
+				throw new RuntimeException( "Failed replacing text: element=" + element + ", description=" + desc );
+			}
 		}
 	}
 

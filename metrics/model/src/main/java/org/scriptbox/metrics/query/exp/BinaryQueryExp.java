@@ -9,11 +9,13 @@ public abstract class BinaryQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BinaryQueryExp.class);
 
+	private String name;
 	private String operator;
 	private MetricQueryExp lhs;
 	private MetricQueryExp rhs;
 
-	public BinaryQueryExp(String operator, MetricQueryExp lhs, MetricQueryExp rhs) {
+	public BinaryQueryExp(String name, String operator, MetricQueryExp lhs, MetricQueryExp rhs) {
+		this.name = name;
 		this.operator = operator;
 		this.lhs = lhs;
 		this.rhs = rhs;
@@ -38,6 +40,6 @@ public abstract class BinaryQueryExp implements MetricQueryExp {
 	public abstract Object process(Object lresult, Object rresult, MetricQueryContext ctx);
 
 	public String toString() {
-		return operator + "(" + lhs + "," + rhs + ")";
+		return name != null ? name : operator + "(" + lhs + "," + rhs + ")";
 	}
 }

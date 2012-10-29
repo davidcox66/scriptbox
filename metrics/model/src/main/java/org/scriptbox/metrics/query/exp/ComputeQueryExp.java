@@ -56,9 +56,10 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	      List<MetricRange> metrics = new ArrayList<MetricRange>(2);
 	      metrics.add( range1 );
 	      metrics.add( range2 );
-	      
-			MetricCollator collator = new MetricCollator(name, name, chunk, metrics);
-			return collator.group(new ParameterizedRunnableWithResult<Metric, MetricRange[]>() {
+	  
+	      String label = toString();
+		  MetricCollator collator = new MetricCollator(label, label, chunk, metrics);
+		  return collator.group(new ParameterizedRunnableWithResult<Metric, MetricRange[]>() {
 				public Metric run(MetricRange[] ranges) {
 					float val1 = compute( ranges[0] );
 					float val2 = compute( ranges[1] );
@@ -77,6 +78,6 @@ public abstract class ComputeQueryExp implements MetricQueryExp {
 	  protected abstract float compute( float val1, float val2 );
 	  
 	  public String toString() {
-	    return name + "(child1=" + child1 + ", child2=" + child2 + ")";
+	    return (name != null ? name : "compute") + "(child1=" + child1 + ", child2=" + child2 + ")";
 	  }
 }

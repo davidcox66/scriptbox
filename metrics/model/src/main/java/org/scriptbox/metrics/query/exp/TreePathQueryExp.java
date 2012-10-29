@@ -14,10 +14,15 @@ public class TreePathQueryExp implements MetricQueryExp {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger( TreePathQueryExp.class );
 	
+	  private String name;
 	  private String type;
 	  private Pattern pattern;
 	  
 	  public TreePathQueryExp( String type, Pattern pattern ) {
+		  this( null, type, pattern );
+	  }
+	  public TreePathQueryExp( String name, String type, Pattern pattern ) {
+	    this.name = name;
 	    this.type = type;
 	    this.pattern = pattern;
 	  }
@@ -46,6 +51,6 @@ public class TreePathQueryExp implements MetricQueryExp {
 	  }
 	  
 	  public String toString() {
-	    return type + "(" + pattern + ")";
+	    return name != null ? name : type + "(" + pattern + ")";
 	  }
 }

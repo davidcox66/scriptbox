@@ -20,9 +20,15 @@ public class PerSecondQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeltaQueryExp.class);
 
+	private String name;
 	private MetricQueryExp child;
 
 	public PerSecondQueryExp(MetricQueryExp child) {
+		this( null, child );
+	}
+	
+	public PerSecondQueryExp(String name, MetricQueryExp child) {
+		this.name = name;
 		this.child = child;
 	}
 
@@ -49,15 +55,14 @@ public class PerSecondQueryExp implements MetricQueryExp {
 				}
 				prev = metric;
 			}
-			ret.add(new ListBackedMetricRange(
-				"persecond(" + range.getName() + ")", 
-				"persecond(" + range.getId() + ")", 
+			String label = toString();
+			ret.add(new ListBackedMetricRange( label, label,
 				range.getFullDateRange(), range.getStart(), range.getEnd(), deltas));
 		}
 		return ret;
 	}
 
 	public String toString() {
-		return "persecond(" + child + ")";
+		return name != null ? name : "persecond(" + child + ")";
 	}
 }

@@ -140,9 +140,17 @@ public class MetricQueries {
 	public static MetricQueryExp metric( Pattern pattern ) {
 	    return new TreePathQueryExp( "metric", pattern );
 	}
+	
+	public static MetricQueryExp list( String name, MetricQueryExp... expressions ) {
+	    return new NaryQueryExp( name, "list", expressions ) {
+	    	public Object process(List<Object> results, MetricQueryContext ctx) {
+	    		return results;
+	    	}
+	    }; 
+	}
 
-	public static MetricQueryExp and( MetricQueryExp expressions ) {
-	    return new NaryQueryExp( "and", expressions ) {
+	public static MetricQueryExp and( String name, MetricQueryExp... expressions ) {
+	    return new NaryQueryExp( name, "and", expressions ) {
 	    	public Object process(List<Object> results, MetricQueryContext ctx) {
 	    		Set ret = null; 
 	    		for( Object result : results ) {
@@ -158,8 +166,8 @@ public class MetricQueries {
 	    }; 
 	}
 
-	public static MetricQueryExp or( MetricQueryExp... expressions ) {
-	    return new NaryQueryExp( "or", expressions ) {
+	public static MetricQueryExp or( String name, MetricQueryExp... expressions ) {
+	    return new NaryQueryExp( name, "or", expressions ) {
 	    	public Object process(List<Object> results, MetricQueryContext ctx) {
 	    		Set ret = new HashSet(); 
 	    		for( Object result : results ) {
@@ -170,8 +178,8 @@ public class MetricQueries {
 	    }; 
 	}
 
-	public static MetricQueryExp not( MetricQueryExp lhs, MetricQueryExp rhs ) {
-	    return new BinaryQueryExp( "not", lhs, rhs ) {
+	public static MetricQueryExp not( String name, MetricQueryExp lhs, MetricQueryExp rhs ) {
+	    return new BinaryQueryExp( name, "not", lhs, rhs ) {
 	    	public Object process(Object lresult, Object rresult, MetricQueryContext ctx) {
 	    		Set metrics = new HashSet((Collection)lresult); 
 	    		metrics.removeAll( (Collection)rresult );
@@ -180,67 +188,67 @@ public class MetricQueries {
 	    }; 
 	}
 
-	public static MetricQueryExp total(MetricQueryExp child) {
-		return new TotalQueryExp(child);
+	public static MetricQueryExp total( String name, MetricQueryExp child ) {
+		return new TotalQueryExp(name, child);
 	}
 
-	public static MetricQueryExp average(MetricQueryExp child) {
-		return new AverageQueryExp(child);
+	public static MetricQueryExp average( String name, MetricQueryExp child) {
+		return new AverageQueryExp(name, child);
 	}
 
-	public static MetricQueryExp min(MetricQueryExp child) {
-		return new MinQueryExp(child);
+	public static MetricQueryExp min( String name, MetricQueryExp child) {
+		return new MinQueryExp(name,child);
 	}
 
-	public static MetricQueryExp max(MetricQueryExp child) {
-		return new MaxQueryExp(child);
+	public static MetricQueryExp max( String name, MetricQueryExp child) {
+		return new MaxQueryExp(name, child);
 	}
 
-	public static MetricQueryExp diff(int chunk, MetricQueryExp lhs, MetricQueryExp rhs) {
-		return new DiffQueryExp(chunk, lhs, rhs);
+	public static MetricQueryExp diff(String name, int chunk, MetricQueryExp lhs, MetricQueryExp rhs) {
+		return new DiffQueryExp(name, chunk, lhs, rhs);
 	}
 	
-	public static MetricQueryExp divisor(int chunk, MetricQueryExp totals, MetricQueryExp divisors) {
-		return new DivisorQueryExp(chunk, totals, divisors);
+	public static MetricQueryExp divisor(String name, int chunk, MetricQueryExp totals, MetricQueryExp divisors) {
+		return new DivisorQueryExp(name, chunk, totals, divisors);
 	}
 	
-	public static MetricQueryExp multiplier(int chunk, MetricQueryExp totals, MetricQueryExp multiples) {
-		return new MultiplierQueryExp(chunk, totals, multiples);
+	public static MetricQueryExp multiplier(String name, int chunk, MetricQueryExp totals, MetricQueryExp multiples) {
+		return new MultiplierQueryExp(name, chunk, totals, multiples);
 	}
 
-	public static MetricQueryExp delta(MetricQueryExp exp) {
-		return new DeltaQueryExp(exp);
+	public static MetricQueryExp delta(String name, MetricQueryExp exp) {
+		return new DeltaQueryExp(name, exp);
 	}
 
-	public static MetricQueryExp persecond(MetricQueryExp exp) {
-		return new PerSecondQueryExp(exp);
+	public static MetricQueryExp persecond(String name, MetricQueryExp exp) {
+		return new PerSecondQueryExp(name, exp);
 	}
 
-	public static MetricQueryExp tps(MetricQueryExp exp) {
-		return new TotalPerSecondQueryExp(exp);
+	public static MetricQueryExp tps(String name, MetricQueryExp exp) {
+		return new TotalPerSecondQueryExp(name, exp);
 	}
 
-	public static MetricQueryExp divide(float divisor, MetricQueryExp exp) {
-		return new DivideQueryExp(divisor, exp);
+	public static MetricQueryExp divide(String name, float divisor, MetricQueryExp exp) {
+		return new DivideQueryExp(name, divisor, exp);
 	}
 
-	public static MetricQueryExp multiply(float multiplier, MetricQueryExp exp) {
-		return new MultiplyQueryExp(multiplier, exp);
+	public static MetricQueryExp multiply(String name, float multiplier, MetricQueryExp exp) {
+		return new MultiplyQueryExp(name, multiplier, exp);
 	}
 
-	public static MetricQueryExp top(int count, MetricQueryExp exp) {
-		return new TopQueryExp(count, exp);
+	public static MetricQueryExp top(String name, int count, MetricQueryExp exp) {
+		return new TopQueryExp(name, count, exp);
 	}
 
-	public static MetricQueryExp bottom(int count, MetricQueryExp exp) {
-		return new BottomQueryExp(count, exp);
+	public static MetricQueryExp bottom(String name, int count, MetricQueryExp exp) {
+		return new BottomQueryExp(name, count, exp);
 	}
 
-	public static MetricQueryExp topavg(int count, MetricQueryExp exp) {
-		return new TopAverageQueryExp(count, exp);
+	public static MetricQueryExp topavg(String name, int count, MetricQueryExp exp) {
+		return new TopAverageQueryExp(name, count, exp);
 	}
 
-	public static MetricQueryExp bottomavg(int count, MetricQueryExp exp) {
-		return new BottomAverageQueryExp(count, exp);
+	public static MetricQueryExp bottomavg(String name, int count, MetricQueryExp exp) {
+		return new BottomAverageQueryExp(name, count, exp);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +27,11 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricCache;
-import org.scriptbox.metrics.model.SequenceCache;
 import org.scriptbox.metrics.model.MetricRange;
 import org.scriptbox.metrics.model.MetricResolution;
 import org.scriptbox.metrics.model.MetricStore;
 import org.scriptbox.metrics.model.MetricTree;
+import org.scriptbox.metrics.model.SequenceCache;
 import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.scriptbox.util.cassandra.Cassandra;
@@ -95,7 +96,7 @@ public class CassandraMetricStore implements MetricStore {
 		final int seconds = ctx.getResolution();
 		
 	    List<String> toQueryIds = new ArrayList<String>();
-	    Map<MetricProvider,MetricRange> ret = new HashMap<MetricProvider,MetricRange>();
+	    Map<MetricProvider,MetricRange> ret = new LinkedHashMap<MetricProvider,MetricRange>();
 	    final Map<String,Integer> resolutionsByNodeId = new HashMap<String,Integer>();
 	    final Map<String,MetricRange> rangesById = new HashMap<String,MetricRange>();
 	     

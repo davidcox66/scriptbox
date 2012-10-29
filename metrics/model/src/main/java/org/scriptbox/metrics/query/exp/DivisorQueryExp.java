@@ -8,7 +8,11 @@ import org.scriptbox.metrics.model.MetricRange;
 public class DivisorQueryExp extends ComputeQueryExp {
 
 	  public DivisorQueryExp( int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
-		  super( "divisor", "/", chunk, child1, child2 );
+		  this( "divisor", chunk, child1, child2 );
+		  
+	  }
+	  public DivisorQueryExp( String name, int chunk, MetricQueryExp child1, MetricQueryExp child2 ) {
+		  super( name, "/", chunk, child1, child2 );
 	  }
 
 	  protected float compute( MetricRange range ) {

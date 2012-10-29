@@ -11,8 +11,12 @@ import org.scriptbox.metrics.model.MetricRange;
 public class BottomAverageQueryExp extends FilteringQueryExp {
 
 	  public BottomAverageQueryExp( int count, MetricQueryExp child ) {
-	    super( "bottomavg", count, child );
+	    this( "bottomavg", count, child );
 	  }
+	  public BottomAverageQueryExp( String name, int count, MetricQueryExp child ) {
+	    super( name, count, child );
+	  }
+	  
 	  float filter( MetricRange range ) {
 		  int count = 0;
 	      float total = 0;

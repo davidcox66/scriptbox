@@ -19,12 +19,18 @@ import org.slf4j.LoggerFactory;
 public class DeltaQueryExp implements MetricQueryExp {
 
 	 private static final Logger LOGGER = LoggerFactory.getLogger( DeltaQueryExp.class );
-	 
+	
+	  private String name;
 	  private MetricQueryExp child; 
 	  
 	  public DeltaQueryExp( MetricQueryExp child ) {
+	    this( null, child );
+	  }
+	  public DeltaQueryExp( String name, MetricQueryExp child ) {
+	    this.name = name;
 	    this.child = child;
 	  }
+	  
 	  public Object evaluate( MetricQueryContext ctx ) throws Exception {
 		  Set<MetricProvider> ret = new HashSet<MetricProvider>();
 		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
@@ -48,14 +54,13 @@ public class DeltaQueryExp implements MetricQueryExp {
 		    	 }
 		    	 prev = metric;
 		      }
-		      ret.add( new ListBackedMetricRange(
-		    	  "diff("+range.getName()+")", 
-		    	  "diff("+range.getId()+")", 
+		      String label = toString();
+		      ret.add( new ListBackedMetricRange( label, label, 
 		          range.getFullDateRange(), range.getStart(), range.getEnd(), deltas) );
 		  }
 		  return ret;
 	  }
 	  public String toString() {
-	    return "delta(" + child + ")";
+	    return name != null ? name : "delta(" + child + ")";
 	  }
 }

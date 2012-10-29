@@ -84,8 +84,9 @@ public class MultiLineChartBuilder extends ChartBuilder {
 	
 	public static NumericAxis<MultiMetric> buildValueAxis( List<String> labels ) {
 		NumericAxis<MultiMetric> valueAxis = buildValueAxis(MultiMetric.class);
-		for( int i=0 ; i < labels.size() ; i++ ) {
-			valueAxis.addField(new MultiMetricValueProvider(i) );
+		int i=0;
+		for( String label : labels ) {
+			valueAxis.addField(new MultiMetricValueProvider(i++,label) );
 		}
 		return valueAxis;
 	}
@@ -111,8 +112,9 @@ public class MultiLineChartBuilder extends ChartBuilder {
 		List<Series<MultiMetric>> ret = new ArrayList<Series<MultiMetric>>( 1 );
 		AreaSeries<MultiMetric> series = new AreaSeries<MultiMetric>();
 		ret.add( series );
-	    series.setHighlighting(true);
+	    // series.setHighlighting(true);
 	    series.setYAxisPosition(Position.LEFT);
+	    series.setToolTipConfig(getToolTip());
 	    
 		int i=0;
 		for( String label : labels ) {
@@ -127,18 +129,18 @@ public class MultiLineChartBuilder extends ChartBuilder {
 		LineSeries<MultiMetric> series = buildValueSeries( MultiMetric.class, color );
 		series.setLegendTitle( label );
 		series.setYField( new MultiMetricValueProvider(index) );
-	    series.setToolTipConfig(getToolTip(index,label));
+	    series.setToolTipConfig(getToolTip());
 		return series;
 	}
 	
-	private static SeriesToolTipConfig<MultiMetric> getToolTip( final int index, final String label ) {
+	private static SeriesToolTipConfig<MultiMetric> getToolTip() {
 		SeriesToolTipConfig<MultiMetric> toolTip = new SeriesToolTipConfig<MultiMetric>();
 	    toolTip.setTrackMouse(true);
 	    // toolTip.setHideDelay(2);
 	    toolTip.setLabelProvider(new SeriesLabelProvider<MultiMetric>() {
 	      @Override
 	      public String getLabel(MultiMetric item, ValueProvider<? super MultiMetric, ? extends Number> valueProvider) {
-	        return dateFormat.format(item.getDate()) + " : " + numberFormat.format(item.getValues()[index]) + " : " + label;
+	        return dateFormat.format(item.getDate()) + " : " + valueProvider.getPath() + " : " + numberFormat.format(valueProvider.getValue(item));
 	      }
 	    });
 	    return toolTip;
