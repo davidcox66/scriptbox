@@ -57,7 +57,7 @@ public class JmxMBeans extends AbstractExecBlock<JmxCapture> {
                   objectNames = processObjectNames.get( connection );
             }
             if( objectNames == null ) {
-		        objectNames = connection.getServer().queryNames(new ObjectName(objectName), expression );
+		        objectNames = connection.queryNames(new ObjectName(objectName), expression );
 		        if( filter != null ) {
 		            Set<ObjectName> filtered = new HashSet<ObjectName>();
 		            for( ObjectName objectName : objectNames ) {

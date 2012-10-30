@@ -10,7 +10,6 @@ import org.scriptbox.box.jmx.conn.JmxConnections;
 import org.scriptbox.box.jmx.vm.VmJmxUtil;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.scriptbox.util.common.os.proc.ProcessStatus;
-import org.scriptbox.util.common.os.proc.ProcessStatusParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

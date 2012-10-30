@@ -38,10 +38,6 @@ public class CaptureContext {
 		return attribute;
 	}
 
-	public MBeanServerConnection getMBeanServerConnection() throws Exception {
-		return connection.getServer();
-	}
-
 	public MBeanProxy getMbean() {
 		return new MBeanProxy(connection, objectName);
 	}

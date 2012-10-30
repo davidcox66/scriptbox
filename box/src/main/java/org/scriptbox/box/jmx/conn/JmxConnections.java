@@ -38,7 +38,7 @@ public class JmxConnections {
 		HostPort key = new HostPort(host,port);
 		JmxConnection ret = byHostPort.get( key );
 		if( ret == null ) {
-			ret = new JmxConnection( host, port );
+			ret = new JmxRmiConnection( host, port );
 			byHostPort.put( key, ret );
 		}
 		return ret;

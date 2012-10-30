@@ -2,6 +2,7 @@ package org.scriptbox.box.jmx.vm;
 
 import org.scriptbox.box.jmx.conn.JmxConnection;
 import org.scriptbox.box.jmx.conn.JmxConnectionBuilder;
+import org.scriptbox.box.jmx.conn.JmxRmiConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class VmJmxConnectionBuilder implements JmxConnectionBuilder {
 					", systemProperties=" + vm.getSystemProperties() +
 					", vm=" + vm); 
 			}
-			return new JmxConnection( connectorAddress );
+			return new JmxRmiConnection( connectorAddress );
 		}
 		finally {
 			vm.detach();

@@ -33,7 +33,7 @@ class MBeanProxy
     def signature = args.collect{ it.class.name };
     String[] signatureArray = new String[ signature.size() ];
     signature.toArray( signatureArray );
-    return connection.server.invoke( objectName, name, args, signatureArray ); 
+    return connection.invoke( objectName, name, args, signatureArray ); 
   }
   
   def propertyMissing(String name, value) {
