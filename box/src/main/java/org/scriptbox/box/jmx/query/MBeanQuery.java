@@ -41,7 +41,8 @@ public class MBeanQuery {
 						attributePatterns = new HashSet<Pattern>();
 					}
 					attributePatterns.add(Matching.toPattern(attr));
-				} else {
+				} 
+				else {
 					if (attributeNames == null) {
 						attributeNames = new HashSet<String>();
 					}
@@ -56,7 +57,8 @@ public class MBeanQuery {
 						exclusionPatterns = new HashSet<Pattern>();
 					}
 					exclusionPatterns.add(Matching.toPattern(exclusion));
-				} else {
+				} 
+				else {
 					if (exclusionNames == null) {
 						exclusionNames = new HashSet<String>();
 					}
@@ -96,8 +98,16 @@ public class MBeanQuery {
 			if (attributePatterns != null && attributePatterns.size() > 0) {
 				MBeanAttributeInfo[] attributeInfo = getAllAttributeInfos(connection, objectName);
 				for (MBeanAttributeInfo ai : attributeInfo) {
-					if (ai.isReadable() && isIncluded(ai.getName()) && !isExcluded(ai.getName())) {
-						ret.add(ai.getName());
+					if( ai.getName() != null ) {
+						if (ai.isReadable() && isIncluded(ai.getName()) && !isExcluded(ai.getName())) {
+							ret.add(ai.getName());
+						}
+					}
+					else {
+						if( LOGGER.isWarnEnabled() ) { 
+							LOGGER.warn( "getMatchingAttributeNames: mbean attribute name is null: " +
+								"objectName=" + objectName + ", attribute=" + ai ); 
+						}
 					}
 				}
 			}

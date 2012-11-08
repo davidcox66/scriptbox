@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.scriptbox.util.common.io.IoUtil;
 
 public abstract class BasicSystemExecRunnable extends SystemExecRunnable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( BasicSystemExecRunnable.class );
+	
 	public BasicSystemExecRunnable(List<String> command) {
 		super( command );
 	}
@@ -16,6 +21,7 @@ public abstract class BasicSystemExecRunnable extends SystemExecRunnable {
 	
 	@Override
 	public boolean run(Process process) throws Exception {
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "run: reading output from: " + getCommand() ); }
 		BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
 		try {
 			String line = null;
@@ -34,6 +40,7 @@ public abstract class BasicSystemExecRunnable extends SystemExecRunnable {
 		finally {
 			IoUtil.closeQuietly(reader);
 		}
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "run: finished reading output from: " + getCommand() ); }
 		return true;
 	}
 

@@ -50,6 +50,6 @@ public class DivideQueryExp implements MetricQueryExp {
 	}
 
 	public String toString() {
-		return name != null ? name : "divide(" + child + ")";
+		return name != null ? name : "divide(" + divisor + "," + child + ")";
 	}
 }

@@ -182,6 +182,7 @@ public class ChartPortletPanel extends ContentPanel {
 				for( Portlet portlet : portlets ) {
 					portlet.removeFromParent();
 				}
+				controllers.clear();
 				portlets.clear();
 			}
 		}));

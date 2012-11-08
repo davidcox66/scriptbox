@@ -96,21 +96,20 @@ public class Action {
         if( init != null ) {
         	init.run( script.getBoxScript().getArguments() );
         }
-        if( CollectionUtil.isEmpty(metrics) && 
-        	CollectionUtil.isEmpty(preMetrics) && 
-        	CollectionUtil.isEmpty(postMetrics) )  {
-            if( pre != null ) {
-                addPreMetric( new AvgTransactionTime("pre") );
-            }
-	        addRunMetric( new TransactionsPerSecond() );
-	        addRunMetric( new TransactionCount() );
-	        addRunMetric( new MinTransactionTime() );
-	        addRunMetric( new MaxTransactionTime() );
-	        addRunMetric( new AvgTransactionTime() );
-	        addRunMetric( new FailureCount() );
-            if( post != null ) {
-                addPostMetric( new AvgTransactionTime("post") );
-            }
+        
+        if( pre != null ) {
+            addPreMetric( new AvgTransactionTime("pre") );
+        }
+        
+        addRunMetric( new TransactionsPerSecond() );
+        addRunMetric( new TransactionCount() );
+        addRunMetric( new MinTransactionTime() );
+        addRunMetric( new MaxTransactionTime() );
+        addRunMetric( new AvgTransactionTime() );
+        addRunMetric( new FailureCount() );
+        
+        if( post != null ) {
+            addPostMetric( new AvgTransactionTime("post") );
         }
     }
     void addRunMetric( ActionMetric metric ) {

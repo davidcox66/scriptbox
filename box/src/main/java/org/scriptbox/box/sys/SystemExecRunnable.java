@@ -57,9 +57,8 @@ public abstract class SystemExecRunnable implements ExecRunnable, BoxServiceList
 		if( process != null ) {
 			throw new RuntimeException( "Cannot start multiple process" );
 		}
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("execute: command=" + command);
-		}
+		
+		if (LOGGER.isDebugEnabled()) { LOGGER.debug("execute: command=" + command); }
 		String[] commandArray = new String[command.size()];
 		command.toArray(commandArray);
 		// Use local variable proc in case shutdown method is called
@@ -79,10 +78,9 @@ public abstract class SystemExecRunnable implements ExecRunnable, BoxServiceList
 			int rvalue = proc.waitFor();
 			if (rvalue != 0) {
 				LOGGER.error("execute: command terminated abnormally - command=" + command + ", exit status=" + rvalue);
-			} else {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("execute: command=" + command + ", exit status=" + rvalue);
-				}
+			} 
+			else {
+				if (LOGGER.isDebugEnabled()) { LOGGER.debug("execute: command=" + command + ", exit status=" + rvalue); }
 			}
 			process = null;
 		}

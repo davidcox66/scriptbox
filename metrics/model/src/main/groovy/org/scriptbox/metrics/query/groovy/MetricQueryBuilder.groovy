@@ -113,6 +113,14 @@ class MetricQueryBuilder
     return MetricQueries.multiply( name, multiplier, arg );  
   }
   
+  public MetricQueryExp invert( int from, MetricQueryExp arg )  {
+	  return invert( (String)null, from, arg );
+  }
+  
+  public MetricQueryExp invert( String name, int from, MetricQueryExp arg )  {
+    return MetricQueries.invert( name, from, arg );  
+  }
+  
   public MetricQueryExp top( int count, MetricQueryExp arg )  {
 	  return top( (String)null, count, arg );
   }

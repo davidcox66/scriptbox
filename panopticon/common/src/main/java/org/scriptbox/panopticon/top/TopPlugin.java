@@ -90,8 +90,8 @@ public class TopPlugin extends BoxContextInjectingListener {
 			public boolean eachLine(String line, int lineNumber)
 					throws Exception {
 
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("parse: processing line: ${line}");
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace("parse: processing line: " + line);
 				}
 				try {
 					if (cpuPattern.matcher(line).find()) {

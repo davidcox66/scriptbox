@@ -20,6 +20,7 @@ import org.scriptbox.metrics.query.exp.DeltaQueryExp;
 import org.scriptbox.metrics.query.exp.DiffQueryExp;
 import org.scriptbox.metrics.query.exp.DivideQueryExp;
 import org.scriptbox.metrics.query.exp.DivisorQueryExp;
+import org.scriptbox.metrics.query.exp.InvertQueryExp;
 import org.scriptbox.metrics.query.exp.MaxQueryExp;
 import org.scriptbox.metrics.query.exp.MetricQueryExp;
 import org.scriptbox.metrics.query.exp.MinQueryExp;
@@ -234,6 +235,10 @@ public class MetricQueries {
 
 	public static MetricQueryExp multiply(String name, float multiplier, MetricQueryExp exp) {
 		return new MultiplyQueryExp(name, multiplier, exp);
+	}
+
+	public static MetricQueryExp invert(String name, float from, MetricQueryExp exp) {
+		return new InvertQueryExp(name, from, exp);
 	}
 
 	public static MetricQueryExp top(String name, int count, MetricQueryExp exp) {

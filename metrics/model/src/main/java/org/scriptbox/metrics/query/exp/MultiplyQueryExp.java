@@ -48,6 +48,6 @@ public class MultiplyQueryExp implements MetricQueryExp {
 	}
 
 	public String toString() {
-		return name != null ? name : "multiply(" + child + ")";
+		return name != null ? name : "multiply(" + multiplier + "," + child + ")";
 	}
 }
