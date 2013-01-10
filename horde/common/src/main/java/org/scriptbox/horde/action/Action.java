@@ -154,7 +154,7 @@ public class Action {
             }
             catch( Throwable ex ) {
                ActionMetric.collectAll( met, false, System.currentTimeMillis() - before );
-               throw ex;
+               script.callGlobalErrorHandlers( ex );
             }
         }
     }

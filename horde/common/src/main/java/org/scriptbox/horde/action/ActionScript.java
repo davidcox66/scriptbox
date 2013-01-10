@@ -1,19 +1,15 @@
 package org.scriptbox.horde.action;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.management.ObjectName;
 
 import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.groovy.Closures;
-import org.scriptbox.horde.metrics.AbstractMetric;
 import org.scriptbox.horde.metrics.ScriptMetric;
 import org.scriptbox.horde.metrics.ThreadCount;
 import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
 import org.scriptbox.horde.metrics.mbean.ActionScriptDynamicMetricMBean;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.RunnableWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +22,7 @@ public class ActionScript {
     private List<Action> actions = new ArrayList<Action>(); 
     private List<ActionRunner> runners = new ArrayList<ActionRunner>();
     private List<Runnable> destructors = new ArrayList<Runnable>();
+    private List<ActionErrorHandler> globalErrorHandlers = new ArrayList<ActionErrorHandler>();
     
     private AbstractDynamicMetricMBean mbean;
     
@@ -64,6 +61,10 @@ public class ActionScript {
     synchronized public int getNumRunners() {
         return runners.size();
     }    
+   
+    public void addGlobalErrorHandler( ActionErrorHandler handler ) {
+    	globalErrorHandlers.add( handler );
+    }
     
 	public void addAction( Action action ) {
     	if( scriptClassLoader == null ) {
@@ -79,7 +80,7 @@ public class ActionScript {
         metric.init( this );
         mbean.addMetric( metric );
     }
-    
+
     // generic type should technically be ? extends GeneratorMetric but Groovy flips out 
     public void initialize() throws Exception {
     	Closures.callInClassLoader( scriptClassLoader, new RunnableWithException() {
@@ -203,6 +204,17 @@ public class ActionScript {
         }
     } 
 
+    public void callGlobalErrorHandlers( Throwable ex ) throws Throwable {
+    	if( globalErrorHandlers.size() > 0 ) {
+	    	for( ActionErrorHandler errorHandler : globalErrorHandlers ) {
+	    		errorHandler.handle( ex );
+	    	}
+    	}
+    	else {
+    		throw ex;
+    	}
+    }
+    
     /**
      * A runner stopping normally will have its running flag set to false and exit. One that
      * fails without the scripts knowledge or consent must be removed from the list manually.

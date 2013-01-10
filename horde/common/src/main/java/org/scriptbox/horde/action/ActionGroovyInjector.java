@@ -35,6 +35,7 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 	public void inject(BoxContext context) {
 		Lookup vars = context.getScriptVariables();
 		vars.put( "addAction", new MethodClosure( this, "addAction")  );
+		vars.put( "addGlobalErrorHandler", new MethodClosure( this, "addGlobalErrorHandler")  );
 		vars.put( "destroy", new MethodClosure( this, "destroy")  );
 	}
 	
@@ -48,6 +49,15 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 		actionScript.addAction( action );
 	}
 
+	public void addGlobalErrorHandler( final Closure closure ) {
+		ActionScript actionScript = getCurrentActionScript();
+		actionScript.addGlobalErrorHandler( new ActionErrorHandler() {
+			public void handle( Throwable ex ) throws Throwable {
+				closure.call( ex );
+			}
+		});
+	}
+	
 	public ParameterizedRunnableWithResult<Boolean,List> toRunnable( Map<String,Object> params, String key, Action action ) {
 		Closure closure = (Closure)params.get(key);
 		if( closure != null ) {
