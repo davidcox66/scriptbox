@@ -36,7 +36,7 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 		Lookup vars = context.getScriptVariables();
 		vars.put( "addAction", new MethodClosure( this, "addAction")  );
 		vars.put( "addGlobalErrorHandler", new MethodClosure( this, "addGlobalErrorHandler")  );
-		vars.put( "destroy", new MethodClosure( this, "destroy")  );
+		vars.put( "addDestructor", new MethodClosure( this, "addDestructor")  );
 	}
 	
 	public void addAction( String name, Map<String,Object> params ) {
@@ -67,7 +67,7 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 		return null;
 		
 	}
-	public void destroy( Closure closure ) {
+	public void addDestructor( Closure closure ) {
 		getCurrentActionScript().addDestructor( Closures.toRunnable(closure) );
 	}
 	
