@@ -25,7 +25,7 @@ public class TotalPerSecondQueryExp implements MetricQueryExp {
 	}
 
 	public Object evaluate(final MetricQueryContext ctx) throws Exception {
-		final int seconds = ctx.getResolution() / 1000;
+		final int seconds = ctx.getResolution();
 		Map<? extends MetricProvider, ? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 		String label = toString();
 		MetricCollator collator = new MetricCollator( label, label, ctx.getResolution(), metrics.values());

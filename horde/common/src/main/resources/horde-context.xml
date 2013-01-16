@@ -30,6 +30,12 @@
 	
     <bean name="action" class="org.scriptbox.horde.action.ActionPlugin" />
    
+	<conditional:dependency classes="groovy.lang.GroovyShell" >
+		<bean name="httpGroovyInjector" class="org.scriptbox.horde.http.HttpGroovyInjector"  />
+	</conditional:dependency>
+	
+    <bean name="http" class="org.scriptbox.horde.http.HttpPlugin" />
+    
 	<bean name="generatorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start"
 		p:box-ref="box" />
 

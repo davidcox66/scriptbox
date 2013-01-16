@@ -15,9 +15,20 @@
 		<servlet-name>ServiceServlet</servlet-name>
 		<servlet-class>org.scriptbox.util.gwt.server.remote.ServiceInstanceServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<description>
+		</description>
+		<display-name>SessionsServlet</display-name>
+		<servlet-name>SessionsServlet</servlet-name>
+		<servlet-class>com.ihg.loadtests.sessions.servlet.SessionsServlet</servlet-class>
+	</servlet>
 	<servlet-mapping>
 		<servlet-name>ServiceServlet</servlet-name>
 		<url-pattern>/panopticon/remote/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SessionsServlet</servlet-name>
+		<url-pattern>/SessionsServlet</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>Panopticon.html</welcome-file>

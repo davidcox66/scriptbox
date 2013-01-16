@@ -642,7 +642,7 @@
 			<dependency>
 				<artifactId>commons-httpclient</artifactId>
 				<groupId>commons-httpclient</groupId>
-				<version>3.0.1</version>
+				<version>3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -664,7 +664,12 @@
 				<artifactId>commons-fileupload</artifactId>
 				<version>1.2.2</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.2.2</version>
+			</dependency>
+            
 			<!-- JavaX -->
 			<dependency>
 				<groupId>javax.servlet</groupId>
