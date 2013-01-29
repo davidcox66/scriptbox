@@ -55,7 +55,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	private List<String> reportPaths;
 	private List<MetricDescriptionPostProcessor> metricDescriptionProcessors;
 	
-	private List<MetricTree> trees;
+	private Map<String,MetricTree> trees;
 	private Map<MetricTree,Map<String,MetricTreeNode>> allNodes = new HashMap<MetricTree,Map<String,MetricTreeNode>>();
 	private Map<String,Report> reports;
 	
@@ -89,9 +89,11 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	public ArrayList<MetricTreeDto> getTrees() throws ServiceException {
 		store.begin();
 		try {
-			trees = store.getAllMetricTrees();
+			List<MetricTree> tr = store.getAllMetricTrees();
 			ArrayList<MetricTreeDto> ret = new ArrayList<MetricTreeDto>();
-			for( MetricTree tree : trees ) {
+			trees = new HashMap<String,MetricTree>();
+			for( MetricTree tree : tr ) {
+				trees.put( tree.getName(), tree );
 				ret.add( new MetricTreeDto(tree.getName()) );
 			}
 			return ret;
@@ -104,7 +106,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	public MetricTreeParentNodeDto getRoot( MetricTreeDto treeDto ) throws ServiceException {
 		store.begin();
 		try {
-			MetricTree tree = getTreeByName(treeDto.getTreeName());
+			MetricTree tree = loadTreeByName(treeDto.getTreeName());
 			MetricTreeNode root = tree.getRoot();
 			
 			Map<String,MetricTreeNode> nodes = new HashMap<String,MetricTreeNode>();
@@ -118,7 +120,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 	}
 	
 	public void delete( MetricTreeDto treeDto ) throws ServiceException {
-		MetricTree tree = getTreeByName(treeDto.getTreeName());
+		MetricTree tree = loadTreeByName(treeDto.getTreeName());
 		tree.delete();
 	}
 	
@@ -318,10 +320,18 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		return report;
 	}
 	private MetricTree getTreeByName( String name ) {
-		for( MetricTree tree : trees ) {
-			if( tree.getName().equals(name) ) {
-				return tree;
-			}
+		MetricTree tree = trees != null ? trees.get( name ) : null;
+		if( tree != null ) {
+			return tree;
+		}
+		throw new RuntimeException( "Could not find tree: '" + name + "'" );
+	}
+	
+	private MetricTree loadTreeByName( String name ) {
+		MetricTree tree = store.getMetricTree( name );
+		if( tree != null ) {
+			trees.put( tree.getName(), tree );
+			return tree;
 		}
 		throw new RuntimeException( "Could not find tree: '" + name + "'" );
 	}

@@ -16,6 +16,8 @@ import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
+
 public class BoxContext {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( BoxContext.class );
@@ -49,6 +51,15 @@ public class BoxContext {
 		}
 	}
 	
+	public static void with( BoxContext context, RunnableWithThrowable runnable ) throws Throwable {
+		current.set( context );
+		try {
+			runnable.run();
+		}
+		finally {
+			current.remove();
+		}
+	}
     public BoxContext( Box box ) {
     	this.box = box;
     }

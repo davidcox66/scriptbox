@@ -27,10 +27,10 @@ public class TcpstatGroovyInjector implements TcpstatInjector {
 	}
 	
 	public void tcpstat( int delay, String interfaceName ) {
-		tcpstat( delay, interfaceName, null, null ) ;
+		tcpstat( true, delay, interfaceName, null, null ) ;
 	}
    
-    public void tcpstat( int delay, String interfaceName, String expression, String tag ) {
-    	plugin.tcpstat(delay, interfaceName, expression, tag);
+    public void tcpstat( boolean sudo, int delay, String interfaceName, String expression, String tag ) {
+    	plugin.tcpstat(sudo, delay, interfaceName, expression, tag);
     }
 }

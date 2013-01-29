@@ -23,6 +23,8 @@ public class TcpstatPlugin extends BoxContextInjectingListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( TcpstatPlugin.class );
 
+    public static final String TCPSTAT_BIN = "/usr/local/bin/tcpstat";
+    
     private static GenericProcess PROC = new GenericProcess("System");
     
     private CaptureStore store;
@@ -41,11 +43,11 @@ public class TcpstatPlugin extends BoxContextInjectingListener {
 		super.contextCreated( context );
 	}
 	
-   public void tcpstat( int delay, String interfaceName, String filter, String tag ) {
+   public void tcpstat( boolean sudo, int delay, String interfaceName, String filter, String tag ) {
      /*
      %A    the number of ARP packets
      %a    the average packet size in bytes
-     %B    the number of bytes per second
+     
      %b    the number of bits per second
      %C    the number of ICMP and ICMPv6 packets
      %d    the standard deviation of the size of each packet in bytes
@@ -65,12 +67,14 @@ public class TcpstatPlugin extends BoxContextInjectingListener {
      %V    the number of IPv6 packets
       * 
       */
-     String exe = "/usr/local/bin/tcpstat";
      if( SystemConfiguration.isLinux() ) {
-      if( new File(exe).exists() ) {
+      if( new File(TCPSTAT_BIN).exists() ) {
         String format = "%A %a %B %C %d %I %l %M %m %N %n %p %T %U %V\\n";
         List<String> args = new ArrayList<String>();
-        args.add( exe );
+        if( sudo ) {
+        	args.add( "sudo" );
+        }
+        args.add( TCPSTAT_BIN );
         args.add( "-i" );
         args.add( interfaceName );
         args.add( "-o" );

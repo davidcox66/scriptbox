@@ -42,6 +42,12 @@
 	
     <bean name="pool" class="org.scriptbox.horde.pool.PoolPlugin" />
     
+	<conditional:dependency classes="groovy.lang.GroovyShell" >
+		<bean name="threadsGroovyInjector" class="org.scriptbox.horde.threads.ThreadsGroovyInjector"  />
+	</conditional:dependency>
+	
+    <bean name="threads" class="org.scriptbox.horde.threads.ThreadsPlugin" />
+    
 	<bean name="generatorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start"
 		p:box-ref="box" />
 

@@ -70,4 +70,13 @@ public class Http {
 	public HttpContext getContext() {
 		return localContext;
 	}
+	
+	public CookieStore getCookies() {
+		return cookieStore;
+	}
+	
+	public void setCookies( CookieStore cookieStore ) {
+		this.cookieStore = cookieStore;
+		localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+	}
 }
