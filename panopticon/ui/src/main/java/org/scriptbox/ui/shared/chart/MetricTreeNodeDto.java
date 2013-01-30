@@ -7,6 +7,7 @@ public class MetricTreeNodeDto implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private MetricTreeParentNodeDto parent;
 	private String treeName;
 	private String id;
 	private String name;
@@ -14,12 +15,17 @@ public class MetricTreeNodeDto implements Serializable {
 	public MetricTreeNodeDto() {
 	}
 	
-	public MetricTreeNodeDto( String treeName, String id, String name ) {
+	public MetricTreeNodeDto( MetricTreeParentNodeDto parent, String treeName, String id, String name ) {
+		this.parent = parent;
 		this.treeName = treeName;
 		this.id = id;
 		this.name = name;
 	}
 
+	public MetricTreeParentNodeDto getParent() {
+		return parent;
+	}
+	
 	public String getTreeName() {
 		return treeName;
 	}

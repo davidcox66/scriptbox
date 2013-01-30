@@ -12,8 +12,8 @@ public class MetricTreeParentNodeDto extends MetricTreeNodeDto implements Serial
 	public MetricTreeParentNodeDto() {
 	}
 	
-	public MetricTreeParentNodeDto( String treeName, String id, String name ) {
-		super( treeName, id, name );
+	public MetricTreeParentNodeDto( MetricTreeParentNodeDto parent, String treeName, String id, String name ) {
+		super( parent, treeName, id, name );
 	}
 
 	public List<MetricTreeNodeDto> getChildren() {

@@ -12,11 +12,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
@@ -37,6 +39,7 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		this.service = service;
 		buildStore();
 		buildToolBar();
+		buildFilter();
 		buildTree();
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
 	}
@@ -69,7 +72,34 @@ public class MetricTreePanel extends VerticalLayoutContainer {
 		}));
 		add(buttonBar, new VerticalLayoutData(1, -1));
 	}
-	
+
+	private void buildFilter() {
+	    StoreFilterField<MetricTreeNodeDto> filter = new StoreFilterField<MetricTreeNodeDto>() {  
+	    	  
+	        @Override  
+	        protected boolean doSelect(Store<MetricTreeNodeDto> store, MetricTreeNodeDto parent,  MetricTreeNodeDto item, String filter) {  
+	       
+	          String[] parts = filter.split("[ 	]+");
+	          for( int i=0 ; i < parts.length ; i++ ) {
+	        	  parts[i] = parts[i].toLowerCase();
+	          }
+        	  MetricTreeNodeDto node = item;
+        	  while( node != null ) {
+        		  String name = node.getName().toLowerCase(); 
+        		  for( int i=0 ; i < parts.length ; i++ ) {
+	        		  if( name.indexOf(parts[i]) != -1 ) {
+	        			  return true;
+	        		  }
+	        	  }
+        		  node = node.getParent();
+	          }  
+	          return false;  
+	        }  
+	    
+	      };  
+	      filter.bind(store);  	
+	      add(filter, new VerticalLayoutData(1, -1));
+	}
 	private void buildTree() {
 		tree = new Tree<MetricTreeNodeDto, String>(store,
 			new ValueProvider<MetricTreeNodeDto, String>() {

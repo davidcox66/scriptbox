@@ -110,7 +110,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			MetricTreeNode root = tree.getRoot();
 			
 			Map<String,MetricTreeNode> nodes = new HashMap<String,MetricTreeNode>();
-			MetricTreeParentNodeDto ret = (MetricTreeParentNodeDto)populateNodes( nodes, tree, root );
+			MetricTreeParentNodeDto ret = (MetricTreeParentNodeDto)populateNodes( nodes, tree, root, null );
 			allNodes.put( tree, nodes );
 			return ret;
 		}
@@ -336,13 +336,13 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 		throw new RuntimeException( "Could not find tree: '" + name + "'" );
 	}
 	
-	private MetricTreeNodeDto populateNodes( Map<String,MetricTreeNode> nodes, MetricTree tree, MetricTreeNode node ) {
+	private MetricTreeNodeDto populateNodes( Map<String,MetricTreeNode> nodes, MetricTree tree, MetricTreeNode node, MetricTreeParentNodeDto ancestor ) {
 		Collection<? extends MetricTreeNode> children = node.getChildren().values();
 		if( children.size() > 0 ) {
 			List<MetricTreeNodeDto> dchildren = new ArrayList<MetricTreeNodeDto>();
-			MetricTreeParentNodeDto parent = new MetricTreeParentNodeDto( tree.getName(), node.getId(), node.getName() );
+			MetricTreeParentNodeDto parent = new MetricTreeParentNodeDto( ancestor, tree.getName(), node.getId(), node.getName() );
 			for( MetricTreeNode child : children ) {
-				dchildren.add( populateNodes(nodes, tree, child) );
+				dchildren.add( populateNodes(nodes, tree, child, parent) );
 			}
 			Collections.sort( dchildren, new Comparator<MetricTreeNodeDto>() {
 				public int compare( MetricTreeNodeDto n1, MetricTreeNodeDto n2 ) {
@@ -354,7 +354,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			return parent;
 		}
 		else {
-			MetricTreeNodeDto child = new MetricTreeNodeDto( tree.getName(), node.getId(), node.getName() );
+			MetricTreeNodeDto child = new MetricTreeNodeDto( ancestor, tree.getName(), node.getId(), node.getName() );
 			nodes.put( child.getId(), node );
 			return child;
 		}
