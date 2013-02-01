@@ -42,10 +42,11 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 	public void addAction( String name, Map<String,Object> params ) {
 		ActionScript actionScript = getCurrentActionScript();
 		Action action = new Action(actionScript,name);
-		action.setRun( toRunnable( params, "run", action) );
-		action.setInit(toRunnable( params, "init", action) );
-		action.setPre( toRunnable( params, "pre", action) );
-		action.setPost( toRunnable( params, "post", action) );
+		action.setIterations( toRunnableWithInteger( params, "iterations", action) );
+		action.setRun( toRunnableWithBoolean( params, "run", action) );
+		action.setInit(toRunnableWithBoolean( params, "init", action) );
+		action.setPre( toRunnableWithBoolean( params, "pre", action) );
+		action.setPost( toRunnableWithBoolean( params, "post", action) );
 		actionScript.addAction( action );
 	}
 
@@ -58,11 +59,21 @@ public class ActionGroovyInjector implements ActionInjector, BoxContextListener 
 		});
 	}
 	
-	public ParameterizedRunnableWithResult<Boolean,List> toRunnable( Map<String,Object> params, String key, Action action ) {
+	public ParameterizedRunnableWithResult<Boolean,List> toRunnableWithBoolean( Map<String,Object> params, String key, Action action ) {
 		Closure closure = (Closure)params.get(key);
 		if( closure != null ) {
 			closure.setDelegate( action );
 			return Closures.toRunnableWithBoolean(closure, List.class);
+		}
+		return null;
+		
+	}
+	
+	public ParameterizedRunnableWithResult<Integer,List> toRunnableWithInteger( Map<String,Object> params, String key, Action action ) {
+		Closure closure = (Closure)params.get(key);
+		if( closure != null ) {
+			closure.setDelegate( action );
+			return Closures.toRunnableWithInteger(closure, List.class);
 		}
 		return null;
 		

@@ -25,6 +25,15 @@ public class Closures {
 		}
 		return false;
 	}
+	
+	public static int coerceToInteger( Object obj ) {
+		if( obj != null ) {
+			if( obj instanceof Number ) {
+				return ((Number)obj).intValue();
+			}
+		}
+		return 0;
+	}
 
 	public static Runnable toRunnableWithDelegate( final Closure closure, Object delegate )  {
 		if( closure != null ) {
@@ -71,6 +80,17 @@ public class Closures {
 			return new ParameterizedRunnableWithResult<Boolean,ARG>() {
 				public Boolean run( ARG arg ) {
 					return coerceToBoolean(closure.getMaximumNumberOfParameters() > 0 ? closure.call(arg) : closure.call());    
+				}
+			};
+		}
+		return null;
+	}
+	
+	public static <ARG> ParameterizedRunnableWithResult<Integer,ARG> toRunnableWithInteger( final Closure closure, Class<ARG> argCls )  {
+		if( closure != null ) {
+			return new ParameterizedRunnableWithResult<Integer,ARG>() {
+				public Integer run( ARG arg ) {
+					return coerceToInteger(closure.getMaximumNumberOfParameters() > 0 ? closure.call(arg) : closure.call());    
 				}
 			};
 		}

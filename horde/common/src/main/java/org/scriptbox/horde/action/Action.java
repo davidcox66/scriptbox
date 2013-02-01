@@ -32,6 +32,7 @@ public class Action {
 
     private String name;
 	private ActionScript script;
+    private ParameterizedRunnableWithResult<Integer,List> iterations;
     private ParameterizedRunnableWithResult<Boolean,List> init;
     private ParameterizedRunnableWithResult<Boolean,List> run;
     private ParameterizedRunnableWithResult<Boolean,List> pre;
@@ -56,6 +57,14 @@ public class Action {
     	return name;
     }
     
+    public ParameterizedRunnableWithResult<Integer,List>  getIterations() {
+		return iterations;
+	}
+
+	public void setIterations(ParameterizedRunnableWithResult<Integer,List>  iterations) {
+		this.iterations = iterations;
+	}
+
     public ParameterizedRunnableWithResult<Boolean,List>  getInit() {
 		return init;
 	}
@@ -135,10 +144,18 @@ public class Action {
     }
 
     public void callAllAndCollectMetrics() throws Throwable {
-       callAndCollectMetrics( preMetrics, pre );
-       callAndCollectMetrics( metrics, run );
-       callAndCollectMetrics( postMetrics, post );
+       int count = 1;
+       if( iterations != null ) {
+    	   List<String> arguments = script.getBoxScript().getArguments();
+    	   count = iterations.run( arguments );
+       }
+       for( int i=0 ; i < count ; i++ ) { 
+	       callAndCollectMetrics( preMetrics, pre );
+	       callAndCollectMetrics( metrics, run );
+	       callAndCollectMetrics( postMetrics, post );
+       }
     }
+    
     public void callAndCollectMetrics( Map<String,ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
     	throws Throwable
     {
