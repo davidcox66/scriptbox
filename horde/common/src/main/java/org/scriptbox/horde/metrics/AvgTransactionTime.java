@@ -30,7 +30,7 @@ public class AvgTransactionTime extends ActionMetric {
     
     synchronized public float getValue() {
         if( transactionCount > 0 ) {
-	        float ret = (int)(totalMillis / transactionCount);
+	        float ret = totalMillis / transactionCount;
 	        transactionCount = 0;
 	        totalMillis = 0;
 	        

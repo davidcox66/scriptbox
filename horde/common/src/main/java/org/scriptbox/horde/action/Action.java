@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.ObjectName;
-
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.FailureCount;
@@ -15,7 +13,7 @@ import org.scriptbox.horde.metrics.TransactionCount;
 import org.scriptbox.horde.metrics.TransactionsPerSecond;
 import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
 import org.scriptbox.horde.metrics.mbean.ActionDynamicMetricMBean;
-import org.scriptbox.util.common.collection.CollectionUtil;
+import org.scriptbox.horde.metrics.probe.Probe;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +118,12 @@ public class Action {
         if( post != null ) {
             addPostMetric( new AvgTransactionTime("post") );
         }
+    }
+    void addRunProbe( Probe probe ) {
+    	List<ActionMetric> metrics = probe.getMetrics();
+    	for( ActionMetric metric : metrics ) {
+    		addRunMetric( metric );
+    	}
     }
     void addRunMetric( ActionMetric metric ) {
         addActionMetric( metrics, metric );
