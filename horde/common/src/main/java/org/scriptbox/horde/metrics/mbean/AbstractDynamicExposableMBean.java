@@ -14,24 +14,21 @@ import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.scriptbox.horde.action.Action;
-import org.scriptbox.horde.action.ActionScript;
 import org.scriptbox.horde.metrics.AbstractMetric;
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractDynamicMetricMBean implements DynamicMBean {
+public abstract class AbstractDynamicExposableMBean implements DynamicMBean {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( AbstractDynamicMetricMBean.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( AbstractDynamicExposableMBean.class );
 	
-    private Map<String,AbstractMetric> metrics = new HashMap<String,AbstractMetric>();
+    private Map<String,Exposable> exposables = new HashMap<String,Exposable>();
     
-    public AbstractDynamicMetricMBean() {
+    public AbstractDynamicExposableMBean() {
     }
 
     public abstract ObjectName getObjectName();
@@ -56,18 +53,18 @@ public abstract class AbstractDynamicMetricMBean implements DynamicMBean {
         }
     }
    
-    synchronized public void addMetric( AbstractMetric metric ) {
-    	metrics.put( metric.getName(), metric );
+    synchronized public void addExposable( Exposable exposable ) {
+    	exposables.put( exposable.getName(), exposable );
     }
     
-    synchronized public void removeMetric( ActionMetric metric ) {
-    	metrics.remove( metric.getName() );
+    synchronized public void removeExposable( Exposable exposable ) {
+    	exposables.remove( exposable.getName() );
     }
     
     synchronized public Object getAttribute(String name) throws AttributeNotFoundException {
-    	AbstractMetric metric = metrics.get( name );
-        if (metric != null) {
-            return metric.getValue();
+    	Exposable exposable = exposables.get( name );
+        if (exposable != null) {
+            return exposable.getValue();
         }
         else {
             throw new AttributeNotFoundException("No such property: " + name);
@@ -82,9 +79,9 @@ public abstract class AbstractDynamicMetricMBean implements DynamicMBean {
     synchronized public AttributeList getAttributes(String[] names) {
         AttributeList list = new AttributeList();
         for (String name : names) {
-        	AbstractMetric metric = metrics.get( name );
-        	if (metric != null) {
-        		list.add( new Attribute(name,metric.getValue()) );
+        	Exposable exposable = exposables.get( name );
+        	if (exposable != null) {
+        		list.add( new Attribute(name,exposable.getValue()) );
         	}
         }
         return list;
@@ -101,13 +98,13 @@ public abstract class AbstractDynamicMetricMBean implements DynamicMBean {
     }
     
     synchronized public MBeanInfo getMBeanInfo() {
-        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[metrics.size()];
+        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[exposables.size()];
         int i=0;
-        for( AbstractMetric metric : metrics.values() ) {
+        for( Exposable exposable : exposables.values() ) {
             attrs[i++] = new MBeanAttributeInfo(
-                    metric.getName(),
+                    exposable.getName(),
                     "java.lang.Float",
-                    metric.getDescription(),
+                    exposable.getDescription(),
                     true,   // isReadable
                     false,   // isWritable
                     false); // isIs

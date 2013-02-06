@@ -7,7 +7,7 @@ import org.scriptbox.box.container.BoxScript;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.horde.metrics.ScriptMetric;
 import org.scriptbox.horde.metrics.ThreadCount;
-import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.AbstractDynamicExposableMBean;
 import org.scriptbox.horde.metrics.mbean.ActionScriptDynamicMetricMBean;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.RunnableWithException;
@@ -24,7 +24,7 @@ public class ActionScript {
     private List<Runnable> destructors = new ArrayList<Runnable>();
     private List<ActionErrorHandler> globalErrorHandlers = new ArrayList<ActionErrorHandler>();
     
-    private AbstractDynamicMetricMBean mbean;
+    private AbstractDynamicExposableMBean mbean;
     
     /**
      * Glean the classloader from calls to addAction which should have the context classloader
@@ -78,7 +78,7 @@ public class ActionScript {
    
     public void addScriptMetric( ScriptMetric metric ) { 
         metric.init( this );
-        mbean.addMetric( metric );
+        mbean.addExposable( metric );
     }
 
     // generic type should technically be ? extends GeneratorMetric but Groovy flips out 

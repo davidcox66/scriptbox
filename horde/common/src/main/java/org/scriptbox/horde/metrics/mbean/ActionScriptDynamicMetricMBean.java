@@ -5,7 +5,7 @@ import javax.management.ObjectName;
 
 import org.scriptbox.horde.action.ActionScript;
 
-public class ActionScriptDynamicMetricMBean extends AbstractDynamicMetricMBean {
+public class ActionScriptDynamicMetricMBean extends AbstractDynamicExposableMBean {
 
 	private ActionScript script;
 	

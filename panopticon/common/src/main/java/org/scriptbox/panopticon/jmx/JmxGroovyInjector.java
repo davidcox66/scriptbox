@@ -16,9 +16,10 @@ import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.box.jmx.conn.JmxConnections;
-import org.scriptbox.box.jmx.proc.JmxRemoteProcessProvider;
 import org.scriptbox.box.jmx.proc.JmxPsProcessProvider;
+import org.scriptbox.box.jmx.proc.JmxRemoteProcessProvider;
 import org.scriptbox.box.jmx.proc.JmxVmProcessProvider;
+import org.scriptbox.box.jmx.vm.VmJmxConnectionBuilder;
 import org.scriptbox.panopticon.capture.CaptureContext;
 import org.scriptbox.panopticon.capture.CaptureResult;
 import org.scriptbox.plugins.jmx.MBeanProxy;
@@ -32,16 +33,6 @@ public class JmxGroovyInjector implements JmxInjector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( JmxGroovyInjector.class );
 	
-	private JmxConnections connections;
-	
-	public JmxConnections getConnections() {
-		return connections;
-	}
-
-	public void setConnections(JmxConnections connections) {
-		this.connections = connections;
-	}
-
 	@Override
 	public String getLanguage() {
 		return "groovy";
@@ -61,12 +52,12 @@ public class JmxGroovyInjector implements JmxInjector {
 
 	public void ps( String name, Object filter, Closure closure ) throws Exception {
 		final ParameterizedRunnableWithResult<Boolean,ProcessStatus> finder = createProcessFinder( filter );
-		add( closure, new JmxPsProcessProvider(connections, name, finder) );
+		add( closure, new JmxPsProcessProvider(getConnections(), name, finder) );
 	}
 	
 	public void vms( String name, Object filter, Closure closure ) throws Exception {
 		final ParameterizedRunnableWithResult<Boolean,ProcessStatus> finder = createProcessFinder( filter );
-		add( closure, new JmxVmProcessProvider(connections, name, finder) );
+		add( closure, new JmxVmProcessProvider(getConnections(), name, finder) );
 	}
 
 	private ParameterizedRunnableWithResult<Boolean,ProcessStatus> createProcessFinder( Object filter ) {
@@ -85,7 +76,7 @@ public class JmxGroovyInjector implements JmxInjector {
 		
 	}
 	public void remote( String name, String host, int port, Closure closure ) throws Exception {
-		add( closure, new JmxRemoteProcessProvider(connections, name, host, port) );
+		add( closure, new JmxRemoteProcessProvider(getConnections(), name, host, port) );
 	}
 	
 	public void mbeans( String objectName, Closure closure ) throws Exception {
@@ -147,5 +138,15 @@ public class JmxGroovyInjector implements JmxInjector {
 		} );
 		
 	}
-	
+
+	private synchronized JmxConnections getConnections() {
+		BoxContext context = BoxContext.getCurrentContext();
+		JmxConnections connections = context.getBeans().get( "jmx.connections", JmxConnections.class );
+		if( connections == null ) {
+			connections = new JmxConnections();
+			connections.setBuilder( new VmJmxConnectionBuilder() );
+			context.getBeans().put( "jmx.connections", connections );
+		}
+		return connections;
+	}
 }

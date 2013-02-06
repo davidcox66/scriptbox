@@ -29,8 +29,7 @@
 			p:plugin-ref="run" />
 		<bean name="quartzGroovyInjector" class="org.scriptbox.box.plugins.quartz.QuartzGroovyInjector" 
 			p:plugin-ref="quartz" />
-		<bean name="jmxGroovyInjector" class="org.scriptbox.panopticon.jmx.JmxGroovyInjector" 
-			p:connections-ref="jmxConnections" />
+		<bean name="jmxGroovyInjector" class="org.scriptbox.panopticon.jmx.JmxGroovyInjector" />
 		<bean name="tcpstatGroovyInjector" class="org.scriptbox.panopticon.net.TcpstatGroovyInjector" 
 			p:plugin-ref="tcpstat" />
 		<bean name="topGroovyInjector" class="org.scriptbox.panopticon.top.TopGroovyInjector" 
@@ -53,10 +52,6 @@
     <bean name="vmstat" class="org.scriptbox.panopticon.vmstat.VmstatPlugin" 
 		p:store-ref="store" />
    
-    <bean name="vmJmxConnectionBuilder" class="org.scriptbox.box.jmx.vm.VmJmxConnectionBuilder" />
-    <bean name="jmxConnections" class="org.scriptbox.box.jmx.conn.JmxConnections"
-    	p:builder-ref="vmJmxConnectionBuilder" />
-  
 	<bean name="monitorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start"
 		p:box-ref="box" />
 

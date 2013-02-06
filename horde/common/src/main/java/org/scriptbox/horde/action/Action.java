@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.scriptbox.horde.metrics.ActionAware;
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.FailureCount;
@@ -11,8 +12,9 @@ import org.scriptbox.horde.metrics.MaxTransactionTime;
 import org.scriptbox.horde.metrics.MinTransactionTime;
 import org.scriptbox.horde.metrics.TransactionCount;
 import org.scriptbox.horde.metrics.TransactionsPerSecond;
-import org.scriptbox.horde.metrics.mbean.AbstractDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.AbstractDynamicExposableMBean;
 import org.scriptbox.horde.metrics.mbean.ActionDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.Exposable;
 import org.scriptbox.horde.metrics.probe.Probe;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
@@ -40,7 +42,8 @@ public class Action {
     private Map<String,ActionMetric> metrics = new HashMap<String,ActionMetric>();
     private Map<String,ActionMetric> postMetrics = new HashMap<String,ActionMetric>();
 
-    private AbstractDynamicMetricMBean mbean;
+    private AbstractDynamicExposableMBean mbean;
+    private Map<String,AbstractDynamicExposableMBean> probes = new HashMap<String,AbstractDynamicExposableMBean>();
     
     public Action( ActionScript script, String name ) {
         this.script = script;
@@ -119,12 +122,19 @@ public class Action {
             addPostMetric( new AvgTransactionTime("post") );
         }
     }
+	
     void addRunProbe( Probe probe ) {
-    	List<ActionMetric> metrics = probe.getMetrics();
-    	for( ActionMetric metric : metrics ) {
-    		addRunMetric( metric );
+    	List<Exposable> exposables = probe.getExposables();
+    	ActionDynamicMetricMBean bean = new ActionDynamicMetricMBean(this, "probe=" + probe.getName() );
+    	for( Exposable exposable : exposables ) {
+    		if( exposable instanceof ActionAware ) {
+    			((ActionAware)exposable).init( this );
+    		}
+	        bean.addExposable( exposable );
     	}
+    	probes.put( probe.getName(), bean );
     }
+    
     void addRunMetric( ActionMetric metric ) {
         addActionMetric( metrics, metric );
     }
@@ -136,14 +146,21 @@ public class Action {
     }
     private void addActionMetric( Map<String,ActionMetric> mets, ActionMetric metric ) {
         metric.init( this );
-        mbean.addMetric( metric );
+        mbean.addExposable( metric );
         mets.put( metric.getName(), metric );
     }
    
     public Object getTestAttribute( String name ) {
-       return attributes.get().get( name ); 
+       return getVariable( name );
     } 
     public void setTestAttribute( String name, Object value ) {
+    	setVariable( name, value );
+    }
+    
+    public Object getVariable( String name ) {
+       return attributes.get().get( name ); 
+    } 
+    public void setVariable( String name, Object value ) {
         attributes.get().put( name, value );
     }
 
@@ -185,10 +202,16 @@ public class Action {
     }
     public void registerMBeans() throws Exception {
     	mbean.register();
+    	for( AbstractDynamicExposableMBean bean : probes.values() ) {
+    		bean.register();
+    	}
     }    
     
     public void unregisterMBeans() throws Exception {
     	mbean.unregister();
+    	for( AbstractDynamicExposableMBean bean : probes.values() ) {
+    		bean.unregister();
+    	}
     }
     
     public String toString() {

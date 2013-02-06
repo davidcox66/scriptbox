@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public abstract class ActionMetric extends AbstractMetric {
+public abstract class ActionMetric extends AbstractMetric implements Recordable, ActionAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( ActionMetric.class );
     
@@ -26,8 +26,4 @@ public abstract class ActionMetric extends AbstractMetric {
         this.action = action;
         this.script = action.getActionScript();
     }
-
-    public abstract String getName();
-    
-    public abstract void record( boolean success, long millis );
 }
