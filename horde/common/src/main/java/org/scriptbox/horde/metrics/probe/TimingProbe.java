@@ -19,9 +19,9 @@ public class TimingProbe extends Probe {
 	
 	public TimingProbe( String name, String description ) {
 		super( name, description );
-		average = new AvgTransactionTime( "avg" ) ;
-		count = new CountMetric( "count", description + " count" ) ;
-		failures = new CountMetric( "fail", description + " failures" ) ;
+		average = new AvgTransactionTime( "probe-avg" ) ;
+		count = new CountMetric( "probe-count", description + " count" ) ;
+		failures = new CountMetric( "probe-fail", description + " failures" ) ;
 		metrics = new ArrayList<Exposable>();
 		metrics.add( average );
 		metrics.add( count );

@@ -8,11 +8,12 @@ else
 	root=$dir/../target
 fi	
 
-if [[ $(uname) = "Darwin" ]] ; then
-	ip=$(/sbin/ifconfig en0 | grep 'inet ' | cut -d' ' -f2)
-else 
-	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
-fi
+# if [[ $(uname) = "Darwin" ]] ; then
+# 	ip=$(/sbin/ifconfig en0 | grep 'inet ' | cut -d' ' -f2)
+# else 
+# 	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+# fi
+ip=0.0.0.0
 
 JAVA=$(which java)
 if [[ -z $JAVA ]] ; then

@@ -49,7 +49,7 @@ public class MetricQueries {
 			LOGGER.debug( "providers: evaluated expr=" + expr + ", result=" + obj );
 		}
 		if( obj == null ) { 
-			throw new MetricException( "Query did not match any metrics");
+			throw new MetricException( "Query did not match any metrics: " + expr);
 		}
 		Collection<MetricProvider> providers = MetricQueries.toCollection(obj, MetricProvider.class);
 		return ctx.getStore().getAllMetrics(providers, ctx);

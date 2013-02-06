@@ -33,6 +33,8 @@ public class DateRange {
 	public void setEnd(Date end) {
 		this.end = end;
 	}
-	
+	public String toString() {
+		return "DateRange{ start=" + start + ", end=" + end + " }";
+	}
 	
 }
