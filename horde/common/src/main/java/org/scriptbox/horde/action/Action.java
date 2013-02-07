@@ -1,5 +1,6 @@
 package org.scriptbox.horde.action;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,8 @@ import java.util.Map;
 import org.scriptbox.horde.metrics.ActionAware;
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
-import org.scriptbox.horde.metrics.DistroMetric;
+import org.scriptbox.horde.metrics.DistroCountMetric;
+import org.scriptbox.horde.metrics.DistroPercentMetric;
 import org.scriptbox.horde.metrics.FailureCount;
 import org.scriptbox.horde.metrics.MaxTransactionTime;
 import org.scriptbox.horde.metrics.MinTransactionTime;
@@ -25,6 +27,8 @@ public class Action {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( Action.class );
 	
+    private static final long[] DISTROS = new long[] { 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000, -1 };
+    
 	private static ThreadLocal<Map<String,Object>> attributes = new ThreadLocal<Map<String,Object>>() {
         public Map<String,Object> initialValue() {
             return new HashMap<String,Object>();
@@ -44,14 +48,14 @@ public class Action {
     private Map<String,ActionMetric> postMetrics = new HashMap<String,ActionMetric>();
 
     private AbstractDynamicExposableMBean mbean;
-    private AbstractDynamicExposableMBean distro;
     private Map<String,AbstractDynamicExposableMBean> probes = new HashMap<String,AbstractDynamicExposableMBean>();
+    private List<AbstractDynamicExposableMBean> mbeans = new ArrayList<AbstractDynamicExposableMBean>();
     
     public Action( ActionScript script, String name ) {
         this.script = script;
         this.name = name;
         this.mbean = new ActionDynamicMetricMBean( this );
-        this.distro = new ActionDynamicMetricMBean( this, "distro=count" );
+        mbeans.add( this.mbean );
     }
     
     public ActionScript getActionScript() {
@@ -120,13 +124,9 @@ public class Action {
         addRunMetric( new MaxTransactionTime() );
         addRunMetric( new AvgTransactionTime() );
         addRunMetric( new FailureCount() );
-        
-        long[] dists = new long[] { 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000, -1 };
-        long prev = 0;
-        for( long dist : dists ) {
-        	addRunDistroMetric( new DistroMetric("distro", prev, dist ) );
-        	prev = dist + 1;
-        }
+       
+        addRunDistroCountMetrics();
+        addRunDistroPercentMetrics();
         
         if( post != null ) {
             addPostMetric( new AvgTransactionTime("post") );
@@ -134,6 +134,10 @@ public class Action {
     }
 	
     void addRunProbe( Probe probe ) {
+    	if( probes.get(probe.getName()) != null ) {
+    		throw new RuntimeException( "Already registered a probe: '" + probe.getName() + "'" );
+    	}
+    	
     	List<Exposable> exposables = probe.getExposables();
     	ActionDynamicMetricMBean bean = new ActionDynamicMetricMBean(this, "probe=" + probe.getName() );
     	for( Exposable exposable : exposables ) {
@@ -143,11 +147,32 @@ public class Action {
 	        bean.addExposable( exposable );
     	}
     	probes.put( probe.getName(), bean );
+    	mbeans.add( bean );
+    }
+   
+    void addRunDistroCountMetrics() {
+    	ActionDynamicMetricMBean distroCount = new ActionDynamicMetricMBean( this, "distro=count" );
+        long prev = 0;
+        for( long dist : DISTROS ) {
+        	addRunDistroMetric( distroCount, new DistroCountMetric("distro", prev, dist ) );
+        	prev = dist + 1;
+        }
+    	mbeans.add( distroCount );
     }
     
-    void addRunDistroMetric( ActionMetric metric ) {
+    void addRunDistroPercentMetrics() {
+    	ActionDynamicMetricMBean distroPercent = new ActionDynamicMetricMBean( this, "distro=percent" );
+        long prev = 0;
+        for( long dist : DISTROS ) {
+        	addRunDistroMetric( distroPercent, new DistroPercentMetric("distro", prev, dist ) );
+        	prev = dist + 1;
+        }
+        mbeans.add( distroPercent );
+    }
+    
+    private void addRunDistroMetric( AbstractDynamicExposableMBean bean, ActionMetric metric ) {
         metric.init( this );
-        distro.addExposable( metric );
+        bean.addExposable( metric );
         metrics.put( metric.getName(), metric );
     }
     
@@ -217,17 +242,13 @@ public class Action {
         ActionMetric.collectAll( metrics, success, millis );
     }
     public void registerMBeans() throws Exception {
-    	mbean.register();
-    	distro.register();
-    	for( AbstractDynamicExposableMBean bean : probes.values() ) {
+    	for( AbstractDynamicExposableMBean bean : mbeans ) {
     		bean.register();
     	}
     }    
     
     public void unregisterMBeans() throws Exception {
-    	mbean.unregister();
-    	distro.unregister();
-    	for( AbstractDynamicExposableMBean bean : probes.values() ) {
+    	for( AbstractDynamicExposableMBean bean : mbeans ) {
     		bean.unregister();
     	}
     }
