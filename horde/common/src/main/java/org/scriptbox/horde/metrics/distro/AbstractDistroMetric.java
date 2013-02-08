@@ -1,6 +1,6 @@
-package org.scriptbox.horde.metrics;
+package org.scriptbox.horde.metrics.distro;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import org.scriptbox.horde.metrics.ActionMetric;
 
 
 public abstract class AbstractDistroMetric extends ActionMetric {
@@ -20,6 +20,10 @@ public abstract class AbstractDistroMetric extends ActionMetric {
     	}
         this.low = low;
         this.high = high;
+    }
+
+    public boolean isInRange( long millis ) {
+    	return  millis >= low && (high < 0 || millis <= high); 
     }
     
     public String getName() {

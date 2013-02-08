@@ -1,7 +1,5 @@
 package org.scriptbox.horde.metrics.probe;
 
-import groovy.lang.Closure;
-
 import java.util.List;
 
 import org.scriptbox.horde.metrics.mbean.Exposable;
@@ -25,5 +23,4 @@ public abstract class Probe {
     }
 
     public abstract List<Exposable> getExposables();
-    public abstract void measure( Closure closure ) throws Throwable;
 }

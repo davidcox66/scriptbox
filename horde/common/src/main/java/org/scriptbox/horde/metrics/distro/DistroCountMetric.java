@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics;
+package org.scriptbox.horde.metrics.distro;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +12,7 @@ public class DistroCountMetric extends AbstractDistroMetric {
     }
     
     public void record( boolean success, long millis ) {
-    	if( millis >= low && (high < 0 || millis <= high) ) {
+    	if( isInRange(millis) ) {
     		count.addAndGet(1);
     	}
     }

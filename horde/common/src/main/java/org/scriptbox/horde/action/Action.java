@@ -1,20 +1,23 @@
 package org.scriptbox.horde.action;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.scriptbox.horde.metrics.ActionAware;
 import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
-import org.scriptbox.horde.metrics.DistroCountMetric;
-import org.scriptbox.horde.metrics.DistroPercentMetric;
 import org.scriptbox.horde.metrics.FailureCount;
 import org.scriptbox.horde.metrics.MaxTransactionTime;
 import org.scriptbox.horde.metrics.MinTransactionTime;
 import org.scriptbox.horde.metrics.TransactionCount;
 import org.scriptbox.horde.metrics.TransactionsPerSecond;
+import org.scriptbox.horde.metrics.distro.DistroCountMetric;
+import org.scriptbox.horde.metrics.distro.DistroPercentMetric;
 import org.scriptbox.horde.metrics.mbean.AbstractDynamicExposableMBean;
 import org.scriptbox.horde.metrics.mbean.ActionDynamicMetricMBean;
 import org.scriptbox.horde.metrics.mbean.Exposable;
@@ -43,9 +46,9 @@ public class Action {
     private ParameterizedRunnableWithResult<Boolean,List> pre;
     private ParameterizedRunnableWithResult<Boolean,List> post;
     
-    private Map<String,ActionMetric> preMetrics = new HashMap<String,ActionMetric>();
-    private Map<String,ActionMetric> metrics = new HashMap<String,ActionMetric>();
-    private Map<String,ActionMetric> postMetrics = new HashMap<String,ActionMetric>();
+    private Set<ActionMetric> preMetrics = new HashSet<ActionMetric>();
+    private Set<ActionMetric> metrics = new HashSet<ActionMetric>();
+    private Set<ActionMetric> postMetrics = new HashSet<ActionMetric>();
 
     private AbstractDynamicExposableMBean mbean;
     private Map<String,AbstractDynamicExposableMBean> probes = new HashMap<String,AbstractDynamicExposableMBean>();
@@ -173,7 +176,7 @@ public class Action {
     private void addRunDistroMetric( AbstractDynamicExposableMBean bean, ActionMetric metric ) {
         metric.init( this );
         bean.addExposable( metric );
-        metrics.put( metric.getName(), metric );
+        metrics.add( metric );
     }
     
     void addRunMetric( ActionMetric metric ) {
@@ -185,10 +188,10 @@ public class Action {
     void addPostMetric( ActionMetric metric ) {
         addActionMetric( postMetrics, metric );
     }
-    private void addActionMetric( Map<String,ActionMetric> mets, ActionMetric metric ) {
+    private void addActionMetric( Collection<ActionMetric> mets, ActionMetric metric ) {
         metric.init( this );
         mbean.addExposable( metric );
-        mets.put( metric.getName(), metric );
+        mets.add( metric );
     }
    
     public Object getTestAttribute( String name ) {
@@ -218,7 +221,7 @@ public class Action {
        }
     }
     
-    public void callAndCollectMetrics( Map<String,ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
+    public void callAndCollectMetrics( Collection<ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
     	throws Throwable
     {
         List<String> arguments = script.getBoxScript().getArguments();

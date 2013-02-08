@@ -1,9 +1,6 @@
 package org.scriptbox.horde.metrics;
 
-import java.util.Map;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import java.util.Collection;
 
 import org.scriptbox.horde.action.Action;
 import org.slf4j.Logger;
@@ -16,8 +13,8 @@ public abstract class ActionMetric extends AbstractMetric implements Recordable,
     
     protected Action action;
     
-    public static void collectAll( Map<String,? extends ActionMetric> met, final boolean success, final long millis ) {
-    	for( ActionMetric metric : met.values() ) {
+    public static void collectAll( Collection<? extends ActionMetric> met, final boolean success, final long millis ) {
+    	for( ActionMetric metric : met ) {
             metric.record( success, millis );
         }
     }

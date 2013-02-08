@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics;
+package org.scriptbox.horde.metrics.distro;
 
 
 public class DistroPercentMetric extends AbstractDistroMetric {
@@ -11,7 +11,7 @@ public class DistroPercentMetric extends AbstractDistroMetric {
     }
     
     synchronized public void record( boolean success, long millis ) {
-    	if( millis >= low && (high < 0 || millis <= high) ) {
+    	if( isInRange(millis) ) {
     		total++;
     	}
     	count++;

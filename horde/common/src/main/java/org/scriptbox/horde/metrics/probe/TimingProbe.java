@@ -2,38 +2,25 @@ package org.scriptbox.horde.metrics.probe;
 
 import groovy.lang.Closure;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.CountMetric;
-import org.scriptbox.horde.metrics.mbean.Exposable;
 
-public class TimingProbe extends Probe {
+public class TimingProbe extends BasicProbe {
 
 	private AvgTransactionTime average;
 	private CountMetric count;
 	private CountMetric failures;
-	private List<Exposable> metrics;
 	
 	public TimingProbe( String name, String description ) {
 		super( name, description );
 		average = new AvgTransactionTime( "probe-avg" ) ;
 		count = new CountMetric( "probe-count", description + " count" ) ;
 		failures = new CountMetric( "probe-fail", description + " failures" ) ;
-		metrics = new ArrayList<Exposable>();
-		metrics.add( average );
-		metrics.add( count );
-		metrics.add( failures );
+		add( average );
+		add( count );
+		add( failures );
 	}
 	
-	@Override
-	public List<Exposable> getExposables() {
-		return metrics;
-	}
-
-	@Override
 	public void measure( Closure closure ) throws Throwable {
 		long start = System.currentTimeMillis();
 		try {
