@@ -30,7 +30,7 @@ public class Action {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( Action.class );
 	
-    private static final long[] DISTROS = new long[] { 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000, -1 };
+    private static final int[] DISTROS = new int[] { 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000, -1 };
     
 	private static ThreadLocal<Map<String,Object>> attributes = new ThreadLocal<Map<String,Object>>() {
         public Map<String,Object> initialValue() {
@@ -128,9 +128,6 @@ public class Action {
         addRunMetric( new AvgTransactionTime() );
         addRunMetric( new FailureCount() );
        
-        addRunDistroCountMetrics();
-        addRunDistroPercentMetrics();
-        
         if( post != null ) {
             addPostMetric( new AvgTransactionTime("post") );
         }
@@ -154,9 +151,13 @@ public class Action {
     }
    
     void addRunDistroCountMetrics() {
+    	addRunDistroCountMetrics( DISTROS );
+    }
+    
+    void addRunDistroCountMetrics( int... distros ) {
     	ActionDynamicMetricMBean distroCount = new ActionDynamicMetricMBean( this, "distro=count" );
         long prev = 0;
-        for( long dist : DISTROS ) {
+        for( long dist : distros ) {
         	addRunDistroMetric( distroCount, new DistroCountMetric("distro", prev, dist ) );
         	prev = dist + 1;
         }
@@ -164,9 +165,13 @@ public class Action {
     }
     
     void addRunDistroPercentMetrics() {
+    	addRunDistroPercentMetrics( DISTROS );
+    }
+    
+    void addRunDistroPercentMetrics( int... distros ) {
     	ActionDynamicMetricMBean distroPercent = new ActionDynamicMetricMBean( this, "distro=percent" );
         long prev = 0;
-        for( long dist : DISTROS ) {
+        for( long dist : distros ) {
         	addRunDistroMetric( distroPercent, new DistroPercentMetric("distro", prev, dist ) );
         	prev = dist + 1;
         }
