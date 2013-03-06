@@ -5,18 +5,16 @@ import org.scriptbox.box.jmx.conn.JmxConnections;
 
 public class JmxRemoteProcessProvider extends JmxProcessProvider {
 
-	private String host;
-	private int port;
+	private String url;
 	
-	public JmxRemoteProcessProvider( JmxConnections connections, String name, String host, int port ) {
+	public JmxRemoteProcessProvider( JmxConnections connections, String name, String url ) {
 		super( connections, name );
-		this.host = host;
-		this.port = port;
+		this.url = url;
 	}
 	
 	@Override
 	public void run() throws Exception {
-		JmxConnection connection = getConnections().getConnection( host, port );
+		JmxConnection connection = getConnections().getConnection( url );
 		with( new JmxProcess(getName(),connection) );
 	}
 

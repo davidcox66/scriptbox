@@ -14,6 +14,15 @@ import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 
+/**
+ * In special circumstances, the underlying metrics values will not be what you 
+ * need to display. This iterates through all of the values substituting values
+ * that are the result of subtracting the metric value from a given number
+ * supplied in the constructor, producing a sort of inverted result.
+ * 
+ * @author david
+ *
+ */
 public class InvertQueryExp implements MetricQueryExp {
 
 	private String name;

@@ -1,7 +1,7 @@
 package org.scriptbox.horde.metrics;
 
 
-public class ManualMetric extends ActionMetric {
+public class ManualMetric extends AbstractMetric {
 
 	private String name;
 	private String description;
@@ -24,9 +24,6 @@ public class ManualMetric extends ActionMetric {
 
     public String getDescription() {
         return description;
-    }
-
-    public void record( boolean success, long millis ) {
     }
 
     public void setValue( float value ) {

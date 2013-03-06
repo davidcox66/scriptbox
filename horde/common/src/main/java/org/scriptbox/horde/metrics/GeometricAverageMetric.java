@@ -1,7 +1,7 @@
 package org.scriptbox.horde.metrics;
 
 
-public class GeometricAverageMetric extends ActionMetric {
+public class GeometricAverageMetric extends RecordableMetric {
 
 	private String name;
 	private String description;

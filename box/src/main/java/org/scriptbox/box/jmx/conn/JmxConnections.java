@@ -6,7 +6,7 @@ import java.util.Map;
 public class JmxConnections {
 
 	private Map<Integer,JmxConnection> byPid = new HashMap<Integer,JmxConnection>();
-	private Map<HostPort,JmxConnection> byHostPort = new HashMap<HostPort,JmxConnection>();
+	private Map<String,JmxConnection> byUrl = new HashMap<String,JmxConnection>();
 	
 	private JmxConnectionBuilder builder;
 
@@ -34,12 +34,11 @@ public class JmxConnections {
 		return ret;
 	}
 
-	synchronized public JmxConnection getConnection( String host, int port ) throws Exception {
-		HostPort key = new HostPort(host,port);
-		JmxConnection ret = byHostPort.get( key );
+	synchronized public JmxConnection getConnection( String url ) throws Exception {
+		JmxConnection ret = byUrl.get( url );
 		if( ret == null ) {
-			ret = new JmxRmiConnection( host, port );
-			byHostPort.put( key, ret );
+			ret = new JmxRmiConnection( url );
+			byUrl.put( url, ret );
 		}
 		return ret;
 	}

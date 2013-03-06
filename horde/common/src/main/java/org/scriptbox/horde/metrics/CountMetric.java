@@ -2,7 +2,7 @@ package org.scriptbox.horde.metrics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CountMetric extends ActionMetric {
+public class CountMetric extends RecordableMetric {
 
 	private String name;
 	private String description;

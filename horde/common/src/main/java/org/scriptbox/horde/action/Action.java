@@ -8,18 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.scriptbox.horde.metrics.ActionAware;
-import org.scriptbox.horde.metrics.ActionMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
+import org.scriptbox.horde.metrics.DeviationMetric;
 import org.scriptbox.horde.metrics.FailureCount;
 import org.scriptbox.horde.metrics.MaxTransactionTime;
 import org.scriptbox.horde.metrics.MinTransactionTime;
+import org.scriptbox.horde.metrics.RecordableMetric;
 import org.scriptbox.horde.metrics.TransactionCount;
 import org.scriptbox.horde.metrics.TransactionsPerSecond;
 import org.scriptbox.horde.metrics.distro.DistroCountMetric;
 import org.scriptbox.horde.metrics.distro.DistroPercentMetric;
 import org.scriptbox.horde.metrics.mbean.AbstractDynamicExposableMBean;
-import org.scriptbox.horde.metrics.mbean.ActionDynamicMetricMBean;
+import org.scriptbox.horde.metrics.mbean.DynamicExposableMBean;
 import org.scriptbox.horde.metrics.mbean.Exposable;
 import org.scriptbox.horde.metrics.probe.Probe;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
@@ -46,9 +46,9 @@ public class Action {
     private ParameterizedRunnableWithResult<Boolean,List> pre;
     private ParameterizedRunnableWithResult<Boolean,List> post;
     
-    private Set<ActionMetric> preMetrics = new HashSet<ActionMetric>();
-    private Set<ActionMetric> metrics = new HashSet<ActionMetric>();
-    private Set<ActionMetric> postMetrics = new HashSet<ActionMetric>();
+    private Set<RecordableMetric> preMetrics = new HashSet<RecordableMetric>();
+    private Set<RecordableMetric> metrics = new HashSet<RecordableMetric>();
+    private Set<RecordableMetric> postMetrics = new HashSet<RecordableMetric>();
 
     private AbstractDynamicExposableMBean mbean;
     private Map<String,AbstractDynamicExposableMBean> probes = new HashMap<String,AbstractDynamicExposableMBean>();
@@ -57,7 +57,7 @@ public class Action {
     public Action( ActionScript script, String name ) {
         this.script = script;
         this.name = name;
-        this.mbean = new ActionDynamicMetricMBean( this );
+        this.mbean = new DynamicExposableMBean( getObjectName() );
         mbeans.add( this.mbean );
     }
     
@@ -127,6 +127,7 @@ public class Action {
         addRunMetric( new MaxTransactionTime() );
         addRunMetric( new AvgTransactionTime() );
         addRunMetric( new FailureCount() );
+        addRunMetric( new DeviationMetric() );
        
         if( post != null ) {
             addPostMetric( new AvgTransactionTime("post") );
@@ -139,7 +140,7 @@ public class Action {
     	}
     	
     	List<Exposable> exposables = probe.getExposables();
-    	ActionDynamicMetricMBean bean = new ActionDynamicMetricMBean(this, "probe=" + probe.getName() );
+    	DynamicExposableMBean bean = new DynamicExposableMBean(getObjectName(), "probe=" + probe.getName() );
     	for( Exposable exposable : exposables ) {
     		if( exposable instanceof ActionAware ) {
     			((ActionAware)exposable).init( this );
@@ -155,10 +156,10 @@ public class Action {
     }
     
     void addRunDistroCountMetrics( int... distros ) {
-    	ActionDynamicMetricMBean distroCount = new ActionDynamicMetricMBean( this, "distro=count" );
+    	DynamicExposableMBean distroCount = new DynamicExposableMBean( getObjectName(), "distro=count" );
         long prev = 0;
         for( long dist : distros ) {
-        	addRunDistroMetric( distroCount, new DistroCountMetric("distro", prev, dist ) );
+        	addActionMetric( distroCount, metrics, new DistroCountMetric("distro", prev, dist ) );
         	prev = dist + 1;
         }
     	mbeans.add( distroCount );
@@ -169,33 +170,29 @@ public class Action {
     }
     
     void addRunDistroPercentMetrics( int... distros ) {
-    	ActionDynamicMetricMBean distroPercent = new ActionDynamicMetricMBean( this, "distro=percent" );
+    	DynamicExposableMBean distroPercent = new DynamicExposableMBean( getObjectName(), "distro=percent" );
         long prev = 0;
         for( long dist : distros ) {
-        	addRunDistroMetric( distroPercent, new DistroPercentMetric("distro", prev, dist ) );
+        	addActionMetric( distroPercent, metrics, new DistroPercentMetric("distro", prev, dist ) );
         	prev = dist + 1;
         }
         mbeans.add( distroPercent );
     }
     
-    private void addRunDistroMetric( AbstractDynamicExposableMBean bean, ActionMetric metric ) {
-        metric.init( this );
+    void addRunMetric( RecordableMetric metric ) {
+        addActionMetric( mbean, metrics, metric );
+    }
+    void addPreMetric( RecordableMetric metric ) {
+        addActionMetric( mbean, preMetrics, metric );
+    }
+    void addPostMetric( RecordableMetric metric ) {
+        addActionMetric( mbean, postMetrics, metric );
+    }
+    private void addActionMetric( AbstractDynamicExposableMBean bean, Collection<RecordableMetric> mets, RecordableMetric metric ) {
+		if( metric instanceof ActionAware ) {
+			((ActionAware)metric).init( this );
+		}
         bean.addExposable( metric );
-        metrics.add( metric );
-    }
-    
-    void addRunMetric( ActionMetric metric ) {
-        addActionMetric( metrics, metric );
-    }
-    void addPreMetric( ActionMetric metric ) {
-        addActionMetric( preMetrics, metric );
-    }
-    void addPostMetric( ActionMetric metric ) {
-        addActionMetric( postMetrics, metric );
-    }
-    private void addActionMetric( Collection<ActionMetric> mets, ActionMetric metric ) {
-        metric.init( this );
-        mbean.addExposable( metric );
         mets.add( metric );
     }
    
@@ -226,7 +223,7 @@ public class Action {
        }
     }
     
-    public void callAndCollectMetrics( Collection<ActionMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
+    private void callAndCollectMetrics( Collection<RecordableMetric> met, ParameterizedRunnableWithResult<Boolean,List> closure ) 
     	throws Throwable
     {
         List<String> arguments = script.getBoxScript().getArguments();
@@ -234,21 +231,24 @@ public class Action {
             long before = System.currentTimeMillis(); 
             try {
                boolean ret = closure.run( arguments );
-               ActionMetric.collectAll( met, ret, System.currentTimeMillis() - before );
+               collectMetrics( met, ret, System.currentTimeMillis() - before );
             }
             catch( VirtualMachineError ex ) {
                 throw ex;
             }
             catch( Throwable ex ) {
-               ActionMetric.collectAll( met, false, System.currentTimeMillis() - before );
+               collectMetrics( met, false, System.currentTimeMillis() - before );
                script.callGlobalErrorHandlers( ex );
             }
         }
     }
     
-    void collectMetrics( boolean success, long millis ) {
-        ActionMetric.collectAll( metrics, success, millis );
+    private void collectMetrics( Collection<? extends RecordableMetric> met, final boolean success, final long millis ) {
+    	for( RecordableMetric metric : met ) {
+            metric.record( success, millis );
+        }
     }
+    
     public void registerMBeans() throws Exception {
     	for( AbstractDynamicExposableMBean bean : mbeans ) {
     		bean.register();
@@ -259,6 +259,10 @@ public class Action {
     	for( AbstractDynamicExposableMBean bean : mbeans ) {
     		bean.unregister();
     	}
+    }
+   
+    public String getObjectName() {
+	    return "ActionMetrics:context=" + script.getBoxScript().getContext().getName() + ",script=" + script.getName() + ",action=" + getName();
     }
     
     public String toString() {

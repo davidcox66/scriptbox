@@ -5,6 +5,15 @@ import org.scriptbox.metrics.query.main.MetricQueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A base class for expression which have 2 children that are evaluated and
+ * have a particular operation applied to achieve  a result. This just
+ * removes some of the boiler-plate code to make that happen. Sublcasses
+ * must override process() to perform this specific operation.
+ * 
+ * @author david
+ *
+ */
 public abstract class BinaryQueryExp implements MetricQueryExp {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BinaryQueryExp.class);

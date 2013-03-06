@@ -75,8 +75,12 @@ public class JmxGroovyInjector implements JmxInjector {
 		}
 		
 	}
+	public void remote( String name, String url, Closure closure ) throws Exception {
+		add( closure, new JmxRemoteProcessProvider(getConnections(), name, url) );
+	}
 	public void remote( String name, String host, int port, Closure closure ) throws Exception {
-		add( closure, new JmxRemoteProcessProvider(getConnections(), name, host, port) );
+		String url = "service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi";
+		remote( name, url, closure );
 	}
 	
 	public void mbeans( String objectName, Closure closure ) throws Exception {

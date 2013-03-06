@@ -6,23 +6,22 @@ import javax.management.ObjectName;
 import org.scriptbox.horde.action.Action;
 import org.scriptbox.horde.action.ActionScript;
 
-public class ActionDynamicMetricMBean extends AbstractDynamicExposableMBean {
+public class DynamicExposableMBean extends AbstractDynamicExposableMBean {
 
-	private Action action;
+	private String objectName;
 	private String qualifier;
 	
-	public ActionDynamicMetricMBean( Action action ) {
-		this.action = action;
+	public DynamicExposableMBean( String objectName ) {
+		this.objectName = objectName;
 	}
 	
-	public ActionDynamicMetricMBean( Action action, String qualifier ) {
-		this.action = action;
+	public DynamicExposableMBean( String objectName, String qualifier ) {
+		this.objectName = objectName;
 		this.qualifier = qualifier;
 	}
 	
     public ObjectName getObjectName() {
-    	ActionScript script = action.getActionScript();
-	    String str = "ActionMetrics:context=" + script.getBoxScript().getContext().getName() + ",script=" + script.getName() + ",action=" + action.getName();
+	    String str = objectName;
 	    if( qualifier != null ) {
 	    	str += "," + qualifier;
 	    }

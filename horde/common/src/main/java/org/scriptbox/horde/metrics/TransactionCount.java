@@ -2,7 +2,7 @@ package org.scriptbox.horde.metrics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TransactionCount extends ActionMetric {
+public class TransactionCount extends RecordableMetric {
 
     private AtomicInteger transactionCount = new AtomicInteger();
      

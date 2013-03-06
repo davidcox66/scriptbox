@@ -147,7 +147,7 @@ public class ChartGWTServiceImpl implements ChartGWTService {
 			if( LOGGER.isDebugEnabled() ) {
 				LOGGER.debug( "getMetrics: seq.start=" + dr.getStart() + ", seq.end=" + dr.getEnd() +
 					", query.start=" + query.getStart() + ", query.end=" + query.getEnd() +
-					", start=" + new Date(start) + ", end=" + new Date(end) );
+					", start=" + new Date(start) + ", end=" + new Date(end) + ", resolution=" + query.getResolution() );
 			}
 			MetricRange range = seq.getRange( start, end );
 			MetricRangeDto ret = new MetricRangeDto( 

@@ -1,7 +1,7 @@
 package org.scriptbox.horde.metrics;
 
 
-public class AvgTransactionTime extends ActionMetric {
+public class AvgTransactionTime extends RecordableMetric {
 
     private String name;
     private int transactionCount;

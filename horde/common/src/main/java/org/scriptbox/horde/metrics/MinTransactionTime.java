@@ -1,6 +1,6 @@
 package org.scriptbox.horde.metrics;
 
-public class MinTransactionTime extends ActionMetric {
+public class MinTransactionTime extends RecordableMetric {
 
     private int min = Integer.MAX_VALUE;
      

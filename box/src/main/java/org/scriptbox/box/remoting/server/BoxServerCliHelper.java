@@ -14,6 +14,11 @@ public class BoxServerCliHelper {
 	}
 	
 	public static void consumeMainArgs( CommandLine cmd, int defaultPort ) throws CommandLineException {
+		
+		// handled by shell wrapper script		
+		cmd.consumeArg( "debug" );
+		cmd.consumeArg( "trace" );
+		
 		String instance = cmd.consumeArgValue( "instance", true );
 		String address = cmd.consumeArgValue( "address", "localhost" );
 		int port = cmd.consumeArgValueAsInt( "port", defaultPort );

@@ -8,8 +8,7 @@ import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.horde.metrics.ScriptMetric;
 import org.scriptbox.horde.metrics.ThreadCount;
 import org.scriptbox.horde.metrics.mbean.AbstractDynamicExposableMBean;
-import org.scriptbox.horde.metrics.mbean.ActionScriptDynamicMetricMBean;
-import org.scriptbox.util.common.obj.ParameterizedRunnable;
+import org.scriptbox.horde.metrics.mbean.DynamicExposableMBean;
 import org.scriptbox.util.common.obj.RunnableWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ public class ActionScript {
     
     public ActionScript( BoxScript boxScript ) {
         this.boxScript = boxScript;
-        this.mbean = new ActionScriptDynamicMetricMBean(this);
+        this.mbean = new DynamicExposableMBean(getObjectName());
         addScriptMetric( new ThreadCount() );
     }
     
@@ -225,6 +224,10 @@ public class ActionScript {
         LOGGER.info( "removeRunnerExplicity: load runner removed manually: " + runner );
         runners.remove( runner );
     } 
+   
+    public String getObjectName() {
+	    return "ActionMetrics:context=" + getBoxScript().getContext().getName() + ",script=" + getName();
+    }
     
     public String toString() {
        return "ActionScript{ name=" + getName() + ", threads=" + runners.size() + "}"; 

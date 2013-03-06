@@ -35,12 +35,15 @@ public class MinQueryExp implements MetricQueryExp {
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getResolution());
-				float min = Float.MAX_VALUE;
-				while (iter.hasNext()) {
-					Metric metric = iter.next();
-					min = Math.min(metric.getValue(), min);
+				if( iter.hasNext() ) {
+					float min = Float.MAX_VALUE;
+					while (iter.hasNext()) {
+						Metric metric = iter.next();
+						min = Math.min(metric.getValue(), min);
+					}
+					return new Metric(range.getStart(), min);
 				}
-				return new Metric(range.getStart(), min);
+				return null;
 			}
 		});
 	}

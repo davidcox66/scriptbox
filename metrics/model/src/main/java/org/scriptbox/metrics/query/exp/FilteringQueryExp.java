@@ -11,6 +11,17 @@ import org.scriptbox.metrics.query.main.MetricProvider;
 import org.scriptbox.metrics.query.main.MetricQueries;
 import org.scriptbox.metrics.query.main.MetricQueryContext;
 
+/**
+ * This is the base class or expression which collate result over time, performing
+ * a specific aggregation function such as a sum or average, sorting these aggregates
+ * then the top/bottom X set of metrics ranges from these. For example, the
+ * BottomAverageQueryExp expression can be given a list of various related metrics,
+ * find those that have the lowest average value, then pick a specified number of
+ * these to be the result of the expression.
+ * 
+ * @author david
+ *
+ */
 public abstract class FilteringQueryExp implements MetricQueryExp {
 
 	  private String operator; 
@@ -33,8 +44,21 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	    this.count = count;
 	    this.child = child;
 	  }
-	  
+	
+	  /**
+	   * Performs a particular aggregating function on the underlying data such as
+	   * a sum or average
+	   * @param range
+	   * @return
+	   */
 	  abstract float filter( MetricRange range );
+	  
+	  /**
+	   * Received the results from filtering of the data and sorts them as needed.
+	   * The first 'count' number of metric ranges will be the result of
+	   * evaluating this expression. 
+	   * @param cvs
+	   */
 	  abstract void sort( List<CriticalValue> cvs );
 	  
 	  public Object evaluate( MetricQueryContext ctx ) throws Exception {

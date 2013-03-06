@@ -3,7 +3,7 @@ package org.scriptbox.horde.metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransactionsPerSecond extends ActionMetric {
+public class TransactionsPerSecond extends RecordableMetric {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( TransactionsPerSecond.class );
 	

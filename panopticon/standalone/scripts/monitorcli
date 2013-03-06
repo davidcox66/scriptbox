@@ -12,4 +12,13 @@ fi
 set -x
 JAVA_OPTS="\
 	-Dlogback.configurationFile=panopticon-logback.xml"
+	
+
+if [[ "$@" == *--trace* ]] ; then
+	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
+	JAVA_OPTS="$JAVA_OPTS -Dtrace.level=DEBUG"
+elif [[ "$@" == *--debug* ]] ; then
+	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
+fi
+	
 java $JAVA_OPTS -cp $root/$jar:$dir org.scriptbox.panopticon.main.MonitorCli "$@"

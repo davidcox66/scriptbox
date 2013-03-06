@@ -38,6 +38,11 @@ public class BoxClientCliHelper {
 		agentHelper.setEndpointConnectionFactory( ctx.getBean("connectionFactory",EndpointConnectionFactory.class) );
 		
 		cmd = new CommandLine( args );
+		
+		// handled by shell wrapper script
+		cmd.consumeArg( "debug" );
+		cmd.consumeArg( "trace" );
+		
 		processTunnel();
 		agentHelper.setEndpoints( getEndpoints() );
 		
@@ -45,6 +50,7 @@ public class BoxClientCliHelper {
 
 	public static void usage( String name ) {
 		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --user <user> --password <password>] --agents=<[host]:[port]> ...\n" +
+			"    --debug --trace\n" +
 			"    {\n" +
 			"        --status\n" +
 			"        --createContext <language> <contextName>\n" +

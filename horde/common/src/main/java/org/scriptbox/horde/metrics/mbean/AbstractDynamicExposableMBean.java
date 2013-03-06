@@ -18,7 +18,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.scriptbox.horde.metrics.AbstractMetric;
-import org.scriptbox.horde.metrics.ActionMetric;
+import org.scriptbox.horde.metrics.RecordableMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,7 @@ public abstract class AbstractDynamicExposableMBean implements DynamicMBean {
         MBeanOperationInfo[] opers = new MBeanOperationInfo[] { };
         return new MBeanInfo(
                 this.getClass().getName(),
-                "Generator Metrics",
+                "Metrics",
                 attrs,
                 null,  // constructors
                 opers,

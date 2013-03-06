@@ -1,9 +1,9 @@
 package org.scriptbox.horde.metrics.distro;
 
-import org.scriptbox.horde.metrics.ActionMetric;
+import org.scriptbox.horde.metrics.RecordableMetric;
 
 
-public abstract class AbstractDistroMetric extends ActionMetric {
+public abstract class AbstractDistroMetric extends RecordableMetric {
 
     private String name;
     private String fullName;

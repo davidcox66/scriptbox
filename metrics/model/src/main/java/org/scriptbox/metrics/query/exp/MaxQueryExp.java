@@ -35,12 +35,15 @@ public class MaxQueryExp implements MetricQueryExp {
 		return collator.collate(false, new ParameterizedRunnableWithResult<Metric, MetricRange>() {
 			public Metric run(MetricRange range) {
 				Iterator<Metric> iter = range.getIterator(ctx.getResolution());
-				float max = Float.MIN_VALUE;
-				while (iter.hasNext()) {
-					Metric metric = iter.next();
-					max = Math.max(metric.getValue(), max);
+				if( iter.hasNext() ) {
+					float max = Float.MIN_VALUE;
+					while (iter.hasNext()) {
+						Metric metric = iter.next();
+						max = Math.max(metric.getValue(), max);
+					}
+					return new Metric(range.getStart(), max);
 				}
-				return new Metric(range.getStart(), max);
+				return null;
 			}
 		});
 	}
