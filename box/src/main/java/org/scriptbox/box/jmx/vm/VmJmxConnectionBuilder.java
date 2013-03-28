@@ -17,6 +17,9 @@ public class VmJmxConnectionBuilder implements JmxConnectionBuilder {
 	public JmxConnection getForPid(int pid, String command ) throws Exception {
 		VirtualMachine vm = null;
 		try { 
+			if( LOGGER.isDebugEnabled() ) {
+				LOGGER.debug( "getForPid: attempting to get JMX information for pid: " + pid );
+			}
 			vm = VirtualMachine.attach(String.valueOf(pid));
 		}
 		catch( Exception ex ) {

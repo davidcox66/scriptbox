@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,8 +19,8 @@ public class GroovyHttp extends Http {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( GroovyHttp.class );
 	
-	public void getAndRead( String url, Closure closure  ) throws ClientProtocolException, IOException {
-		HttpResponse response = get( url );
+	public void getAndRead( String url, Map<String,String> headers, Closure closure  ) throws ClientProtocolException, IOException {
+		HttpResponse response = get( url, headers );
 		HttpEntity entity = response.getEntity();
 		if( entity != null ) {
 			InputStream input = null;
@@ -41,8 +42,8 @@ public class GroovyHttp extends Http {
 		}
 	}
 	
-	public void getAndReadLine( String url, Closure closure ) throws ClientProtocolException, IOException {
-		HttpResponse response = get( url );
+	public void getAndReadLine( String url, Map<String,String> headers, Closure closure ) throws ClientProtocolException, IOException {
+		HttpResponse response = get( url, headers );
 		HttpEntity entity = response.getEntity();
 		if( entity != null ) {
 			BufferedReader input = null;

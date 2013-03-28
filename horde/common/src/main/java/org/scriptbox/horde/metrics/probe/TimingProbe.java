@@ -2,6 +2,7 @@ package org.scriptbox.horde.metrics.probe;
 
 import groovy.lang.Closure;
 
+import org.scriptbox.horde.metrics.AverageMetric;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.CountMetric;
 

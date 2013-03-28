@@ -2,27 +2,36 @@ package org.scriptbox.horde.pool;
 
 import groovy.lang.Closure;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 
 public class GroovyPool {
 
 	protected GenericObjectPool pool;
 	protected PoolableObjectFactory factory;
 	
+	private static Set<String> PARAMS = new HashSet<String>(
+		Arrays.asList( new String[] { 
+		"makeObject",
+		"destroyObject",
+		"validateObject",
+		"activateObject",
+		"passivateObject",
+		"maxActive"} )
+	);
+	
 	public GroovyPool( final Map<String,Object> params ) {
+		
+		for( String param : params.keySet() ) {
+			if( !PARAMS.contains(param) ) {
+				throw new IllegalArgumentException( "Unknown pool parameter: '" + param + "'" ); 
+			}
+		}
 		
 		final Closure cMakeObject = (Closure)params.get( "makeObject" );
 		final Closure cDestroyObject = (Closure)params.get( "destroyObject" );
@@ -33,7 +42,7 @@ public class GroovyPool {
 		final Integer maxActive = (Integer)params.get( "maxActive" );
 		
 		if( cMakeObject == null ) {
-			throw new RuntimeException( "Must define a pool with makeObject()" );
+			throw new IllegalArgumentException( "Must define a pool with makeObject()" );
 		}
 		
 		factory = new PoolableObjectFactory() {
@@ -47,7 +56,7 @@ public class GroovyPool {
 			  }
 
 			  public boolean validateObject(Object obj) {
-				 if( cDestroyObject != null ) { 
+				 if( cValidateObject != null ) { 
 					 return (Boolean)cValidateObject.call( obj );
 				 }
 				 return true;

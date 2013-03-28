@@ -1,6 +1,7 @@
 package org.scriptbox.horde.http;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -13,6 +14,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -45,11 +47,30 @@ public class Http {
 		return client.execute( op, localContext );
 	}
 	
+	public HttpResponse get( String url, Map<String,String> headers ) throws ClientProtocolException, IOException {
+		HttpGet op = new HttpGet( url ); 
+		if( headers != null ) {
+			for( Map.Entry<String,String> entry : headers.entrySet() ) {
+				op.addHeader( new BasicHeader(entry.getKey(),entry.getValue()));
+			}
+		}	
+		return client.execute( op, localContext );
+	}
+	
 	public HttpResponse post( String url ) throws ClientProtocolException, IOException {
 		HttpPost op = new HttpPost( url ); 
 		return client.execute( op, localContext );
 	}
 	
+	public HttpResponse post( String url, Map<String,String> headers ) throws ClientProtocolException, IOException {
+		HttpPost op = new HttpPost( url ); 
+		if( headers != null ) {
+			for( Map.Entry<String,String> entry : headers.entrySet() ) {
+				op.addHeader( new BasicHeader(entry.getKey(),entry.getValue()));
+			}
+		}
+		return client.execute( op, localContext );
+	}
 	public HttpResponse execute( HttpUriRequest request ) throws ClientProtocolException, IOException {
 		return client.execute( request, localContext );
 	}

@@ -20,8 +20,13 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JmxRmiConnection extends JmxConnection {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( JmxRmiConnection.class ) ;
+	
 	private JMXServiceURL url;
 	private JMXConnector connector;
 	private MBeanServerConnection server;
@@ -31,12 +36,16 @@ public class JmxRmiConnection extends JmxConnection {
         this.url = new JMXServiceURL( url );
 	}
 	public JmxRmiConnection( String host, int port ) throws MalformedURLException {
-       url = new JMXServiceURL( "service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi" );
+       String str = "service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi";
+       if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "Connecting to JMX url: '" + str + "'"); }
+       url = new JMXServiceURL( str );
+       
 	}
 	
 	public JmxRmiConnection( String host, int port, String user, String password ) throws MalformedURLException {
 	   this( host, port );
 	   environment = new HashMap<String, String[]>();
+       if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "Connecting to JMX host/port: '" + host + "/" + port + "'"); }
 	   environment.put(JMXConnector.CREDENTIALS, new String[] {user, password} );
 	}
 

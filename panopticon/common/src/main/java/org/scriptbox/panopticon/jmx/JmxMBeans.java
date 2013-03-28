@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 
@@ -82,5 +83,8 @@ public class JmxMBeans extends AbstractExecBlock<JmxCapture> {
         		  down = true;
         	  }
           } 
+          catch( MalformedObjectNameException ex ) {
+        	 throw new Exception( "Invalid object name: objectName='" + objectName + "', expression='" + expression + "'", ex );
+          }
 	}
 }
