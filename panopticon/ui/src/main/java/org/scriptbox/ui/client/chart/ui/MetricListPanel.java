@@ -1,6 +1,7 @@
 package org.scriptbox.ui.client.chart.ui;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.scriptbox.ui.shared.chart.ChartGWTServiceAsync;
@@ -50,7 +51,7 @@ public class MetricListPanel extends VerticalLayoutContainer {
 		
 		store = new ListStore<MetricTreeDto>(access.key());
 		list = new ListView<MetricTreeDto,String>(store,access.treeName());
-		list.getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
+		list.getSelectionModel().setSelectionMode( SelectionMode.MULTI );
 		buildToolBar();
 	    add(list, new VerticalLayoutData(1, 1));
 	    getScrollSupport().setScrollMode(ScrollMode.AUTO);
@@ -68,32 +69,39 @@ public class MetricListPanel extends VerticalLayoutContainer {
 	}
 	
 	public void delete() {
-		final MetricTreeDto tree = list.getSelectionModel().getSelectedItem();
-		if( tree != null ) {
+		final List<MetricTreeDto> trees = list.getSelectionModel().getSelectedItems();
+		if( trees != null && trees.size() > 0 ) {
+			final MetricTreeDto first = trees.get(0);
 			final HideHandler hideHandler = new HideHandler() {
 			      @Override
 			      public void onHide(HideEvent event) {
 			        Dialog dlg = (Dialog) event.getSource();
 			        if( dlg.getHideButton().getText().equals("Yes") ) {
-				        
-						service.delete( tree, new AsyncCallback<Void>() {
-							 public void onFailure(Throwable ex) {
-								 logger.info( "Failed deleting tree: " + ex );
-							 }
-							 public void onSuccess(Void result) {
-								 store.remove( tree );
-								 Info.display("Deleted", "Tree deleted: " + tree.getTreeName() );
-							 }
-						} );
+			        	for( MetricTreeDto tree : trees ) {
+			        		callServiceDelete( tree );
+			        	}
 			        }
 			      }
 			};
 			    
-			ConfirmMessageBox box = new ConfirmMessageBox("Delete", "Are you sure you want to delete " + tree.getTreeName() + "?" );
+			ConfirmMessageBox box = new ConfirmMessageBox("Delete", "Are you sure you want to delete " + first.getTreeName() + "?" );
 	        box.addHideHandler(hideHandler);
 	        box.show();
 		}
 	}
+
+	private void callServiceDelete( final MetricTreeDto tree ) {
+		service.delete( tree, new AsyncCallback<Void>() {
+			 public void onFailure(Throwable ex) {
+				 logger.info( "Failed deleting tree: " + ex );
+			 }
+			 public void onSuccess(Void result) {
+				 store.remove( tree );
+				 Info.display("Deleted", "Tree deleted: " + tree.getTreeName() );
+			 }
+		} );
+	}
+	
 	
 	public void addSelectionHandler( SelectionHandler<MetricTreeDto> handler ) {
 		list.getSelectionModel().addSelectionHandler( handler );

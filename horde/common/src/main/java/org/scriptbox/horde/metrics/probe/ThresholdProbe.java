@@ -32,7 +32,7 @@ public class ThresholdProbe extends BasicProbe {
 			ret = Closures.coerceToBoolean( closure.call() );
 			long end = System.currentTimeMillis();
 			long time = end - start;
-			if( end - start >= threshold ) {
+			if( time >= threshold ) {
 				average.record(true, time);
 				count.increment();
 				percent.increment();
