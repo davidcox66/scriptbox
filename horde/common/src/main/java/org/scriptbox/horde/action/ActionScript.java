@@ -146,19 +146,28 @@ public class ActionScript {
    
     synchronized void stop() throws Exception {
         LOGGER.debug( "stop: stopping " + runners.size() + " threads");
+        List<Thread> joiners = new ArrayList<Thread>();
         try {
         	for( ActionRunner runner : runners ) {
 	            runner.stop();
 	        }
+        	//
+        	// May seem a little redundant kicking off threads to join but we want to wait a 
+        	// reasonable amount of time for each to finish and then abort if they are
+        	// unresponsive.
+        	//
         	for( ActionRunner runner : runners ) {
-	            runner.join();
+        		joiners.add( runner.joinAsynchronously() );
 	        }
+        	for( Thread thread : joiners ) {
+        		thread.join();
+        	}
         }
         finally {
 		    runners.clear();
         }
     }
-    
+   
     synchronized public void shutdown() throws Exception {
         LOGGER.debug( "shutdown: shutting down script");
         try {

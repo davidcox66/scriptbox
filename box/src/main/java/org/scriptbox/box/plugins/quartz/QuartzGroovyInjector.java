@@ -58,7 +58,7 @@ public class QuartzGroovyInjector implements QuartzInjector {
 	}
 
 	private QuartzExecBlock createBlock( final Closure closure ) throws Exception {
-		QuartzExecBlock block = new QuartzExecBlock( plugin, BoxContext.getCurrentContext() );
+		QuartzExecBlock block = new QuartzExecBlock( plugin, BoxContext.getCurrentContext(), closure );
 		ExecContext.with(block, new ExecRunnable() {
 			public void run() throws Exception {
 				closure.call();

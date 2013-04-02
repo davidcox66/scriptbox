@@ -37,9 +37,9 @@ public class ApacheGroovyInjector implements ApacheInjector {
 	}
 
 	public void apacheLog( String location, final Closure closure ) {
-		plugin.log( location,  new ParameterizedRunnableWithResult<String,String>() {
-			public String run( String param ) {
-				return (String)closure.call( param );
+		plugin.log( location,  new ParameterizedRunnableWithResult<ApacheLogEntry,String>() {
+			public ApacheLogEntry run( String param ) {
+				return (ApacheLogEntry)closure.call( param );
 			}
 		} );
 	}

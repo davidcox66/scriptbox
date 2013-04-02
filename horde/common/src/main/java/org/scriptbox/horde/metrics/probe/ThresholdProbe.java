@@ -30,35 +30,31 @@ public class ThresholdProbe extends BasicProbe {
 		long start = System.currentTimeMillis();
 		try {
 			ret = Closures.coerceToBoolean( closure.call() );
-			long end = System.currentTimeMillis();
-			long time = end - start;
-			if( time >= threshold ) {
-				average.record(true, time);
-				count.increment();
-				percent.increment();
-				if( handler != null ) {
-					ret = Closures.coerceToBoolean( handler.call( new Object[] { time, true } ) );
-				}
-			}
+			ret = check( ret, start, handler );
 		}
 		catch( VirtualMachineError ex ) {
 			throw ex;
 		}
 		catch( Throwable ex ) {
-			long end = System.currentTimeMillis();
-			long time = end - start;
-			if( time >= threshold ) {
-				average.record(false, time );
-				count.increment();
-				percent.increment();
-				if( handler != null ) {
-					handler.call( new Object[] { time, false } );
-				}
-			}
+			check( false, start, handler );
 			throw ex;
 		}
 		finally {
 			percent.record(true, 0);
+		}
+		return ret;
+	}
+	
+	private boolean check( boolean ret, long start, Closure handler ) {
+		long end = System.currentTimeMillis();
+		long time = end - start;
+		if( time >= threshold ) {
+			average.record(ret, time);
+			count.increment();
+			percent.increment();
+			if( handler != null ) {
+				ret = Closures.coerceToBoolean( handler.call( new Object[] { time, ret } ) );
+			}
 		}
 		return ret;
 	}

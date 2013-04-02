@@ -6,10 +6,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
+import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +24,60 @@ public class IoUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( IoUtil.class );
 	
+    public static Object splitEachLine(URL url, String pattern, ParameterizedRunnableWithResult<Object,List<String>>  closure) throws Exception {
+        return splitEachLine(newReader(url), Pattern.compile(pattern), closure);
+    }
+
+    public static Object splitEachLine(URL url, Pattern pattern, ParameterizedRunnableWithResult<Object,List<String>>  closure) throws Exception {
+        return splitEachLine(newReader(url), pattern, closure);
+    }
+
+    public static Object splitEachLine(Reader reader, String pattern, ParameterizedRunnableWithResult<Object,List<String>> closure) throws Exception {
+    	return splitEachLine( reader, Pattern.compile(pattern), closure ); 
+    }
+
+    public static Object splitEachLine(Reader reader, Pattern pattern, ParameterizedRunnableWithResult<Object,List<String>> closure) throws Exception {
+        BufferedReader br;
+        Object result = null;
+
+        if (reader instanceof BufferedReader)
+            br = (BufferedReader) reader;
+        else
+            br = new BufferedReader(reader);
+
+        try {
+            while (true) {
+                String line = br.readLine();
+                if (line == null) {
+                    break;
+                } else {
+                    List vals = Arrays.asList(pattern.split(line));
+                    result = closure.run(vals);
+                }
+            }
+            Reader temp = reader;
+            reader = null;
+            temp.close();
+            return result;
+        } 
+        finally {
+            closeQuietly(reader);
+            closeQuietly(br);
+        }
+    }
+
+    public static BufferedReader newReader(URL url) throws MalformedURLException, IOException {
+        return newReader(url.openConnection().getInputStream());
+    }
+
+    public static BufferedReader newReader(URL url, String charset) throws MalformedURLException, IOException {
+        return new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), charset));
+    }
+    
+    public static BufferedReader newReader(InputStream self) {
+        return new BufferedReader(new InputStreamReader(self));
+    }
+
 	public static String readFile( File file ) throws IOException {
 		if( !file.exists() ) {
 			throw new IOException( "File " + file + " does not exist");

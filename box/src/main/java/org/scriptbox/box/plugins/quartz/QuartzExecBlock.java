@@ -20,18 +20,23 @@ public class QuartzExecBlock extends BasicExecBlock<ExecRunnable> implements Job
 	private QuartzPlugin plugin;
 	private BoxContext context;
 	private JobDetail detail;
-
+	private Object container;
+	
 	private AtomicBoolean busy = new AtomicBoolean();
 	
 	// Only called by quartz
 	public QuartzExecBlock() {
 	}
 	
-	public QuartzExecBlock( QuartzPlugin plugin, BoxContext context ) {
+	public QuartzExecBlock( QuartzPlugin plugin, BoxContext context, Object container ) {
 		this.plugin = plugin;
 		this.context = context;
+		this.container = container;
 	}
-	
+
+	public Object getContainer() {
+		return container;
+	}
 	public QuartzPlugin getPlugin() {
 		return plugin;
 	}

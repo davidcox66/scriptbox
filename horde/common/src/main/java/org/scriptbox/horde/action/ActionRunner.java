@@ -87,6 +87,17 @@ public class ActionRunner {
     void stop() {
         running = false;
     }
+    
+    Thread joinAsynchronously() {
+    	Thread joiner = new Thread( new Runnable() {
+    		public void run() {
+    			join();
+    		}
+    	} );
+    	joiner.start();
+    	return joiner;
+    }
+    
     void join() {
     	try {
 	        thread.join( 10 * 1000 );

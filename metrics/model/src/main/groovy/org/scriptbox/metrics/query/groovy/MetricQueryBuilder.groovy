@@ -44,6 +44,17 @@ class MetricQueryBuilder
 	return MetricQueries.or( name, args );
   }
   
+  public MetricQueryExp distro( MetricQueryExp exp ) { 
+	  return distro( exp, 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000 );
+  }
+  
+  public MetricQueryExp distro( MetricQueryExp exp, int... intervals ) { 
+	 MetricQueryExp sub = new MetricQueryExp[ intervals.length ];
+	 for( int i=0 ; i < intervals.length ; i++ ) {
+		 sub[i] = average( String.sprintf("%0.000f", intervals[i] / 1000) );
+	 }
+  }
+  
   public MetricQueryExp not( MetricQueryExp arg, MetricQueryExp nots ) { 
 	  return not( (String)null, arg, nots );
   }

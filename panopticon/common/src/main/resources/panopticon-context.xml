@@ -36,6 +36,8 @@
 			p:plugin-ref="top" />
 		<bean name="vmstatGroovyInjector" class="org.scriptbox.panopticon.vmstat.VmstatGroovyInjector" 
 			p:plugin-ref="vmstat" />
+		<bean name="apacheGroovyInjector" class="org.scriptbox.panopticon.apache.ApacheGroovyInjector" 
+			p:plugin-ref="apache" />
 	</conditional:dependency>
 	
     <bean name="quartzListeners" class="org.scriptbox.util.spring.context.BeanListFactoryBean" 
@@ -50,6 +52,8 @@
     <bean name="top" class="org.scriptbox.panopticon.top.TopPlugin" 
 		p:store-ref="store" />
     <bean name="vmstat" class="org.scriptbox.panopticon.vmstat.VmstatPlugin" 
+		p:store-ref="store" />
+    <bean name="apache" class="org.scriptbox.panopticon.apache.ApachePlugin" 
 		p:store-ref="store" />
    
 	<bean name="monitorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start"

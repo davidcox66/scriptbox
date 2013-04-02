@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.scriptbox.box.container.BoxContext;
+import org.scriptbox.box.controls.BoxService;
+import org.scriptbox.box.controls.BoxServiceListener;
+import org.scriptbox.box.controls.BoxServices;
 import org.scriptbox.horde.metrics.AvgTransactionTime;
 import org.scriptbox.horde.metrics.DeviationMetric;
 import org.scriptbox.horde.metrics.FailureCount;
@@ -23,6 +27,7 @@ import org.scriptbox.horde.metrics.mbean.DynamicExposableMBean;
 import org.scriptbox.horde.metrics.mbean.Exposable;
 import org.scriptbox.horde.metrics.probe.Probe;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +138,32 @@ public class Action {
             addPostMetric( new AvgTransactionTime("post") );
         }
     }
-	
+
+	public void abort() throws Exception {
+		final BoxContext context = BoxContext.getCurrentContext();
+		LOGGER.info( "abort: contextName=" + context.getName()); 
+		final Collection<BoxServiceListener> listeners = context.getBeans().getAll(BoxServiceListener.class);
+		final Collection<BoxService> services = context.getBeans().getAll(BoxService.class);
+		//
+		// Asynchronously kick off the suspension of the action as we are initiating this from
+		// within the action itself
+		//
+		new Thread( new Runnable() {
+			public void run() {
+				try {
+					BoxContext.with(context, new RunnableWithThrowable() {
+						public void run() throws Throwable {
+							BoxServices.stop(services,listeners).logError( "Error suspending services", LOGGER);
+						}
+					} );
+				}
+				catch( Throwable ex ) {
+					LOGGER.error( "Error aborting context: " + context.getName() );
+				}
+			}
+		}).start();
+	}
+
     void addRunProbe( Probe probe ) {
     	if( probes.get(probe.getName()) != null ) {
     		throw new RuntimeException( "Already registered a probe: '" + probe.getName() + "'" );

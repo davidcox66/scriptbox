@@ -2,8 +2,12 @@ package org.scriptbox.panopticon.apache;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.scriptbox.util.common.io.IoUtil;
+import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,38 +15,40 @@ public class ApacheStatusParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( ApacheStatusParser.class );
    
-    /*
-    static ApacheStatus parse( URL url ) {
+    static ApacheStatus parse( URL url ) throws Exception {
         ApacheStatus ret = new ApacheStatus();
-        Map<String,String> values = new HashMap<String,String>();
-        url.splitEachLine(':') { List<String> tokens ->
-            if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "parse: tokens=${tokens}"); }
-            values.putAt( tokens[0], tokens[1].trim() );
-        }
-        ret.totalAccesses = getLong(values,'Total Accesses');
-        ret.totalKbytes = getLong(values,'Total kBytes');
-        ret.cpuLoad = getDouble(values,'CPULoad');
-        ret.uptime = getInt(values,'Uptime');
-        ret.requestsPerSecond = getDouble(values,'ReqPerSec');
-        ret.bytesPerSecond = getDouble(values,'BytesPerSec');
-        ret.bytesPerRequest = getDouble(values,'BytesPerReq');
-        ret.busyWorkers = getInt(values,'BusyWorkers');
-        ret.idleWorkers = getInt(values,'IdleWorkers');
+        final Map<String,String> values = new HashMap<String,String>();
+        IoUtil.splitEachLine( url, ":", new ParameterizedRunnableWithResult<Object, List<String>>() {
+        	public Object run( List<String> tokens ) { 
+	            if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "parse: tokens=" + tokens); }
+	            values.put( tokens.get(0), tokens.get(1).trim() );
+	            return null;
+        	}
+        } );
+        ret.totalAccesses = getLong(values,"Total Accesses");
+        ret.totalKbytes = getLong(values,"Total kBytes");
+        ret.cpuLoad = getDouble(values,"CPULoad");
+        ret.uptime = getInt(values,"Uptime");
+        ret.requestsPerSecond = getDouble(values,"ReqPerSec");
+        ret.bytesPerSecond = getDouble(values,"BytesPerSec");
+        ret.bytesPerRequest = getDouble(values,"BytesPerReq");
+        ret.busyWorkers = getInt(values,"BusyWorkers");
+        ret.idleWorkers = getInt(values,"IdleWorkers");
 
-        String scorecard = values.getAt('Scoreboard');
-        char[] chars = scorecard.getChars();
+        String scorecard = values.get("Scoreboard");
+        char[] chars = scorecard.toCharArray();
         int len = chars.length;
         
-        final char waitingForConnection = '_' as char;
-        final char startingUp = 'S' as char;
-        final char readingRequest = 'R' as char;
-        final char sendingReply = 'W' as char;
-        final char keepAlive = 'K' as char;
-        final char closingConnection = 'C' as char;
-        final char logging = 'L'  as char;
-        final char gracefullyFinishing = 'G' as char;
-        final char idleCleanup = 'I' as char;
-        final char openSlot = '.' as char;
+        final char waitingForConnection = '_';
+        final char startingUp = 'S';
+        final char readingRequest = 'R';
+        final char sendingReply = 'W';
+        final char keepAlive = 'K';
+        final char closingConnection = 'C';
+        final char logging = 'L';
+        final char gracefullyFinishing = 'G';
+        final char idleCleanup = 'I';
+        final char openSlot = '.';
         
         for( int i=0 ; i < len ; i++ ) {
             char ch = chars[i];
@@ -65,24 +71,28 @@ public class ApacheStatusParser {
    
     static double getDouble( Map<String,String> values, String key ) {
         String val = values.get(key);
-        return val ? val.toDouble() : 0.0;
+        return StringUtils.isNotEmpty(val) ? Double.parseDouble(val): 0.0;
     }
-    static double getLong( Map<String,String> values, String key ) {
+    static long getLong( Map<String,String> values, String key ) {
         String val = values.get(key);
-        return val ? val.toLong() : 0L;
+        return StringUtils.isNotEmpty(val) ? Long.parseLong(val) : 0L;
     }
-    static double getInt( Map<String,String> values, String key ) {
+    static int getInt( Map<String,String> values, String key ) {
         String val = values.get(key);
-        return val ? val.toInteger() : 0;
+        return StringUtils.isNotEmpty(val) ? Integer.parseInt(val) : 0;
     }
     
     static void main( String[] args ) {
-        if( args.length != 1 ) {
-            System.err.println( "Usage: ApacheStatusParser <url>");
-            System.exit( 1 );
-        }
-        ApacheStatus status = parse( new URL(args[0]) );
-        println status;
+    	try {
+	        if( args.length != 1 ) {
+	            System.err.println( "Usage: ApacheStatusParser <url>");
+	            System.exit( 1 );
+	        }
+	        ApacheStatus status = parse( new URL(args[0]) );
+	        System.out.println( status );
+    	}
+    	catch( Exception ex ) {
+    		ex.printStackTrace( System.err );
+    	}
     }     
-    */
 }
