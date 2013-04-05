@@ -40,15 +40,27 @@ public class ApachePlugin extends BoxContextInjectingListener {
 	public void status( final String url ) {
 		ExecBlock<ExecRunnable> container = ExecContext.getEnclosing(ExecBlock.class);
 		container.add(new ExecRunnable() {
+			private long totalAccesses;
+			private long totalKbytes;
+			private long millis;
 			public void run() throws Exception {
 				ApacheStatus status = ApacheStatusParser.parse( new URL(url) );    
+				long accesses = status.totalAccesses - totalAccesses;
+				long kbytes = status.totalKbytes - totalKbytes;
+			    store( "status", "accesses", accesses );
+			    store( "status", "kbytes", kbytes );
+		    	store( "status", "bytesPerRequest", (kbytes * 1000) / accesses );
+			    if( millis != 0 ) {
+			    	store( "status", "bytesPerSecond", kbytes / millis );
+			    	store( "status", "requestsPerSecond", accesses / (millis / 1000.0) );
+			    }
 			    store( "status", "totalAccesses", status.totalAccesses );
 			    store( "status", "totalKbytes", status.totalKbytes );
 			    store( "status", "cpuLoad", status.cpuLoad );
 			    store( "status", "uptime", status.uptime );
-			    store( "status", "requestsPerSecond", status.requestsPerSecond );
-			    store( "status", "bytesPerSecond", status.bytesPerSecond );
-			    store( "status", "bytesPerRequest", status.bytesPerRequest );
+			    store( "status", "totalRequestsPerSecond", status.requestsPerSecond );
+			    store( "status", "totalBytesPerSecond", status.bytesPerSecond );
+			    store( "status", "totalBytesPerRequest", status.bytesPerRequest );
 			    store( "status", "busyWorkers", status.busyWorkers );
 			    store( "status", "idleWorkers", status.idleWorkers );
 			      
@@ -63,6 +75,9 @@ public class ApachePlugin extends BoxContextInjectingListener {
 			    store( "status", "idleCleanup", status.idleCleanup );
 			    store( "status", "openSlot", status.openSlot );
 			    store( "status", "unknown", status.unknown );
+			    totalAccesses = status.totalAccesses;
+			    totalKbytes = status.totalKbytes;
+			    millis = System.currentTimeMillis();
 			}
 		} );
 	}

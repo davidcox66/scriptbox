@@ -32,6 +32,8 @@
 		<bean name="jmxGroovyInjector" class="org.scriptbox.panopticon.jmx.JmxGroovyInjector" />
 		<bean name="tcpstatGroovyInjector" class="org.scriptbox.panopticon.net.TcpstatGroovyInjector" 
 			p:plugin-ref="tcpstat" />
+		<bean name="tcpdumpGroovyInjector" class="org.scriptbox.panopticon.net.TcpdumpGroovyInjector" 
+			p:plugin-ref="tcpdump" />
 		<bean name="topGroovyInjector" class="org.scriptbox.panopticon.top.TopGroovyInjector" 
 			p:plugin-ref="top" />
 		<bean name="vmstatGroovyInjector" class="org.scriptbox.panopticon.vmstat.VmstatGroovyInjector" 
@@ -48,6 +50,8 @@
     	p:listeners-ref="quartzListeners" />
     <bean name="jmx" class="org.scriptbox.panopticon.jmx.JmxPlugin" />
     <bean name="tcpstat" class="org.scriptbox.panopticon.net.TcpstatPlugin" 
+    	p:store-ref="store" />
+    <bean name="tcpdump" class="org.scriptbox.panopticon.net.TcpdumpPlugin" 
     	p:store-ref="store" />
     <bean name="top" class="org.scriptbox.panopticon.top.TopPlugin" 
 		p:store-ref="store" />

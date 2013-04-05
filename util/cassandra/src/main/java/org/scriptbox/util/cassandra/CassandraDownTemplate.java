@@ -1,8 +1,10 @@
 package org.scriptbox.util.cassandra;
 
+import me.prettyprint.hector.api.exceptions.HectorException;
+
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
  * A template to enclose a block of functionality which accesses Cassandra where you anticipate 
@@ -26,7 +28,7 @@ public class CassandraDownTemplate {
    * @param closure
    * @return true if the call succeeded without a cassandra host down exception
    */
-  public boolean invoke( Runnable closure ) {
+  public boolean invoke( RunnableWithThrowable closure ) {
       try {
         closure.run();
         down = false;
@@ -34,6 +36,9 @@ public class CassandraDownTemplate {
 	  catch( HectorException ex ) {
         checkDown( ex );
 	  }
+      catch( Throwable ex ) {
+    	  LOGGER.error( "Error while accessing Cassandra", ex );
+      }
       return !down;
   }
 
@@ -43,7 +48,7 @@ public class CassandraDownTemplate {
    * @param closure
    * @return true if the host is up
    */
-  public boolean invokeIfNotDown( Runnable closure ) {
+  public boolean invokeIfNotDown( RunnableWithThrowable closure ) {
       if( !down ) {
           return invoke( closure );
       }    

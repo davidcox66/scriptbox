@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.scriptbox.util.cassandra.Cassandra;
 import org.scriptbox.util.cassandra.CassandraDownTemplate;
 import org.scriptbox.util.cassandra.ColumnFamilyDefinition;
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,16 +164,11 @@ public abstract class CassandraHeartbeatGenerator<X> {
 
     private void loop() {
         try {
-            down.invoke( new Runnable() {
-            	public void run() { 
+            down.invoke( new RunnableWithThrowable() {
+            	public void run() throws Throwable { 
             		initializeColumnFamilyIfNeeded();
-				    try {
-	                    X data = data();
-	                    send( data );
-				    }
-				    catch( Exception ex ) {
-				    	throw new RuntimeException( "Error sending heartbeat", ex );
-				    }
+                    X data = data();
+                    send( data );
                 }
             } );
             Thread.sleep( interval*1000 );

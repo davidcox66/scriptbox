@@ -20,6 +20,7 @@ import org.scriptbox.metrics.model.MetricTreeNode;
 import org.scriptbox.panopticon.jmx.JmxTypeVisitor;
 import org.scriptbox.panopticon.jmx.JmxTypeWalker;
 import org.scriptbox.util.cassandra.CassandraDownTemplate;
+import org.scriptbox.util.common.obj.RunnableWithThrowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -57,8 +58,8 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 
     public void jobStarted( final QuartzInvocationContext context ) {
         LOGGER.debug( "jobStarted: starting transaction" );
-		down.invoke( new Runnable() {
-			public void run() {
+		down.invoke( new RunnableWithThrowable() {
+			public void run() throws Throwable {
 		        cstore.begin();
 		        try {
 		            HTransactionTemplate.execute( new Runnable() {
@@ -81,8 +82,8 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 
 	@Override
 	public void store( final CaptureResult result ) throws Exception {
-		down.invoke( new Runnable() {
-			public void run() {
+		down.invoke( new RunnableWithThrowable() {
+			public void run() throws Throwable {
 				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
 				if( result.value != null && !(result.value instanceof String) ) {
 					BoxContext ctx = BoxContext.getCurrentContext();
