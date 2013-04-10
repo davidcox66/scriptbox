@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.scriptbox.box.container.BoxContext;
@@ -26,9 +28,11 @@ public class TcpdumpPlugin extends BoxContextInjectingListener {
 
     public static final String TCPDUMP_BIN = "/usr/sbin/tcpdump";
     
+	private static final Pattern LINE_PATTERN = Pattern.compile( "^(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+>\\s+(\\S+):\\s+(.*)$");
+	private static final Pattern LINUX_IP_PATTERN = Pattern.compile( "^(\\w+)\\s+(\\d+):(\\d+)\\((\\d+)\\)\\s+(.*)\\s+<mss (\\d+)>.*$");
     private static GenericProcess PROC = new GenericProcess("System");
    
-    private static final String FLAGS = ": Flags [";
+    private static final String FLAGS = "Flags [";
     
     private CaptureStore store;
    
@@ -70,53 +74,52 @@ public class TcpdumpPlugin extends BoxContextInjectingListener {
         BasicSystemExecRunnable runnable = new BasicSystemExecRunnable( args ) {
     		private long last = System.currentTimeMillis();
         	public boolean eachLine( String line, int lineNumber ) throws Exception {
-        		if( LOGGER.isDebugEnabled() ) { 
-        			LOGGER.debug( "tcpdump: processing[" + lineNumber + "] '" + line + "'" );
-        		}
         		long now = System.currentTimeMillis();
         		try {
-        			if( "IP".equals(getProtocol(line)) ) {
-        				int pos = line.indexOf( FLAGS );
-        				if( pos != -1 ) {
-        					String[] parts = line.substring(0,pos).split( "\\s+" );
-        					rec.line = line;
-        					rec.time = parts[0];
-        					rec.source = parts[2];
-        					rec.destination = parts[4];
-        					
-        					int pos2 = line.indexOf("],", FLAGS.length());
-        					rec.flags = line.substring(pos+FLAGS.length(),pos2);
-        				
-        					rec.fields.clear();
-        					String[] fields = line.substring(pos2+3).split( ", " );
-        					for( int i=0 ; i < fields.length ; i++ ) {
-        						pos2 = fields[i].indexOf(" " );
-        						String name = fields[i].substring(0,pos2);
-        						String value = fields[i].substring(pos2+1);
-        						rec.fields.put( name, value );
-        					}
-        					
-        					processor.run( rec );
-        					
-        					if( (now - last) / 1000 >= delay ) {
-        						summary.run( results );
-	        					for( Map.Entry<String, Number> entry : results.entrySet() ) {
-	        						store( attr, entry.getKey(), entry.getValue().floatValue() );
-	        					}
-        						results.clear();
-        						last = now;
-        					}
-        				}
-        				else {
-	        				if( LOGGER.isDebugEnabled() ) {
-	        					LOGGER.debug( "Unable to parse tcpdump line: '" + line + "'");
+        			Matcher matcher = LINE_PATTERN.matcher( line );
+        			if( matcher.matches() ) {
+        				rec.reset();
+        				int g=1;
+        				rec.line = line;
+        				rec.time = matcher.group(g++);
+        				rec.protocol = matcher.group(g++);
+        				rec.source = matcher.group(g++);
+        				rec.destination = matcher.group(g++);
+    					rec.text = matcher.group(g++);
+    					
+    					if( "IP".equals(rec.protocol) ) {
+							if( processDarwinIp(rec) || processLinuxIp(rec) ) {
+								
+				        		if( LOGGER.isDebugEnabled() ) { 
+				        			LOGGER.debug( "Processing IP record [" + lineNumber + "] : " + rec );
+				        		}
+    					
+								processor.run( rec );
+					        					
+								if( (now - last) / 1000 >= delay ) {
+									summary.run( results );
+									for( Map.Entry<String, Number> entry : results.entrySet() ) {
+										store( attr, entry.getKey(), entry.getValue().floatValue() );
+									}
+									last = now;
+								}
 	        				}
-        				}
+	        				else {
+		        				if( LOGGER.isDebugEnabled() ) {
+		        					LOGGER.debug( "Unable to parse IP record [" + lineNumber + "] : " + rec );
+		        				}
+	        				}
+	        			}
+	        			else {
+	        				if( LOGGER.isDebugEnabled() ) {
+	        					LOGGER.debug( "Unsupported tcpdump protocol [" + lineNumber + "] : " + rec ); 
+	        				}
+	        			}
         			}
         			else {
-        				if( LOGGER.isDebugEnabled() ) {
-        					LOGGER.debug( "Unsupported tcpdump line: '" + line + "'");
-        				}
+		        		if( LOGGER.isDebugEnabled() ) { 
+		        			LOGGER.debug( "Line does not match [" + lineNumber + "] '" + line + "'" );
+		        		}
         			}
         		}
         		finally {
@@ -136,19 +139,47 @@ public class TcpdumpPlugin extends BoxContextInjectingListener {
       }
    }
 
+	private boolean processDarwinIp( TcpdumpRecord rec ) {
+		
+		if( rec.text.indexOf(FLAGS) == 0 ) {  
+			int pos = rec.text.indexOf("],", FLAGS.length());
+			rec.flags = rec.text.substring(FLAGS.length(),pos);
+        				
+			String[] fields = rec.text.substring(pos+3).split( ", " );
+			for( int i=0 ; i < fields.length ; i++ ) {
+				int pos2 = fields[i].indexOf(" " );
+				String name = fields[i].substring(0,pos2);
+				String value = fields[i].substring(pos2+1);
+				rec.fields.put( name, value );
+			}
+			rec.seqFirst = rec.seqLast = rec.fields.get( "seq" );
+			return true;
+		}
+		return false;
+	}
+
+	private boolean processLinuxIp( TcpdumpRecord rec ) {
+		
+	    Matcher matcher = LINUX_IP_PATTERN.matcher(rec.text);
+	    if( matcher.matches() ) {
+	    	int g=1;
+	    	rec.flags = matcher.group(g++);
+	    	rec.seqFirst = matcher.group(g++);
+	    	rec.seqLast = matcher.group(g++);
+	    	g++;
+	    	String[] fields = matcher.group(g++).split("\\s+");
+	    	for( int i=0 ; i < fields.length ; i++ ) {
+	    		String name = fields[i++];
+	    		String value = fields[i];
+	    		rec.fields.put( name, value );
+	    	}
+	    	return true;
+	    }
+	    return false;
+	}
+	
 	private void store( String attr, String metric, Float value ) throws Exception {
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: attr=" + attr + ", metric=" + metric + ", value=" + value); }
 	    store.store( new CaptureResult(PROC, attr, metric, value) );
 	} 
-
-	private String getProtocol( String line ) {
-		int start = line.indexOf(" " );
-		if( start != -1 ) {
-			int end = line.indexOf(" ", start+1);
-			if( end != -1 ) {
-				return line.substring(start+1,end);
-			}
-		}
-		return null;
-	}
 }
