@@ -1,0 +1,10 @@
+apply plugin: 'java'
+
+dependencies {
+	compile jettyServerDepend
+	compile jettyServletDepend
+	compile jettyJmxDepend
+
+	provided servletApiDepend
+}
+

@@ -2,7 +2,9 @@
 .*.swp
 *.class
 target/
+build/
 bin/
+.gradle/
 .project
 .classpath
 .settings/

@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(":deps:logging")
+	compile project(":deps:jetty")
+	compile project(":util:spring")
+	compile commonsLangDepend
+    compile springWebDepend
+    compile springWebMvcDepend
+    compile hessianDepend
+    compile jschDepend
+	testCompile junitDepend
+}
+

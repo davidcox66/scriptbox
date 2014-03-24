@@ -1,0 +1,560 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+defaultTasks 'build'
+
+ext {
+	appGroup       = "org.scriptbox"
+	appDescription = "scriptbox"
+	appVersion     = "1.0-SNAPSHOT"
+}
+
+// need this to treat java and groovy as one by default,
+// sourceSets.main.java.srcDirs = []
+// sourceSets.main.groovy.srcDirs = ['src/main/java', 'src/main/groovy']
+
+// turn on lint
+//compileJava.options.compilerArgs   = [ '-Xlint' ] 
+//compileGroovy.options.compilerArgs = [ '-Xlint' ] 
+
+
+task cp << {
+    sourceSets.main.compileClasspath.each{
+        println "classpath: ${it}"
+    }
+}
+
+/**
+ * Extend clean task to clean out generated model folder
+ */
+clean << {
+    // ext.delme = file("${webAppDirName}/app/data")
+    // println "----------------------------------------------------"
+    // println "Deleting contents of ${delme}"
+    // println "----------------------------------------------------"
+
+    // ant {
+    //     delete (includeEmptyDirs: 'true') {
+    //         fileset(dir: delme, includes: '*')
+    //     }
+    // }
+}
+
+javadoc {
+    title = "LRD = ${version}"
+}
+
+// configure war task
+// war {
+//    archiveName = "${baseName}.${extension}"
+// }
+
+// configure test task
+test {
+    ignoreFailures = true
+    systemProperties['myprop'] = 'true'
+    exclude "com/lrd/service/*"
+}
+
+/**
+ * Explode war onto ${buildDir}/exploded
+
+ task explodedWar(type: Copy) {
+ dependsOn(war)
+ with war
+ }
+
+ assemble.dependsOn << explodedWar
+ */
+
+
+//* --------------------------------------------------------
+//*  STANDALONE TASKS FOLLOW
+//* --------------------------------------------------------
+
+/**
+ * Generate DDL
+ *
+ */
+//task tar( type: Tar, dependsOn: war ) {
+//	
+//	inputs.dir file('scripts')
+//	inputs.dir files(sourceSets.main.resources)
+//
+//	from ('scripts') {
+//		include '**/*'
+//		exclude 'deploy_tms.sh', 'build_tms.sh', 'setenv.sh'
+//		into 'bin'
+//	}
+//	from (war.archivePath)
+//	
+//	archiveName  'tms.tar'
+//}
+
+
+//assemble.dependsOn << [senchaRefresh,senchaBuild]
+
+task copyToLib(type: Copy) {
+    into "$buildDir/output/lib"
+    from configurations.runtime
+}
+//-------------------------------------------------------------------------
+//  Dependency Management 
+//-------------------------------------------------------------------------
+
+ext {
+    log4jVersion = "1.2.17"
+    slf4jVersion = "1.7.2"
+	// slf4jVersion = "1.6.1"
+	logbackVersion = "0.9.24"
+
+    groovyVersion = "2.0.7"
+    hibernateVersion = "4.1.10.Final"
+	// hibernateVersion = "4.1.9.Final"
+    springVersion = "3.2.8.RELEASE"
+    springSecurityVersion = "3.2.1.RELEASE"
+	// springVersion = "3.1.1.RELEASE"
+    // springSecurityVersion = "3.1.4.RELEASE"
+    jacksonVersion = "1.9.2"
+    spockVersion = "0.7-groovy-2.0"
+	cxfVersion = "2.6.1"
+	jettyVersion = "8.0.0.M2"
+	tomcatVersion = "7.0.47"
+	webflowVersion = "2.1.1.RELEASE"
+	droolsVersion = "5.4.0.Final"
+	hectorVersion = "1.0-1"
+	cassandraVersion = "1.0.5"
+
+	seamFacesVersion = "3.1.0.Final"
+	seamVersion = "3.1.0.Final"
+	arquillianVersion = "1.0.0.Alpha5"
+	jbossJavaee6Version = "1.0.0.Final"
+	solderVersion = "3.0.0.Final"
+	tilesVersion = "2.2.2"
+	gwtVersion = "2.4.0"
+
+	// Plugins
+
+	groovyDepend = "org.codehaus.groovy:groovy-all:${groovyVersion}"
+	shadowPluginDepend = "com.github.jengelman.gradle.plugins:shadow:0.8"
+
+	// Testing 
+	// jmockit has to appear before junit and should be at the top of the 
+    // dependency list 
+
+	jmockitDepend = "mockit:jmockit:0.999.10"
+	junitDepend = "junit:junit:4.8.2"
+	testNgDepend = "org.testng:testng:5.13.1"
+
+	// Logging
+	slf4jApiDepend = "org.slf4j:slf4j-api:${slf4jVersion}"
+	slf4jJclDepend = "org.slf4j:slf4j-jcl:${slf4jVersion}"
+	slf4jJulDepend = "org.slf4j:jul-to-slf4j:${slf4jVersion}"
+	slf4jJdk14Depend = "org.slf4j:slf4j-jdk14:${slf4jVersion}"
+	slf4jLog4jDepend = "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+	slf4jLog4jOverDepend = "org.slf4j:log4j-over-slf4j:${slf4jVersion}"
+	slf4jJclOverDepend = "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
+	slf4jJulOverDepend = "org.slf4j:jul-to-slf4j:${slf4jVersion}"
+
+	logbackClassicDepend = [ "ch.qos.logback:logback-classic:${logbackVersion}", {
+			exclude group: "org.slf4j", module: "slf4j-api"
+		}
+	]
+	logbackCoreDepend = "ch.qos.logback:logback-core:${logbackVersion}"
+	log4jDepend = "log4j:log4j:${log4jVersion}"
+
+	// CXF dependencies 
+	cxfJaxwsDepend = "org.apache.cxf:cxf-rt-frontend-jaxws:${cxfVersion}"
+	cxfHttpDepend = "org.apache.cxf:cxf-rt-transports-http:${cxfVersion}"
+	cxfHttpJettyDepend = "org.apache.cxf:cxf-rt-transports-http-jetty:${cxfVersion}"
+	cxfWsSecurityDepend = "org.apache.cxf:cxf-rt-ws-security:${cxfVersion}"
+	cxfToolsDepend = "org.apache.cxf:cxf-tools:${cxfVersion}"
+	cxfToolsJaxbDepend = "org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:${cxfVersion}"
+    cxfToolsJaxwsDepend = "org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:${cxfVersion}"
+
+	cxfToolsAllDepend = [ cxfToolsDepend, cxfToolsJaxbDepend, cxfToolsJaxwsDepend, log4jDepend ]
+
+	// Omit if using standard WSS4J interceptors 
+	cxfWsPolicy = "org.apache.cxf:cxf-rt-ws-policy:${cxfVersion}"
+
+	// Commons
+	
+	commonsLoggingDepend = "commons-logging:commons-logging:1.1.1"
+	commonsCollectionsDepend = "commons-collections:commons-collections:3.2.1"
+	commonsPoolDepend = "commons-pool:commons-pool:1.5.3"
+	commonsDbcp = "commons-dbcp:commons-dbcp:1.2.2"
+	commonsIoDepend = "commons-io:commons-io:1.4"
+	commonsHttpClientDepend = "commons-httpclient:commons-httpclient:3.0.1"
+	commonsCodecDepend = "commons-codec:commons-codec:1.6"
+	commonsLangDepend = "commons-lang:commons-lang:2.6"
+	commonsFileUploadDepend = "commons-fileupload:commons-fileupload:1.2.2"
+	commonsCliDepend = "commons-cli:commons-cli:1.0"
+	commonsSslDepend = "commons-ssl:not-yet-commons-ssl:0.3.10"
+
+	commonsBeanutilsOnlyDepend = "commons-beanutils:commons-beanutils:1.8.3"
+	commonsBeanutilsDepend = [ commonsBeanutilsOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	commonsConfigurationOnlyDepend = "commons-configuration:commons-configuration:1.9"
+	commonsConfigurationDepend = [ commonsConfigurationOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	// Servlet
+
+	servletApiDepend = "javax.servlet:servlet-api:2.5"
+	jstlDepend = "jstl:jstl:1.2"
+	tilesCoreDepend = [ "org.apache.tiles:tiles-core:${tilesVersion}", {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+	]
+	tilesJspDepend = "org.apache.tiles:tiles-jsp:${tilesVersion}"
+	javaxSecurityDepend = "javax.security:jacc:1.0"
+
+	// Code generation
+
+	cglibDepend = "cglib:cglib:2.2.2"
+	antlrDepend = "antlr:antlr:2.7.6"
+	asmDepend = "asm:asm:3.1"
+
+	// Jetty
+
+	jettyServerDepend = "org.eclipse.jetty:jetty-server:${jettyVersion}"
+	jettyServletDepend = "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+	jettyUtilDepend = "org.eclipse.jetty:jetty-util:${jettyVersion}"
+	jettyClientDepend = "org.eclipse.jetty:jetty-client:${jettyVersion}"
+	jettyJmxDepend = "org.eclipse.jetty:jetty-jmx:${jettyVersion}"
+	
+	// Tomcat
+
+	tomcatPluginDepend = "org.gradle.api.plugins:gradle-tomcat-plugin:1.0"	
+	tomcatDepend = [
+  		"org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+        "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
+  		[ 
+			"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}",
+			{
+    			exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+  			}
+		]
+	]
+
+	// Cassandra/Hector 
+	hectorObjectMapperDepend = "me.prettyprint:hector-object-mapper:1.1-02"
+	googleCollectionsDepend = "com.google.collections:google-collections:1.0"
+	xbeanDepend = "org.apache.xbean:xbean-spring:3.5"
+
+	// Ant
+
+	antJschDepend = "ant:ant-jsch:1.6.5"
+	jschDepend = "com.jcraft:jsch:0.1.48"
+	antOptionalDepend = "ant:ant-optional:1.5.3-1"
+
+	// Spring dependencies 
+	springContextDepend = "org.springframework:spring-context:${springVersion}"
+	springContextSupportDepend = "org.springframework:spring-context-support:${springVersion}"
+	springExpressionDepend = "org.springframework:spring-expression:${springVersion}"
+	springAopDepend = "org.springframework:spring-aop:${springVersion}"
+
+	springBeansOnlyDepend = "org.springframework:spring-beans:${springVersion}"
+	springBeansDepend = [ springBeansOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	springCoreOnlyDepend = "org.springframework:spring-core:${springVersion}"
+	springCoreDepend = [ springCoreOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	springAsmOnlyDepend = "org.springframework:spring-asm:${springVersion}"
+	springAsmDepend = [ springAsmOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	springWebOnlyDepend = "org.springframework:spring-web:${springVersion}"
+	springWebDepend = [ springWebOnlyDepend, {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+	springWebMvcDepend = "org.springframework:spring-webmvc:${springVersion}"
+	springTestDepend = [ 
+		"org.springframework:spring-test:${springVersion}", {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+	]
+
+	springSecurityCoreDepend = "org.springframework.security:spring-security-core:${springSecurityVersion}"
+	springSecurityAclDepend = "org.springframework.security:spring-security-acl:${springSecurityVersion}"
+	springSecurityWebDepend = "org.springframework.security:spring-security-web:${springSecurityVersion}"
+	springSecurityConfigDepend = "org.springframework.security:spring-security-config:${springSecurityVersion}"
+            
+	springWebflowDepend = "org.springframework.webflow:spring-webflow:${webflowVersion}"
+	springWebflowBindingDepend = "org.springframework.webflow:spring-binding:${webflowVersion}"
+	springWebflowJsDepend = "org.springframework.webflow:spring-js:${webflowVersion}"
+	springWebflowFacesDepend = "org.springframework.webflow:spring-faces:${webflowVersion}"
+			
+	springJdbcDepend = "org.springframework:spring-jdbc:${springVersion}"
+	springOrmDepend = "org.springframework:spring-orm:${springVersion}"
+		
+	hessianOsgiDepend = "com.caucho:hessian-osgi:4.0.7.0"
+	hessianDepend = "com.caucho:hessian:4.0.7"
+
+	// AWS Dependencies
+	awsJavaDepend = [ "com.amazonaws:aws-java-sdk:1.3.27", {
+			exclude group: "org.codehaus.jackson", module: "jackson-core-asl"
+			exclude group: "commons-logging", module: "commons-logging"
+			exclude group: "stax", module: "stax-api"
+		}
+	]
+	jacksonCoreAslDepend = "org.codehaus.jackson:jackson-core-asl:${jacksonVersion}"
+	jacksonMapperAslDepend = "org.codehaus.jackson:jackson-mapper-asl:${jacksonVersion}"
+	jacksonDatabindDepend = "com.fasterxml.jackson.core:jackson-databind:2.3.1"
+
+	staxDepend = [ "stax:stax:1.2.0_rc2-dev", {
+			exclude group: "stax", module: "stax-api"
+		}
+	]
+
+	groovyHttpBuilderDepend = "org.codehaus.groovy:http-builder:0.4.0"
+
+	// Javax
+
+	javaxActivationDepend = "javax.activation:activation:1.1"
+	javaxMailDepend = "javax.mail:mail:1.4"
+
+	// EXT dependencies
+
+	extDirectSpringDepend = "ch.ralscha:extdirectspring:1.4.0"
+/*
+	extDirectSpringModule = {
+			dependency jacksonDatabindDepend
+			dependency springAopDepend
+			dependency springContextDepend
+			dependency springContextSupportDepend
+			dependency springExpressionDepend
+			dependency springWebMvcDepend
+
+			dependency springBeansOnlyDepend
+			dependency springCoreOnlyDepend
+			dependency springWebOnlyDepend
+
+			//dependency springAsmOnlyDepend
+			exclude group: "org.springframework", module: "spring-asm"
+	}
+*/
+	extDirectSpringClassDepend = "ch.rasc:extclassgenerator:1.0.1"
+
+	ehcacheCoreDepend = [ "net.sf.ehcache:ehcache-core:2.6.2", {
+			exclude group: "org.slf4j", module: "slf4j-api"
+		}
+	]
+
+	// Miscellaneous
+
+	jodaDepend = "joda-time:joda-time:1.6"
+	poiDepend = "org.apache.poi:poi:3.7"
+	quartzDepend = "org.quartz-scheduler:quartz:1.8.4"
+}
+
+
+allprojects { Project proj -> 
+	// sourceCompatibility = 1.6
+	sourceCompatibility = JavaVersion.VERSION_1_6
+	project.version = appVersion
+
+	repositories {
+		maven {
+            /*
+			credentials {
+				username = 'deployment'
+				password = 'monkey1'
+			}
+			url = 'https://gandolf.joulex.com/nexus/content/groups/public'
+            */
+            url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+		}
+		mavenLocal()
+	}
+}
+
+subprojects {
+	buildscript {
+		repositories {
+			maven {
+                /*
+				credentials {
+					username = 'deployment'
+					password = 'monkey1'
+				}
+				url = 'https://gandolf.joulex.com/nexus/content/groups/public'
+                */
+                url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+			}
+			jcenter()
+			// maven {
+			// 	url = 'http://jcenter.bintray.com/'
+			// }
+			mavenLocal()
+		}
+		dependencies {
+			classpath groovyDepend
+			classpath shadowPluginDepend
+			classpath tomcatPluginDepend
+		}
+	}
+	configurations {
+		provided
+	}
+
+	configurations.all {
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.group == 'org.springframework') {
+				details.useVersion springVersion
+			}
+		}
+	}
+
+	afterEvaluate {
+		sourceSets {
+			main.compileClasspath += configurations.provided
+			test.compileClasspath += configurations.provided
+			test.runtimeClasspath += configurations.provided
+		}
+	}
+	// eclipse.classpath.plusConfigurations += configurations.provided  // Eclipse users only
+}
+
+/* **********************************************************************
+	Unused at the moment
+   **********************************************************************
+	// Databases
+
+	mysqlDepend = "mysql:mysql-connector-java:5.1.13"
+	oracleDepend = "com.oracle:ojdbc14:10.2.0.3.0" // pom
+
+	// Hibernate
+
+	hibernateCoreDepend = "org.hibernate:hibernate-core:${hibernateVersion}"
+	hibernateAnnotationsDepend = "org.hibernate:hibernate-annotations:3.5.6-Final"
+	hibernateCommonsAnnotationsDepend = "org.hibernate.common:hibernate-commons-annotations:4.0.1.Final"
+	hibernateC3PODepend = "org.hibernate:hibernate-c3p0:4.1.10.Final"
+	hibernateJpaDepend = "org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final"
+	hibernateOgmCoreDepend = "org.hibernate.ogm:hibernate-ogm-core:4.0.0.Beta2"
+	hibernateValidatorDepend = "org.hibernate:hibernate-validator:4.3.1.Final" 
+
+	// SoapUI Dependencies
+
+	fifeDepend = "fife:rsyntaxtextarea:1.0-soapui"
+	jgoodiesLooksDepend = "jgoodies:looks:2.2.0"
+	jgoodiesBindingDepend = "jgoodies:binding:2.0.1"
+	jgoodiesFormsDepend = "jgoodies:forms:1.0.7"
+	l2fprodDepend = "l2fprod:l2fprod-common-fontchooser:0.2-dev"
+	jsonLibDepend = "json:json-lib:2.2.2-jdk15"
+	xomDepend = "xom:xom:1.1"
+	ezmorphDepend = "ezmorph:ezmorph:1.0.5"
+	xmlBeansDepend = "xmlbeans:xbean:fixed-2.4.0"
+	xmlBeansXpathDepend = "xmlbeans:xbean_xpath:2.4.0"
+	xmlBeanPublicDepend = "xmlbeans:xmlpublic:2.4.0"
+	xmlBeansJsr173Depend = "xmlbeans:jsr173:xmlbeans-2.4.0"
+	
+	soapuiSwingxDepend = "swingx:swingx:soapui"
+	soapuiXmlBeansDepend = "eviware:soapui-xmlbeans:2.5.1"
+	soapuiXmlBeansPolicyDepend = "eviware:policy-xmlbeans:1.5"
+	soapuiXmlBeansExtDepend = "eviware:ext-xmlbeans:1.1"
+	soapuiXmlBeansSoapDepend = "eviware:soap-xmlbeans:1.2"
+	soapuiXmlBeansWadlDepend = "eviware:wadl-xmlbeans:1.0"
+	soapuiXmlBeansJ2eeDepend = "eviware:j2ee-xmlbeans:1.4"
+	soapuiDepend = "eviware:soapui:2.5.1"
+
+	saxonDepend = "saxon:saxon:9.1.0.8j"
+	saxonDomDepend = "saxon:saxon-dom:9.1.0.8j"
+	xmlUnitDepend = "xmlunit:xmlunit:1.2"
+	xmlSecurityDepend = "xml-security:xmlsec:1.4.2"
+	netComponentsDepend = "net-components:netcomponents:1.3.8a"
+	openSamlDepend = "opensaml:opensaml:1.1"
+	xalanDepend = "xalan:xalan:2.7.1"
+	bouncyCastleDepend = "bouncycastle:bcprov-jdk15:141"
+	wss4jDepend = "wss4j:wss4j:1.5.5"
+
+	// Seam dependencies 
+
+	javaxFacesDepend = "javax.faces:javax.faces-api:2.1" // provided
+	seamFacesApiDepend = "org.jboss.seam.faces:seam-faces-api:${seamFacesVersion}"
+	seamFacesImplDepend = "org.jboss.seam.faces:seam-faces-impl:${seamFacesVersion}" // runtime
+
+	// This import scope dependency defines the versions for all other seam 
+	// modules under this umbrella 
+	seamBomDepend = "org.jboss.seam:seam-bom:${seamVersion}" // type pom, scope import
+
+	// Annotation processor to generate the JPA 2.0 metamodel classes for 
+	// typesafe criteria queries 
+	hibernateModelGenDepend = [ "org.hibernate:hibernate-jpamodelgen:1.1.1.Final", { // provided
+			// Excluded because it's provided by the Java EE 6 dependencies 
+			exclude group: "org.hibernate.javax.persistence", module: "hibernate-jpa-2.0-api"
+		}
+	]
+
+	seamSolderDepend = "org.jboss.seam.solder:seam-solder:${solderVersion}"
+	solderApiDepend = "org.jboss.solder:solder-api:${solderVersion}"
+	solderImplDepend = "org.jboss.solder:solder-impl:${solderVersion}" // runtime
+
+	// JSR-303 (Bean Validation) Implementation 
+	// Provides portable constraints such as @Email 
+	// Hibernate Validator is the only JSR-303 implementation at the moment, 
+	// so we can assume it's provided 
+	// Optional, but highly recommended 
+	// Arquillian allows you to test enterprise code such as EJBs and Transactional(JTA) 
+	// JPA from JUnit/TestNG 
+	arquillianJunitDepend = "org.jboss.arquillian:arquillian-junit:${arquillianVersion}" // test
+
+	// Java EE 6 API dependency 
+	// This one dependency imports all APIs available for a Java EE 6.0 
+	// application 
+	jbossJavaee6Depend = "org.jboss.spec:jboss-javaee-6.0:${jbossJavaee6Version}" // type pom, scope provided
+
+	// Drools Dependencies
+
+	droolsDepend = "org.drools:drools-api:${droolsVersion}"
+	droolsCompilerDepend = "org.drools:drools-compiler:${droolsVersion}"
+	droolsCoreDepend = "org.drools:drools-core:${droolsVersion}"
+	droolsSpringDepend = [ 
+		"org.drools:drools-spring:${droolsVersion}", {
+			exclude group: "org.springframework", module: "spring-core"
+			exclude group: "org.springframework", module: "spring-beans"
+			exclude group: "org.springframework", module: "spring-context"
+		}
+	]
+	droolsDecisionTablesDepend = [ 
+		"org.drools:drools-decisiontables:${droolsVersion}", {
+			exclude group: "log4j", module: "log4j"
+		}
+	]
+	droolsTemplatesDepend = "org.drools:drools-templates:${droolsVersion}"
+	droolsBpmDepend = "org.drools:drools-bpmn2:${droolsVersion}"
+   
+	// GWT Dependencies
+
+	gwtServletDepend = "com.google.gwt:gwt-servlet:${gwtVersion}" // runtime
+	gwtUserDepend = "com.google.gwt:gwt-user:${gwtVersion}" // provided
+	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
+	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
+
+	// Miscellaneous
+
+	nekoHtmlDepend = "nekohtml:nekohtml:0.7.6"
+	genericCollectionsDepend = "net.sourceforge.collections:collections-generic:4.01"
+	gsonDepend = "com.google.code.gson:gson:2.2.2"
+	yuiDepend = "com.yahoo.platform.yui:yuicompressor:2.4.7"
+	findBugsJsr305Depend = "com.google.code.findbugs:jsr305:2.0.0" // provided
+	findBugsAnnotationsDepend = "findbugs:annotations:1.0.0" // provided
+	jargsDepend = "net.sf:jargs:1.0"
+	rhinoDepend = "rhino:js:1.7R2"
+	aspectjDepend = "org.aspectj:aspectjrt:1.6.11"
+
+*/

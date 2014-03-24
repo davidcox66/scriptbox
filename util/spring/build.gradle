@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(":deps:logging")
+	compile project(":util:common")
+	compile project(":util:config")
+	compile project(":util:json")
+
+	compile commonsLangDepend
+	compile springBeansDepend
+	compile springContextDepend
+	compile springExpressionDepend
+
+	testCompile springTestDepend
+	testCompile junitDepend
+}
+
