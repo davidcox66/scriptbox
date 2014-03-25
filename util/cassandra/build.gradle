@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(":deps:logging")
+	compile project(":deps:cassandra")
+	compile project(":deps:cassandra-embedded")
+	compile project(":util:common")
+	compile project(":util:remoting")
+	compile commonsLangDepend
+	testCompile junitDepend
+}
+

@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+dependencies {
+	compile hectorCoreDepend
+	compile cassandraAllDepend
+
+    // Use updated and consistent version of Jackson instead of those from cassandra-all 
+    compile jacksonCoreAslDepend
+    compile jacksonMapperAslDepend
+    compile cassandraThriftDepend
+
+	testCompile junitDepend
+}
+

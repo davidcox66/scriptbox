@@ -122,8 +122,8 @@ ext {
 	tomcatVersion = "7.0.47"
 	webflowVersion = "2.1.1.RELEASE"
 	droolsVersion = "5.4.0.Final"
-	hectorVersion = "1.0-1"
-	cassandraVersion = "1.0.5"
+	hectorVersion = "1.1-4"
+	cassandraVersion = "2.0.6"
 
 	seamFacesVersion = "3.1.0.Final"
 	seamVersion = "3.1.0.Final"
@@ -131,7 +131,11 @@ ext {
 	jbossJavaee6Version = "1.0.0.Final"
 	solderVersion = "3.0.0.Final"
 	tilesVersion = "2.2.2"
-	gwtVersion = "2.4.0"
+	gwtVersion = "2.6.0"
+
+    // JDK
+
+	toolsJarDepend = files( "${System.properties['java.home']}/../lib/tools.jar" )
 
 	// Plugins
 
@@ -243,9 +247,39 @@ ext {
 	]
 
 	// Cassandra/Hector 
-	hectorObjectMapperDepend = "me.prettyprint:hector-object-mapper:1.1-02"
+	hectorObjectMapperDepend = "me.prettyprint:hector-object-mapper:3.1-09"
 	googleCollectionsDepend = "com.google.collections:google-collections:1.0"
 	xbeanDepend = "org.apache.xbean:xbean-spring:3.5"
+
+	hectorCoreOnlyDepend = "me.prettyprint:hector-object-mapper:3.1-09"
+	hectorCoreDepend = [ hectorCoreOnlyDepend, {
+			exclude group: "org.apache.cassandra", module: "cassandra-all"
+			exclude group: "org.apache.cassandra", module: "cassandra-thrift"
+			exclude group: "org.slf4j", module: "slf4j-log4j12"
+			exclude group: "org.springframework", module: "spring-beans"
+			exclude group: "org.springframework", module: "spring-context"
+		}
+	]
+    
+    cassandraAllOnlyDepend = "org.apache.cassandra:cassandra-all:${cassandraVersion}"
+    cassandraAllDepend = [ cassandraAllOnlyDepend, {
+			exclude group: "org.mortbay.jetty", module: "jetty"
+			exclude group: "org.codehaus.jackson", module: "jackson-core-asl"
+			exclude group: "org.codehaus.jackson", module: "jackson-mapper-asl"
+			exclude group: "org.slf4j", module: "slf4j-log4j12"
+			exclude group: "log4j", module: "log4j"
+		}
+	]
+    
+    cassandraThriftDepend = "org.apache.cassandra:cassandra-thrift:${cassandraVersion}"
+    cassandraHighScaleLib = "com.github.stephenc.high-scale-lib:high-scale-lib:1.1.2"
+
+	// GWT Dependencies
+
+	gwtServletDepend = "com.google.gwt:gwt-servlet:${gwtVersion}" // runtime
+	gwtUserDepend = "com.google.gwt:gwt-user:${gwtVersion}" // provided
+	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
+	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
 
 	// Ant
 
@@ -538,13 +572,6 @@ subprojects {
 	droolsTemplatesDepend = "org.drools:drools-templates:${droolsVersion}"
 	droolsBpmDepend = "org.drools:drools-bpmn2:${droolsVersion}"
    
-	// GWT Dependencies
-
-	gwtServletDepend = "com.google.gwt:gwt-servlet:${gwtVersion}" // runtime
-	gwtUserDepend = "com.google.gwt:gwt-user:${gwtVersion}" // provided
-	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
-	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
-
 	// Miscellaneous
 
 	nekoHtmlDepend = "nekohtml:nekohtml:0.7.6"
