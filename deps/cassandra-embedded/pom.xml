@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project 
+	xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <!-- ================== -->
+  <!-- Basic project info -->
+  <!-- ================== -->
+  <parent>
+    <groupId>org.scriptbox</groupId>
+    <artifactId>deps.pom</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../deps-pom/pom.xml</relativePath>
+  </parent>
+  
+  
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>deps.pom.cassandra.embedded</artifactId>
+   <packaging>jar</packaging>
+   <name>deps-pom-cassandra-embedded</name>
+   
+   <dependencies>
+      <dependency>
+      <groupId>org.scriptbox</groupId>
+      <artifactId>deps.pom.cassandra</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Added for running Cassandra embedded -->
+	<dependency>
+      <groupId>com.github.stephenc.high-scale-lib</groupId>
+      <artifactId>high-scale-lib</artifactId>
+      <version>1.1.2</version>
+      <scope>test</scope>
+    </dependency>
+	<!-- Added for running Cassandra embedded -->
+	<!--
+    <dependency>
+      <groupId>com.reardencommerce</groupId>
+      <artifactId>clhm-production</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+	</dependency>
+	-->
+  </dependencies>
+
+	<build>  
+	<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
