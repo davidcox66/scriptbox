@@ -122,7 +122,7 @@ ext {
 	tomcatVersion = "7.0.47"
 	webflowVersion = "2.1.1.RELEASE"
 	droolsVersion = "5.4.0.Final"
-	hectorVersion = "1.1-4"
+	hectorVersion = "1.1-4-tx"
 	cassandraVersion = "2.0.6"
 
 	seamFacesVersion = "3.1.0.Final"
