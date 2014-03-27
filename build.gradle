@@ -207,6 +207,8 @@ ext {
 		}
 	]
 
+    httpClientDepend = "org.apache.httpcomponents:httpclient:4.2.2"
+
 	// Servlet
 
 	servletApiDepend = "javax.servlet:servlet-api:2.5"

@@ -8,9 +8,11 @@ include 'util:json'
 include 'util:spring'
 include 'util:remoting'
 include 'util:cassandra'
-include 'box'
 include 'metrics:model'
 include 'metrics:cassandra'
+include 'box'
+include 'horde:common'
+include 'horde:standalone'
 
 /*
 include 'util:gwt'
