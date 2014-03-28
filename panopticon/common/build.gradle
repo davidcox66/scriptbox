@@ -1,14 +1,14 @@
 apply plugin: 'java'
-apply plugin: 'groovy'
 
 dependencies {
 	compile project(":deps:logging")
-	compile project(":util:common")
 	compile project(":util:remoting")
-	compile quartzDepend
+	compile project(":util:cassandra")
+	compile project(":metrics:cassandra")
+	compile project(":box")
 
-	provided groovyDepend
-	provided toolsJarDepend
+    provided groovyDepend
 
 	testCompile junitDepend
 }
+

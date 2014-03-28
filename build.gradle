@@ -132,6 +132,7 @@ ext {
 	solderVersion = "3.0.0.Final"
 	tilesVersion = "2.2.2"
 	gwtVersion = "2.6.0"
+    gxtVersion = "3.0.1"
 
     // JDK
 
@@ -289,6 +290,10 @@ ext {
 	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
 	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
 
+    // GXT
+    gxtDepend = "com.sencha.gxt:gxt:${gxtVersion}"
+    gxtChartDepend = "com.sencha.gxt:gxt-chart:${gxtVersion}"
+			
 	// Ant
 
 	antJschDepend = "ant:ant-jsch:1.6.5"

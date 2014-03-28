@@ -13,6 +13,8 @@ include 'metrics:cassandra'
 include 'box'
 include 'horde:common'
 include 'horde:standalone'
+include 'panopticon:common'
+include 'panopticon:standalone'
 
 /*
 include 'util:gwt'

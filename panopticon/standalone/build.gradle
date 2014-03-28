@@ -1,0 +1,24 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
+apply plugin: 'java'
+apply plugin: 'shadow'
+
+assemble.dependsOn << shadowJar
+
+shadow {
+    baseName = "panopticon"
+    classifier = "standalone"
+    transformer(AppendingTransformer) {
+        resource = 'META-INF/spring.handlers'
+    }
+    transformer(AppendingTransformer) {
+        resource = 'META-INF/spring.schemas'
+    }
+}
+
+dependencies {
+	compile project(":panopticon:common")
+	compile project(":deps:jetty")
+
+	testCompile junitDepend
+}
