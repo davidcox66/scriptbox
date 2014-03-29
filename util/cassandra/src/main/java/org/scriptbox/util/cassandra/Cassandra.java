@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.naming.ConfigurationException;
 
@@ -17,7 +19,6 @@ import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.factory.HFactory;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.db.Table;
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.transport.TTransportException;
@@ -31,6 +32,14 @@ public class Cassandra {
     private static final String EMBEDDED_CONF = "/cassandra-conf/cassandra.yaml";
     private static final String CLUSTER_NAME = "Test Cluster";
     private static final int MAX_SCHEMA_RETRIES = 30;
+    private static final String SYSTEM_KEYSPACE = "system";
+    private static final String SYSTEM_TRACES_KEYSPACE = "system_traces";
+
+    private static final Set<String> SYSTEM_KEYSPACES = new HashSet<String>();
+    static {
+        SYSTEM_KEYSPACES.add( SYSTEM_KEYSPACE );
+        SYSTEM_KEYSPACES.add( SYSTEM_TRACES_KEYSPACE );
+    }
 
     private static EmbeddedCassandraService cassandra;
 
@@ -156,7 +165,7 @@ public class Cassandra {
 
     public static boolean isAvailable(Cluster cluster) {
         try {
-            cluster.describeKeyspace(Table.SYSTEM_TABLE);
+            cluster.describeKeyspace(SYSTEM_KEYSPACE);
             String name = cluster.getName();
             LOGGER.info("isAvailable: cassandra cluster '{}' is running", name);
             return true;
@@ -225,10 +234,14 @@ public class Cassandra {
         dropAllKeyspaces(getOrCreateCluster());
     }
 
+    public static boolean isSystemKeyspace( String name ) {
+        return SYSTEM_KEYSPACES.contains(name);
+    }
+
     public static void dropAllKeyspaces(Cluster cluster) {
         List<KeyspaceDefinition> keyspaces = cluster.describeKeyspaces();
         for (KeyspaceDefinition keyspace : keyspaces) {
-            if (!Table.SYSTEM_TABLE.equals(keyspace.getName())) {
+            if (!isSystemKeyspace(keyspace.getName())) {
                 LOGGER.info("dropAllKeyspaces: dropping '{}'", keyspace.getName());
                 cluster.dropKeyspace(keyspace.getName());
             }
@@ -292,7 +305,11 @@ public class Cassandra {
     }
 
     private static boolean isKeyspaceNotExistException(HInvalidRequestException ex) {
-        return "Keyspace does not exist.".equals(ex.getWhy());
+        return ex.getWhy() != null &&
+            (
+                ex.getWhy().startsWith("Keyspace does not exist") ||
+                ex.getWhy().startsWith("Cannot drop non existing keyspace")
+            );
     }
 
     public static Cluster getOrCreateCluster() {

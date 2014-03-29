@@ -122,7 +122,7 @@ ext {
 	tomcatVersion = "7.0.47"
 	webflowVersion = "2.1.1.RELEASE"
 	droolsVersion = "5.4.0.Final"
-	hectorVersion = "1.1-4"
+	hectorVersion = "1.1-4-tx"
 	cassandraVersion = "2.0.6"
 
 	seamFacesVersion = "3.1.0.Final"
@@ -132,6 +132,7 @@ ext {
 	solderVersion = "3.0.0.Final"
 	tilesVersion = "2.2.2"
 	gwtVersion = "2.6.0"
+    gxtVersion = "3.0.1"
 
     // JDK
 
@@ -207,6 +208,8 @@ ext {
 		}
 	]
 
+    httpClientDepend = "org.apache.httpcomponents:httpclient:4.2.2"
+
 	// Servlet
 
 	servletApiDepend = "javax.servlet:servlet-api:2.5"
@@ -247,25 +250,31 @@ ext {
 	]
 
 	// Cassandra/Hector 
-	hectorObjectMapperDepend = "me.prettyprint:hector-object-mapper:3.1-09"
 	googleCollectionsDepend = "com.google.collections:google-collections:1.0"
 	xbeanDepend = "org.apache.xbean:xbean-spring:3.5"
 
-	hectorCoreOnlyDepend = "me.prettyprint:hector-object-mapper:3.1-09"
+	hectorObjectMapperDepend = "org.hectorclient:hector-object-mapper:3.1-09"
+	hectorCoreOnlyDepend = "org.hectorclient:hector-core:${hectorVersion}"
 	hectorCoreDepend = [ hectorCoreOnlyDepend, {
-			exclude group: "org.apache.cassandra", module: "cassandra-all"
-			exclude group: "org.apache.cassandra", module: "cassandra-thrift"
-			exclude group: "org.slf4j", module: "slf4j-log4j12"
-			exclude group: "org.springframework", module: "spring-beans"
-			exclude group: "org.springframework", module: "spring-context"
+			exclude group: "org.slf4j", module: "slf4j-api"
+			exclude group: "commons-lang", module: "commons-lang"
+			exclude group: "commons-pool", module: "commons-pool"
 		}
 	]
     
     cassandraAllOnlyDepend = "org.apache.cassandra:cassandra-all:${cassandraVersion}"
     cassandraAllDepend = [ cassandraAllOnlyDepend, {
-			exclude group: "org.mortbay.jetty", module: "jetty"
 			exclude group: "org.codehaus.jackson", module: "jackson-core-asl"
 			exclude group: "org.codehaus.jackson", module: "jackson-mapper-asl"
+
+			exclude group: "org.apache.httpcomponents", module: "httpcore"
+			exclude group: "org.apache.httpcomponents", module: "httpclient"
+
+			exclude group: "commons-cli", module: "commons-cli"
+			exclude group: "commons-codec", module: "commons-codec"
+			exclude group: "commons-logging", module: "commons-logging"
+
+			exclude group: "org.slf4j", module: "slf4j-api"
 			exclude group: "org.slf4j", module: "slf4j-log4j12"
 			exclude group: "log4j", module: "log4j"
 		}
@@ -281,6 +290,10 @@ ext {
 	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
 	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
 
+    // GXT
+    gxtDepend = "com.sencha.gxt:gxt:${gxtVersion}"
+    gxtChartDepend = "com.sencha.gxt:gxt-chart:${gxtVersion}"
+			
 	// Ant
 
 	antJschDepend = "ant:ant-jsch:1.6.5"

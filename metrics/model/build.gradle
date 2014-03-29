@@ -1,9 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'war'
-
-ext {
-    moduleName = "org.scriptbox.metrics.Metrics"
-}
+apply plugin: GwtPlugin
 
 dependencies {
 	compile project(":util:common")
@@ -30,7 +27,12 @@ dependencies {
 }
 
 
-task compileGwt (dependsOn: classes, type: JavaExec) {
+gwt {
+    moduleName = "org.scriptbox.metrics.Metrics"
+}
+
+/*
+task gwtCompile (dependsOn: classes, type: JavaExec) {
     buildDir = "${project.buildDir}/gwt"
     extraDir = "${project.buildDir}/extra"
 
@@ -65,7 +67,59 @@ task compileGwt (dependsOn: classes, type: JavaExec) {
     maxHeapSize = '256M'
 }
 
-war.dependsOn compileGwt
+*/
+
+war.dependsOn gwtCompile
 war {
-    from compileGwt.buildDir
+    from gwtCompile.buildDir
+}
+
+class GwtPlugin implements Plugin<Project> {
+
+    void apply( Project project ) {
+        project.extensions.create("gwt", GwtPluginExtension)
+        project.task('gwtCompile',type: GwtCompileTask ) {
+            ext {
+                buildDir = "${project.buildDir}/gwt"
+                extraDir = "${project.buildDir}/extra"
+            }
+            inputs.source project.sourceSets.main.java.srcDirs
+            inputs.dir project.sourceSets.main.output.resourcesDir
+            outputs.dir buildDir
+
+            // Workaround for incremental build (GRADLE-1483)
+            outputs.upToDateSpec = new org.gradle.api.specs.AndSpec()
+
+            doFirst {
+                project.file(buildDir).mkdirs()
+            }
+
+            main = 'com.google.gwt.dev.Compiler'
+            classpath { [
+                project.sourceSets.main.java.srcDirs, // Java source
+                project.sourceSets.main.output.resourcesDir, // Generated resources
+                project.sourceSets.main.output.classesDir, // Generated classes
+                project.sourceSets.main.compileClasspath, // Deps
+            ] }
+        
+            args = [
+                moduleName ? moduleName : project.gwt.moduleName,
+                '-war', buildDir,
+                '-logLevel', 'INFO',
+                '-localWorkers', '2',
+                '-compileReport',
+                '-extra', extraDir,
+                // '-draftCompile' // Speeds up compile with 25%
+            ]
+            maxHeapSize = '256M'
+        }
+    }
+}
+
+class GwtPluginExtension {
+    def moduleName;
+}
+
+class GwtCompileTask extends JavaExec {
+    def moduleName;
 }

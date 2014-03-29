@@ -38,9 +38,9 @@ seed_provider:
 phi_convict_threshold: 8
 rpc_keepalive: true
 rpc_port: 9161
-rpc_timeout_in_ms: 5000
+# rpc_timeout_in_ms: 5000
 saved_caches_directory: target/test/cassandra/savedcaches
-sliced_buffer_size_in_kb: 64
+# sliced_buffer_size_in_kb: 64
 snapshot_before_compaction: false
 storage_port: 7010
 thrift_framed_transport_size_in_mb: 15

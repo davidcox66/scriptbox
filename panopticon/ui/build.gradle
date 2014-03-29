@@ -1,0 +1,81 @@
+apply plugin: 'java'
+apply plugin: 'war'
+
+ext {
+    moduleName = "org.scriptbox.metrics.Metrics"
+}
+
+dependencies {
+	compile project(":util:common")
+	compile project(":box")
+	compile project(":util:spring")
+	compile project(":util:gwt:client")
+	compile project(":util:gwt:server")
+	compile project(":metrics:cassandra")
+    compile gxtDepend
+    compile gxtChartDepend
+    compile gwtUserDepend
+    compile gwtDevDepend
+    
+    testCompile springTestDepend  
+    testCompile junitDepend
+  
+    // Compile GWT libs, needed for gwtCompile and the javaCompile
+    // Also includes the servlet-api
+    providedCompile gwtUserDepend
+    providedCompile gwtDevDepend
+
+    // Needed for GWT compile and at runtime for RequestBuilder
+    // Specify two artifacts as workaround for GRADLE-1934
+    /*
+    compile('javax.validation:validation-api:1.0.0.GA') {
+        artifact { name = 'validation-api' type = 'jar' }
+        artifact { name = 'validation-api' type = 'jar' classifier = 'sources' }
+    }
+    */
+
+    // Runtime GWT libraries, should be included in WAR
+    runtime gwtServletDepend
+    //runtime 'org.json:json:20090211'
+}
+
+
+task compileGwt (dependsOn: classes, type: JavaExec) {
+    buildDir = "${project.buildDir}/gwt"
+    extraDir = "${project.buildDir}/extra"
+
+    inputs.source sourceSets.main.java.srcDirs
+    inputs.dir sourceSets.main.output.resourcesDir
+    outputs.dir buildDir
+
+    // Workaround for incremental build (GRADLE-1483)
+    outputs.upToDateSpec = new org.gradle.api.specs.AndSpec()
+
+    doFirst {
+        file(buildDir).mkdirs()
+    }
+
+    main = 'com.google.gwt.dev.Compiler'
+    classpath { [
+        sourceSets.main.java.srcDirs, // Java source
+        sourceSets.main.output.resourcesDir, // Generated resources
+        sourceSets.main.output.classesDir, // Generated classes
+        sourceSets.main.compileClasspath, // Deps
+    ] }
+
+    args = [
+        moduleName,
+        '-war', buildDir,
+        '-logLevel', 'INFO',
+        '-localWorkers', '2',
+        '-compileReport',
+        '-extra', extraDir,
+        // '-draftCompile' // Speeds up compile with 25%
+    ]
+    maxHeapSize = '256M'
+}
+
+war.dependsOn compileGwt
+war {
+    from compileGwt.buildDir
+}

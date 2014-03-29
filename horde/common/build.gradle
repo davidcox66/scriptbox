@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(":deps:logging")
+	compile project(":util:cassandra")
+	compile project(":box")
+    compile httpClientDepend
+    compile commonsPoolDepend
+
+    provided groovyDepend
+
+	testCompile junitDepend
+}
+
