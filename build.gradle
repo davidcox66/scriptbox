@@ -404,14 +404,16 @@ allprojects { Project proj ->
 
 	repositories {
 		maven {
-            /*
-			credentials {
-				username = 'deployment'
-				password = 'monkey1'
-			}
-			url = 'https://gandolf.joulex.com/nexus/content/groups/public'
-            */
-            url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+				if( System.env['REPO'] ) {
+                	url System.env['REPO']
+				}
+				else {
+					credentials {
+						username = 'deployment'
+						password = 'monkey1'
+					}
+					url = 'https://gandolf.joulex.com/nexus/content/groups/public'
+				}
 		}
 		mavenLocal()
 	}
@@ -421,14 +423,16 @@ subprojects {
 	buildscript {
 		repositories {
 			maven {
-                /*
-				credentials {
-					username = 'deployment'
-					password = 'monkey1'
+				if( System.env['REPO'] ) {
+                	url System.env['REPO']
 				}
-				url = 'https://gandolf.joulex.com/nexus/content/groups/public'
-                */
-                url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+				else {
+					credentials {
+						username = 'deployment'
+						password = 'monkey1'
+					}
+					url = 'https://gandolf.joulex.com/nexus/content/groups/public'
+				}
 			}
 			jcenter()
 			// maven {
