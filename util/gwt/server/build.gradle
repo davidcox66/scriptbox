@@ -1,8 +1,17 @@
 apply plugin: 'java'
+apply plugin: GwtPlugin
+
+gwtCompile {
+    moduleName = "org.scriptbox.util.gwt.server.remote.Remote"
+}
 
 dependencies {
 	compile project(":deps:logging")
-	compile commonsLangDepend
+	compile project(":util:common")
+	compile springWebDepend
+	compile springAopDepend
+
 	testCompile junitDepend
+    testCompile springTestDepend
 }
 
