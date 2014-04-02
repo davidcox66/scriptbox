@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'war'
 apply plugin: 'gwt'
 
@@ -10,6 +11,7 @@ dependencies {
 	compile project(":util:common")
 	compile commonsLangDepend
 	compile commonsCollectionsDepend
+	compile groovyDepend
 }
 
 

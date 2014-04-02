@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.TaskAction
 
 import java.nio.charset.Charset;
 
@@ -81,35 +82,6 @@ class GwtPlugin implements Plugin<Project> {
         }
 
         project.task('gwtGenerateAsync',type: GwtGenerateAsyncTask ) {
-            doFirst {
-                if( !servicePattern ) {
-                    throw new Exception( "serviceName not defined on GWT plugin" );
-                }
-                def ss = project.sourceSets.main.java
-
-                def services = ss.matching{ include servicePattern }
-                def root = ss.srcDirs.iterator().next()
-                def path = root.absolutePath
-                println "Root: ${root}"
-
-                def sources = [];
-                services.each{ 
-                    sources.add( getRelativePath(root,it) );
-                    // println "Matching service: ${it}"
-                }
-                JavaDocBuilder builder = createJavaDocBuilder( project )
-                sources.each{ 
-                    String className = getTopLevelClassName( it ); 
-                    JavaClass clazz = builder.getClassByName( className );
-                    if( isEligibleForGeneration(clazz) ) {
-                        println "Generating class: ${className}"
-                        println generateAsync( clazz, null )                        ;
-                    }
-                    else {
-                        println "Not eligible class: ${className}"
-                    } 
-                }
-            }
         }
     }
 }
@@ -126,6 +98,19 @@ class GwtCompileTask extends JavaExec {
 class GwtGenerateAsyncTask extends DefaultTask {
 
     private static final String REMOTE_SERVICE_INTERFACE = "com.google.gwt.user.client.rpc.RemoteService";
+
+    private final static Map<String, String> WRAPPERS = new HashMap<String, String>();
+    static
+    {
+        WRAPPERS.put( "boolean", Boolean.class.getName() );
+        WRAPPERS.put( "byte", Byte.class.getName() );
+        WRAPPERS.put( "char", Character.class.getName() );
+        WRAPPERS.put( "short", Short.class.getName() );
+        WRAPPERS.put( "int", Integer.class.getName() );
+        WRAPPERS.put( "long", Long.class.getName() );
+        WRAPPERS.put( "float", Float.class.getName() );
+        WRAPPERS.put( "double", Double.class.getName() );
+    }
 
     def servicePattern;
     def encoding;
@@ -154,7 +139,7 @@ class GwtGenerateAsyncTask extends DefaultTask {
         builder.getClassLibrary().addClassLoader( getProjectClassLoader(project) );
         for( String sourceRoot : project.sourceSets.main.java.srcDirs ) {
             File src = new File( sourceRoot );
-            println "Adding source: ${src}"
+            // println "Adding source: ${src}"
             builder.getClassLibrary().addSourceFolder( src );
         }
         return builder;
@@ -166,15 +151,18 @@ class GwtGenerateAsyncTask extends DefaultTask {
         int i = 0;
         for ( File classpathFile : classpath ) {
             urls[i] = classpathFile.toURI().toURL();
-            println "Adding URL: ${urls[i]}"
+            // println "Adding URL: ${urls[i]}"
             i++;
         }
         return new URLClassLoader( urls, ClassLoader.getSystemClassLoader() );
     }
 
     boolean isEligibleForGeneration( JavaClass javaClass ) {
-        println "Class: ${javaClass} interface=${javaClass.isInterface()}, public=${javaClass.isPublic()}, remote=${isRemote(javaClass)}"
-        return javaClass.isInterface() && javaClass.isPublic() && isRemote(javaClass);
+        boolean ret = javaClass.isInterface() && javaClass.isPublic() && isRemote(javaClass);
+        if( !ret ) {
+            println "Class: ${javaClass} interface=${javaClass.isInterface()}, public=${javaClass.isPublic()}, remote=${isRemote(javaClass)}"
+        }
+        return ret;
     }
 
     boolean isRemote( JavaClass javaClass ) {
@@ -242,12 +230,36 @@ class GwtGenerateAsyncTask extends DefaultTask {
         }
     }
 
-    String generateAsync( JavaClass clazz, File targetFile ) {
-        /*
-        PrintWriter writer = new PrintWriter( new BufferedWriter(
-            new OutputStreamWriter( buildContext.newFileOutputStream( targetFile ), encoding ) ) );
-        */
+    @TaskAction
+    void generateAsync() {
+        if( !servicePattern ) {
+            throw new Exception( "serviceName not defined on GWT plugin" );
+        }
+        def ss = project.sourceSets.main.java
 
+        def services = ss.matching{ include servicePattern }
+        def root = ss.srcDirs.iterator().next()
+        def path = root.absolutePath
+
+        def sources = [];
+        services.each{ sources.add( getRelativePath(root,it) ); }
+
+        JavaDocBuilder builder = createJavaDocBuilder( project )
+        sources.each{ 
+            String className = getTopLevelClassName( it ); 
+            JavaClass clazz = builder.getClassByName( className );
+            if( isEligibleForGeneration(clazz) ) {
+                File target = getTargetFile(root,it);
+                println "Generating class: ${className} to: ${target}"
+                target.setText( generateAsync(clazz) );
+            }
+            else {
+                println "Not eligible class: ${className}"
+            } 
+        }
+    }
+
+    String generateAsync( JavaClass clazz ) {
         String text = ''' 
 <%= clazz.package ?  "package ${clazz.packageName};\n" :"" %>
 import com.google.gwt.core.client.GWT;
@@ -282,10 +294,10 @@ public interface ${className}Async
       */
     public static final class Util 
     { 
-        private static ${className}Async instance;\n" );
+        private static ${className}Async instance;
         public static final ${className}Async getInstance() {
-            if ( instance == null ) {;
-                instance = (${className}Async)GWT.create( ${className}.class;
+            if ( instance == null ) {
+                instance = (${className}Async)GWT.create( ${className}.class );
                 <% if ( !hasRemoteServiceRelativePath ) { 
                     String uri = MessageFormat.format( rpcPattern, className );
                 %>
