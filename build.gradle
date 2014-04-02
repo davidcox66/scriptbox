@@ -290,6 +290,8 @@ ext {
 	gwtDevDepend = "com.google.gwt:gwt-dev:${gwtVersion}" // test
 	gwtLogDepend = "com.google.code.gwt-log:gwt-log:2.6.2"
 
+    gwtPluginDepend = "org.scriptbox.gwt:gwt-plugin:1.0-SNAPSHOT"
+
     // GXT
     gxtDepend = "com.sencha.gxt:gxt:${gxtVersion}"
     gxtChartDepend = "com.sencha.gxt:gxt-chart:${gxtVersion}"
@@ -417,14 +419,16 @@ allprojects { Project proj ->
 
 	repositories {
 		maven {
-            /*
-			credentials {
-				username = 'deployment'
-				password = 'monkey1'
-			}
-			url = 'https://gandolf.joulex.com/nexus/content/groups/public'
-            */
-            url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+            if( System.env['REPO_USER'] ) {
+                credentials {
+                    username = System.env['REPO_USER']
+                    password = System.evn['REPO_PASSWORD']
+                }
+                url = System.env['REPO']
+            }
+            else if( System.env['REPO'] ) {
+                url System.env['REPO']
+            }
 		}
 		mavenLocal()
 	}
@@ -434,14 +438,16 @@ subprojects {
 	buildscript {
 		repositories {
 			maven {
-                /*
-				credentials {
-					username = 'deployment'
-					password = 'monkey1'
-				}
-				url = 'https://gandolf.joulex.com/nexus/content/groups/public'
-                */
-                url "http://ecpd-dev4.odc.vzwcorp.com:6211/nexus/content/groups/public"
+                if( System.env['REPO_USER'] ) {
+                    credentials {
+                        username = System.env['REPO_USER']
+                        password = System.evn['REPO_PASSWORD']
+                    }
+                    url = System.env['REPO']
+                }
+                else if( System.env['REPO'] ) {
+                    url System.env['REPO']
+                }
 			}
 			jcenter()
 			// maven {
@@ -453,6 +459,7 @@ subprojects {
 			classpath groovyDepend
 			classpath shadowPluginDepend
 			classpath tomcatPluginDepend
+			classpath gwtPluginDepend
 		}
 	}
 	configurations {
