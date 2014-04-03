@@ -1,6 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'war'
-apply plugin: GwtPlugin
+apply plugin: 'gwt'
 
 gwtCompile {
     moduleName = "org.scriptbox.metrics.Metrics"
@@ -10,6 +11,7 @@ dependencies {
 	compile project(":util:common")
 	compile commonsLangDepend
 	compile commonsCollectionsDepend
+	compile groovyDepend
 }
 
 

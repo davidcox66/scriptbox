@@ -1,6 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'war'
-apply plugin: GwtPlugin
+apply plugin: 'gwt'
 
 gwtGenerateAsync {
     servicePattern = "**/*GWTService.java"
@@ -13,6 +14,7 @@ dependencies {
 	compile project(":util:gwt:client")
 	compile project(":util:gwt:server")
 	compile project(":metrics:cassandra")
+    compile groovyDepend
     compile gxtDepend
     compile gxtChartDepend
     compile gwtUserDepend

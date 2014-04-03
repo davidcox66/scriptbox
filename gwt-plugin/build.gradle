@@ -1,0 +1,151 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+// apply plugin: 'signing'
+
+version = '1.0-SNAPSHOT'
+group = 'org.scriptbox.gwt'
+def artifact = 'gwt-plugin'
+
+configurations { 
+  deployment
+  // published.extendsFrom archives, signatures
+  published.extendsFrom archives
+}
+
+repositories {
+    maven {
+        if( System.env['REPO_USER'] ) {
+            credentials {
+                username = System.env['REPO_USER']
+                password = System.evn['REPO_PASSWORD']
+            }
+            url = System.env['REPO']
+        }
+        else if( System.env['REPO'] ) {
+            url System.env['REPO']
+        }
+    }
+    mavenLocal()
+}
+
+buildscript {
+    repositories {
+        maven {
+            if( System.env['REPO_USER'] ) {
+                credentials {
+                    username = System.env['REPO_USER']
+                    password = System.evn['REPO_PASSWORD']
+                }
+                url = System.env['REPO']
+            }
+            else if( System.env['REPO'] ) {
+                url System.env['REPO']
+            }
+        }
+        jcenter()
+        // maven {
+        // 	url = 'http://jcenter.bintray.com/'
+        // }
+        mavenLocal()
+    }
+}
+
+dependencies {
+    compile "com.thoughtworks.qdox:qdox:1.12.1"
+    compile gradleApi()
+    compile localGroovy()
+}
+
+
+jar {
+  baseName = artifact
+}
+
+task wrapper(type: Wrapper) { 
+  gradleVersion = '1.11'
+}
+
+
+task sourceJar(type: Jar) {
+  description = 'An archive of the source code for Maven Central'
+  baseName = artifact
+  classifier = 'sources'
+  from sourceSets.main.groovy
+}
+
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+  description = 'An archive of the GroovyDocs for Maven Central'
+  baseName = artifact
+  classifier = 'javadoc'
+  from fileTree(groovydoc.destinationDir)
+}
+
+artifacts { 
+  archives groovydocJar, sourceJar
+}
+
+// signing {
+//  sign configurations.archives
+//}
+
+
+install {
+  repositories.mavenInstaller {
+    pom.project(pomConfiguration)
+  }
+}
+
+
+uploadPublished {
+  // dependsOn << [ signArchives ]
+  repositories.mavenDeployer {
+    beforeDeployment { deployment ->
+      // signPom(deployment)
+    }
+    name = 'mavenCentralReleaseDeployer'
+    repository(url: System.env['REPO'] ) { 
+      if( System.env['REPO_USER'] ) {
+        authentication(userName: System.env['REPO_USER'], password: System.env['REPO_PASSWORD'])
+      }
+      releases(updatePolicy: 'always')
+      snapshots(updatePolicy: 'never')
+    }
+    pom.project(pomConfiguration)
+  }
+}
+
+
+
+
+//
+// A single place to create the POM configuration, so it can be
+// applied from the install and the upload tasks.
+//
+def getPomConfiguration() { 
+  return {
+    name('Scriptbox GWT Plugin')
+    description('A Gradle plugin for GWT.')
+    url('https://github.com/davidcox66/scriptbox')
+    licenses {
+      license {
+        name 'The Apache Software License, Version 2.0'
+        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+        distribution 'repo'
+      }
+    }
+    developers {
+      developer {
+        id('davidcox66')
+        name('David Cox')
+        email('david@gmail.com')
+      }
+    }
+    scm {
+      connection('scm:davidcox66@github.com/davidcox66/scriptbox')
+      developerConnection('scm:git@github.com:davidcox66/scriptbox.git')
+      url('https://github.com/davidcox66/scriptbox')
+    }
+  }
+}
+
