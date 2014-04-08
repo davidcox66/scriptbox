@@ -12,3 +12,6 @@ dependencies {
 	testCompile junitDepend
 }
 
+jar {
+    baseName = "cassandra-deps"
+}

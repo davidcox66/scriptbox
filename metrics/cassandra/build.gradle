@@ -7,3 +7,6 @@ dependencies {
 	testCompile junitDepend
 }
 
+jar {
+    baseName = "metrics-cassandra"
+}

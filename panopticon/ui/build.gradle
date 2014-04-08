@@ -3,17 +3,36 @@ apply plugin: 'groovy'
 apply plugin: 'war'
 apply plugin: 'gwt'
 
+gwtCompile {
+    moduleName = "org.scriptbox.ui.Panopticon"
+    style = 'DETAILED'
+}
+
 gwtGenerateAsync {
     servicePattern = "**/*GWTService.java"
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDirs << "${buildDir}/gwt"
+        }
+    }
+}
+
 dependencies {
+	compile project(":box") 
 	compile project(":util:common")
-	compile project(":box")
 	compile project(":util:spring")
+	compile project(":util:cassandra")
 	compile project(":util:gwt:client")
 	compile project(":util:gwt:server")
 	compile project(":metrics:cassandra")
+
+    // Source attachment for GWT compile
+	compile project(path: ":util:gwt:server", configuration: "archives" )
+	compile project(path: ":metrics:model", configuration: "archives" )
+
     compile groovyDepend
     compile gxtDepend
     compile gxtChartDepend
@@ -24,3 +43,8 @@ dependencies {
     testCompile junitDepend
 }
 
+war {
+    from gwt.buildDir
+}
+war.dependsOn << gwtCompile 
+compileJava.dependsOn << gwtGenerateAsync
