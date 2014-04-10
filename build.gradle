@@ -416,7 +416,7 @@ ext {
 
 allprojects { Project proj -> 
 	// sourceCompatibility = 1.6
-	sourceCompatibility = JavaVersion.VERSION_1_6
+	sourceCompatibility = JavaVersion.VERSION_1_7
 	project.version = appVersion
 
 	repositories {
@@ -424,7 +424,7 @@ allprojects { Project proj ->
             if( System.env['REPO_USER'] ) {
                 credentials {
                     username = System.env['REPO_USER']
-                    password = System.evn['REPO_PASSWORD']
+                    password = System.env['REPO_PASSWORD']
                 }
                 url = System.env['REPO']
             }
@@ -443,7 +443,7 @@ subprojects {
                 if( System.env['REPO_USER'] ) {
                     credentials {
                         username = System.env['REPO_USER']
-                        password = System.evn['REPO_PASSWORD']
+                        password = System.env['REPO_PASSWORD']
                     }
                     url = System.env['REPO']
                 }

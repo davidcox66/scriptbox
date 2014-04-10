@@ -17,7 +17,7 @@ repositories {
         if( System.env['REPO_USER'] ) {
             credentials {
                 username = System.env['REPO_USER']
-                password = System.evn['REPO_PASSWORD']
+                password = System.env['REPO_PASSWORD']
             }
             url = System.env['REPO']
         }
@@ -34,7 +34,7 @@ buildscript {
             if( System.env['REPO_USER'] ) {
                 credentials {
                     username = System.env['REPO_USER']
-                    password = System.evn['REPO_PASSWORD']
+                    password = System.env['REPO_PASSWORD']
                 }
                 url = System.env['REPO']
             }
