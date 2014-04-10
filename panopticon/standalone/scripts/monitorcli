@@ -1,11 +1,11 @@
 #!/bin/bash
 
-jar=panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar
+jar=panopticon-1.0-SNAPSHOT-standalone.jar
 dir=$(dirname $0)
 if [[ -f $jar ]] ; then
 	root=$dir
 else
-	root=$dir/../target
+	root=$dir/../build/distributions
 fi	
 
 

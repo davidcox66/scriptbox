@@ -20,8 +20,18 @@ public class HordeMain {
 				Thread.sleep( 60*1000 );
 			}
 		}
+		catch( CommandLineException ex ) {
+			System.err.println( ex.getMessage() );
+			usage();
+		}
 		catch( Exception ex ) {
 			ex.printStackTrace( System.err );
+			System.exit( 1 );
 		}
+	}
+	
+	private static void usage() {
+		BoxServerCliHelper.usage( "HordeMain", 7900 );
+		System.exit( 1 );
 	}
 }

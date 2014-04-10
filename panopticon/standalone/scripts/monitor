@@ -1,11 +1,11 @@
 #!/bin/bash
 
-jar=panopticon.sa-1.0-SNAPSHOT-standalone-distro.jar
+jar=panopticon-1.0-SNAPSHOT-standalone.jar
 dir=$(dirname $0)
 if [[ -f $jar ]] ; then
 	root=$dir
 else
-	root=$dir/../target
+	root=$dir/../build/distributions
 fi	
 
 # if [[ $(uname) = "Darwin" ]] ; then
@@ -49,5 +49,6 @@ JAVA_OPTS="\
 elif [[ "$@" == *--debug* ]] ; then
 	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
 fi
-    	
+
+set -x    	
 java $JAVA_OPTS -cp $CP org.scriptbox.panopticon.main.MonitorMain --address=$ip "$@"

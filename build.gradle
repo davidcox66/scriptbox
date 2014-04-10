@@ -421,15 +421,15 @@ allprojects { Project proj ->
 
 	repositories {
 		maven {
-            if( System.env['REPO_USER'] ) {
+            if( mavenRepoUser ) {
                 credentials {
-                    username = System.env['REPO_USER']
-                    password = System.env['REPO_PASSWORD']
+                    username = mavenRepoUser
+                    password = mavenRepoPassword
                 }
-                url = System.env['REPO']
+                url = mavenRepo
             }
-            else if( System.env['REPO'] ) {
-                url System.env['REPO']
+            else if( mavenRepo ) {
+                url mavenRepo
             }
 		}
 		mavenLocal()
@@ -440,21 +440,21 @@ subprojects {
 	buildscript {
 		repositories {
 			maven {
-                if( System.env['REPO_USER'] ) {
-                    credentials {
-                        username = System.env['REPO_USER']
-                        password = System.env['REPO_PASSWORD']
-                    }
-                    url = System.env['REPO']
-                }
-                else if( System.env['REPO'] ) {
-                    url System.env['REPO']
-                }
+				if( mavenRepoUser ) {
+					credentials {
+						username = mavenRepoUser
+						password = mavenRepoPassword
+					}
+					url = mavenRepo
+				}
+				else if( mavenRepo ) {
+					url mavenRepo
+				}
 			}
-			jcenter()
-			// maven {
-			// 	url = 'http://jcenter.bintray.com/'
-			// }
+			// jcenter()
+			maven {
+			 	url = 'http://jcenter.bintray.com/'
+			}
 			mavenLocal()
 		}
 		dependencies {
