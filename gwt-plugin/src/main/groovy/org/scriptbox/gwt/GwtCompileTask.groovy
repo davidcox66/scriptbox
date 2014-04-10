@@ -128,7 +128,7 @@ class GwtCompileTask extends JavaExec {
             // '-draftCompile' // Speeds up compile with 25%
         ]
         */
-        println "GWT compile args: ${args}"
+        logger.info( "GWT compile args: ${args}" )
         return args
     }
 

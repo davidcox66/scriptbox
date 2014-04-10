@@ -67,7 +67,7 @@ class GwtGenerateAsyncTask extends DefaultTask {
         builder.getClassLibrary().addClassLoader( getProjectClassLoader(project) );
         for( String sourceRoot : project.sourceSets.main.java.srcDirs ) {
             File src = new File( sourceRoot );
-            // println "Adding source: ${src}"
+            logger.debug( "Adding source: ${src}" );
             builder.getClassLibrary().addSourceFolder( src );
         }
         return builder;
@@ -79,7 +79,7 @@ class GwtGenerateAsyncTask extends DefaultTask {
         int i = 0;
         for ( File classpathFile : classpath ) {
             urls[i] = classpathFile.toURI().toURL();
-            // println "Adding URL: ${urls[i]}"
+            logger.debug( "Adding URL: ${urls[i]}" );
             i++;
         }
         return new URLClassLoader( urls, ClassLoader.getSystemClassLoader() );
@@ -88,7 +88,7 @@ class GwtGenerateAsyncTask extends DefaultTask {
     boolean isEligibleForGeneration( JavaClass javaClass ) {
         boolean ret = javaClass.isInterface() && javaClass.isPublic() && isRemote(javaClass);
         if( !ret ) {
-            println "Class: ${javaClass} interface=${javaClass.isInterface()}, public=${javaClass.isPublic()}, remote=${isRemote(javaClass)}"
+            logger.debug( "Class: ${javaClass} interface=${javaClass.isInterface()}, public=${javaClass.isPublic()}, remote=${isRemote(javaClass)}" );
         }
         return ret;
     }
@@ -112,9 +112,9 @@ class GwtGenerateAsyncTask extends DefaultTask {
     boolean hasRemoteServiceRelativePath(JavaClass clazz) {
         if ( clazz != null && clazz.getAnnotations() != null ) {
             for ( Annotation annotation : clazz.getAnnotations() ) {
-                println "annotation found on service interface " + annotation;
+                logger.debug( "annotation found on service interface " + annotation );
                 if ( annotation.getType().getValue().equals( "com.google.gwt.user.client.rpc.RemoteServiceRelativePath" ) ) {
-                    println "@RemoteServiceRelativePath annotation found on service interface";
+                    logger.debug( "@RemoteServiceRelativePath annotation found on service interface" );
                     return true;
                 }
             }
@@ -178,12 +178,12 @@ class GwtGenerateAsyncTask extends DefaultTask {
             JavaClass clazz = builder.getClassByName( className );
             if( isEligibleForGeneration(clazz) ) {
                 File target = getTargetFile( new File(project.gwt.buildDir),it);
-                println "Generating class: ${className} to: ${target}"
+                logger.debug( "Generating class: ${className} to: ${target}" );
                 target.parentFile.mkdirs();
                 target.setText( generateAsync(clazz) );
             }
             else {
-                println "Not eligible class: ${className}"
+                logger.debug( "Not eligible class: ${className}" );
             } 
         }
     }

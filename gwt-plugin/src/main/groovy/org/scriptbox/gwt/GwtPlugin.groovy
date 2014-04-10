@@ -19,8 +19,6 @@ class GwtPlugin implements Plugin<Project> {
 
         project.sourceSets.main.java.srcDirs = project.sourceSets.main.java.srcDirs << dir
         project.sourceSets.main.resources.srcDirs = project.sourceSets.main.resources.srcDirs << dir
-        println "Java directories: ${project.sourceSets.main.java.srcDirs}"
-        println "Source directories: ${project.sourceSets.main.resources.srcDirs}"
 
         project.task('gwtCompile',type: GwtCompileTask ) { it.init(); }
         project.task('gwtGenerateAsync',type: GwtGenerateAsyncTask ) { it.init(); }

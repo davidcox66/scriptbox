@@ -1,17 +1,18 @@
 #!/bin/bash
 
-jar=horde.sa-1.0-SNAPSHOT-standalone-distro.jar
+jar=horde-1.0-SNAPSHOT-standalone.jar
 dir=$(dirname $0)
 if [[ -f $jar ]] ; then
 	root=$dir
 else
-	root=$dir/../target
+	root=$dir/../build/distributions
 fi	
 
 if [[ $(uname) = "Darwin" ]] ; then
 	ip=$(/sbin/ifconfig en0 | grep 'inet ' | cut -d' ' -f2)
 else 
-	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+	# ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+	ip=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
 fi
 
 # So com.sun virtual machine apis will work
