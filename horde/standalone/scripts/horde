@@ -11,8 +11,10 @@ fi
 if [[ $(uname) = "Darwin" ]] ; then
 	ip=$(/sbin/ifconfig en0 | grep 'inet ' | cut -d' ' -f2)
 else 
-	# ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
-	ip=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
+	ip=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+    if [[ -z $ip ]] ; then
+        ip=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
+    fi
 fi
 
 # So com.sun virtual machine apis will work
