@@ -131,7 +131,8 @@ ext {
 	jbossJavaee6Version = "1.0.0.Final"
 	solderVersion = "3.0.0.Final"
 	tilesVersion = "2.2.2"
-	gwtVersion = "2.6.0"
+	// gwtVersion = "2.6.0"
+	gwtVersion = "2.4.0"
     gxtVersion = "3.0.1"
 
     // JDK
@@ -212,7 +213,8 @@ ext {
 
 	// Servlet
 
-	servletApiDepend = "javax.servlet:servlet-api:2.5"
+	// servletApiDepend = "javax.servlet:servlet-api:2.5"
+	servletApiDepend = "javax.servlet:servlet-api:3.0"
 	jstlDepend = "jstl:jstl:1.2"
 	tilesCoreDepend = [ "org.apache.tiles:tiles-core:${tilesVersion}", {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
