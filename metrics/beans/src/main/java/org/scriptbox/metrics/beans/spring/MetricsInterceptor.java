@@ -1,10 +1,14 @@
 package org.scriptbox.metrics.beans.spring;
 
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -23,12 +27,13 @@ import org.scriptbox.metrics.beans.mbean.DynamicExposableMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MetricsInterceptor implements MethodInterceptor {
+public class MetricsInterceptor implements MethodInterceptor, MetricsInterceptorMBean {
 
 	private static final Logger logger = LoggerFactory.getLogger( MetricsInterceptor.class );
 	
     private static final int[] DISTROS = new int[] { 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000, 32000, -1 };
 	private Map<Object,InvocationContext> contexts = new HashMap<Object,InvocationContext>();
+	private boolean enabled;
 	
 	private static class InvocationContext {
 		private List<RecordableMetric> metrics = new ArrayList<RecordableMetric>();
@@ -37,9 +42,10 @@ public class MetricsInterceptor implements MethodInterceptor {
 		private List<DynamicExposableMBean> mbeans = new ArrayList<DynamicExposableMBean>();
 		
 		InvocationContext( String objectName, InvocationContext parent ) {
+            this.objectName = objectName;
 		    this.parent = parent;
 		    DynamicExposableMBean mbean = new DynamicExposableMBean( objectName );
-		    this.mbeans.add( mbean );
+		    mbeans.add( mbean );
 		    
 	        addMetric( mbean, new TransactionsPerSecond() );
 	        addMetric( mbean, new TransactionCount() );
@@ -105,19 +111,43 @@ public class MetricsInterceptor implements MethodInterceptor {
 	    }
 	}
 	
-	public  Object invoke(MethodInvocation invocation) throws Throwable {
-		long start = System.currentTimeMillis();
-		
+	public MetricsInterceptor() {
 		try {
-			Object rval = invocation.proceed();
-			long end = System.currentTimeMillis();
-			record( invocation, true, end - start );
-			return rval;
+			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+			ObjectName name = new ObjectName("SpringMetricsInterceptor:type=MethodInterceptor");		
+			mbs.registerMBean(this, name);		
 		}
-		catch (Throwable ex) {
-			long end = System.currentTimeMillis();
-			record( invocation, false, end - start );
-			throw ex;
+		catch( Exception ex ) {
+			logger.error( "Error registering MetricsInterceptor", ex );
+		}
+	}
+	
+	public void setEnabled( boolean enabled ) {
+		this.enabled = enabled;
+	}
+	
+	public boolean getEnabled() {
+		return enabled;
+	}
+	
+	public  Object invoke(MethodInvocation invocation) throws Throwable {
+		if( enabled ) {
+			long start = System.currentTimeMillis();
+			
+			try {
+				Object rval = invocation.proceed();
+				long end = System.currentTimeMillis();
+				record( invocation, true, end - start );
+				return rval;
+			}
+			catch (Throwable ex) {
+				long end = System.currentTimeMillis();
+				record( invocation, false, end - start );
+				throw ex;
+			}
+		}
+		else {
+			return invocation.proceed();
 		}
 	}
 
@@ -144,16 +174,12 @@ public class MetricsInterceptor implements MethodInterceptor {
 	
 	protected String getMethodName(Method method) {
 		StringBuilder builder = new StringBuilder( getMethodShortName(method) );
-		builder.append( "(");
 		Class[] clss = method.getParameterTypes();
 		for( int i=0 ; i < clss.length ; i++ ) {
 			Class cls = clss[i];
-			if( i > 0 ) {
-				builder.append( "," );
-			}
+            builder.append( "_" );
 			builder.append( getClassShortName(cls) );
 		}
-		builder.append( ")" );
 		return builder.toString();
 	}
 
