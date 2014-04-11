@@ -14,15 +14,15 @@ configurations {
 
 repositories {
     maven {
-        if( System.env['REPO_USER'] ) {
+        if( mavenRepoUser ) {
             credentials {
-                username = System.env['REPO_USER']
-                password = System.env['REPO_PASSWORD']
+                username = mavenRepoUser
+                password = mavenRepoPassword
             }
-            url = System.env['REPO']
+            url = mavenRepo
         }
-        else if( System.env['REPO'] ) {
-            url System.env['REPO']
+        else if( mavenRepo ) {
+            url = mavenRepo
         }
     }
     mavenLocal()
@@ -105,9 +105,9 @@ uploadPublished {
       // signPom(deployment)
     }
     name = 'mavenCentralReleaseDeployer'
-    repository(url: System.env['REPO'] ) { 
-      if( System.env['REPO_USER'] ) {
-        authentication(userName: System.env['REPO_USER'], password: System.env['REPO_PASSWORD'])
+    repository(url: mavenRepo ) { 
+      if( mavenRepoUser ) {
+        authentication(userName: mavenRepoUser, password: mavenRepoPassword)
       }
       releases(updatePolicy: 'always')
       snapshots(updatePolicy: 'never')

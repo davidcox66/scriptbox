@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics;
+package org.scriptbox.metrics.beans;
 
 
 public class AverageMetric extends RecordableMetric {

@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics.mbean;
+package org.scriptbox.metrics.beans.mbean;
 
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
@@ -17,8 +17,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.scriptbox.horde.metrics.AbstractMetric;
-import org.scriptbox.horde.metrics.RecordableMetric;
+import org.scriptbox.metrics.beans.AbstractMetric;
+import org.scriptbox.metrics.beans.RecordableMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

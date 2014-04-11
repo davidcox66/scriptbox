@@ -1,6 +1,6 @@
-package org.scriptbox.horde.metrics.distro;
+package org.scriptbox.metrics.beans.distro;
 
-import org.scriptbox.horde.metrics.RecordableMetric;
+import org.scriptbox.metrics.beans.RecordableMetric;
 
 
 public abstract class AbstractDistroMetric extends RecordableMetric {

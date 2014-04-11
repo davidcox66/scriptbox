@@ -1,10 +1,7 @@
-package org.scriptbox.horde.metrics.mbean;
+package org.scriptbox.metrics.beans.mbean;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import org.scriptbox.horde.action.Action;
-import org.scriptbox.horde.action.ActionScript;
 
 public class DynamicExposableMBean extends AbstractDynamicExposableMBean {
 

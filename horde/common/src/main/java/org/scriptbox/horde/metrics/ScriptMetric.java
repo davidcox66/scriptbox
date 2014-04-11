@@ -1,6 +1,7 @@
 package org.scriptbox.horde.metrics;
 
 import org.scriptbox.horde.action.ActionScript;
+import org.scriptbox.metrics.beans.AbstractMetric;
 
 
 public abstract class ScriptMetric extends AbstractMetric {

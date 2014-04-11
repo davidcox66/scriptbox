@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics.mbean;
+package org.scriptbox.metrics.beans.mbean;
 
 
 public interface Exposable {

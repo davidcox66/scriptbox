@@ -1,10 +1,8 @@
 package org.scriptbox.horde.metrics.probe;
 
 import groovy.lang.Closure;
-
-import org.scriptbox.horde.metrics.AverageMetric;
-import org.scriptbox.horde.metrics.AvgTransactionTime;
-import org.scriptbox.horde.metrics.CountMetric;
+import org.scriptbox.metrics.beans.AvgTransactionTime;
+import org.scriptbox.metrics.beans.CountMetric;
 
 public class TimingProbe extends BasicProbe {
 

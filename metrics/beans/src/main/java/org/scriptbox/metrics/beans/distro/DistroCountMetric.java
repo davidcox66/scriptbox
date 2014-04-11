@@ -1,4 +1,4 @@
-package org.scriptbox.horde.metrics.distro;
+package org.scriptbox.metrics.beans.distro;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -3,7 +3,7 @@ package org.scriptbox.horde.metrics.probe;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.scriptbox.horde.metrics.mbean.Exposable;
+import org.scriptbox.metrics.beans.mbean.Exposable;
 
 public class BasicProbe extends Probe {
 

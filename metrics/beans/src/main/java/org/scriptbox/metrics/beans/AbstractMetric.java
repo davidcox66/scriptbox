@@ -1,6 +1,6 @@
-package org.scriptbox.horde.metrics;
+package org.scriptbox.metrics.beans;
 
-import org.scriptbox.horde.metrics.mbean.Exposable;
+import org.scriptbox.metrics.beans.mbean.Exposable;
 
 
 public abstract class AbstractMetric implements Exposable {

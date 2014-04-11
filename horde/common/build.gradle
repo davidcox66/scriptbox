@@ -3,6 +3,7 @@ apply plugin: 'java'
 dependencies {
 	compile project(":deps:logging")
 	compile project(":util:cassandra")
+	compile project(":metrics:beans")
 	compile project(":box")
     compile httpClientDepend
     compile commonsPoolDepend

@@ -1,0 +1,150 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+// apply plugin: 'signing'
+
+version = '1.0-SNAPSHOT'
+group = 'org.scriptbox'
+def artifact = 'metric-beans'
+
+dependencies {
+	compile project(":deps:logging")
+	compile springAopDepend
+}
+
+
+configurations {
+  deployment
+  // published.extendsFrom archives, signatures
+  published.extendsFrom archives
+}
+
+repositories {
+	maven {
+		if( mavenRepoUser ) {
+			credentials {
+				username = mavenRepoUser
+				password = mavenRepoPassword
+			}
+			url = mavenRepo
+		}
+		else if( mavenRepo ) {
+			url = mavenRepo
+		}
+	}
+	mavenLocal()
+}
+
+buildscript {
+	repositories {
+		maven {
+			if( mavenRepoUser ) {
+				credentials {
+					username = mavenRepoUser
+					password = mavenRepoPassword
+				}
+				url = mavenRepo
+			}
+			else if( mavenRepo ) {
+				url = mavenRepo
+			}
+		}
+		jcenter()
+		// maven {
+		// 	url = 'http://jcenter.bintray.com/'
+		// }
+		mavenLocal()
+	}
+}
+
+jar {
+  baseName = artifact
+}
+
+task javadocs(type: Javadoc) {
+	source = sourceSets.main.allJava
+}
+
+task sourceJar(type: Jar) {
+  description = 'An archive of the source code for Maven Central'
+  baseName = artifact
+  classifier = 'sources'
+  from sourceSets.main.java
+}
+
+
+task javadocJar(type: Jar, dependsOn: javadocs) {
+  description = 'An archive of the Javadocs for Maven Central'
+  baseName = artifact
+  classifier = 'javadoc'
+  from fileTree(javadocs.destinationDir)
+}
+
+artifacts {
+  archives javadocJar, sourceJar
+}
+
+// signing {
+//  sign configurations.archives
+//}
+
+
+install {
+  repositories.mavenInstaller {
+	pom.project(pomConfiguration)
+  }
+}
+
+
+uploadArchives {
+  // dependsOn << [ signArchives ]
+  repositories {
+	mavenDeployer {
+		beforeDeployment { deployment ->
+	  		// signPom(deployment)
+		}
+		repository(url: mavenDeploySnapshots ) {
+	  		if( mavenRepoUser ) {
+				authentication(userName: mavenRepoUser, password: mavenRepoPassword)
+	  		}
+		  releases(updatePolicy: 'always')
+		  snapshots(updatePolicy: 'never')
+		}
+		pom.project(pomConfiguration)
+	}
+  }
+}
+
+
+
+
+//
+// A single place to create the POM configuration, so it can be
+// applied from the install and the upload tasks.
+//
+def getPomConfiguration() {
+  return {
+	name('Scriptbox Metrics')
+	description('Metric classes for scriptbox')
+	url('https://github.com/davidcox66/scriptbox')
+	licenses {
+	  license {
+		name 'The Apache Software License, Version 2.0'
+		url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+		distribution 'repo'
+	  }
+	}
+	developers {
+	  developer {
+		id('davidcox66')
+		name('David Cox')
+		email('david@gmail.com')
+	  }
+	}
+	scm {
+	  connection('scm:davidcox66@github.com/davidcox66/scriptbox')
+	  developerConnection('scm:git@github.com:davidcox66/scriptbox.git')
+	  url('https://github.com/davidcox66/scriptbox')
+	}
+  }
+}
+
