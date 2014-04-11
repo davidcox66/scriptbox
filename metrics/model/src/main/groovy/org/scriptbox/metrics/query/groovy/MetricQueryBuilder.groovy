@@ -49,10 +49,11 @@ class MetricQueryBuilder
   }
   
   public MetricQueryExp distro( MetricQueryExp exp, int... intervals ) { 
-	 MetricQueryExp sub = new MetricQueryExp[ intervals.length ];
+	 MetricQueryExp[] sub = new MetricQueryExp[ intervals.length ];
 	 for( int i=0 ; i < intervals.length ; i++ ) {
-		 sub[i] = average( String.sprintf("%0.000f", intervals[i] / 1000) );
+		 sub[i] = average( String.sprintf("%0.000f", intervals[i] / 1000), exp );
 	 }
+	 return list( sub );
   }
   
   public MetricQueryExp not( MetricQueryExp arg, MetricQueryExp nots ) { 
