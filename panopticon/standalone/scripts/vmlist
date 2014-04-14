@@ -1,4 +1,21 @@
-root=$(dirname $0)/..
+set -x
+
+jar=panopticon-1.0-SNAPSHOT-standalone.jar
+dir=$(dirname $0)
+if [[ -f $jar ]] ; then
+	root=$dir
+else
+	root=$dir/../build/distributions
+fi	
+
 JAVA_OPTS="\
 	-Dlogback.configurationFile=panopticon-logback.xml"
-java $JAVA_OPTS -cp $root/build/distributions/panopticon-1.0-SNAPSHOT-standalone.jar org.scriptbox.box.plugins.jmx.VmJmxUtil "$@"
+
+if [[ "$@" == *--trace* ]] ; then
+	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
+	JAVA_OPTS="$JAVA_OPTS -Dtrace.level=DEBUG"
+elif [[ "$@" == *--debug* ]] ; then
+	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
+fi
+	
+java $JAVA_OPTS -cp $root/panopticon-1.0-SNAPSHOT-standalone.jar:$JAVA_HOME/lib/tools.jar org.scriptbox.box.jmx.vm.VmJmxUtil "$@"

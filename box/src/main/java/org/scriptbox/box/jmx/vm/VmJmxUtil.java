@@ -43,6 +43,11 @@ public class VmJmxUtil {
 		for (VirtualMachineDescriptor vmd: list) {
 			String id = vmd.id();
 			try {
+				LOGGER.debug( "getVirtualMachines: " +
+					"displayName=" + vmd.displayName() +
+					", id=" + vmd.id() +
+					", value=" + vmd.toString() +
+					", provider=(" + vmd.provider().name() + "," + vmd.provider().type() + ")" );
 				result.put(id, VirtualMachine.attach(vmd));
 			} 
 			catch( IOException ex ) {

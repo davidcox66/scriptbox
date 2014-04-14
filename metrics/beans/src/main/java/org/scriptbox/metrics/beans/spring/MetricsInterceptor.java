@@ -163,7 +163,7 @@ public class MetricsInterceptor implements MethodInterceptor, MetricsInterceptor
 			String methodName = getMethodName(method);
 			InvocationContext classContext = contexts.get( method.getDeclaringClass() );
 			if( classContext == null ) {
-				classContext = new InvocationContext( "SpringMetrics:class=" + classShortName, null );
+				classContext = new InvocationContext( "SpringMetrics:class=" + classShortName + ",method=all", null );
 				contexts.put( method.getDeclaringClass(), classContext );
 			}
 			methodContext = new InvocationContext( "SpringMetrics:class=" + classShortName +  ",method=" + methodName, classContext );
@@ -185,7 +185,8 @@ public class MetricsInterceptor implements MethodInterceptor, MetricsInterceptor
 
     
 	private String getMethodShortName( Method method ) {
-		return getClassShortName(method.getDeclaringClass()) + "." + method.getName();
+		// return getClassShortName(method.getDeclaringClass()) + "." + method.getName();
+		return method.getName();
 	}
 	
     @SuppressWarnings("rawtypes")
