@@ -173,6 +173,8 @@ public class MetricsInterceptor implements MethodInterceptor, MetricsInterceptor
 	}
 	
 	protected String getMethodName(Method method) {
+        return getMethodShortName(method);
+        /*
 		StringBuilder builder = new StringBuilder( getMethodShortName(method) );
 		Class[] clss = method.getParameterTypes();
 		for( int i=0 ; i < clss.length ; i++ ) {
@@ -181,6 +183,7 @@ public class MetricsInterceptor implements MethodInterceptor, MetricsInterceptor
 			builder.append( getClassShortName(cls) );
 		}
 		return builder.toString();
+        */
 	}
 
     
