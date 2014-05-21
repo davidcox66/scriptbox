@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class BottomAverageQueryExp extends FilteringQueryExp {
 
@@ -17,10 +18,10 @@ public class BottomAverageQueryExp extends FilteringQueryExp {
 	    super( name, count, child );
 	  }
 	  
-	  float filter( MetricRange range ) {
+	  float filter( MetricRange range, MetricQueryContext ctx ) {
 		  int count = 0;
 	      float total = 0;
-	      for( Iterator<Metric> iter = range.getIterator(0) ; iter.hasNext() ; ) {
+	      for( Iterator<Metric> iter = range.getIterator(ctx.getResolution()) ; iter.hasNext() ; ) {
 	    	  Metric metric = iter.next();
 	    	  total += metric.getValue();
 	    	  count++;

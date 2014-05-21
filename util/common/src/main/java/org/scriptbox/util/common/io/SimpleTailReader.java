@@ -11,9 +11,9 @@ import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TailReader {
+public class SimpleTailReader {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( TailReader.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( SimpleTailReader.class );
 	
     private static int charBufferSize = 4096;     // half the default stream buffer size
     private static int expectedLineLength = 160;  // double the default line length

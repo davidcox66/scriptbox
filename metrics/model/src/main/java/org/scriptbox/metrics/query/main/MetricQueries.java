@@ -36,6 +36,9 @@ import org.scriptbox.metrics.query.exp.TreePathQueryExp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.regex.Matcher;
+import groovy.lang.Closure;
+
 public class MetricQueries {
 	static final Logger LOGGER = LoggerFactory.getLogger(MetricQueries.class);
 
@@ -150,6 +153,19 @@ public class MetricQueries {
 	    }; 
 	}
 
+	public static MetricQueryExp filter( String name, final Closure closure, MetricQueryExp... expressions ) {
+	    return new NaryQueryExp( name, "filter", expressions ) {
+	    	public Object process(List<Object> results, MetricQueryContext ctx) {
+	    		Set ret = new HashSet(); 
+	    		for( Object result : results ) {
+	    			if( coerceToBoolean(closure.call(result)) ) {
+	    				ret.add( result );
+	    			}
+	    		}
+	    		return ret;
+	    	}
+	    }; 
+	}
 	public static MetricQueryExp and( String name, MetricQueryExp... expressions ) {
 	    return new NaryQueryExp( name, "and", expressions ) {
 	    	public Object process(List<Object> results, MetricQueryContext ctx) {
@@ -256,4 +272,20 @@ public class MetricQueries {
 	public static MetricQueryExp bottomavg(String name, int count, MetricQueryExp exp) {
 		return new BottomAverageQueryExp(name, count, exp);
 	}
+	
+   public static boolean coerceToBoolean( Object obj ) {
+        if( obj != null ) {
+            if( obj instanceof Boolean ) {
+                return ((Boolean)obj).booleanValue();
+            }
+            else if( obj instanceof Matcher ) {
+                return ((Matcher)obj).matches();
+            }
+            else {
+                return Boolean.valueOf( String.valueOf(obj) ).booleanValue();
+            }
+        }
+        return false;
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.scriptbox.box.jmx.conn;
 
 import java.io.IOException;
+import javax.management.AttributeNotFoundException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -15,6 +16,8 @@ import javax.management.ReflectionException;
 
 public abstract class JmxConnection {
 
+	public abstract Object getAttribute( ObjectName objectName, String attribute ) 
+		throws IOException, ReflectionException, InstanceNotFoundException, AttributeNotFoundException, MBeanException;
 	public abstract AttributeList getAttributes( ObjectName objectName, Collection attributes ) 
 		throws IOException, ReflectionException, InstanceNotFoundException;
 	public abstract MBeanAttributeInfo[] getAttributeInfo( ObjectName objectName )

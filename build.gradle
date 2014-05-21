@@ -189,7 +189,7 @@ ext {
 	commonsCollectionsDepend = "commons-collections:commons-collections:3.2.1"
 	commonsPoolDepend = "commons-pool:commons-pool:1.5.3"
 	commonsDbcp = "commons-dbcp:commons-dbcp:1.2.2"
-	commonsIoDepend = "commons-io:commons-io:1.4"
+	commonsIoDepend = "commons-io:commons-io:2.4"
 	commonsHttpClientDepend = "commons-httpclient:commons-httpclient:3.0.1"
 	commonsCodecDepend = "commons-codec:commons-codec:1.6"
 	commonsLangDepend = "commons-lang:commons-lang:2.6"
@@ -416,7 +416,9 @@ ext {
 
 allprojects { Project proj -> 
 	// sourceCompatibility = 1.6
-	sourceCompatibility = JavaVersion.VERSION_1_7
+    if( !project.sourceCompatibility ) {
+        sourceCompatibility = JavaVersion.VERSION_1_7
+    }
 	project.version = appVersion
 
 	repositories {

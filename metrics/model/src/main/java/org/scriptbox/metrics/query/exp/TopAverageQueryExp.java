@@ -1,6 +1,7 @@
 package org.scriptbox.metrics.query.exp;
 
 import java.util.Collections;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -16,10 +17,10 @@ public class TopAverageQueryExp extends FilteringQueryExp {
 	  public TopAverageQueryExp( String name, int count, MetricQueryExp child ) {
 	    super( name, count, child );
 	  }
-	  float filter( MetricRange range ) {
+	  float filter( MetricRange range, MetricQueryContext ctx ) {
 		  int count = 0;
 	      float total = 0;
-	      for( Iterator<Metric> iter = range.getIterator(0) ; iter.hasNext() ; ) {
+	      for( Iterator<Metric> iter = range.getIterator(ctx.getResolution()) ; iter.hasNext() ; ) {
 	    	  Metric metric = iter.next();
 	    	  total += metric.getValue();
 	    	  count++;

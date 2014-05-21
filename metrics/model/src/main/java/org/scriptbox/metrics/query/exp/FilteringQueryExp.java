@@ -51,7 +51,7 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 	   * @param range
 	   * @return
 	   */
-	  abstract float filter( MetricRange range );
+	  abstract float filter( MetricRange range, MetricQueryContext ctx );
 	  
 	  /**
 	   * Received the results from filtering of the data and sorts them as needed.
@@ -66,7 +66,7 @@ public abstract class FilteringQueryExp implements MetricQueryExp {
 		  Map<? extends MetricProvider,? extends MetricRange> metrics = MetricQueries.providers(ctx, child);
 	      List<CriticalValue> cvs = new ArrayList<CriticalValue>(metrics.size());
 	      for( Map.Entry<? extends MetricProvider,? extends MetricRange> entry : metrics.entrySet() ) {
-	    	  float cv = filter( entry.getValue() );
+	    	  float cv = filter( entry.getValue(), ctx );
 	    	  cvs.add( new CriticalValue(entry.getKey(),cv) );
 	      }
 	      sort( cvs );

@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.input.Tailer;
+import org.apache.commons.io.input.TailerListener;
 import org.scriptbox.box.controls.BoxServiceListener;
-import org.scriptbox.util.common.io.TailReader;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class ApacheLogParser implements BoxServiceListener {
 	  
 	private File file;
 	private ParameterizedRunnableWithResult<ApacheLogEntry,String> parser;
-	private TailReader reader;	
+	private Tailer tailer;	
 	  
 	private Map<String,ApacheLogTotal> totals = new HashMap<String,ApacheLogTotal>();
 
@@ -40,8 +41,8 @@ public class ApacheLogParser implements BoxServiceListener {
 	  }
 
 	  public void starting( List arguments ) throws Exception {
-		  if( reader == null ) {
-			  createReader();
+		  if( tailer == null ) {
+			  createTailer();
 		  }
 	  }
 	  
@@ -50,17 +51,23 @@ public class ApacheLogParser implements BoxServiceListener {
 
 	  public void shutdown() {
 		  if( LOGGER.isInfoEnabled() ) { LOGGER.info( "shutdown: stopping tail of: " + file ); }
-		  if( reader != null ) {
-		      reader.stop();    
+		  if( tailer != null ) {
+		      tailer.stop();    
 		  }
 	  }
 	  
-	  private void createReader() {
+	  private void createTailer() {
 	      if( file.exists() ) {
-	          if( LOGGER.isInfoEnabled() ) { LOGGER.info( "createReader: starting tail of " + file ); }
-		      reader = new TailReader();
-		      reader.tail( file, TAIL_INTERVAL, new ParameterizedRunnable<String>() {
-		    	  public void run( String line ) { 
+	          if( LOGGER.isInfoEnabled() ) { LOGGER.info( "createTailer: starting tail of " + file ); }
+		      tailer = Tailer.create( 
+		          file, 
+		          new TailerListener() {
+					public void init(Tailer tailer) {
+					}
+					public void handle(Exception ex) {
+	    			  LOGGER.warn( "Error tailing log: " + file, ex );
+					}
+					public void handle(String line) {
 		    		  try {
 				          ApacheLogEntry entry = parser.run(line);    
 				          if( entry != null ) {
@@ -84,8 +91,16 @@ public class ApacheLogParser implements BoxServiceListener {
 		    		  catch( Exception ex ) {
 		    			  LOGGER.warn( "Error parsing log line: " + line, ex );
 		    		  }
-			      }
-		      } );
+					}
+					public void fileRotated() {
+						LOGGER.info( "Log file rotated: " + file );
+					}
+					public void fileNotFound() {
+						LOGGER.warn( "Log file not found: " + file );
+					}
+		          },
+		          TAIL_INTERVAL,
+		          true );
 	      }
 	      else {
 	          LOGGER.warn( "createReader: Apache log does not exists yet: " + file );

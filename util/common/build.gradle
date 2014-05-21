@@ -3,6 +3,7 @@ apply plugin: 'java'
 dependencies {
 	compile project(":deps:logging")
 	compile commonsLangDepend
+	compile commonsIoDepend
 	testCompile junitDepend
 }
 

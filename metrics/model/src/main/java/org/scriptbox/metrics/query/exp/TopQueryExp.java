@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.scriptbox.metrics.model.Metric;
 import org.scriptbox.metrics.model.MetricRange;
+import org.scriptbox.metrics.query.main.MetricQueryContext;
 
 public class TopQueryExp extends FilteringQueryExp {
 
@@ -16,9 +17,9 @@ public class TopQueryExp extends FilteringQueryExp {
 	  public TopQueryExp( String name, int count, MetricQueryExp child ) {
 	    super( name, count, child );
 	  }
-	  float filter( MetricRange range ) {
+	  float filter( MetricRange range, MetricQueryContext ctx ) {
 	      float max = Float.MIN_VALUE;
-	      for( Iterator<Metric> iter = range.getIterator(0) ; iter.hasNext() ; ) {
+	      for( Iterator<Metric> iter = range.getIterator(ctx.getResolution()) ; iter.hasNext() ; ) {
 	    	  Metric metric = iter.next();
 	          max = Math.max( max, metric.getValue() );
 	      }

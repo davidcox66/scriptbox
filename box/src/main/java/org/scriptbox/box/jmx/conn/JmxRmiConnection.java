@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
@@ -49,6 +50,12 @@ public class JmxRmiConnection extends JmxConnection {
 	   environment.put(JMXConnector.CREDENTIALS, new String[] {user, password} );
 	}
 
+	public Object getAttribute( ObjectName objectName, String attribute ) 
+		throws IOException, ReflectionException, InstanceNotFoundException, AttributeNotFoundException, MBeanException
+	{
+		return getServer().getAttribute(objectName, attribute);
+	}
+	
 	public AttributeList getAttributes( ObjectName objectName, Collection attributes ) 
 		throws IOException, ReflectionException, InstanceNotFoundException 
 	{

@@ -62,7 +62,7 @@
     	p:store-ref="store">
     	<property name="reportPaths">
     		<list>
-    			<value>/tmp/reports</value>
+    			<value>${reports.dir}</value>
     		</list>
     	</property>
     	<property name="metricDescriptionProcessors">

@@ -2,6 +2,7 @@ package org.scriptbox.panopticon.jmx;
 
 import groovy.lang.Closure;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -16,12 +17,14 @@ import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.box.jmx.conn.JmxConnections;
+import org.scriptbox.box.jmx.proc.JmxProcess;
 import org.scriptbox.box.jmx.proc.JmxPsProcessProvider;
 import org.scriptbox.box.jmx.proc.JmxRemoteProcessProvider;
 import org.scriptbox.box.jmx.proc.JmxVmProcessProvider;
 import org.scriptbox.box.jmx.vm.VmJmxConnectionBuilder;
 import org.scriptbox.panopticon.capture.CaptureContext;
 import org.scriptbox.panopticon.capture.CaptureResult;
+import org.scriptbox.panopticon.capture.CaptureStore;
 import org.scriptbox.plugins.jmx.MBeanProxy;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.scriptbox.util.common.os.proc.ProcessStatus;
@@ -44,10 +47,13 @@ public class JmxGroovyInjector implements JmxInjector {
 		vars.put( "ps", new MethodClosure( this, "ps")  );
 		vars.put( "vms", new MethodClosure( this, "vms")  );
 		vars.put( "remote", new MethodClosure( this, "remote")  );
+		vars.put( "jboss", new MethodClosure( this, "jboss")  );
 		
 		vars.put( "mbeans", new MethodClosure( this, "mbeans")  );
 		vars.put( "mbean", new MethodClosure( this, "mbean")  );
+		vars.put( "gc", new MethodClosure( this, "gc")  );
 		vars.put( "capture", new MethodClosure( this, "capture")  );
+		vars.put( "store", new MethodClosure( this, "store")  );
 	}
 
 	public void ps( String name, Object filter, Closure closure ) throws Exception {
@@ -83,6 +89,14 @@ public class JmxGroovyInjector implements JmxInjector {
 		remote( name, url, closure );
 	}
 	
+	public void jboss( String name, String url, Closure closure ) throws Exception {
+		add( closure, new JmxRemoteProcessProvider(getConnections(), name, url) );
+	}
+	public void jboss( String name, String host, int port, Closure closure ) throws Exception {
+		String url = "service:jmx:remoting-jmx://" + host + ":" + port;
+		remote( name, url, closure );
+	}
+	
 	public void mbeans( String objectName, Closure closure ) throws Exception {
 		mbeans( objectName, null, false, null, closure );
 	}
@@ -103,6 +117,13 @@ public class JmxGroovyInjector implements JmxInjector {
 		block.add( receiver );
 	}
 
+	@SuppressWarnings("unchecked")
+	public void gc( final Closure closure ) throws Exception {
+		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
+		ExecRunnable receiver = new JmxGarbageCollection( Closures.toRunnable(closure,GarbageCollector.Info.class) );
+		block.add( receiver );
+	}
+	
     public void capture( final Object oneOrMoreAttributes )  {
     	capture( oneOrMoreAttributes, null );
     }
@@ -127,6 +148,25 @@ public class JmxGroovyInjector implements JmxInjector {
 		block.add( receiver );
     }
     
+	public void store( String attribute, String statistic, Object value ) throws Exception {
+		final CaptureStore cs = BoxContext.getCurrentContext().getBeans().getEx("store", CaptureStore.class );
+		final JmxProcess proc = ExecContext.getNearestEnclosing(JmxProcess.class);
+		CaptureResult result = new CaptureResult(proc, attribute, statistic, value, System.currentTimeMillis());
+		cs.store( result );
+	}
+	
+	public void store( final Storable storable ) throws Exception {
+		if( storable != null ) {
+			Collection<CaptureResult> results = storable.getResults();
+			if( results != null ) {
+				final CaptureStore cs = BoxContext.getCurrentContext().getBeans().getEx("store", CaptureStore.class );
+				for( CaptureResult result : results ) {
+					cs.store( result );
+				}
+			}
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void add( final Closure closure, ExecRunnable runnable ) throws Exception {
 		ExecBlock<ExecRunnable> container = ExecContext.getEnclosing(ExecBlock.class);

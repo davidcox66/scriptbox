@@ -6,6 +6,10 @@ version = '1.0-SNAPSHOT'
 group = 'org.scriptbox'
 def artifact = 'metric-beans'
 
+// Need to override as dependents are not 1.7 yet
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
 dependencies {
 	compile project(":deps:logging")
 	compile springAopDepend

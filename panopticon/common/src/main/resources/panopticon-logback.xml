@@ -38,6 +38,11 @@
     <appender-ref ref="CONSOLE" />
   </logger>
   
+  <logger name="me.prettyprint.cassandra.connection.CassandraHostRetryService" additivity="false">
+    <level value="${fine.level:-ERROR}" />
+    <appender-ref ref="CONSOLE" />
+  </logger>
+  
   <logger name="org.scriptbox" additivity="false">
     <level value="${debug.level:-INFO}" />
     <appender-ref ref="CONSOLE" />
