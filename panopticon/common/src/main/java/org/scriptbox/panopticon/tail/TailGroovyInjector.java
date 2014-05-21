@@ -1,14 +1,15 @@
 package org.scriptbox.panopticon.tail;
 
 import groovy.lang.Closure;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import groovy.util.Expando;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
@@ -68,10 +69,10 @@ public class TailGroovyInjector implements TailInjector {
 				if( matching ) {
 					if( matcher.groupCount() == fields.size() ) {
 						accepted = true;
-						Map<String,String> obj = new HashMap<String,String>();
+						Expando obj = new Expando();
 						int i=1;
 						for( String field : fields ) {
-							obj.put( field, matcher.group(i++) );
+							obj.setProperty( field, matcher.group(i++) );
 						}
 						if( arguments.length == 1 ) {
 							ret = closure.call( obj );

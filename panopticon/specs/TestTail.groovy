@@ -4,17 +4,16 @@ mailer.host = "Mailhost.odc.vzwcorp.com";
 boolean sent = false;
 def header = ~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/
 
-def processor = { String line ->
-    println "Line: ${line}";
+def processor = { record ->
+    println "record: ${record}"
     if( !sent ) {
         println "Preparing email";
         sent = true;
         def msg = mailer.message();
         msg.from = "test@verizonwireless.com";
-        msg.subject = "Ooops";
+        msg.subject = "Received an ${record.level} message";
         msg.addTo( "David.Cox2@VerizonWireless.com" );
-        msg.addText( "Something went wrong" );
-        msg.addText( line );
+        msg.addText( "Got this message: ${record.message}" );
         println "Sending email";
         msg.send(); 
         println "Email sent";
@@ -22,21 +21,16 @@ def processor = { String line ->
 }
 
 def converter = objectify(
-    ~/(?s)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+(.*?)\n(.*)/,
-    // ~/(?m)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+(.*?)\n?(.*)/,
+    ~/(?s)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+([^\n]*)\n?(.*)/,
     ["time","user","request","thread", "level", "location", "message", "data" ],
+    processor, 
     {
-        println "obj: ${it}"
-    },
-    {
-        println "rejected"
+        // rejected
     }
 );
 
 def combined = coalesce(header,converter);
- 
 
 tail(10,['/tmp/dummy'],combined);
-// tail(10,['/tmp/dummy'],processor);
 
 
