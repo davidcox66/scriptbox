@@ -9,7 +9,7 @@ import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventsGroovyInjector implements EventslInjector {
+public class EventsGroovyInjector implements EventsInjector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( EventsGroovyInjector.class );
 	

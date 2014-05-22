@@ -1,5 +1,5 @@
 
-mailer.host = "Mailhost.odc.vzwcorp.com";
+mailer.host = getContextPropertyEx('mail.host')
 
 def converter = objectify(
     ~/(?s)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+([^\n]*)\n?(.*)/,
@@ -18,7 +18,7 @@ def converter = objectify(
 );
 
 def processor = coalesce(~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/,converter);
-tail(10,['/tmp/dummy'],processor);
+tail(10,[getContextPropertyEx('server.log')],processor);
 
 /*
 def fl = flow(); 
@@ -51,7 +51,9 @@ observe( 'SERVER_LOG_ERROR' ) { ev, record ->
         def msg = mailer.message();
         msg.from = "test@verizonwireless.com";
         msg.subject = "Got an ${record.level} message";
-        msg.addTo( "David.Cox2@VerizonWireless.com" );
+        getContextPropertyEx('mail.addresses').each{ 
+            msg.addTo( it );
+        }
         msg.addText( "Message: ${record.message}" );
         msg.addText( "error.txt", "${record.data}" );
         println "Sending email";

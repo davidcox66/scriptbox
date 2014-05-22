@@ -36,6 +36,7 @@
 		<bean name="tailGroovyInjector" class="org.scriptbox.panopticon.tail.TailGroovyInjector" p:plugin-ref="tail" />
 		<bean name="mailGroovyInjector" class="org.scriptbox.panopticon.mail.MailGroovyInjector" p:plugin-ref="mail" />
 		<bean name="eventsGroovyInjector" class="org.scriptbox.panopticon.events.EventsGroovyInjector" p:plugin-ref="events" />
+		<bean name="utilGroovyInjector" class="org.scriptbox.panopticon.util.UtilGroovyInjector" p:plugin-ref="util" />
 	</conditional:dependency>
 	
     <bean name="quartzListeners" class="org.scriptbox.util.spring.context.BeanListFactoryBean" 
@@ -52,6 +53,7 @@
     <bean name="tail" class="org.scriptbox.panopticon.tail.TailPlugin" />
     <bean name="mail" class="org.scriptbox.panopticon.mail.MailPlugin" />
     <bean name="events" class="org.scriptbox.panopticon.events.EventsPlugin" />
+    <bean name="util" class="org.scriptbox.panopticon.util.UtilPlugin" />
    
 	<bean name="monitorImpl" class="org.scriptbox.box.remoting.server.BoxWithServices" init-method="start" p:box-ref="box" />
 

@@ -12,7 +12,7 @@ public class EventsPlugin extends BoxContextInjectingListener {
 
 	@Override
 	public void contextCreated(BoxContext context) throws Exception {
-		setInjectors(context.getBox().getInjectorsOfType(EventslInjector.class));
+		setInjectors(context.getBox().getInjectorsOfType(EventsInjector.class));
 		super.contextCreated(context);
 		context.getBeans().put("EventBus", new EventBus(context) ); 
 	}
