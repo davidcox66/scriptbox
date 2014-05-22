@@ -18,6 +18,7 @@ import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
 import org.scriptbox.util.common.io.GlobFileSource;
 import org.scriptbox.util.common.io.TailerListenerFactory;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,19 +165,29 @@ public class TailGroovyInjector implements TailInjector {
 	}
 	
     public void tail( int seconds, Collection<String> exprs, final Closure tailer ) {
+    	final BoxContext context = BoxContext.getCurrentContext();
     	plugin.tail( 
     		seconds*1000,
     		new GlobFileSource(exprs), 
 	    	new TailerListenerFactory() {
     			public TailerListener create( final File file ) {
     				return new TailerListener() {
-    					public void handle(String line) {
-			    			if( tailer.getMaximumNumberOfParameters() == 2 ) {
-			    				tailer.call( line, file );
-			    			}
-			    			else {
-			    				tailer.call( line );
-			    			}
+    					public void handle(final String line) {
+    						try {
+	    						BoxContext.with(context, new ParameterizedRunnable<BoxContext>() {
+	    							public void run( BoxContext ctx ) {
+						    			if( tailer.getMaximumNumberOfParameters() == 2 ) {
+						    				tailer.call( line, file );
+						    			}
+						    			else {
+						    				tailer.call( line );
+						    			}
+	    							}
+	    						} );
+    						}
+    						catch( Exception ex ) {
+    							LOGGER.error( "Error processing tail: '" + line + "'", ex );
+    						}
     					}
     					public void handle(Exception ex) {
     						LOGGER.error( "Error tailing file: " + file, ex );

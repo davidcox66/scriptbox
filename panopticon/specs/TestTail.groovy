@@ -1,36 +1,62 @@
 
 mailer.host = "Mailhost.odc.vzwcorp.com";
 
-boolean sent = false;
-def header = ~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/
+def converter = objectify(
+    ~/(?s)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+([^\n]*)\n?(.*)/,
+    ["time","user","request","thread", "level", "location", "message", "data" ],
+    {
+		// it.time = totime( 'HH:mm:ss', it.time )
+		
+		raise( 'SERVER_LOG', it )
+		if( 'ERROR' == it.level ) {
+			raise( 'SERVER_LOG_ERROR', it )
+		}
+    },
+    {
+		raise( 'SERVER_LOG_REJECT', it )
+    }
+);
 
-def processor = { record ->
-    println "record: ${record}"
+def processor = coalesce(~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/,converter);
+tail(10,['/tmp/dummy'],processor);
+
+/*
+def fl = flow(); 
+
+fl.filter( blackout("20:00", "07:00" ) { msg ->
+	return msg.priority < 5;
+} );
+
+fl.filter( suspend(10) { msg ->
+	return msg.priority < 5;
+} );
+
+fl.filter( collate{ a, b ->
+	
+} );
+
+fl.receiver{ msgs ->
+}
+
+observe( 'SERVER_LOG_ERROR' ) { ev, record ->
+	fl.send( record ) 
+}
+*/
+
+boolean sent = false;
+observe( 'SERVER_LOG_ERROR' ) { ev, record ->
     if( !sent ) {
         println "Preparing email";
         sent = true;
         def msg = mailer.message();
         msg.from = "test@verizonwireless.com";
-        msg.subject = "Received an ${record.level} message";
+        msg.subject = "Got an ${record.level} message";
         msg.addTo( "David.Cox2@VerizonWireless.com" );
-        msg.addText( "Got this message: ${record.message}" );
+        msg.addText( "Message: ${record.message}" );
+        msg.addText( "error.txt", "${record.data}" );
         println "Sending email";
         msg.send(); 
         println "Email sent";
     }
 }
-
-def converter = objectify(
-    ~/(?s)^(\d\d:\d\d:\d\d\.\d\d\d)\s+<([^:]*):([^:]*):([^>]*)>\s+(\w+)\s+([^\s]+)\s+([^\n]*)\n?(.*)/,
-    ["time","user","request","thread", "level", "location", "message", "data" ],
-    processor, 
-    {
-        // rejected
-    }
-);
-
-def combined = coalesce(header,converter);
-
-tail(10,['/tmp/dummy'],combined);
-
 

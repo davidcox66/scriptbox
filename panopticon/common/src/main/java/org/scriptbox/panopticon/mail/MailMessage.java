@@ -81,6 +81,17 @@ public class MailMessage {
 	    }
 	}
 	
+	public void addText( String description, String text ) {
+	    try {
+	    	MimeBodyPart textpart = new MimeBodyPart();
+	    	textpart.setText( text );
+	    	textpart.setDescription( description );
+	    	parts.add( textpart );
+	    }
+	    catch( Exception ex ) {
+	    	throw new RuntimeException( "Failed setting message text", ex );
+	    }
+	}
 	public void addHtml( String html ) {
 	    try {
 	    	MimeBodyPart htmlpart = new MimeBodyPart();
