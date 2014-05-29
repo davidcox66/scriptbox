@@ -1,3 +1,4 @@
+import groovy.text.SimpleTemplateEngine;
 
 mailer.host = getContextPropertyEx('mail.host')
 
@@ -18,47 +19,60 @@ def converter = objectify(
 );
 
 def processor = coalesce(~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/,converter);
-tail(10,[getContextPropertyEx('server.log')],processor);
+tail(2,[getContextPropertyEx('server.log')],processor);
 
-/*
-def fl = flow(); 
-
-fl.filter( blackout("20:00", "07:00" ) { msg ->
-	return msg.priority < 5;
-} );
-
-fl.filter( suspend(10) { msg ->
-	return msg.priority < 5;
-} );
-
-fl.filter( collate{ a, b ->
-	
-} );
-
-fl.receiver{ msgs ->
+def mbox = inbox();
+mbox.blackout("20:00", "07:00" ) { msg ->
+	msg.priority >= 5
+}
+mbox.throttle( 3 ) { msg ->
+	msg.priority >= 5
 }
 
-observe( 'SERVER_LOG_ERROR' ) { ev, record ->
-	fl.send( record ) 
+mbox.throttle( 1 ) { msg, box ->
+	msg.priority > box.previousDelivery.maxPriority;
+} 
+
+/*
+mbox.predicate{ msg ->
 }
 */
 
-boolean sent = false;
+Random rand = new Random();
 observe( 'SERVER_LOG_ERROR' ) { ev, record ->
-    if( !sent ) {
-        println "Preparing email";
-        sent = true;
-        def msg = mailer.message();
-        msg.from = "test@verizonwireless.com";
-        msg.subject = "Got an ${record.level} message";
-        getContextPropertyEx('mail.addresses').each{ 
-            msg.addTo( it );
-        }
-        msg.addText( "Message: ${record.message}" );
-        msg.addText( "error.txt", "${record.data}" );
-        println "Sending email";
-        msg.send(); 
-        println "Email sent";
+	// int priority = Math.abs(rand.nextInt() % 10);
+	int priority = 3;
+	println "Priority: ${priority}";
+	mbox.send( record.location, priority, record );
+}
+
+String text = '''
+	Received ${msgs.size()} messages
+
+<% msgs.each{ msg -> 
+	def rec = msg.data;
+%>
+	${msg.priority} : ${rec.time} ${rec.user} ${rec.request} ${rec.level} ${rec.location} ${rec.message} 
+	${rec.data}
+<% } %>
+''';
+
+def engine = new SimpleTemplateEngine()
+def template = engine.createTemplate(text);
+
+mbox.deliver{ msgs ->
+    println "Preparing email";
+    def msg = mailer.message();
+    msg.from = "test@verizonwireless.com";
+    msg.subject = "Received ${msgs.size()} messages";
+    getContextPropertyEx('mail.addresses').each{ 
+        msg.addTo( it );
     }
+	
+    msg.addText( template.make([msgs: msgs]).toString() );
+    // msg.addText( "error.txt", "${record.data}" );
+    println "Sending email";
+    msg.send(); 
+    println "Email sent";
 }
 

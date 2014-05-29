@@ -408,7 +408,7 @@ ext {
 
 	// Miscellaneous
 
-	jodaDepend = "joda-time:joda-time:1.6"
+	jodaDepend = "joda-time:joda-time:2.3"
 	poiDepend = "org.apache.poi:poi:3.7"
 	quartzDepend = "org.quartz-scheduler:quartz:1.8.4"
 }

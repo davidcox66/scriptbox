@@ -6,6 +6,7 @@ dependencies {
 	compile project(":util:cassandra")
 	compile project(":metrics:cassandra")
 	compile project(":box")
+	compile jodaDepend
 	compile javaxMailDepend
 	compile javaxActivationDepend
 	
