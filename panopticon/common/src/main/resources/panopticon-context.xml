@@ -35,7 +35,7 @@
 		<bean name="apacheGroovyInjector" class="org.scriptbox.panopticon.apache.ApacheGroovyInjector" p:plugin-ref="apache" />
 		<bean name="tailGroovyInjector" class="org.scriptbox.panopticon.tail.TailGroovyInjector" p:plugin-ref="tail" />
 		<bean name="mailGroovyInjector" class="org.scriptbox.panopticon.mail.MailGroovyInjector" p:plugin-ref="mail" />
-		<bean name="inboxGroovyInjector" class="org.scriptbox.panopticon.inbox.InboxGroovyInjector" p:plugin-ref="inbox" />
+		<bean name="inboxGroovyInjector" class="org.scriptbox.panopticon.gauntlet.GauntletGroovyInjector" p:plugin-ref="inbox" />
 		<bean name="eventsGroovyInjector" class="org.scriptbox.panopticon.events.EventsGroovyInjector" p:plugin-ref="events" />
 		<bean name="utilGroovyInjector" class="org.scriptbox.panopticon.util.UtilGroovyInjector" p:plugin-ref="util" />
 	</conditional:dependency>
@@ -53,7 +53,7 @@
     <bean name="apache" class="org.scriptbox.panopticon.apache.ApachePlugin" p:store-ref="store" />
     <bean name="tail" class="org.scriptbox.panopticon.tail.TailPlugin" />
     <bean name="mail" class="org.scriptbox.panopticon.mail.MailPlugin" />
-    <bean name="inbox" class="org.scriptbox.panopticon.inbox.InboxPlugin" />
+    <bean name="inbox" class="org.scriptbox.panopticon.gauntlet.GauntletPlugin" />
     <bean name="events" class="org.scriptbox.panopticon.events.EventsPlugin" />
     <bean name="util" class="org.scriptbox.panopticon.util.UtilPlugin" />
    

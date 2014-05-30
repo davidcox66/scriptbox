@@ -1,25 +1,7 @@
-package org.scriptbox.panopticon.inbox;
+package org.scriptbox.panopticon.gauntlet;
 
 import groovy.lang.Closure;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.groovy.Closures;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
@@ -27,11 +9,11 @@ import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InboxGroovy extends Inbox {
+public class GauntletGroovy extends Gauntlet {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( InboxGroovy.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( GauntletGroovy.class );
 	
-	public InboxGroovy( BoxContext context ) {
+	public GauntletGroovy( BoxContext context ) {
 		super( context );
 	}
 
