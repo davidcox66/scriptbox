@@ -1,4 +1,4 @@
-package org.scriptbox.panopticon.inbox;
+package org.scriptbox.panopticon.gauntlet;
 
 import org.joda.time.DateTime;
 

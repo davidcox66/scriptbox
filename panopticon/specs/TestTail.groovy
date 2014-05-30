@@ -21,7 +21,7 @@ def converter = objectify(
 def processor = coalesce(~/^\d\d:\d\d:\d\d\.\d\d\d\s.*/,converter);
 tail(2,[getContextPropertyEx('server.log')],processor);
 
-def mbox = inbox();
+def mbox = gauntlet();
 mbox.blackout("20:00", "07:00" ) { msg ->
 	msg.priority >= 5
 }
@@ -61,9 +61,8 @@ def engine = new SimpleTemplateEngine()
 def template = engine.createTemplate(text);
 
 mbox.deliver{ msgs ->
-    println "Preparing email";
     def msg = mailer.message();
-    msg.from = "test@verizonwireless.com";
+    msg.from = getContextPropertyEx('mail.from');
     msg.subject = "Received ${msgs.size()} messages";
     getContextPropertyEx('mail.addresses').each{ 
         msg.addTo( it );
@@ -71,8 +70,6 @@ mbox.deliver{ msgs ->
 	
     msg.addText( template.make([msgs: msgs]).toString() );
     // msg.addText( "error.txt", "${record.data}" );
-    println "Sending email";
     msg.send(); 
-    println "Email sent";
 }
 

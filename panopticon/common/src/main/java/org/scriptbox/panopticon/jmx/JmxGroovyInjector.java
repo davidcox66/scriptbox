@@ -26,6 +26,7 @@ import org.scriptbox.panopticon.capture.CaptureContext;
 import org.scriptbox.panopticon.capture.CaptureResult;
 import org.scriptbox.panopticon.capture.CaptureStore;
 import org.scriptbox.plugins.jmx.MBeanProxy;
+import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.scriptbox.util.common.os.proc.ProcessStatus;
 import org.scriptbox.util.common.regex.RegexUtil;
@@ -118,9 +119,19 @@ public class JmxGroovyInjector implements JmxInjector {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void gc( final Closure closure ) throws Exception {
+	public void gc( boolean deltas, final Closure closure ) throws Exception {
 		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
-		ExecRunnable receiver = new JmxGarbageCollection( Closures.toRunnable(closure,GarbageCollector.Info.class) );
+		ExecRunnable receiver = new JmxGarbageCollection( deltas, new ParameterizedRunnable<GarbageCollection[]>() {
+			public void run( GarbageCollection[] infos ) {
+				if( closure.getMaximumNumberOfParameters() == 1 ) {
+					closure.call( infos[0] );
+				}
+				else {
+					closure.call( infos[0], infos[1] );
+				}
+			}
+		} );
+				
 		block.add( receiver );
 	}
 	

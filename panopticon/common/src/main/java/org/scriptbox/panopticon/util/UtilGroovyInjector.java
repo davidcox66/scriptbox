@@ -31,7 +31,10 @@ public class UtilGroovyInjector implements UtilInjector {
 	
 	public void inject( BoxContext context ) {
 		Lookup vars = context.getScriptVariables();
-		vars.put( "context", context.getBeans().get("Properties", HashMap.class) );
+		vars.put( "inject", new MethodClosure( this, "inject")  );
+		vars.put( "getContextBean", new MethodClosure( this, "getContextBean")  );
+		vars.put( "setContextBean", new MethodClosure( this, "setContextBean")  );
+		vars.put( "getContextBean", new MethodClosure( this, "getContextBeanEx")  );
 		vars.put( "getContextProperty", new MethodClosure( this, "getContextProperty")  );
 		vars.put( "setContextProperty", new MethodClosure( this, "setContextProperty")  );
 		vars.put( "getContextPropertyEx", new MethodClosure( this, "getContextPropertyEx")  );
@@ -39,6 +42,23 @@ public class UtilGroovyInjector implements UtilInjector {
 		vars.put( "toTime", new MethodClosure( this, "toTime")  );
 	}
 	
+	public void inject( String name, Object value ) {
+		Lookup vars = BoxContext.getCurrentContext().getScriptVariables();
+		vars.put( name, value );
+	}
+	
+	public Object getContextBean( String name ) {
+		return BoxContext.getCurrentContext().getBeans().get(name, Object.class);
+	}
+	
+	public void setContextBean( String name, Object value ) {
+		BoxContext.getCurrentContext().getBeans().put(name, value);
+	}
+	
+	public Object getContextBeanEx( String name ) {
+		return BoxContext.getCurrentContext().getBeans().getEx(name, Object.class);
+	}
+
 	public Object getContextProperty( String name ) {
 		return getProperties().get( name );
 	}

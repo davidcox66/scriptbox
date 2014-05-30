@@ -1,4 +1,4 @@
-package org.scriptbox.panopticon.inbox;
+package org.scriptbox.panopticon.gauntlet;
 
 
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Inbox {
+public class Gauntlet {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger( Inbox.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( Gauntlet.class );
 	
 	private static AtomicInteger counter = new AtomicInteger();
 	private static DateTimeFormatter fmt = DateTimeFormat.forPattern("HH:mm");
@@ -42,15 +42,15 @@ public class Inbox {
 	private List<ParameterizedRunnableWithResult<Boolean,List<Message>>> predicates = 
 		new ArrayList<ParameterizedRunnableWithResult<Boolean,List<Message>>>();
 
-	public static class InboxJob implements Job {
+	public static class GauntletJob implements Job {
 		public void execute( JobExecutionContext ctx ) throws JobExecutionException {
 			JobDataMap map = ctx.getJobDetail().getJobDataMap();
-			final Inbox inbox = (Inbox)map.get("inbox");
+			final Gauntlet gauntlet = (Gauntlet)map.get("gauntlet");
 			try {
-				BoxContext.with(inbox.context, new ParameterizedRunnable<BoxContext>() {
+				BoxContext.with(gauntlet.context, new ParameterizedRunnable<BoxContext>() {
 					public void run( BoxContext ctx ) {
-						synchronized( inbox ) {
-							inbox.processDelivery( inbox.getUndeliveredMessages() );
+						synchronized( gauntlet ) {
+							gauntlet.processDelivery( gauntlet.getUndeliveredMessages() );
 						}
 					}
 				} );
@@ -62,7 +62,7 @@ public class Inbox {
 		
 	}
 	
-	public Inbox( BoxContext context ) {
+	public Gauntlet( BoxContext context ) {
 		this.context = context;
 		deliveries.add( new Delivery() );
 	}
@@ -313,10 +313,10 @@ public class Inbox {
 				Scheduler scheduler = getScheduler();
 				int cnt = counter.addAndGet(1);
 				
-				JobDetail detail = new JobDetail("inbox" + cnt, InboxJob.class);
+				JobDetail detail = new JobDetail("gauntlet" + cnt, GauntletJob.class);
 				JobDataMap map = detail.getJobDataMap();
 				map.put("id", cnt );
-				map.put("inbox", this );
+				map.put("gauntlet", this );
 			    
 				scheduler.scheduleJob( detail, trigger );
 				scheduled = true;

@@ -1,10 +1,9 @@
 package org.scriptbox.panopticon.jmx;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
+import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -24,11 +23,17 @@ public class JmxGarbageCollection implements ExecRunnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( JmxGarbageCollection.class );
 	
+	private boolean deltas;
     private List<GarbageCollector> collectors = null;
-
-    private ParameterizedRunnable<GarbageCollector.Info> runnable;
+    private Map<GarbageCollector,GarbageCollection> infos = new HashMap<GarbageCollector,GarbageCollection>();
     
-    public JmxGarbageCollection( ParameterizedRunnable<GarbageCollector.Info> runnable ) {
+    private ParameterizedRunnable<GarbageCollection[]> runnable;
+    
+    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollection[]> runnable ) {
+    	this.deltas = deltas;
+    	if( deltas ) {
+    		infos = new HashMap<GarbageCollector,GarbageCollection>();
+    	}
     	this.runnable = runnable;
     }
     
@@ -36,8 +41,15 @@ public class JmxGarbageCollection implements ExecRunnable {
 		JmxConnection connection = ExecContext.getEnclosing(JmxProcess.class).getConnection();
 		try {
 	        for( GarbageCollector coll : getCollectors() ) {
-	        	GarbageCollector.Info info = coll.getInfo( connection );
-	        	runnable.run( info );
+	        	GarbageCollection info = coll.getInfo( connection );
+        		GarbageCollection last = infos.get( coll );
+	        	if( !deltas || last == null || !last.equals(info) ) {
+	        		infos.put( coll, info );
+	        		GarbageCollection[] args = new GarbageCollection[2];
+	        		args[0] = info;
+	        		args[1] = last;
+        			runnable.run( args );
+	        	}
 	        }
 		}
 		catch( Exception ex ) {
