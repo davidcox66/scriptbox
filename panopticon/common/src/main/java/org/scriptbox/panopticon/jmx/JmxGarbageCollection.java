@@ -25,14 +25,14 @@ public class JmxGarbageCollection implements ExecRunnable {
 	
 	private boolean deltas;
     private List<GarbageCollector> collectors = null;
-    private Map<GarbageCollector,GarbageCollector.Info> infos = new HashMap<GarbageCollector,GarbageCollector.Info>();
+    private Map<GarbageCollector,GarbageCollection> infos = new HashMap<GarbageCollector,GarbageCollection>();
     
-    private ParameterizedRunnable<GarbageCollector.Info[]> runnable;
+    private ParameterizedRunnable<GarbageCollection[]> runnable;
     
-    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollector.Info[]> runnable ) {
+    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollection[]> runnable ) {
     	this.deltas = deltas;
     	if( deltas ) {
-    		infos = new HashMap<GarbageCollector,GarbageCollector.Info>();
+    		infos = new HashMap<GarbageCollector,GarbageCollection>();
     	}
     	this.runnable = runnable;
     }
@@ -41,10 +41,10 @@ public class JmxGarbageCollection implements ExecRunnable {
 		JmxConnection connection = ExecContext.getEnclosing(JmxProcess.class).getConnection();
 		try {
 	        for( GarbageCollector coll : getCollectors() ) {
-	        	GarbageCollector.Info info = coll.getInfo( connection );
-        		GarbageCollector.Info last = infos.get( coll );
+	        	GarbageCollection info = coll.getInfo( connection );
+        		GarbageCollection last = infos.get( coll );
         		infos.put( coll, info );
-        		GarbageCollector.Info[] args = new GarbageCollector.Info[2];
+        		GarbageCollection[] args = new GarbageCollection[2];
         		args[0] = info;
         		args[1] = last;
 	        	if( !deltas || last == null || !last.equals(info) ) {

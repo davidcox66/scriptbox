@@ -121,8 +121,8 @@ public class JmxGroovyInjector implements JmxInjector {
 	@SuppressWarnings("unchecked")
 	public void gc( boolean deltas, final Closure closure ) throws Exception {
 		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
-		ExecRunnable receiver = new JmxGarbageCollection( deltas, new ParameterizedRunnable<GarbageCollector.Info[]>() {
-			public void run( GarbageCollector.Info[] infos ) {
+		ExecRunnable receiver = new JmxGarbageCollection( deltas, new ParameterizedRunnable<GarbageCollection[]>() {
+			public void run( GarbageCollection[] infos ) {
 				if( closure.getMaximumNumberOfParameters() == 1 ) {
 					closure.call( infos[0] );
 				}
