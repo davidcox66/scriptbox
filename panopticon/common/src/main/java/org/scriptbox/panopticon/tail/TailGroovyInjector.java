@@ -150,7 +150,7 @@ public class TailGroovyInjector implements TailInjector {
 						builder.setLength(0);
 					}
 					else {
-						LOGGER.info( "coalesce: no queued text yet");
+						LOGGER.debug( "coalesce: no queued text yet");
 					}
 				}
 				else if( builder.length() > 0 ) {
