@@ -16,6 +16,7 @@ import org.apache.commons.io.input.TailerListener;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
+import org.scriptbox.box.groovy.ClosureWrapper;
 import org.scriptbox.util.common.io.GlobFileSource;
 import org.scriptbox.util.common.io.TailerListenerFactory;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
@@ -54,11 +55,9 @@ public class TailGroovyInjector implements TailInjector {
 	
 	public Closure objectify( final Pattern expression, final List<String> fields, final Closure closure, final Closure rejects ) {
 		LOGGER.debug( "objectify: expression: " + expression );
-		class Objectify extends Closure {
+		class Objectify extends ClosureWrapper {
 			public Objectify() {
-				super( closure, closure.getThisObject() );
-				maximumNumberOfParameters = closure.getMaximumNumberOfParameters();
-				parameterTypes = closure.getParameterTypes();
+				super( closure );
 			}
 			public Object doCall(Object... arguments) {
 				Object ret = null;
@@ -76,13 +75,13 @@ public class TailGroovyInjector implements TailInjector {
 							obj.setProperty( field, matcher.group(i++) );
 						}
 						if( arguments.length == 1 ) {
-							ret = closure.call( obj );
+							ret = delegate.call( obj );
 						}
 						else if( arguments.length == 2 ) {
-							ret = closure.call( obj, arguments[1] );
+							ret = delegate.call( obj, arguments[1] );
 						}
 						else if( arguments.length == 3 ) {
-							ret = closure.call( obj, arguments[1], line );
+							ret = delegate.call( obj, arguments[1], line );
 						}
 						else {
 							throw new RuntimeException( "Must pass closure with (fields,[file],[line]) to objectify()");
@@ -121,13 +120,11 @@ public class TailGroovyInjector implements TailInjector {
 	
 	public Closure coalesce( final Pattern expression, final Closure closure ) {
 		LOGGER.debug( "coalesce: expression: " + expression );
-		class CoalesceClosure extends Closure {
+		class CoalesceClosure extends ClosureWrapper {
 			private boolean matched;
 			private StringBuilder builder = new StringBuilder();
 			public CoalesceClosure() {
-				super( closure, closure.getThisObject() );
-				maximumNumberOfParameters = closure.getMaximumNumberOfParameters();
-				parameterTypes = closure.getParameterTypes();
+				super( closure );
 			}
 			public Object doCall(Object... arguments) {
 				String line = (String)arguments[0];
@@ -139,10 +136,10 @@ public class TailGroovyInjector implements TailInjector {
 						String str = builder.toString();
 						if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "coalesce: processing queued text: '" + str + "'"); }
 						if( arguments.length == 1 ) {
-							ret = closure.call( str );
+							ret = delegate.call( str );
 						}
 						else if( arguments.length == 2 ) {
-							ret = closure.call( str, arguments[1] );
+							ret = delegate.call( str, arguments[1] );
 						}
 						else {
 							throw new RuntimeException( "Must pass closure with (line,[file]) to coalesce()");

@@ -411,6 +411,18 @@ ext {
 	jodaDepend = "joda-time:joda-time:2.3"
 	poiDepend = "org.apache.poi:poi:3.7"
 	quartzDepend = "org.quartz-scheduler:quartz:1.8.4"
+
+	// HornetQ
+	hornetqVersion = "2.4.0.Final"
+	hornetqJmsClientDepend = ["org.hornetq:hornetq-jms-client:${hornetqVersion}", {
+			exclude group: "org.hornetq", module: "hornetq-native"
+		}
+	]
+
+	hornetqCoreDepend = "org.hornetq:hornetq-core:${hornetqVersion}"
+	hornetqCoreClientDepend = "org.hornetq:hornetq-core-client:${hornetqVersion}"
+	hornetqCommonsDepend = "org.hornetq:hornetq-commons:${hornetqVersion}"
+	hornetqServerDepend = "org.hornetq:hornetq-server:${hornetqVersion}"
 }
 
 
