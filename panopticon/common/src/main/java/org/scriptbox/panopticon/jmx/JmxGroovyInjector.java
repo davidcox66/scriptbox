@@ -118,9 +118,9 @@ public class JmxGroovyInjector implements JmxInjector {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void gc( final Closure closure ) throws Exception {
+	public void gc( boolean deltas, final Closure closure ) throws Exception {
 		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
-		ExecRunnable receiver = new JmxGarbageCollection( Closures.toRunnable(closure,GarbageCollector.Info.class) );
+		ExecRunnable receiver = new JmxGarbageCollection( deltas, Closures.toRunnable(closure,GarbageCollector.Info.class) );
 		block.add( receiver );
 	}
 	
