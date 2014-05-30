@@ -27,9 +27,9 @@ public class JmxGarbageCollection implements ExecRunnable {
     private List<GarbageCollector> collectors = null;
     private Map<GarbageCollector,GarbageCollector.Info> infos = new HashMap<GarbageCollector,GarbageCollector.Info>();
     
-    private ParameterizedRunnable<GarbageCollector.Info> runnable;
+    private ParameterizedRunnable<GarbageCollector.Info[]> runnable;
     
-    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollector.Info> runnable ) {
+    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollector.Info[]> runnable ) {
     	this.deltas = deltas;
     	if( deltas ) {
     		infos = new HashMap<GarbageCollector,GarbageCollector.Info>();
@@ -42,16 +42,13 @@ public class JmxGarbageCollection implements ExecRunnable {
 		try {
 	        for( GarbageCollector coll : getCollectors() ) {
 	        	GarbageCollector.Info info = coll.getInfo( connection );
-	        	if( deltas ) {
-	        		GarbageCollector.Info last = infos.get( coll );
-	        		boolean changed = last == null || !last.equals(info);
-	        		infos.put( coll, info );
-	        		if( changed ) { 
-	        			runnable.run( info );
-	        		}
-	        	}
-	        	else {
-		        	runnable.run( info );
+        		GarbageCollector.Info last = infos.get( coll );
+        		infos.put( coll, info );
+        		GarbageCollector.Info[] args = new GarbageCollector.Info[2];
+        		args[0] = info;
+        		args[1] = last;
+	        	if( !deltas || last == null || !last.equals(info) ) {
+        			runnable.run( args );
 	        	}
 	        }
 		}
