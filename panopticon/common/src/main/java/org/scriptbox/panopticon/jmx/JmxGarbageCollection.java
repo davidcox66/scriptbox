@@ -23,17 +23,20 @@ public class JmxGarbageCollection implements ExecRunnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( JmxGarbageCollection.class );
 	
+    private static class GarbageCollectionHistory {
+    	Map<GarbageCollector,GarbageCollection> collections = new HashMap<GarbageCollector,GarbageCollection>();
+    }
+    
 	private boolean deltas;
     private List<GarbageCollector> collectors = null;
-    private Map<GarbageCollector,GarbageCollection> infos = new HashMap<GarbageCollector,GarbageCollection>();
+    private Map<JmxConnection,GarbageCollectionHistory> histories = new HashMap<JmxConnection,GarbageCollectionHistory>();
     
     private ParameterizedRunnable<GarbageCollection[]> runnable;
     
+    
     public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollection[]> runnable ) {
     	this.deltas = deltas;
-    	if( deltas ) {
-    		infos = new HashMap<GarbageCollector,GarbageCollection>();
-    	}
+    	histories = new HashMap<JmxConnection,GarbageCollectionHistory>();
     	this.runnable = runnable;
     }
     
@@ -42,9 +45,14 @@ public class JmxGarbageCollection implements ExecRunnable {
 		try {
 	        for( GarbageCollector coll : getCollectors() ) {
 	        	GarbageCollection info = coll.getInfo( connection );
-        		GarbageCollection last = infos.get( coll );
+        		GarbageCollectionHistory hist = histories.get( connection );
+        		if( hist == null ) {
+        			hist = new GarbageCollectionHistory();
+        			histories.put( connection, hist );
+        		}
+        		GarbageCollection last = hist.collections.get( coll );
 	        	if( !deltas || last == null || !last.equals(info) ) {
-	        		infos.put( coll, info );
+	        		hist.collections.put( coll, info );
 	        		GarbageCollection[] args = new GarbageCollection[2];
 	        		args[0] = info;
 	        		args[1] = last;

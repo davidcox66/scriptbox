@@ -49,6 +49,10 @@ public class GarbageCollection implements Storable {
 		this.time = time;
 	}
 	
+	public String toString() {
+		return "GC{ type=" + type + ", name=" + name + ", count=" + count + ", time=" + time + " }";
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

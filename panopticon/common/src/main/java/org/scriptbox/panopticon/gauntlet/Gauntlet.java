@@ -33,7 +33,7 @@ public class Gauntlet {
 	private static DateTimeFormatter fmt = DateTimeFormat.forPattern("HH:mm");
 	
 	private int maxDeliveryRetentionMinutes = 120;
-	private int maxMessages = 10000;
+	private int maxMessages = 1000;
 	private LinkedList<Delivery> deliveries = new LinkedList<Delivery>();
 	
 	private boolean scheduled;
@@ -66,7 +66,7 @@ public class Gauntlet {
 		this.context = context;
 		deliveries.add( new Delivery() );
 	}
-	public List<Message> getUndeliveredMessages() {
+	public LinkedList<Message> getUndeliveredMessages() {
 		return getCurrentDelivery().getMessages();
 	}
 	public int getCountUndeliveredMessages() {
@@ -105,7 +105,7 @@ public class Gauntlet {
 		Delivery current = getCurrentDelivery();
 		current.setMinPriority( Math.min(current.getMinPriority(),priority) );
 		current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
-		current.getMessages().add( msg );
+		current.getMessages().addLast( msg );
 		enforceMessageLimit();
 		
 		List<Message> messagesToEvaluate = new ArrayList<Message>(1);
@@ -234,15 +234,18 @@ public class Gauntlet {
 			if( del.getTime() == null || del.getTime().isBefore(oldest) ) {
 				break;
 			}
-			LOGGER.debug( "archiveDelivery: discarding delivery: " + del.getTime() );
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: discarding delivery: " + del.getTime() ); }
 			iter.remove();
+		}
+		if( LOGGER.isDebugEnabled() ) {
+			LOGGER.debug( "archiveDelivery: there are currently " + deliveries.size() + " deliveries" );
 		}
 	}
 	
 	private void enforceMessageLimit() {
-		Delivery current = getCurrentDelivery();
-		while( current.getMessages().size() > maxMessages ) {
-			Message message = current.getMessages().remove(0);
+		LinkedList<Message> undelivered = getUndeliveredMessages();
+		while( undelivered.size() > maxMessages ) {
+			Message message = undelivered.removeFirst();
 			LOGGER.warn( "enforceMessageLimit: exceeded message queue limit - removing: " + message );
 		}
 	}

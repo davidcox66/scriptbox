@@ -42,4 +42,7 @@ public class CaptureContext {
 		return new MBeanProxy(connection, objectName);
 	}
 
+	public String toString() {
+		return "CaptureContext{ process=" + process + ", connection=" + connection + ", objectName=" + objectName + ", attribute=[" + attribute + "] }";
+	}
 }

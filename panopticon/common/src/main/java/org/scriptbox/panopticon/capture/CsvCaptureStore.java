@@ -10,6 +10,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxContextListener  {
 
+	private boolean enabled;
 	private String instance;
 	private String path;
 	private PrintStream output;
@@ -17,6 +18,16 @@ public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxConte
 	public CsvCaptureStore() {
 	}
 	
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+
 	public String getInstance() {
 		return instance;
 	}
@@ -59,7 +70,9 @@ public class CsvCaptureStore implements CaptureStore, InitializingBean, BoxConte
 	
 	@Override
 	public void store(CaptureResult result) throws Exception {
-		output.println( instance + "," + result.process.getName() + "," +  result.attribute + "," + result.value + "," + result.millis );
+		if( enabled ) {
+			output.println( instance + "," + result.process.getName() + "," +  result.attribute + "," + result.value + "," + result.millis );
+		}
 	}
 
 }

@@ -34,9 +34,19 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 	private String instance;
 	private CassandraMetricStore cstore;
 	private NameSplitter nameSplitter;
+	private boolean enabled;
 	
 	private CassandraDownTemplate down = new CassandraDownTemplate();
+
 	
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
 	public NameSplitter getNameSplitter() {
 		return nameSplitter;
 	}
@@ -56,28 +66,33 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 		invocation.next();
 	}
 
-    public void jobStarted( final QuartzInvocationContext context ) {
-        LOGGER.debug( "jobStarted: starting transaction" );
-		down.invoke( new RunnableWithThrowable() {
-			public void run() throws Throwable {
-		        cstore.begin();
-		        try {
-		            HTransactionTemplate.execute( new Runnable() {
-		                public void run() {
-		                    try {
-		                        context.next();
-		                    }
-		                    catch( Exception ex ) {
-		                        throw new RuntimeException( "Error invoking job: " + context.getDetail(), ex );
-		                    }
-		                }
-		            });
-		        }
-		        finally {
-		            cstore.end();
-		        }
-			}
-		} );
+    public void jobStarted( final QuartzInvocationContext context ) throws Exception {
+    	if( enabled ) {
+	        LOGGER.debug( "jobStarted: starting transaction" );
+			down.invoke( new RunnableWithThrowable() {
+				public void run() throws Throwable {
+			        cstore.begin();
+			        try {
+			            HTransactionTemplate.execute( new Runnable() {
+			                public void run() {
+			                    try {
+			                        context.next();
+			                    }
+			                    catch( Exception ex ) {
+			                        throw new RuntimeException( "Error invoking job: " + context.getDetail(), ex );
+			                    }
+			                }
+			            });
+			        }
+			        finally {
+			            cstore.end();
+			        }
+				}
+			} );
+    	}
+    	else {
+    		context.next();
+    	}
     }
 
 	@Override

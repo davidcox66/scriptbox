@@ -53,6 +53,7 @@ public class JmxGroovyInjector implements JmxInjector {
 		vars.put( "mbeans", new MethodClosure( this, "mbeans")  );
 		vars.put( "mbean", new MethodClosure( this, "mbean")  );
 		vars.put( "gc", new MethodClosure( this, "gc")  );
+		vars.put( "storage", new MethodClosure( this, "storage")  );
 		vars.put( "capture", new MethodClosure( this, "capture")  );
 		vars.put( "store", new MethodClosure( this, "store")  );
 	}
@@ -133,6 +134,10 @@ public class JmxGroovyInjector implements JmxInjector {
 		} );
 				
 		block.add( receiver );
+	}
+	
+	public void storage( boolean enabled ) {
+		BoxContext.getCurrentContext().getBeans().getEx("store", CaptureStore.class).setEnabled(enabled);
 	}
 	
     public void capture( final Object oneOrMoreAttributes )  {

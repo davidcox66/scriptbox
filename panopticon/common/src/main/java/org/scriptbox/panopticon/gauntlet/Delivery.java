@@ -11,7 +11,7 @@ public class Delivery {
 	private int minPriority;
 	private int maxPriority;
 	private int count;
-	private List<Message> messages = new LinkedList<Message>();
+	private LinkedList<Message> messages = new LinkedList<Message>();
 	
 	public DateTime getTime() {
 		return time;
@@ -31,10 +31,10 @@ public class Delivery {
 	public void setMaxPriority(int maxPriority) {
 		this.maxPriority = maxPriority;
 	}
-	public List<Message> getMessages() {
+	public LinkedList<Message> getMessages() {
 		return messages;
 	}
-	public void setMessages(List<Message> messages) {
+	public void setMessages(LinkedList<Message> messages) {
 		this.messages = messages;
 	}
 	public int getCount() {
