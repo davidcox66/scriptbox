@@ -43,11 +43,11 @@ public class JmxGarbageCollection implements ExecRunnable {
 	        for( GarbageCollector coll : getCollectors() ) {
 	        	GarbageCollection info = coll.getInfo( connection );
         		GarbageCollection last = infos.get( coll );
-        		infos.put( coll, info );
-        		GarbageCollection[] args = new GarbageCollection[2];
-        		args[0] = info;
-        		args[1] = last;
 	        	if( !deltas || last == null || !last.equals(info) ) {
+	        		infos.put( coll, info );
+	        		GarbageCollection[] args = new GarbageCollection[2];
+	        		args[0] = info;
+	        		args[1] = last;
         			runnable.run( args );
 	        	}
 	        }
