@@ -97,26 +97,28 @@ public class CassandraCaptureStore implements BoxContextListener, CaptureStore, 
 
 	@Override
 	public void store( final CaptureResult result ) throws Exception {
-		down.invoke( new RunnableWithThrowable() {
-			public void run() throws Throwable {
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
-				if( result.value != null && !(result.value instanceof String) ) {
-					BoxContext ctx = BoxContext.getCurrentContext();
-					Lookup beans = ctx.getBeans();
-					MetricTree tree = beans.get( "metric.tree", MetricTree.class );
-					if( tree == null ) {
-						tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30,300,900,1800) );
-						beans.put( "metric.tree", tree );
-					}
-					if( result.value instanceof Number ) {
-						store( getAttributeNode(tree,result), result.millis, result.statistic, ((Number)result.value).floatValue() );
-					}
-					else {
-						store( tree, result );
+		if( enabled ) {
+			down.invoke( new RunnableWithThrowable() {
+				public void run() throws Throwable {
+					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "store: result=" + result ); }
+					if( result.value != null && !(result.value instanceof String) ) {
+						BoxContext ctx = BoxContext.getCurrentContext();
+						Lookup beans = ctx.getBeans();
+						MetricTree tree = beans.get( "metric.tree", MetricTree.class );
+						if( tree == null ) {
+							tree = cstore.createMetricTree(ctx.getName(), MetricResolution.create(30,300,900,1800) );
+							beans.put( "metric.tree", tree );
+						}
+						if( result.value instanceof Number ) {
+							store( getAttributeNode(tree,result), result.millis, result.statistic, ((Number)result.value).floatValue() );
+						}
+						else {
+							store( tree, result );
+						}
 					}
 				}
-			}
-		} );
+			} );
+		}
 	}
 
 	public void flush() throws Exception {

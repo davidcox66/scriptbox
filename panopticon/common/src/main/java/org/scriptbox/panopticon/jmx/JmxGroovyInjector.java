@@ -53,6 +53,7 @@ public class JmxGroovyInjector implements JmxInjector {
 		vars.put( "mbeans", new MethodClosure( this, "mbeans")  );
 		vars.put( "mbean", new MethodClosure( this, "mbean")  );
 		vars.put( "gc", new MethodClosure( this, "gc")  );
+		vars.put( "heap", new MethodClosure( this, "heap")  );
 		vars.put( "storage", new MethodClosure( this, "storage")  );
 		vars.put( "capture", new MethodClosure( this, "capture")  );
 		vars.put( "store", new MethodClosure( this, "store")  );
@@ -122,17 +123,28 @@ public class JmxGroovyInjector implements JmxInjector {
 	@SuppressWarnings("unchecked")
 	public void gc( boolean deltas, final Closure closure ) throws Exception {
 		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
-		ExecRunnable receiver = new JmxGarbageCollection( deltas, new ParameterizedRunnable<GarbageCollection[]>() {
-			public void run( GarbageCollection[] infos ) {
-				if( closure.getMaximumNumberOfParameters() == 1 ) {
-					closure.call( infos[0] );
-				}
-				else {
-					closure.call( infos[0], infos[1] );
-				}
-			}
-		} );
-				
+		ExecRunnable receiver = new JmxGarbageCollection( deltas, Closures.toRunnable(closure,Object.class) );
+		block.add( receiver );
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void gc( boolean deltas, int maxSize, int maxSeconds, final Closure closure ) throws Exception {
+		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
+		ExecRunnable receiver = new JmxGarbageCollection( deltas, maxSize, maxSeconds, Closures.toRunnable(closure,Object.class) ); 
+		block.add( receiver );
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void heap( boolean deltas, final Closure closure ) throws Exception {
+		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
+		ExecRunnable receiver = new JmxHeap( deltas, Closures.toRunnable(closure,Object.class) );
+		block.add( receiver );
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void heap( boolean deltas, int maxSize, int maxSeconds, final Closure closure ) throws Exception {
+		ExecBlock<ExecRunnable> block = ExecContext.getEnclosing(ExecBlock.class);
+		ExecRunnable receiver = new JmxHeap( deltas, maxSize, maxSeconds, Closures.toRunnable(closure,Object.class) ); 
 		block.add( receiver );
 	}
 	

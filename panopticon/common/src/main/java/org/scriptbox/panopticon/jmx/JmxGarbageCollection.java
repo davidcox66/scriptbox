@@ -23,20 +23,22 @@ public class JmxGarbageCollection implements ExecRunnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( JmxGarbageCollection.class );
 	
-    private static class GarbageCollectionHistory {
-    	Map<GarbageCollector,GarbageCollection> collections = new HashMap<GarbageCollector,GarbageCollection>();
+    private boolean deltas;
+    private int maxSize;
+    private int maxSeconds;
+    private List<GarbageCollector> collectors = null;
+    private Map<GarbageCollector,Historical<GarbageCollection>> histories = new HashMap<GarbageCollector,Historical<GarbageCollection>>();
+    
+    private ParameterizedRunnable<Object> runnable;
+    
+    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<Object> runnable ) {
+    	this( deltas, 1, 0, runnable );
     }
     
-	private boolean deltas;
-    private List<GarbageCollector> collectors = null;
-    private Map<JmxConnection,GarbageCollectionHistory> histories = new HashMap<JmxConnection,GarbageCollectionHistory>();
-    
-    private ParameterizedRunnable<GarbageCollection[]> runnable;
-    
-    
-    public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<GarbageCollection[]> runnable ) {
+    public JmxGarbageCollection( boolean deltas, int maxSize, int maxSeconds, ParameterizedRunnable<Object> runnable ) {
     	this.deltas = deltas;
-    	histories = new HashMap<JmxConnection,GarbageCollectionHistory>();
+    	this.maxSize = maxSize;
+    	this.maxSeconds = maxSeconds;
     	this.runnable = runnable;
     }
     
@@ -45,19 +47,24 @@ public class JmxGarbageCollection implements ExecRunnable {
 		try {
 	        for( GarbageCollector coll : getCollectors() ) {
 	        	GarbageCollection info = coll.getInfo( connection );
-        		GarbageCollectionHistory hist = histories.get( connection );
+        		Historical<GarbageCollection> hist = histories.get( coll );
         		if( hist == null ) {
-        			hist = new GarbageCollectionHistory();
-        			histories.put( connection, hist );
+        			hist = new Historical<GarbageCollection>(maxSize,maxSeconds);
+        			histories.put( coll, hist );
         		}
-        		GarbageCollection last = hist.collections.get( coll );
-	        	if( !deltas || last == null || !last.equals(info) ) {
-	        		hist.collections.put( coll, info );
-	        		GarbageCollection[] args = new GarbageCollection[2];
-	        		args[0] = info;
-	        		args[1] = last;
-        			runnable.run( args );
+        		Historical.Sample<GarbageCollection> last = hist.getLatest();
+	        	if( !deltas || last == null || !last.getData().equals(info) ) {
+	        		hist.add( info );
+	        		if( maxSize == 1 && maxSeconds == 0 ) {
+	        			runnable.run( info );
+	        		}
+	        		else {
+	        			runnable.run( hist );
+	        		}
 	        	}
+        		if( LOGGER.isDebugEnabled() ) {
+	        		LOGGER.debug( "JmxGarbageCollection: latest:" + info + ", previous: " + (last != null ? last.getData() : null) );
+        		}
 	        }
 		}
 		catch( Exception ex ) {
