@@ -75,6 +75,10 @@ public class Historical<X> {
 		return size() > 1 ? samples.get(1) : null;
 	}
 	
+	public Sample<X> getOldest() {
+		return size() > 1 ? samples.getLast() : null;
+	}
+	
 	public List<Sample<X>> getAll() {
 		return samples;
 	}

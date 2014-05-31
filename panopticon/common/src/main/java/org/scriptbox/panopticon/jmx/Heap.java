@@ -1,6 +1,14 @@
 package org.scriptbox.panopticon.jmx;
 
-public class Heap {
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.scriptbox.box.exec.ExecContext;
+import org.scriptbox.box.jmx.proc.JmxProcess;
+import org.scriptbox.panopticon.capture.CaptureResult;
+
+public class Heap implements Storable {
 
 	private long init;
 	private long committed;
@@ -12,6 +20,17 @@ public class Heap {
 		this.committed = committed;
 		this.max = max;
 		this.used = used;
+	}
+	
+	public Collection<CaptureResult> getResults() {
+		JmxProcess proc = ExecContext.getNearestEnclosing(JmxProcess.class);
+		List<CaptureResult> ret = new ArrayList<CaptureResult>(4);
+		long ts = System.currentTimeMillis();
+		ret.add( new CaptureResult(proc, "Memory,type=heap", "init", init, ts) );
+		ret.add( new CaptureResult(proc, "Memory,type=heap", "committed", committed, ts) );
+		ret.add( new CaptureResult(proc, "Memory,type=heap", "max", max, ts) );
+		ret.add( new CaptureResult(proc, "Memory,type=heap", "used", used, ts) );
+		return ret;
 	}
 	
 	public long getInit() {

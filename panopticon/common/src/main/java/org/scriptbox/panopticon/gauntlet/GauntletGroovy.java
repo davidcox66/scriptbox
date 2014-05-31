@@ -13,8 +13,8 @@ public class GauntletGroovy extends Gauntlet {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( GauntletGroovy.class );
 	
-	public GauntletGroovy( BoxContext context ) {
-		super( context );
+	public GauntletGroovy( BoxContext context, boolean immediate ) {
+		super( context, immediate );
 	}
 
 	public void deliver( final Closure closure ) {

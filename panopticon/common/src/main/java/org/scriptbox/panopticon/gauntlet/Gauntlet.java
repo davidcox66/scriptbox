@@ -32,6 +32,7 @@ public class Gauntlet {
 	private static AtomicInteger counter = new AtomicInteger();
 	private static DateTimeFormatter fmt = DateTimeFormat.forPattern("HH:mm");
 	
+	private boolean immediate;
 	private int maxDeliveryRetentionMinutes = 120;
 	private int maxMessages = 1000;
 	private LinkedList<Delivery> deliveries = new LinkedList<Delivery>();
@@ -62,13 +63,24 @@ public class Gauntlet {
 		
 	}
 	
-	public Gauntlet( BoxContext context ) {
+	public Gauntlet( BoxContext context, boolean immediate ) {
 		this.context = context;
+		this.immediate = immediate;
 		deliveries.add( new Delivery() );
 	}
+	
+	public boolean isImmediate() {
+		return immediate;
+	}
+
+	public void setImmediate(boolean immediate) {
+		this.immediate = immediate;
+	}
+
 	public LinkedList<Message> getUndeliveredMessages() {
 		return getCurrentDelivery().getMessages();
 	}
+	
 	public int getCountUndeliveredMessages() {
 		return getUndeliveredMessages().size();
 	}
@@ -76,12 +88,15 @@ public class Gauntlet {
 	public boolean isAnyUndeliveredMessages() {
 		return getCountUndeliveredMessages() > 0;
 	}
+	
 	public Delivery getCurrentDelivery() {
 		return deliveries.getFirst();
 	}
+	
 	public Delivery getPreviousDelivery() {
 		return deliveries.size() > 1 ? deliveries.get(1) : null;
 	}
+	
 	public List<Delivery> getDeliveries() {
 		return deliveries;
 	}
@@ -107,10 +122,12 @@ public class Gauntlet {
 		current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
 		current.getMessages().addLast( msg );
 		enforceMessageLimit();
-		
-		List<Message> messagesToEvaluate = new ArrayList<Message>(1);
-		messagesToEvaluate.add( msg );
-		processDelivery( messagesToEvaluate );
+
+		if( immediate ) {
+			List<Message> messagesToEvaluate = new ArrayList<Message>(1);
+			messagesToEvaluate.add( msg );
+			processDelivery( messagesToEvaluate );
+		}
 	}
 
 	synchronized public void deliver( ParameterizedRunnable<Object[]> closure ) {

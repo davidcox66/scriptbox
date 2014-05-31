@@ -31,6 +31,10 @@ public class GauntletGroovyInjector implements GauntletInjector {
 	}
 	
 	public Gauntlet gauntlet() {
-		return new GauntletGroovy( BoxContext.getCurrentContext() );
+		return gauntlet( false );
+	}
+	
+	public Gauntlet gauntlet( boolean immediate ) {
+		return new GauntletGroovy( BoxContext.getCurrentContext(), immediate );
 	}
 }
