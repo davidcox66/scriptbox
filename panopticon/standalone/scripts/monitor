@@ -28,14 +28,21 @@ fi
 
 # So com.sun virtual machine apis will work
 if [[ -f $JAVA_HOME/lib/tools.jar ]] ; then
-	echo "Added tools.jar to classpath"
 	tools=$JAVA_HOME/lib/tools.jar
+	echo "Added to classpath: $tools"
 fi
 
 CP= 
 CP="$CP:$dir"
 CP="$CP:$tools"
 CP="$CP:$root/$jar"
+
+if [[ -d $HOME/.panopticon/libs ]] ; then
+    for lib in $HOME/.panopticon/libs/* ; do
+        echo "Added to classpath: $lib"
+        CP="$CP:$lib"
+    done
+fi
 
 set -x
 JAVA_OPTS="\

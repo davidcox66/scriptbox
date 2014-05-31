@@ -312,9 +312,9 @@ public class Gauntlet {
 	private void startSchedulerIfNeeded() {
 		if( !scheduled ) {
 			try {
-				Trigger trigger = new SimpleTrigger("every " + counter.addAndGet(1), SimpleTrigger.REPEAT_INDEFINITELY, 60*1000 );
-				Scheduler scheduler = getScheduler();
 				int cnt = counter.addAndGet(1);
+				Trigger trigger = new SimpleTrigger("gauntlet " + cnt, SimpleTrigger.REPEAT_INDEFINITELY, 60*1000 );
+				Scheduler scheduler = getScheduler();
 				
 				JobDetail detail = new JobDetail("gauntlet" + cnt, GauntletJob.class);
 				JobDataMap map = detail.getJobDataMap();
