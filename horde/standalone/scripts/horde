@@ -28,6 +28,20 @@ CP="$CP:$dir"
 CP="$CP:$tools"
 CP="$CP:$root/$jar"
 
+if [[ -d $HOME/.scriptbox/horde/libs ]] ; then
+    for lib in $HOME/.scriptbox/horde/libs/* ; do
+        echo "Added to classpath: $lib"
+        CP="$CP:$lib"
+    done
+fi
+
+if [[ -d $HOME/.scriptbox/libs ]] ; then
+    for lib in $HOME/.scriptbox/libs/* ; do
+        echo "Added to classpath: $lib"
+        CP="$CP:$lib"
+    done
+fi
+
 set -x
 JAVA_OPTS="\
         -Dlogback.configurationFile=horde-logback.xml \

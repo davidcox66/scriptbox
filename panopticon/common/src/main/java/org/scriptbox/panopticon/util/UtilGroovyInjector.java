@@ -31,13 +31,19 @@ public class UtilGroovyInjector implements UtilInjector {
 	
 	public void inject( BoxContext context ) {
 		Lookup vars = context.getScriptVariables();
-		vars.put( "inject", new MethodClosure( this, "inject")  );
+		vars.put( "boxInstance", System.getProperty("box.instance") );
+		vars.put( "contextName", context.getName() );
+		vars.put( "context", this );
+		
 		vars.put( "getContextBean", new MethodClosure( this, "getContextBean")  );
 		vars.put( "setContextBean", new MethodClosure( this, "setContextBean")  );
 		vars.put( "getContextBean", new MethodClosure( this, "getContextBeanEx")  );
+		
 		vars.put( "getContextProperty", new MethodClosure( this, "getContextProperty")  );
 		vars.put( "setContextProperty", new MethodClosure( this, "setContextProperty")  );
 		vars.put( "getContextPropertyEx", new MethodClosure( this, "getContextPropertyEx")  );
+		
+		vars.put( "inject", new MethodClosure( this, "inject")  );
 		vars.put( "toDate", new MethodClosure( this, "toDate")  );
 		vars.put( "toTime", new MethodClosure( this, "toTime")  );
 	}

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.quartz.Job;
@@ -24,6 +25,7 @@ import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.scriptbox.util.common.obj.ParameterizedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class Gauntlet {
 
@@ -93,6 +95,16 @@ public class Gauntlet {
 		return deliveries.getFirst();
 	}
 	
+	public long getMinutesSinceLastDelivery() {
+		Delivery previous = getPreviousDelivery();
+		if( previous != null ) {
+			DateTime now = new DateTime();
+			DateTime last = previous.getTime();
+			Duration dur = new Duration( last, now );
+			return dur.getStandardMinutes();
+		}
+		return 0;
+	}
 	public Delivery getPreviousDelivery() {
 		return deliveries.size() > 1 ? deliveries.get(1) : null;
 	}
@@ -105,10 +117,12 @@ public class Gauntlet {
 		DateTime past = getDateInPast(minutes);
 		int count = 0;
 		for( Delivery del : deliveries ) {
-			if( del.getTime() != null && del.getTime().isBefore(past) ) {
-				break;
+			if( del.getTime() != null ) {
+				if( del.getTime().isBefore(past) ) {
+					break;
+				}
+				count++;
 			}
-			count++;
 		}
 		return count;
 	}
@@ -135,10 +149,18 @@ public class Gauntlet {
 	}
 	
 	public void blackout( String start, String end, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
-		blackout( start, end, false, closure );
+		between( start, end, false, closure );
 	}
 	
-	synchronized public void blackout( String start, String end, final boolean all, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+	public void blackout( String start, String end, final boolean all, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		between( start, end, all, closure );
+	}
+	
+	public void between( String start, String end, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		between( start, end, false, closure );
+	}
+	
+	synchronized public void between( String start, String end, final boolean all, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
 		final LocalTime startTime = fmt.parseDateTime(start).toLocalTime();
 		final LocalTime endTime = fmt.parseDateTime(end).toLocalTime();
 		
@@ -161,6 +183,36 @@ public class Gauntlet {
 		} );
 	}
 	
+	/*
+	synchronized public void backoff( final int addMinutes, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		predicates.add( new ParameterizedRunnableWithResult<Boolean,List<Message>>() {
+			boolean rejected;
+			int accumulatedMinutes=addMinutes;
+			public Boolean run( List<Message> messagesToEvaluate ) throws Exception {
+				long sinceLast = getMinutesSinceLastDelivery(); 
+				if( sinceLast > 0 ) {
+					// We are trying to send again too soon 
+					if( sinceLast <= accumulatedMinutes ) {
+						if( !rejected ) {
+							accumulatedMinutes += addMinutes;
+							rejected = true;
+						}
+						return false;
+					}
+					else {
+						rejected = false;
+						accumulatedMinutes = addMinutes;
+						return true;
+					}
+				}
+				else {
+					// nothing delivered
+					return true;
+				}
+			}
+		} );
+	}
+	*/
 	public void throttle( final int minutes, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
 		throttle( minutes, false, closure );
 	}
@@ -243,12 +295,11 @@ public class Gauntlet {
 		deliveries.addFirst(new Delivery());
 
 		// Drop deliveries beyond the rentention window
-		DateTime oldest = new DateTime();
-		oldest.plusMinutes( -maxDeliveryRetentionMinutes );
+		DateTime oldest = getDateInPast( -maxDeliveryRetentionMinutes );
 		Iterator<Delivery> iter = deliveries.descendingIterator();
 		while( iter.hasNext() ) {
 			Delivery del = iter.next();
-			if( del.getTime() == null || del.getTime().isBefore(oldest) ) {
+			if( del.getTime() == null || del.getTime().isAfter(oldest) ) {
 				break;
 			}
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: discarding delivery: " + del.getTime() ); }
