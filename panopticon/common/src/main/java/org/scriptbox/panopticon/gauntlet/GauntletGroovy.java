@@ -25,6 +25,18 @@ public class GauntletGroovy extends Gauntlet {
 		});
 	}
 	
+	public void backoff( int minutes, final Closure closure ) throws Exception {
+		backoff( minutes, minutes, closure );
+	}
+	
+	public void backoff( int initial, int increment, final Closure closure ) throws Exception {
+		super.backoff( initial, increment, new ParameterizedRunnableWithResult<Boolean,Object[]>() {
+			public Boolean run( Object[] args ) throws Exception {
+				return Closures.coerceToBoolean( call(closure,args) );
+			}
+		} );
+	}
+	
 	public void between( String start, String end, final Closure closure ) throws Exception {
 		between( start, end, false, closure );
 	}

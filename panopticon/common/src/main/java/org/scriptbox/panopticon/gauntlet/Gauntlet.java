@@ -183,25 +183,32 @@ public class Gauntlet {
 		} );
 	}
 	
-	/*
-	synchronized public void backoff( final int addMinutes, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
-		predicates.add( new ParameterizedRunnableWithResult<Boolean,List<Message>>() {
+	public void backoff( final int minutes, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		backoff( minutes, minutes, closure );
+	}
+	
+	synchronized public void backoff( final int initial, final int increment, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		class Backoff implements ParameterizedRunnable<Object[]> {
+			public int minutes=initial;
 			boolean rejected;
-			int accumulatedMinutes=addMinutes;
-			public Boolean run( List<Message> messagesToEvaluate ) throws Exception {
+			public void run( Object[] args ) {
+				if( rejected ) {
+					minutes += increment;
+					rejected = false;
+				}
+			}
+			public boolean check() {
 				long sinceLast = getMinutesSinceLastDelivery(); 
 				if( sinceLast > 0 ) {
 					// We are trying to send again too soon 
-					if( sinceLast <= accumulatedMinutes ) {
-						if( !rejected ) {
-							accumulatedMinutes += addMinutes;
-							rejected = true;
-						}
+					if( sinceLast <= minutes ) {
+						rejected = true;
 						return false;
 					}
+					// We have been quiet for the current duration so we will reset back to original minutes
 					else {
 						rejected = false;
-						accumulatedMinutes = addMinutes;
+						minutes = initial;
 						return true;
 					}
 				}
@@ -210,9 +217,16 @@ public class Gauntlet {
 					return true;
 				}
 			}
+		}
+		final Backoff bo = new Backoff();
+		receivers.add( bo );
+		predicates.add( new ParameterizedRunnableWithResult<Boolean,List<Message>>() {
+			public Boolean run( List<Message> messagesToEvaluate ) throws Exception {
+				return bo.check();
+			}
 		} );
 	}
-	*/
+	
 	public void throttle( final int minutes, final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
 		throttle( minutes, false, closure );
 	}
