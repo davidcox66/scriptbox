@@ -64,7 +64,7 @@ public class TailGroovyInjector implements TailInjector {
 				String line = (String)arguments[0];
 				Matcher matcher = expression.matcher(line);
 				boolean matching = matcher.matches(); 
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "objectify: match: " + matching + ", line: '" + line + "'" ); }
+				if( LOGGER.isTraceEnabled() ) { LOGGER.trace( "objectify: match: " + matching + ", line: '" + line + "'" ); }
 				boolean accepted = false;
 				if( matching ) {
 					if( matcher.groupCount() == fields.size() ) {
@@ -130,11 +130,11 @@ public class TailGroovyInjector implements TailInjector {
 				String line = (String)arguments[0];
 				Object ret = null;
 				boolean matching = expression.matcher(line).matches(); 
-				if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "coalesce: match: " + matching + ", line: '" + line + "'"); }
+				if( LOGGER.isTraceEnabled() ) { LOGGER.trace( "coalesce: match: " + matching + ", line: '" + line + "'"); }
 				if( matching ) {
 					if( builder.length() > 0 ) {
 						String str = builder.toString();
-						if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "coalesce: processing queued text: '" + str + "'"); }
+						if( LOGGER.isTraceEnabled() ) { LOGGER.trace( "coalesce: processing queued text: '" + str + "'"); }
 						if( arguments.length == 1 ) {
 							ret = delegate.call( str );
 						}
@@ -147,7 +147,7 @@ public class TailGroovyInjector implements TailInjector {
 						builder.setLength(0);
 					}
 					else {
-						LOGGER.debug( "coalesce: no queued text yet");
+						LOGGER.trace( "coalesce: no queued text yet");
 					}
 				}
 				else if( builder.length() > 0 ) {

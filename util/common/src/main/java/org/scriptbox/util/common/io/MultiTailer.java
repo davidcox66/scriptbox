@@ -76,6 +76,7 @@ public class MultiTailer {
     		  
     	if( oldFiles.size() > 0 ) {
     		for( File oldFile : oldFiles ) {
+				LOGGER.info( "closeOldTailers: closing: '" + oldFile + "'" );
     			Tailer tailer = tailers.remove( oldFile );
     			tailer.stop();
     		}
@@ -89,6 +90,7 @@ public class MultiTailer {
     	if( newFiles.size() > 0 ) {
     		for( File newFile : newFiles ) {
     			if( newFile.exists() ) {
+    				LOGGER.info( "openNewTailers: opening: '" + newFile + "'" );
     				Tailer tailer = Tailer.create( newFile, factory.create(newFile), interval, true );
     				tailers.put( newFile, tailer );
     			}
