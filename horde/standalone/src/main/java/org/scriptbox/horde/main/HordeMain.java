@@ -12,8 +12,7 @@ public class HordeMain {
 		
 		try {
 			CommandLine cmd = new CommandLine( args ) ;
-			BoxServerCliHelper.consumeAllArgs( cmd, 7900 );
-			JettyService jetty = new JettyService( "classpath:horde-context.xml" );
+			JettyService jetty = BoxServerCliHelper.consumeAllArgs( cmd, "horde", 7900 );
 			jetty.start();
 			while( true ) {
 				System.out.print( "." );

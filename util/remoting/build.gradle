@@ -9,8 +9,10 @@ dependencies {
     compile hessianDepend
     compile jschDepend
 
-	provided project(":deps:jetty")
-
+	compile project(":deps:jetty")
+	// compile jettyServerDepend
+	// compile jettyServletDepend
+	
 	testCompile junitDepend
 }
 
