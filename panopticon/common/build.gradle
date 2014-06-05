@@ -10,6 +10,8 @@ dependencies {
 	compile javaxMailDepend
 	compile javaxActivationDepend
 	compile hornetqJmsClientDepend
+	compile springSecurityWebDepend
+	compile springSecurityConfigDepend
 	
     provided groovyDepend
 

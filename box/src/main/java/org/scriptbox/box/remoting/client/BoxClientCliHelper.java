@@ -24,6 +24,8 @@ public class BoxClientCliHelper {
 
 	private String tunnelHost;
 	private int tunnelPort;
+	private String tunnelUser;
+	private String tunnelPassword;
 	private String user;
 	private String password;
 	private BoxAgentHelper agentHelper;
@@ -43,13 +45,20 @@ public class BoxClientCliHelper {
 		cmd.consumeArg( "debug" );
 		cmd.consumeArg( "trace" );
 		
+		user = cmd.consumeArgValue("user", false);
+		if( user != null ) {
+			password = cmd.consumeArgValue("password", true);
+			System.setProperty( "spring.user", user );
+			System.setProperty( "spring.password", password );
+		}
+		
 		processTunnel();
 		agentHelper.setEndpoints( getEndpoints() );
 		
 	}
 
 	public static void usage( String name ) {
-		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --user <user> --password <password>] --agents=<[host]:[port]> ...\n" +
+		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --tunnel-user=<user> --tunnel-password=<password>] [--user=<user> --password=<password>] --agents=<[host]:[port]> ...\n" +
 			"    --debug --trace\n" +
 			"    {\n" +
 			"        --status\n" +
@@ -75,8 +84,8 @@ public class BoxClientCliHelper {
 			String[] parts = tunnel.split(":");
 			tunnelHost = parts[0];
 			tunnelPort = parts.length > 1 ? Integer.parseInt(parts[1]) : 22;
-			user = cmd.consumeArgValue("user", true);
-			password = cmd.consumeArgValue("password", true);
+			tunnelUser = cmd.consumeArgValue("user", true);
+			tunnelPassword = cmd.consumeArgValue("password", true);
 		}
 	}
 	
@@ -166,7 +175,7 @@ public class BoxClientCliHelper {
 			return new TcpEndpoint( host, port );
 		}
 		else {
-			return new SshTunnelEndpoint( tunnelHost, tunnelPort, host, port, user, password );
+			return new SshTunnelEndpoint( tunnelHost, tunnelPort, host, port, tunnelUser, tunnelPassword );
 		}
 	}
 }
