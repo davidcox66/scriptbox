@@ -63,11 +63,13 @@ public class BoxServerCliHelper {
 		if( springContext == null ) {
 			springContext = "classpath:" + baseName + "-context.xml";
 		}
-		String springSecurityContext = null;
-		if( !cmd.consumeArg("without-security-context") ) {
-			springSecurityContext = cmd.consumeArgValue( "spring-security-context", false );
-			if( springSecurityContext == null ) {
+		String springSecurityContext = cmd.consumeArgValue( "spring-security-context", false );
+		if( springSecurityContext != null ) {
+			if( springSecurityContext.equals("default") ) {
 				springSecurityContext = "classpath:" + baseName + "-security-context.xml";
+				if( user == null || password == null ) {
+					throw new CommandLineException( "Must specify user and password when using default security context");
+				}
 			}
 		}
 		
@@ -138,7 +140,7 @@ public class BoxServerCliHelper {
 			"\t[--tags=<tag1,tag2,...>] [--ssh-host=<host> [--ssh-port=[22]] [--ssh-user=<user> --ssh-password=<password>]\n" +
 			"\t[--jmxport=[port+1]]\n" +
 			"\t[--spring-context=<context file>]\n"  +
-			"\t[--spring-security-context=<context file>] [--without-security-context]\n" +
+			"\t[--spring-security-context=<context file>|'default']\n" +
 			"\t[--user=<user> {--password=<password>|(prompts for password)}]\n" +
 			"\t[--keystore=<keystore>] [--keystore-alias=<alias>] [--keystore-pass=<password>] [--key-pass=<pass>]\n"  +
 			"\t[--trust-store=<location>] [--trust-store-password=<password>]" );
