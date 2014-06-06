@@ -64,7 +64,7 @@ public class BoxServerCliHelper {
 			springContext = "classpath:" + baseName + "-context.xml";
 		}
 		String springSecurityContext = null;
-		if( !cmd.consumeArg("no-security") ) {
+		if( !cmd.consumeArg("without-security-context") ) {
 			springSecurityContext = cmd.consumeArgValue( "spring-security-context", false );
 			if( springSecurityContext == null ) {
 				springSecurityContext = "classpath:" + baseName + "-security-context.xml";
@@ -138,8 +138,7 @@ public class BoxServerCliHelper {
 			"\t[--tags=<tag1,tag2,...>] [--ssh-host=<host> [--ssh-port=[22]] [--ssh-user=<user> --ssh-password=<password>]\n" +
 			"\t[--jmxport=[port+1]]\n" +
 			"\t[--spring-context=<context file>]\n"  +
-			"\t[--spring-security-context=<context file>]\n" +
-			"\t[--no-security]\n" +
+			"\t[--spring-security-context=<context file>] [--without-security-context]\n" +
 			"\t[--user=<user> {--password=<password>|(prompts for password)}]\n" +
 			"\t[--keystore=<keystore>] [--keystore-alias=<alias>] [--keystore-pass=<password>] [--key-pass=<pass>]\n"  +
 			"\t[--trust-store=<location>] [--trust-store-password=<password>]" );

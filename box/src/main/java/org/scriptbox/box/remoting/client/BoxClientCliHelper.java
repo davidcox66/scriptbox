@@ -1,5 +1,6 @@
 package org.scriptbox.box.remoting.client;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class BoxClientCliHelper {
 	private String tunnelPassword;
 	private String user;
 	private String password;
+	private boolean ssl;
 	private BoxAgentHelper agentHelper;
 	
 	public BoxClientCliHelper( String name, String[] args, int defaultAgentPort, String[] contextConfigLocations ) throws CommandLineException {
@@ -42,18 +44,29 @@ public class BoxClientCliHelper {
 			System.setProperty( "box.user", user );
 			System.setProperty( "box.password", password );
 		}
+		ssl = cmd.consumeArg("ssl"); 
+		System.setProperty( "box.scheme", ssl ? "https" : "http" );
 		
-		System.setProperty( "box.scheme", cmd.consumeArg("ssl") ? "https" : "http" );
+		if( ssl ) {
+			String trustStore = cmd.consumeArgValue("trust-store", false );
+			if( trustStore == null ) {
+				File file = new File( System.getProperty("user.home") + File.separator + ".scriptbox" + File.separator + "truststore" );
+				if( file.exists() ) {
+					trustStore = file.getAbsolutePath();
+				}
+				else {
+					throw new CommandLineException( "No trust store specified and the scriptbox default one does not exist in ~/.scriptbox/truststore");
+				}
+			}
 		
-		String trustStore = cmd.consumeArgValue("trust-store", false );
-		if( trustStore != null ) {
+			String trustStorePassword = cmd.consumeArgValue("trust-store-password", false );
+			if( trustStorePassword == null ) {
+				trustStorePassword = "password";
+			}
 		    System.setProperty( "javax.net.ssl.trustStore", trustStore );
-		}
-		String trustStorePassword = cmd.consumeArgValue("trust-store-password", false );
-		if( trustStorePassword != null ) {
 		    System.setProperty( "javax.net.ssl.trustStorePassword", trustStorePassword );
 		}
-			    
+		
 		ApplicationContext ctx = new ClassPathXmlApplicationContext( contextConfigLocations );
 		agentHelper = new BoxAgentHelper();
 		agentHelper.setStreamFactory( ctx.getBean("streamFactory",PrintStreamFactory.class) );
@@ -70,7 +83,7 @@ public class BoxClientCliHelper {
 
 	public static void usage( String name ) {
 		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --tunnel-user=<user> --tunnel-password=<password>] --agents=<[host]:[port]> ...\n" +
-			"    [--user=<user> [--password=<password>]]\n" +
+			"    [--ssl] [--user=<user> [--password=<password>]]\n" +
 			"    [--trust-store=<location>] [--trust-store-password=<password>]\n" +
 			"    [--debug] [--trace]\n" +
 			"    {\n" +
@@ -164,7 +177,7 @@ public class BoxClientCliHelper {
 		
 		int defaultPort = cmd.consumeArgValueAsInt("port", false);
 		if( defaultPort == 0 ) {
-			defaultPort = defaultAgentPort;
+			defaultPort = ssl ? defaultAgentPort+1 : defaultAgentPort;
 		}
 		
 		String agents = cmd.consumeArgValue( "agents", true );
