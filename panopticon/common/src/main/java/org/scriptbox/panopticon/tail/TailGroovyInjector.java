@@ -192,7 +192,10 @@ public class TailGroovyInjector implements TailInjector {
     					public void fileRotated() {
     						LOGGER.info( "File rotated: " + file );
     					}
-    					public void fileNotFound() { }
+    					public void fileNotFound() { 
+    						LOGGER.info( "File not found: " + file );
+    						
+    					}
     					public void init(Tailer tailer) {}
     				};
     			}

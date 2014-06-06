@@ -135,6 +135,8 @@ public class Gauntlet {
 		current.setMinPriority( Math.min(current.getMinPriority(),priority) );
 		current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
 		current.getMessages().addLast( msg );
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "send: added message: " + msg ); }
+		
 		enforceMessageLimit();
 
 		if( immediate ) {
@@ -170,7 +172,7 @@ public class Gauntlet {
 					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "blackout: in blackout period: " + startTime + "-" + endTime ); }
 					boolean ret = isPassed(closure,messagesToEvaluate,all); 
 					if( LOGGER.isDebugEnabled() ) {
-						LOGGER.debug( "blackout: " + (ret ? "allowing " : "suspending ") + messagesToEvaluate.size() + 
+						LOGGER.debug( "blackout: " + (ret ? "allowing " : "suspending ") + getCountUndeliveredMessages() + 
 							" message during blackout period" );
 					}
 					return ret;
@@ -271,7 +273,14 @@ public class Gauntlet {
 
 	
 	private void processDelivery( List<Message> messagesToEvaluate ) {
+		boolean anyMessages = getCountUndeliveredMessages() > 0 || messagesToEvaluate.size() > 0;
 		try {
+			if( LOGGER.isDebugEnabled() ) { 
+				if( anyMessages ) {
+					LOGGER.debug( "processDelivery: initial message count: " + getCountUndeliveredMessages() + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
+				}
+			}
+			
 			int count = getCountUndeliveredMessages();
 			if( count > 0 && isAllPredicatesPassed(messagesToEvaluate) ) {
 				try {
@@ -298,6 +307,13 @@ public class Gauntlet {
 		}
 		catch( Exception ex ) {
 			LOGGER.error( "Error delivering messages", ex );
+		}
+		finally {
+			if( LOGGER.isDebugEnabled() ) { 
+				if( anyMessages ) {
+					LOGGER.debug( "processDelivery: final message count: " + getCountUndeliveredMessages() + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
+				}
+			}
 		}
 	}
 
