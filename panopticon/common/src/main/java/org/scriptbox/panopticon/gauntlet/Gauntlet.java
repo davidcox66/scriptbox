@@ -273,15 +273,15 @@ public class Gauntlet {
 
 	
 	private void processDelivery( List<Message> messagesToEvaluate ) {
-		boolean anyMessages = getCountUndeliveredMessages() > 0 || messagesToEvaluate.size() > 0;
+		int count = getCountUndeliveredMessages();
+		boolean anyMessages = count > 0 || messagesToEvaluate.size() > 0;
 		try {
 			if( LOGGER.isDebugEnabled() ) { 
 				if( anyMessages ) {
-					LOGGER.debug( "processDelivery: initial message count: " + getCountUndeliveredMessages() + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
+					LOGGER.debug( "processDelivery: initial message count: " + count + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
 				}
 			}
 			
-			int count = getCountUndeliveredMessages();
 			if( count > 0 && isAllPredicatesPassed(messagesToEvaluate) ) {
 				try {
 					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "processDelivery: delivering " + count + " messages" ); }
