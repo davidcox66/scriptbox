@@ -13,7 +13,7 @@ import org.scriptbox.util.spring.context.ContextBuilder;
 public class TestServiceTest {
 
 	@Test
-	public void testService() {
+	public void testService() throws Exception {
 		
 		JettyService jetty = new JettyService("classpath:/META-INF/spring/remoting-server-context.xml");
 		jetty.start();

@@ -25,11 +25,15 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class JettyService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger( JettyService.class );
+	
 	private String hostname="127.0.0.1";
 	private int httpPort=8090;
 	private int httpsPort=0;
@@ -82,26 +86,32 @@ public class JettyService {
 		}
 	
 		if( httpsPort > 0 ) {
-			HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
-	        httpsConfig.addCustomizer(new SecureRequestCustomizer());
-	 
-			SslContextFactory sslContextFactory = new SslContextFactory();
-			sslContextFactory.setKeyStorePath( getKeyStoreLocation() );
-			sslContextFactory.setKeyStorePassword( keyStorePassword != null ? keyStorePassword : "password" );
-			sslContextFactory.setKeyManagerPassword( certificatePassword != null ? certificatePassword : "password" );
-			sslContextFactory.setCertAlias( certificateAlias != null ? certificateAlias : "jetty" );
-			
-			if( trustStorePath != null ) {
-				sslContextFactory.setTrustStorePath(trustStorePath);
+			String keyStore = getKeyStoreLocation();
+			if( keyStore != null ) {
+				HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
+		        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+		 
+				SslContextFactory sslContextFactory = new SslContextFactory();
+				sslContextFactory.setKeyStorePath( getKeyStoreLocation() );
+				sslContextFactory.setKeyStorePassword( keyStorePassword != null ? keyStorePassword : "password" );
+				sslContextFactory.setKeyManagerPassword( certificatePassword != null ? certificatePassword : "password" );
+				sslContextFactory.setCertAlias( certificateAlias != null ? certificateAlias : "jetty" );
+				
+				String trustStore = getTrustStoreLocation();
+				if( trustStore != null ) {
+					sslContextFactory.setTrustStorePath(trustStore);
+				}
+				if( trustStorePassword != null ) {
+					sslContextFactory.setTrustStorePassword(trustStorePassword);
+				}
+				
+		        ServerConnector conn = new ServerConnector(server, new SslConnectionFactory(sslContextFactory,"http/1.1"), new HttpConnectionFactory(httpsConfig));
+		        conn.setPort(httpsPort);
+				server.addConnector(conn);
 			}
-			if( trustStorePassword != null ) {
-				sslContextFactory.setTrustStorePassword(trustStorePassword);
+			else {
+				LOGGER.warn( "No keystore path defined and none found in current directory or $HOME/.scriptbox");
 			}
-			
-	        ServerConnector conn = new ServerConnector(server, new SslConnectionFactory(sslContextFactory,"http/1.1"), new HttpConnectionFactory(httpsConfig));
-	        conn.setPort(httpsPort);
-			server.addConnector(conn);
-			
 		}
 		HandlerCollection handlers = new HandlerCollection();
 		server.setHandler(handlers);;
@@ -304,21 +314,29 @@ public class JettyService {
 		directories.put( pathSpec, directory );
 	}
 
-	public String getKeyStoreLocation() {
-		if( StringUtils.isNotBlank(keyStorePath) ) {
-			return keyStorePath;
-		}
-		else {
-			File file = new File("keystore");
-			if( file.exists() ) {
-				return file.getAbsolutePath();
-			}
-			file = new File(System.getProperty("user.home") + File.separator + ".scriptbox" + File.separator + "keystore" );
-			if( file.exists() ) {
-				return file.getAbsolutePath();
-			}
-			throw new RuntimeException( "No keystore path defined and none found in current directory or $HOME/.scriptbox");
-		}
+	private String getKeyStoreLocation() {
+		return getStoreLocation( keyStorePath, "keystore" );
 	}
 	
+	private String getTrustStoreLocation() {
+		return getStoreLocation( trustStorePath, "truststore" );
+	}
+	
+	private String getStoreLocation( String path, String name ) {
+		if( StringUtils.isNotBlank(path) ) {
+			File file = new File(path);
+			return file.exists() ? path : null;
+		}
+		else {
+			File file = new File(name);
+			if( file.exists() ) {
+				return file.getAbsolutePath();
+			}
+			file = new File(System.getProperty("user.home") + File.separator + ".scriptbox" + File.separator + name );
+			if( file.exists() ) {
+				return file.getAbsolutePath();
+			}
+			return null;
+		}
+	}
 }
