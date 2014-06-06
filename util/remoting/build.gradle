@@ -10,6 +10,9 @@ dependencies {
     compile jschDepend
 
 	compile project(":deps:jetty")
+	compile jettyServerDepend
+	compile jettyUtilDepend
+	compile jettyHttpDepend
 	// compile jettyServerDepend
 	// compile jettyServletDepend
 	

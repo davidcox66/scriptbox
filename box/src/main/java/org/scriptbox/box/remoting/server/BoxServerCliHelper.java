@@ -1,6 +1,7 @@
 package org.scriptbox.box.remoting.server;
 
 import java.io.Console;
+import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
 import org.scriptbox.util.common.args.CommandLine;
@@ -40,19 +41,22 @@ public class BoxServerCliHelper {
 		String user = cmd.consumeArgValue( "user", false );
 		String password = null;
 		if( user != null ) {
-			Console cons = System.console();
-			if( cons == null ) {
-				throw new CommandLineException( "Unable to read password from console" );
+			password = cmd.consumeArgValue( "password", false );
+			if( password == null ) {
+				Console cons = System.console();
+				if( cons == null ) {
+					throw new CommandLineException( "Unable to read password from console" );
+				}
+				char[] passwd;
+				if ((passwd = cons.readPassword("%s", "Password:")) != null) {
+					password = new String( passwd );
+				}
+				if( StringUtils.isBlank(password) ) {
+					throw new CommandLineException( "Must specify a password");
+				}
 			}
-			char[] passwd;
-			if ((passwd = cons.readPassword("[%s]", "Password:")) != null) {
-				password = new String( passwd );
-			}
-			if( StringUtils.isBlank(password) ) {
-				throw new CommandLineException( "Must specify a password");
-			}
-			System.setProperty( "spring.user", user );
-			System.setProperty( "spring.password", password );
+			System.setProperty( "box.user", user );
+			System.setProperty( "box.password", password );
 		}
 		
 		String springContext = cmd.consumeArgValue( "spring-context", false );
@@ -69,7 +73,25 @@ public class BoxServerCliHelper {
 		
 		JettyService jetty = new JettyService( springContext, springSecurityContext );
 		jetty.setHostname( address );
-		jetty.setPort( port );
+		jetty.setKeyStorePath( cmd.consumeArgValue("keystore-path", false) );
+		jetty.setKeyStorePassword(cmd.consumeArgValue("keystore-password", false) );
+		jetty.setCertificateAlias(cmd.consumeArgValue("cert-alias", false) );
+		jetty.setCertificatePassword(cmd.consumeArgValue("cert-password", false) );
+		
+		jetty.setHttpPort( port );
+		jetty.setHttpsPort( port+1 );
+		
+		jetty.addDirectory( "/www", new File("/tmp/www") );
+		
+		String trustStore = cmd.consumeArgValue("trust-store", false );
+		if( trustStore != null ) {
+		    jetty.setTrustStorePath( trustStore );
+		}
+		String trustStorePassword = cmd.consumeArgValue("trust-store-password", false );
+		if( trustStorePassword != null ) {
+		    jetty.setTrustStorePassword( trustStorePassword );
+		}
+			    
 		return jetty;
 	}
 	
@@ -118,7 +140,10 @@ public class BoxServerCliHelper {
 			"\t[--spring-context=<context file>]\n"  +
 			"\t[--spring-security-context=<context file>]\n" +
 			"\t[--no-security]\n" +
-			"\t[--user=<user>] (prompts for password)" );
+			"\t[--user=<user> {--password=<password>|(prompts for password)}]\n" +
+			"\t[--keystore=<keystore>] [--keystore-alias=<alias>] [--keystore-pass=<password>] [--key-pass=<pass>]\n"  +
+			"\t[--trust-store=<location>] [--trust-store-password=<password>]" );
+			
 		System.exit( 1 );
 	}
 }

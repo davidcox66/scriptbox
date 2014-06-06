@@ -23,9 +23,9 @@
 		<property name="factories">
 			<list>
 				<bean class="org.scriptbox.box.remoting.client.BoxTunnelConnectionFactory" 
-					p:format="http://%host%:%port%/remoting/lm/" />
+					p:format="${box.scheme}://%host%:%port%/remoting/lm/" />
 				<bean class="org.scriptbox.box.remoting.client.BoxDirectConnectionFactory" 
-					p:format="http://%host%:%port%/remoting/lm/" />
+					p:format="${box.scheme}://%host%:%port%/remoting/lm/" />
 			</list>
 		</property>
 	</bean>

@@ -34,23 +34,34 @@ public class BoxClientCliHelper {
 		this.name = name;
 		this.defaultAgentPort = defaultAgentPort;
 	
+		cmd = new CommandLine( args );
+		
+		user = cmd.consumeArgValue("user", false);
+		if( user != null ) {
+			password = cmd.consumeArgValue("password", true);
+			System.setProperty( "box.user", user );
+			System.setProperty( "box.password", password );
+		}
+		
+		System.setProperty( "box.scheme", cmd.consumeArg("ssl") ? "https" : "http" );
+		
+		String trustStore = cmd.consumeArgValue("trust-store", false );
+		if( trustStore != null ) {
+		    System.setProperty( "javax.net.ssl.trustStore", trustStore );
+		}
+		String trustStorePassword = cmd.consumeArgValue("trust-store-password", false );
+		if( trustStorePassword != null ) {
+		    System.setProperty( "javax.net.ssl.trustStorePassword", trustStorePassword );
+		}
+			    
 		ApplicationContext ctx = new ClassPathXmlApplicationContext( contextConfigLocations );
 		agentHelper = new BoxAgentHelper();
 		agentHelper.setStreamFactory( ctx.getBean("streamFactory",PrintStreamFactory.class) );
 		agentHelper.setEndpointConnectionFactory( ctx.getBean("connectionFactory",EndpointConnectionFactory.class) );
 		
-		cmd = new CommandLine( args );
-		
 		// handled by shell wrapper script
 		cmd.consumeArg( "debug" );
 		cmd.consumeArg( "trace" );
-		
-		user = cmd.consumeArgValue("user", false);
-		if( user != null ) {
-			password = cmd.consumeArgValue("password", true);
-			System.setProperty( "spring.user", user );
-			System.setProperty( "spring.password", password );
-		}
 		
 		processTunnel();
 		agentHelper.setEndpoints( getEndpoints() );
@@ -58,8 +69,10 @@ public class BoxClientCliHelper {
 	}
 
 	public static void usage( String name ) {
-		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --tunnel-user=<user> --tunnel-password=<password>] [--user=<user> --password=<password>] --agents=<[host]:[port]> ...\n" +
-			"    --debug --trace\n" +
+		System.err.println( "Usage: " + name + " [--port=<port>] [--tunnel=<host:[port]> --tunnel-user=<user> --tunnel-password=<password>] --agents=<[host]:[port]> ...\n" +
+			"    [--user=<user> [--password=<password>]]\n" +
+			"    [--trust-store=<location>] [--trust-store-password=<password>]\n" +
+			"    [--debug] [--trace]\n" +
 			"    {\n" +
 			"        --status\n" +
 			"        --createContext <language> <contextName>\n" +

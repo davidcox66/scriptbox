@@ -60,6 +60,8 @@ JAVA_OPTS="\
  if [[ "$@" == *--trace* ]] ; then
 	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
 	JAVA_OPTS="$JAVA_OPTS -Dtrace.level=DEBUG"
+	# JAVA_OPTS="$JAVA_OPTS -Djavax.net.debug=ssl:handshake"
+	JAVA_OPTS="$JAVA_OPTS -Djavax.net.debug=all"
 elif [[ "$@" == *--debug* ]] ; then
 	JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
 fi

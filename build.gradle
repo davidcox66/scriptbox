@@ -118,7 +118,8 @@ ext {
     jacksonVersion = "1.9.2"
     spockVersion = "0.7-groovy-2.0"
 	cxfVersion = "2.6.1"
-	jettyVersion = "8.0.0.M2"
+	// jettyVersion = "8.0.0.M2"
+	jettyVersion = "9.2.0.v20140526"
 	tomcatVersion = "7.0.47"
 	webflowVersion = "2.1.1.RELEASE"
 	droolsVersion = "5.4.0.Final"
@@ -233,6 +234,7 @@ ext {
 
 	jettyServerDepend = "org.eclipse.jetty:jetty-server:${jettyVersion}"
 	jettyServletDepend = "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+	jettyHttpDepend = "org.eclipse.jetty:jetty-http:${jettyVersion}"
 	jettyUtilDepend = "org.eclipse.jetty:jetty-util:${jettyVersion}"
 	jettyClientDepend = "org.eclipse.jetty:jetty-client:${jettyVersion}"
 	jettyJmxDepend = "org.eclipse.jetty:jetty-jmx:${jettyVersion}"

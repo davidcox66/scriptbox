@@ -4,6 +4,8 @@ dependencies {
 	compile jettyServerDepend
 	compile jettyServletDepend
 	compile jettyJmxDepend
+	compile jettyUtilDepend
+	compile jettyHttpDepend
 
 	provided servletApiDepend
 }

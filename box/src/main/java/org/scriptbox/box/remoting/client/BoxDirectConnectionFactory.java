@@ -13,10 +13,10 @@ public class BoxDirectConnectionFactory extends BoxConnectionFactory {
 			TcpEndpoint tcp = (TcpEndpoint)endpoint;
 			HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
 			
-			String user = System.getProperty( "spring.user" );
+			String user = System.getProperty( "box.user" );
 			if( user != null ) {
 				factory.setUsername( user );
-				factory.setPassword( System.getProperty("spring.password") );
+				factory.setPassword( System.getProperty("box.password") );
 			}
 			
 			factory.setServiceUrl(getFormat().replaceAll("%host%", tcp.getHost()).replaceAll("%port%",""+tcp.getPort()));
