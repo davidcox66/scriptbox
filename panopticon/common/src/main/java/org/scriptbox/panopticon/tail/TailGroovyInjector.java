@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.input.Tailer;
-import org.apache.commons.io.input.TailerListener;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
 import org.scriptbox.box.groovy.ClosureWrapper;
 import org.scriptbox.util.common.io.GlobFileSource;
+import org.scriptbox.util.common.io.Tailer;
+import org.scriptbox.util.common.io.TailerListener;
 import org.scriptbox.util.common.io.TailerListenerFactory;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
@@ -131,6 +131,7 @@ public class TailGroovyInjector implements TailInjector {
 				Object ret = null;
 				boolean matching = expression.matcher(line).matches(); 
 				if( LOGGER.isTraceEnabled() ) { LOGGER.trace( "coalesce: match: " + matching + ", line: '" + line + "'"); }
+				
 				if( matching ) {
 					if( builder.length() > 0 ) {
 						String str = builder.toString();
@@ -162,6 +163,9 @@ public class TailGroovyInjector implements TailInjector {
 	}
 	
     public void tail( int seconds, Collection<String> exprs, final Closure tailer ) {
+    	tail( seconds, false, exprs, tailer );
+    }
+    public void tail( int seconds, final boolean newer, Collection<String> exprs, final Closure tailer ) {
     	final BoxContext context = BoxContext.getCurrentContext();
     	plugin.tail( 
     		seconds*1000,
@@ -197,6 +201,11 @@ public class TailGroovyInjector implements TailInjector {
     						
     					}
     					public void init(Tailer tailer) {}
+    					
+    					public boolean newer( File file ) {
+    						LOGGER.info( "File is newer: " + file + ", time: " + file.lastModified() );
+    						return newer;
+    					}
     				};
     			}
 	    	}

@@ -9,12 +9,16 @@ import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.inject.BoxContextInjectingListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormat;
 
 public class UtilPlugin extends BoxContextInjectingListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UtilPlugin.class);
 
-	private Map<String,SimpleDateFormat> formats = new HashMap<String,SimpleDateFormat>();
+	private Map<String,DateTimeFormatter> formats = new HashMap<String,DateTimeFormatter>();
 	
 	@Override
 	public void contextCreated(BoxContext context) throws Exception {
@@ -23,21 +27,20 @@ public class UtilPlugin extends BoxContextInjectingListener {
 		super.contextCreated(context);
 	}
 
-	synchronized public Date toDate( String format, String text ) {
-		try {
-			SimpleDateFormat sdf = formats.get( format );
-			if( sdf == null ) {
-				sdf = new SimpleDateFormat( format );
-				formats.put( format, sdf );
-			}
-			return sdf.parse( text );
-		}
-		catch( Exception ex ) {
-			throw new RuntimeException( "Failed parsing date: '" + text + "', format: '" + format + "'");
-		}
+	public DateTime toDate( String format, String text ) {
+		return getFormatter(format).parseDateTime( text );
 	}
 
-	synchronized public Date toTime( String format, String text ) {
-		return toDate( format, text );
+	public LocalTime toTime( String format, String text ) {
+		return getFormatter(format).parseLocalTime(text);
+	}
+	
+	synchronized private DateTimeFormatter getFormatter( String format ) {
+		DateTimeFormatter sdf = formats.get( format );
+		if( sdf == null ) {
+			sdf = DateTimeFormat.forPattern( format );
+			formats.put( format, sdf );
+		}
+		return sdf;
 	}
 }

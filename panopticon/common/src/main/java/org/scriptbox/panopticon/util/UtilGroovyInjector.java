@@ -1,7 +1,5 @@
 package org.scriptbox.panopticon.util;
 
-import java.util.Date;
-
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
@@ -10,6 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.HashMap;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
 
 public class UtilGroovyInjector implements UtilInjector {
 
@@ -85,11 +86,11 @@ public class UtilGroovyInjector implements UtilInjector {
 		return BoxContext.getCurrentContext().getBeans().get("Properties", HashMap.class);
 	}
 	
-	public Date toDate( String format, String text ) {
+	public DateTime toDate( String format, String text ) {
 		return plugin.toDate( format, text );
 	}
 	
-	public Date toTime( String format, String text ) {
+	public LocalTime toTime( String format, String text ) {
 		return plugin.toTime( format, text );
 	}
 }
