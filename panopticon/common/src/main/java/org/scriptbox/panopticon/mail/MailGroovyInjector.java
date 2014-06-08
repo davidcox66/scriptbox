@@ -27,6 +27,6 @@ public class MailGroovyInjector implements MailInjector {
 	
 	public void inject( BoxContext context ) {
 		Lookup vars = context.getScriptVariables();
-		vars.put( "mailer", new Mailer()  );
+		vars.put( "mailer", new GroovyMailer()  );
 	}
 }
