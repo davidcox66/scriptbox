@@ -326,17 +326,20 @@ public class Gauntlet {
 
 		// Drop deliveries beyond the rentention window
 		DateTime oldest = getDateInPast( -maxDeliveryRetentionMinutes );
+		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: oldest message to keep of " + deliveries.size() + " deliveries: " +  oldest); }
+		
 		Iterator<Delivery> iter = deliveries.descendingIterator();
 		while( iter.hasNext() ) {
 			Delivery del = iter.next();
-			if( del.getTime() == null || del.getTime().isAfter(oldest) ) {
+			DateTime time = del.getTime();
+			if( time == null || time.isAfter(oldest) ) {
 				break;
 			}
 			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: discarding delivery: " + del.getTime() ); }
 			iter.remove();
 		}
 		if( LOGGER.isDebugEnabled() ) {
-			LOGGER.debug( "archiveDelivery: there are currently " + deliveries.size() + " deliveries" );
+			LOGGER.debug( "archiveDelivery: there are " + deliveries.size() + " remaining" );
 		}
 	}
 	
@@ -404,7 +407,7 @@ public class Gauntlet {
 
 	private DateTime getDateInPast( int minutes ) {
 		DateTime past = new DateTime();
-		return past.plusMinutes( -minutes );
+		return past.minusMinutes( minutes );
 	}
 	
 	private void startSchedulerIfNeeded() {
