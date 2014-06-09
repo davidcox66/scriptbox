@@ -4,6 +4,7 @@ import groovy.lang.Closure;
 import groovy.util.Expando;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -203,7 +204,7 @@ public class TailGroovyInjector implements TailInjector {
     					public void init(Tailer tailer) {}
     					
     					public boolean newer( File file ) {
-    						LOGGER.info( "File is newer: " + file + ", time: " + file.lastModified() );
+    						LOGGER.info( "File is newer: " + file + ", time: " + new Date(file.lastModified()) );
     						return newer;
     					}
     				};

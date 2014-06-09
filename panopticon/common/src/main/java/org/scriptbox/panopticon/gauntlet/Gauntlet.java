@@ -383,7 +383,7 @@ public class Gauntlet {
 		Object[] args = new Object[2];
 		args[0] = message;
 		args[1] = this;
-		return closure.run( args );
+		return closure != null ? closure.run( args ) : false;
 	}
 	
 	private boolean isBetween( LocalTime start, LocalTime end ) {

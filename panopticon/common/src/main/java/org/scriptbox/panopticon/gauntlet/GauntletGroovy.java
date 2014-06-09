@@ -86,15 +86,18 @@ public class GauntletGroovy extends Gauntlet {
 	}
 	
 	private Object call( Closure closure, Object[] args ) {
-		if( closure.getMaximumNumberOfParameters() == 0 ) {
-			return closure.call();
+		if( closure != null ) {
+			if( closure.getMaximumNumberOfParameters() == 0 ) {
+				return closure.call();
+			}
+			else if( closure.getMaximumNumberOfParameters() == 1 ) {
+				return closure.call( args[0] );
+			}
+			else {
+				return closure.call( args[0], args[1] );
+			}
 		}
-		else if( closure.getMaximumNumberOfParameters() == 1 ) {
-			return closure.call( args[0] );
-		}
-		else {
-			return closure.call( args[0], args[1] );
-		}
+		return null;
 			
 	}
 }
