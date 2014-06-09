@@ -278,7 +278,7 @@ public class Gauntlet {
 		try {
 			if( LOGGER.isDebugEnabled() ) { 
 				if( anyMessages ) {
-					LOGGER.debug( "processDelivery: initial message count: " + count + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
+					LOGGER.debug( "processDelivery: message count: " + count + ", evaluating: " + messagesToEvaluate.size() ); 
 				}
 			}
 			
@@ -308,13 +308,6 @@ public class Gauntlet {
 		catch( Exception ex ) {
 			LOGGER.error( "Error delivering messages", ex );
 		}
-		finally {
-			if( LOGGER.isDebugEnabled() ) { 
-				if( anyMessages ) {
-					LOGGER.debug( "processDelivery: final message count: " + getCountUndeliveredMessages() + ", messagesToEvaluate: " + messagesToEvaluate.size() ); 
-				}
-			}
-		}
 	}
 
 	private void archiveDelivery() {
@@ -325,7 +318,7 @@ public class Gauntlet {
 		deliveries.addFirst(new Delivery());
 
 		// Drop deliveries beyond the rentention window
-		DateTime oldest = getDateInPast( -maxDeliveryRetentionMinutes );
+		DateTime oldest = getDateInPast( maxDeliveryRetentionMinutes );
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: oldest message to keep of " + deliveries.size() + " deliveries: " +  oldest); }
 		
 		Iterator<Delivery> iter = deliveries.descendingIterator();

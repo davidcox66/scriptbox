@@ -24,7 +24,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( QuartzPlugin.class );
 	
-	private static final int DEFAULT_THREAD_COUNT = 10;
+	private static final int DEFAULT_THREAD_COUNT = 2;
 	
 	private int threadCount = DEFAULT_THREAD_COUNT;
 	
