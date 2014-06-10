@@ -85,6 +85,14 @@ public class GauntletGroovy extends Gauntlet {
 		} );
 	}
 	
+	public void filter( final Closure closure ) throws Exception {
+		super.filter( new ParameterizedRunnableWithResult<Boolean,Object[]>() {
+			public Boolean run( Object[] args ) throws Exception {
+				return Closures.coerceToBoolean( call(closure,args) );
+			}
+		} );
+	}
+	
 	private Object call( Closure closure, Object[] args ) {
 		if( closure != null ) {
 			if( closure.getMaximumNumberOfParameters() == 0 ) {

@@ -42,6 +42,8 @@ public class Gauntlet {
 	private boolean scheduled;
 	private BoxContext context;
 	private List<ParameterizedRunnable<Object[]>> receivers = new ArrayList<ParameterizedRunnable<Object[]>>();
+	private List<ParameterizedRunnableWithResult<Boolean,Message>> filters = 
+		new ArrayList<ParameterizedRunnableWithResult<Boolean,Message>>();
 	private List<ParameterizedRunnableWithResult<Boolean,List<Message>>> predicates = 
 		new ArrayList<ParameterizedRunnableWithResult<Boolean,List<Message>>>();
 
@@ -127,22 +129,29 @@ public class Gauntlet {
 		return count;
 	}
 	
-	synchronized public void send( String source, int priority, Object data ) {
+	synchronized public void send( String source, int priority, Object data ) throws Exception {
 		startSchedulerIfNeeded();
 		
 		Message msg = new Message(source,priority,data);
-		Delivery current = getCurrentDelivery();
-		current.setMinPriority( Math.min(current.getMinPriority(),priority) );
-		current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
-		current.getMessages().addLast( msg );
-		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "send: added message: " + msg ); }
-		
-		enforceMessageLimit();
-
-		if( immediate ) {
-			List<Message> messagesToEvaluate = new ArrayList<Message>(1);
-			messagesToEvaluate.add( msg );
-			processDelivery( messagesToEvaluate );
+		if( isAllFiltersPassed(msg) ) {
+			Delivery current = getCurrentDelivery();
+			current.setMinPriority( Math.min(current.getMinPriority(),priority) );
+			current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
+			current.getMessages().addLast( msg );
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "send: added message: " + msg ); }
+			
+			enforceMessageLimit();
+	
+			if( immediate ) {
+				List<Message> messagesToEvaluate = new ArrayList<Message>(1);
+				messagesToEvaluate.add( msg );
+				processDelivery( messagesToEvaluate );
+			}
+		}
+		else {
+			if( LOGGER.isDebugEnabled() ) {
+				LOGGER.debug( "send: discarding message: " + msg );
+			}
 		}
 	}
 
@@ -181,6 +190,15 @@ public class Gauntlet {
 					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "blackout: outside blackout period: " + startTime + "-" + endTime ); }
 				}
 				return true;
+			}
+		} );
+	}
+	
+	synchronized public void filter( final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+		
+		filters.add( new ParameterizedRunnableWithResult<Boolean,Message>() {
+			public Boolean run( Message message ) throws Exception {
+				return closure.run( new Object[] { message } );
 			}
 		} );
 	}
@@ -271,6 +289,14 @@ public class Gauntlet {
 		} );
 	}
 
+	private boolean isAllFiltersPassed( Message message ) throws Exception {
+		for( ParameterizedRunnableWithResult<Boolean, Message> f : filters ) {
+			if( !f.run(message) ) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	private void processDelivery( List<Message> messagesToEvaluate ) {
 		int count = getCountUndeliveredMessages();

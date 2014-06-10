@@ -351,10 +351,7 @@ public class Tailer implements Runnable {
                 }
 
                 if (reader == null) {
-                    try {
-                        Thread.sleep(delayMillis);
-                    } catch (InterruptedException e) {
-                    }
+                	pause();
                 } else {
                     // The current position in the file
                     position = end ? file.length() : 0;
@@ -386,6 +383,7 @@ public class Tailer implements Runnable {
                     } catch (FileNotFoundException e) {
                         // in this case we continue to use the previous reader and position values
                         listener.fileNotFound();
+                        pause();
                     }
                     continue;
                 } else {
@@ -417,10 +415,7 @@ public class Tailer implements Runnable {
                 if (reOpen) {
                     IOUtils.closeQuietly(reader);
                 }
-                try {
-                    Thread.sleep(delayMillis);
-                } catch (InterruptedException e) {
-                }
+                pause();
                 if (run && reOpen) {
                     reader = new RandomAccessFile(file, RAF_MODE);
                     reader.seek(position);
@@ -436,6 +431,14 @@ public class Tailer implements Runnable {
         }
     }
 
+    private void pause() {
+        try {
+            Thread.sleep(delayMillis);
+        } 
+        catch (InterruptedException e) {
+        }
+    }
+    
     /**
      * Allows the tailer to complete its current loop and return.
      */

@@ -1,16 +1,15 @@
 package org.scriptbox.panopticon.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codehaus.groovy.runtime.MethodClosure;
+import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
 import org.scriptbox.box.container.BoxContext;
 import org.scriptbox.box.container.Lookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalTime;
 
 public class UtilGroovyInjector implements UtilInjector {
 
