@@ -1,5 +1,6 @@
 package org.scriptbox.panopticon.gauntlet;
 
+import java.util.Collection;
 import groovy.lang.Closure;
 
 import org.scriptbox.box.container.BoxContext;
@@ -85,14 +86,21 @@ public class GauntletGroovy extends Gauntlet {
 		} );
 	}
 	
-	public void filter( final Closure closure ) throws Exception {
-		super.filter( new ParameterizedRunnableWithResult<Boolean,Object[]>() {
+	public void discard( final Closure closure ) throws Exception {
+		super.discard( new ParameterizedRunnableWithResult<Boolean,Object[]>() {
 			public Boolean run( Object[] args ) throws Exception {
 				return Closures.coerceToBoolean( call(closure,args) );
 			}
 		} );
 	}
 	
+	public void filter( final Closure closure ) throws Exception {
+		super.filter( new ParameterizedRunnableWithResult<Collection<Message>,Object[]>() {
+			public Collection<Message> run( Object[] args ) throws Exception {
+				return (Collection<Message>)call(closure,args);
+			}
+		} );
+	}
 	private Object call( Closure closure, Object[] args ) {
 		if( closure != null ) {
 			if( closure.getMaximumNumberOfParameters() == 0 ) {

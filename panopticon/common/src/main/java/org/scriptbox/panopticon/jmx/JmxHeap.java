@@ -1,21 +1,13 @@
 package org.scriptbox.panopticon.jmx;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
+import java.rmi.ConnectException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 
 import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.jmx.conn.JmxConnection;
+import org.scriptbox.box.jmx.conn.JmxRmiConnection;
 import org.scriptbox.box.jmx.proc.JmxProcess;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
@@ -29,8 +21,8 @@ public class JmxHeap implements ExecRunnable {
     private int maxSize;
     private int maxSeconds;
     private Historical<Heap> history;
-    
     private ParameterizedRunnable<Object> runnable;
+    private boolean connected=true;
     
     public JmxHeap( boolean deltas, ParameterizedRunnable<Object> runnable ) {
     	this( deltas, 1, 0, runnable );
@@ -45,10 +37,9 @@ public class JmxHeap implements ExecRunnable {
     }
     
     public void run() {
+    	final JmxProcess proc = ExecContext.getNearestEnclosing(JmxProcess.class);
+		final JmxConnection connection = proc.getConnection();
     	try {
-	    	final JmxProcess proc = ExecContext.getNearestEnclosing(JmxProcess.class);
-			final JmxConnection connection = proc.getConnection();
-			
 			Object o = connection.getAttribute(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage");
 			CompositeData cd = (CompositeData)o;
 			Heap mem = new Heap(
@@ -67,9 +58,18 @@ public class JmxHeap implements ExecRunnable {
         			runnable.run( history );
         		}
 	        }
+        	connected = true;
 		}
 		catch( Exception ex ) {
-			LOGGER.error( "Failed getting heap information", ex );
+			if( connected ) {
+				if( JmxRmiConnection.isConnectException(ex) ) {
+					connected = false;
+					LOGGER.warn( "Could not connect to get heap information: " + connection, ex );
+				}
+				else {
+					LOGGER.error( "Failed getting heap information", ex );
+				}
+			}
 		}
     }
 }

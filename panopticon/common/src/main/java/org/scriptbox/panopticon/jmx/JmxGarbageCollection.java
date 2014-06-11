@@ -1,19 +1,13 @@
 package org.scriptbox.panopticon.jmx;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ReflectionException;
-
 import org.scriptbox.box.exec.ExecContext;
 import org.scriptbox.box.exec.ExecRunnable;
 import org.scriptbox.box.jmx.conn.JmxConnection;
+import org.scriptbox.box.jmx.conn.JmxRmiConnection;
 import org.scriptbox.box.jmx.proc.JmxProcess;
 import org.scriptbox.util.common.obj.ParameterizedRunnable;
 import org.slf4j.Logger;
@@ -28,8 +22,8 @@ public class JmxGarbageCollection implements ExecRunnable {
     private int maxSeconds;
     private List<GarbageCollector> collectors = null;
     private Map<GarbageCollector,Historical<GarbageCollection>> histories = new HashMap<GarbageCollector,Historical<GarbageCollection>>();
-    
     private ParameterizedRunnable<Object> runnable;
+    private boolean connected=true;
     
     public JmxGarbageCollection( boolean deltas, ParameterizedRunnable<Object> runnable ) {
     	this( deltas, 1, 0, runnable );
@@ -66,13 +60,22 @@ public class JmxGarbageCollection implements ExecRunnable {
 	        		LOGGER.debug( "JmxGarbageCollection: latest:" + info + ", previous: " + (last != null ? last.getData() : null) );
         		}
 	        }
+	        connected = true;
 		}
 		catch( Exception ex ) {
-			LOGGER.error( "Failed getting GC information", ex );
+			if( connected ) {
+				if( JmxRmiConnection.isConnectException(ex) ) {
+					connected = false;
+					LOGGER.warn( "Could not connect to get GC information: " + connection, ex );
+				}
+				else {
+					LOGGER.error( "Failed getting GC information", ex );
+				}
+			}
 		}
     }
  
-    synchronized private List<GarbageCollector> getCollectors() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    synchronized private List<GarbageCollector> getCollectors() throws Exception {
     	if( collectors == null ) {
 			JmxConnection connection = ExecContext.getEnclosing(JmxProcess.class).getConnection();
 			collectors = GarbageCollector.getCollectors( connection );

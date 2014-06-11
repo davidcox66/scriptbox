@@ -70,7 +70,7 @@ public class GarbageCollector {
     	ATTRS.add( "CollectionTime" );
     }
     
-    public static List<GarbageCollector> getCollectors( JmxConnection connection ) throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public static List<GarbageCollector> getCollectors( JmxConnection connection ) throws Exception {
         // Get standard attribute "VmVendor"
     	if( LOGGER.isDebugEnabled() ) {
 	        ObjectName objectName = new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME);
@@ -94,7 +94,7 @@ public class GarbageCollector {
     	return ret;
     }
     
-    public GarbageCollection getInfo( JmxConnection connection ) throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, IOException {
+    public GarbageCollection getInfo( JmxConnection connection ) throws Exception {
     	ObjectName objectName = new ObjectName("java.lang:type=GarbageCollector,name=" + name );
     	AttributeList attrs = connection.getAttributes(objectName, ATTRS );
 

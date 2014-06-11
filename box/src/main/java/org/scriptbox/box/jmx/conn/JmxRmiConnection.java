@@ -8,15 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -50,35 +45,59 @@ public class JmxRmiConnection extends JmxConnection {
 	   environment.put(JMXConnector.CREDENTIALS, new String[] {user, password} );
 	}
 
-	public Object getAttribute( ObjectName objectName, String attribute ) 
-		throws IOException, ReflectionException, InstanceNotFoundException, AttributeNotFoundException, MBeanException
+	public Object getAttribute( ObjectName objectName, String attribute ) throws Exception
 	{
-		return getServer().getAttribute(objectName, attribute);
+		try {
+			return getServer().getAttribute(objectName, attribute);
+		}
+		catch( Exception ex ) {
+			reset(ex);
+			throw ex;
+		}
+		
 	}
 	
-	public AttributeList getAttributes( ObjectName objectName, Collection attributes ) 
-		throws IOException, ReflectionException, InstanceNotFoundException 
-	{
-		String[] namesArray = new String[attributes.size()];
-		attributes.toArray(namesArray);
-		return getServer().getAttributes(objectName, namesArray);
+	public AttributeList getAttributes( ObjectName objectName, Collection attributes ) throws Exception {
+		try {
+			String[] namesArray = new String[attributes.size()];
+			attributes.toArray(namesArray);
+			return getServer().getAttributes(objectName, namesArray);
+		}
+		catch( Exception ex ) {
+			reset(ex);
+			throw ex;
+		}
 	}
 	
-	public MBeanAttributeInfo[] getAttributeInfo( ObjectName objectName ) 
-		throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException 
-	{
-		return getServer().getMBeanInfo(objectName).getAttributes();
-	}
-	public Set<ObjectName> queryNames( ObjectName objectName, QueryExp expression ) 
-		throws IOException 
-	{
-		return getServer().queryNames( objectName, expression );
+	public MBeanAttributeInfo[] getAttributeInfo( ObjectName objectName ) throws Exception {
+		try {
+			return getServer().getMBeanInfo(objectName).getAttributes();
+		}
+		catch( Exception ex ) {
+			reset(ex);
+			throw ex;
+		}
 	}
 	
-	public Object invoke( ObjectName objectName, String methodName, Object[] arguments, String[] signature ) 
-		throws InstanceNotFoundException, MBeanException, ReflectionException, IOException 
-	{
-		return getServer().invoke( objectName, methodName, arguments, signature );
+	public Set<ObjectName> queryNames( ObjectName objectName, QueryExp expression ) throws Exception {
+		try {
+			return getServer().queryNames( objectName, expression );
+		}
+		catch( Exception ex ) {
+			reset(ex);
+			throw ex;
+		}
+	}
+	
+	public Object invoke( ObjectName objectName, String methodName, Object[] arguments, String[] signature ) throws Exception {
+		try {
+			return getServer().invoke( objectName, methodName, arguments, signature );
+		}
+		catch( Exception ex ) {
+			reset(ex);
+			throw ex;
+		}
+			
 	}
 	
 	public JMXServiceURL getUrl() {
@@ -104,6 +123,17 @@ public class JmxRmiConnection extends JmxConnection {
 	    return server;
 	}
 
+	private void reset( Exception ex ) {
+		if( isConnectException(ex) ) {
+			reset();
+		}
+	}
+	
+	public void reset() {
+		connector = null;
+		server = null;
+	}
+	
 	public String toString() {
 		return "JmxConnection { " + url + " }";
 	}
@@ -132,4 +162,17 @@ public class JmxRmiConnection extends JmxConnection {
 	}
 	
 	
+	public static boolean isConnectException( Exception ex ) {
+		Throwable curr = ex;
+		do {
+			if( curr instanceof java.net.ConnectException || 
+				curr instanceof java.rmi.ConnectException || 
+				curr instanceof javax.naming.ServiceUnavailableException )
+			{
+				return true;
+			}
+			curr = ex.getCause();
+		} while( curr != null );
+		return false;
+	}
 }

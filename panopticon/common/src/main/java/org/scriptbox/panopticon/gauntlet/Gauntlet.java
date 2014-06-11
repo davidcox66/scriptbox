@@ -1,6 +1,7 @@
 package org.scriptbox.panopticon.gauntlet;
 
 
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -42,8 +43,10 @@ public class Gauntlet {
 	private boolean scheduled;
 	private BoxContext context;
 	private List<ParameterizedRunnable<Object[]>> receivers = new ArrayList<ParameterizedRunnable<Object[]>>();
-	private List<ParameterizedRunnableWithResult<Boolean,Message>> filters = 
+	private List<ParameterizedRunnableWithResult<Boolean,Message>> discarders = 
 		new ArrayList<ParameterizedRunnableWithResult<Boolean,Message>>();
+	private List<ParameterizedRunnableWithResult<Collection<Message>,Collection<Message>>> filters = 
+		new ArrayList<ParameterizedRunnableWithResult<Collection<Message>,Collection<Message>>>();
 	private List<ParameterizedRunnableWithResult<Boolean,List<Message>>> predicates = 
 		new ArrayList<ParameterizedRunnableWithResult<Boolean,List<Message>>>();
 
@@ -133,7 +136,7 @@ public class Gauntlet {
 		startSchedulerIfNeeded();
 		
 		Message msg = new Message(source,priority,data);
-		if( isAllFiltersPassed(msg) ) {
+		if( isAllDiscardersPassed(msg) ) {
 			Delivery current = getCurrentDelivery();
 			current.setMinPriority( Math.min(current.getMinPriority(),priority) );
 			current.setMaxPriority( Math.max(current.getMaxPriority(),priority) );
@@ -194,11 +197,20 @@ public class Gauntlet {
 		} );
 	}
 	
-	synchronized public void filter( final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
+	synchronized public void discard( final ParameterizedRunnableWithResult<Boolean,Object[]> closure ) throws Exception {
 		
-		filters.add( new ParameterizedRunnableWithResult<Boolean,Message>() {
+		discarders.add( new ParameterizedRunnableWithResult<Boolean,Message>() {
 			public Boolean run( Message message ) throws Exception {
-				return closure.run( new Object[] { message } );
+				return closure.run( new Object[] { message, this } );
+			}
+		} );
+	}
+	
+	synchronized public void filter( final ParameterizedRunnableWithResult<Collection<Message>,Object[]> closure ) throws Exception {
+		
+		filters.add( new ParameterizedRunnableWithResult<Collection<Message>,Collection<Message>>() {
+			public Collection<Message> run( Collection<Message> messages ) throws Exception {
+				return closure.run( new Object[] { messages, this } );
 			}
 		} );
 	}
@@ -289,8 +301,8 @@ public class Gauntlet {
 		} );
 	}
 
-	private boolean isAllFiltersPassed( Message message ) throws Exception {
-		for( ParameterizedRunnableWithResult<Boolean, Message> f : filters ) {
+	private boolean isAllDiscardersPassed( Message message ) throws Exception {
+		for( ParameterizedRunnableWithResult<Boolean, Message> f : discarders ) {
 			if( !f.run(message) ) {
 				return false;
 			}
@@ -314,8 +326,14 @@ public class Gauntlet {
 					Delivery current = getCurrentDelivery();
 					current.setTime( new DateTime() );
 					current.setCount( count );
+					
+					Collection<Message> msgs = current.getMessages();
+					for( ParameterizedRunnableWithResult<Collection<Message>,Collection<Message>> f : filters ) {
+						msgs = f.run( msgs );
+					}
+					
 					Object[] args = new Object[2];
-					args[0] = current.getMessages();
+					args[0] = msgs;
 					args[1] = this;
 					for( ParameterizedRunnable<Object[]> receiver : receivers ) {
 						try {
