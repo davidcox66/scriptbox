@@ -33,6 +33,17 @@ public class Heap implements Storable {
 		return ret;
 	}
 	
+	public Heap diff( Heap other ) {
+		if( other != null ) {
+			return new Heap( 
+				getInit(),
+				getCommitted() - other.getCommitted(),
+				getMax(),
+				getUsed() - other.getUsed() );
+		}
+		return this;
+	}
+		
 	public long getInit() {
 		return init;
 	}

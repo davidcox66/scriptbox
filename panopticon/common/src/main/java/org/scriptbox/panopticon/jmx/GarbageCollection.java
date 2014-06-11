@@ -24,6 +24,18 @@ public class GarbageCollection implements Storable {
 		return ret;
 	}
 	
+	public GarbageCollection diff( GarbageCollection other ) {
+		if( other != null ) {
+			GarbageCollection ret = new GarbageCollection();
+			ret.setType( getType() );
+			ret.setName( getName() );
+			ret.setCount( getCount() - other.getCount() );
+			ret.setTime( getTime() - other.getTime() );
+			return ret;
+		}
+		return this;
+	}
+	
 	public String getType() {
 		return type;
 	}

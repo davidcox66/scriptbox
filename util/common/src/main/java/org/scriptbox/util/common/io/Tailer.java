@@ -338,6 +338,9 @@ public class Tailer implements Runnable {
      * Follows changes in the file, calling the TailerListener's handle method for each new line.
      */
     public void run() {
+    	boolean notFoundSent = false;
+    	boolean rotatedSent = false;
+    	
         RandomAccessFile reader = null;
         try {
             long last = 0; // The last time the file was checked for changes
@@ -346,8 +349,12 @@ public class Tailer implements Runnable {
             while (run && reader == null) {
                 try {
                     reader = new RandomAccessFile(file, RAF_MODE);
+                    notFoundSent = false;
                 } catch (FileNotFoundException e) {
-                    listener.fileNotFound();
+                	if( !notFoundSent ) {
+	                    listener.fileNotFound();
+	                    notFoundSent = true;
+                	}
                 }
 
                 if (reader == null) {
@@ -370,7 +377,10 @@ public class Tailer implements Runnable {
                 if (length < position) {
 
                     // File was rotated
-                    listener.fileRotated();
+                	if( !rotatedSent ) {
+	                    listener.fileRotated();
+	                    rotatedSent = true;
+                	}
 
                     // Reopen the reader after rotation
                     try {
@@ -380,14 +390,19 @@ public class Tailer implements Runnable {
                         position = 0;
                         // close old file explicitly rather than relying on GC picking up previous RAF
                         IOUtils.closeQuietly(save);
+                        notFoundSent = false;
                     } catch (FileNotFoundException e) {
                         // in this case we continue to use the previous reader and position values
-                        listener.fileNotFound();
+                    	if( !notFoundSent ) {
+	                        listener.fileNotFound();
+	                        notFoundSent = true;
+                    	}
                         pause();
                     }
                     continue;
-                } else {
-
+                } 
+                else {
+                	rotatedSent = false;
                     // File was not rotated
 
                     // See if the file needs to be read again
