@@ -82,15 +82,19 @@ public class BoxAgentHelper implements InitializingBean {
             for( Thread thread : threads ) {
                 thread.join();
             }
-            for( Connection<BoxInterface> conn : connections ) {
-            	try {
-            		conn.close();
-            	}
-            	catch( Exception ex ) {
-            		LOGGER.error( "Error closing connection: " + conn, ex );
-            	}
-            }
+            threads.clear();
+            close();
 		}
+	}
+	public void close() {
+        for( Connection<BoxInterface> conn : connections ) {
+        	try {
+        		conn.close();
+        	}
+        	catch( Exception ex ) {
+        		LOGGER.error( "Error closing connection: " + conn, ex );
+        	}
+        }
 	}
 	
 	public void createContext( final String language, final String contextName ) throws Exception {

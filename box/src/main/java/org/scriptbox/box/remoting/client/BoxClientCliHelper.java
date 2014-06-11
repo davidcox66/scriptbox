@@ -1,15 +1,17 @@
 package org.scriptbox.box.remoting.client;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.endpoint.Endpoint;
+import org.scriptbox.util.remoting.endpoint.EndpointConnectionFactory;
 import org.scriptbox.util.remoting.endpoint.SshTunnelEndpoint;
 import org.scriptbox.util.remoting.endpoint.TcpEndpoint;
-import org.scriptbox.util.remoting.endpoint.EndpointConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -100,8 +102,21 @@ public class BoxClientCliHelper {
 	}
 	
 	public void process() throws Exception {
-		processAgents();
-		agentHelper.join();
+		if( cmd.consumeArg("commands") ) {
+			BufferedReader in = new BufferedReader( new InputStreamReader(System.in) );
+			String line = null;
+			while( (line = in.readLine()) != null ) {
+				String[] args = line.split( "\\s+" );
+				CommandLine cl = new CommandLine( args );
+				processAgents( cl );
+				agentHelper.join();
+			}
+		}
+		else {
+			processAgents( cmd );
+			agentHelper.join();
+		}
+		
 	}
 	
 	private void processTunnel() throws CommandLineException {
@@ -115,47 +130,47 @@ public class BoxClientCliHelper {
 		}
 	}
 	
-	private void processAgents() throws Exception {
+	private void processAgents( CommandLine cl ) throws Exception {
 	
-		if( cmd.consumeArgWithParameters("createContext", 2) ) {
-			cmd.checkUnusedArgs();
-			final String language = cmd.getParameter( 0 );
-			final String contextName = cmd.getParameter( 1 );
+		if( cl.consumeArgWithParameters("createContext", 2) ) {
+			cl.checkUnusedArgs();
+			final String language = cl.getParameter( 0 );
+			final String contextName = cl.getParameter( 1 );
 			agentHelper.createContext(language, contextName);
 		}
-		else if( cmd.consumeArgWithMinParameters("startContext",1) ) {
-			cmd.checkUnusedArgs();
-			List<String> parameters = cmd.getParameters();
+		else if( cl.consumeArgWithMinParameters("startContext",1) ) {
+			cl.checkUnusedArgs();
+			List<String> parameters = cl.getParameters();
 			final String contextName = parameters.get(0);
 			final List<String> arguments = parameters.subList(1, parameters.size());
 			agentHelper.startContext(contextName, arguments);
 		}
-		else if( cmd.consumeArgWithParameters("stopContext",1) ) {
-			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 0 );
+		else if( cl.consumeArgWithParameters("stopContext",1) ) {
+			cl.checkUnusedArgs();
+			final String contextName = cl.getParameter( 0 );
 			agentHelper.stopContext(contextName);
 		}
-		else if( cmd.consumeArgWithParameters("shutdownContext",1) ) {
-			cmd.checkUnusedArgs();
-			final String contextName = cmd.getParameter( 0 );
+		else if( cl.consumeArgWithParameters("shutdownContext",1) ) {
+			cl.checkUnusedArgs();
+			final String contextName = cl.getParameter( 0 );
 			agentHelper.shutdownContext(contextName);
 		}
-		else if( cmd.consumeArgWithParameters("shutdownAllContexts",0) ) {
-			cmd.checkUnusedArgs();
+		else if( cl.consumeArgWithParameters("shutdownAllContexts",0) ) {
+			cl.checkUnusedArgs();
 			agentHelper.shutdownAllContexts();
 		}
-		else if( cmd.consumeArgWithMinParameters("loadScript",3) ) {
-			cmd.checkUnusedArgs();
-			List<String> parameters = cmd.getParameters();
+		else if( cl.consumeArgWithMinParameters("loadScript",3) ) {
+			cl.checkUnusedArgs();
+			List<String> parameters = cl.getParameters();
 			final String contextName = parameters.get(0);
 			final String scriptName = parameters.get(1);
 			final String fileName = parameters.get(2);
 			final List<String> arguments = parameters.subList(3, parameters.size());
 			agentHelper.loadScript(contextName, scriptName, fileName, arguments);
 		}
-		else if( cmd.consumeArgWithMinParameters("startScript",4) ) {
-			cmd.checkUnusedArgs();
-			List<String> parameters = cmd.getParameters();
+		else if( cl.consumeArgWithMinParameters("startScript",4) ) {
+			cl.checkUnusedArgs();
+			List<String> parameters = cl.getParameters();
 			final String language = parameters.get(0);
 			final String contextName = parameters.get(1);
 			final String scriptName = parameters.get(2);
@@ -163,8 +178,8 @@ public class BoxClientCliHelper {
 			final List<String> arguments = parameters.subList(4, parameters.size());
 			agentHelper.startScript(language, contextName, scriptName, fileName, arguments);
 		}
-		else if( cmd.consumeArgWithParameters("status",0) ) {
-			cmd.checkUnusedArgs();
+		else if( cl.consumeArgWithParameters("status",0) ) {
+			cl.checkUnusedArgs();
 			agentHelper.status();
 		}
 		else {
