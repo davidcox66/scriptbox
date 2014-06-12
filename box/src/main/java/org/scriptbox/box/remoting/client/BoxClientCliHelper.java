@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
@@ -132,11 +134,22 @@ public class BoxClientCliHelper {
 	
 	private void processAgents( CommandLine cl ) throws Exception {
 	
-		if( cl.consumeArgWithParameters("createContext", 2) ) {
+		if( cl.consumeArgWithMinParameters("createContext", 2) ) {
 			cl.checkUnusedArgs();
-			final String language = cl.getParameter( 0 );
-			final String contextName = cl.getParameter( 1 );
-			agentHelper.createContext(language, contextName);
+			final List<String> params = cl.getParameters();
+			final String language = params.get( 0 );
+			final String contextName = params.get( 1 );
+			final Map<String,Object> properties = new HashMap<String,Object>();
+			if( params.size() > 2 ) {
+				for( String prop : params.subList(2,params.size()) ) {
+					String[] parts = prop.split("=");
+					if( parts.length != 2 ) {
+						throw new CommandLineException( "Context properties must be in the form name=value");
+					}
+					properties.put( parts[0], parts[1] );
+				}
+			}
+			agentHelper.createContext(language, contextName, properties);
 		}
 		else if( cl.consumeArgWithMinParameters("startContext",1) ) {
 			cl.checkUnusedArgs();

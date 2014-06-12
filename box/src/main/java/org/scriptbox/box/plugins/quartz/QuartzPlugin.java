@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -24,7 +25,7 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( QuartzPlugin.class );
 	
-	private static final int DEFAULT_THREAD_COUNT = 2;
+	private static final int DEFAULT_THREAD_COUNT = 3;
 	
 	private int threadCount = DEFAULT_THREAD_COUNT;
 	
@@ -54,7 +55,13 @@ public class QuartzPlugin extends BoxContextInjectingListener {
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, context.getName() );
 		props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool" );
 		props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore" );
-		props.put("org.quartz.threadPool.threadCount", "" + threadCount );
+		
+		int threads = threadCount;
+		String threadCountProperty = context.getBeans().get("quartz.threads", String.class );
+		if( StringUtils.isNotBlank(threadCountProperty) ) {
+			threads = Integer.parseInt( threadCountProperty );
+		}
+		props.put("org.quartz.threadPool.threadCount", "" + threads );
 		
 		final Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
 		

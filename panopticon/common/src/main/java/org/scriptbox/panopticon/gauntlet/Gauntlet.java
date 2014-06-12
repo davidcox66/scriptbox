@@ -322,7 +322,6 @@ public class Gauntlet {
 			
 			if( count > 0 && isAllPredicatesPassed(messagesToEvaluate) ) {
 				try {
-					if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "processDelivery: delivering " + count + " messages" ); }
 					Delivery current = getCurrentDelivery();
 					current.setTime( new DateTime() );
 					current.setCount( count );
@@ -331,6 +330,8 @@ public class Gauntlet {
 					for( ParameterizedRunnableWithResult<Collection<Message>,Collection<Message>> f : filters ) {
 						msgs = f.run( msgs );
 					}
+					
+					if( LOGGER.isInfoEnabled() ) { LOGGER.info( "processDelivery: delivering " + msgs.size() + " messages from: " + current ); }
 					
 					Object[] args = new Object[2];
 					args[0] = msgs;
@@ -365,15 +366,14 @@ public class Gauntlet {
 		DateTime oldest = getDateInPast( maxDeliveryRetentionMinutes );
 		if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: oldest message to keep of " + deliveries.size() + " deliveries: " +  oldest); }
 		
-		Iterator<Delivery> iter = deliveries.descendingIterator();
-		while( iter.hasNext() ) {
-			Delivery del = iter.next();
+		while( true ) {
+			Delivery del = deliveries.getLast();
 			DateTime time = del.getTime();
 			if( time == null || time.isAfter(oldest) ) {
 				break;
 			}
-			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: discarding delivery: " + del.getTime() ); }
-			iter.remove();
+			if( LOGGER.isDebugEnabled() ) { LOGGER.debug( "archiveDelivery: discarding delivery: " + del ); }
+			deliveries.removeLast();
 		}
 		if( LOGGER.isDebugEnabled() ) {
 			LOGGER.debug( "archiveDelivery: there are " + deliveries.size() + " remaining" );

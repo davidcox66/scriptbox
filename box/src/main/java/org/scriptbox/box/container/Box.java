@@ -51,13 +51,21 @@ public class Box {
     	});
     }
     
-	synchronized public void createContext( String language, String contextName ) throws Exception {
+	synchronized public void createContext( String language, String contextName, Map<String,Object> properties ) throws Exception {
         if( contexts.get(contextName) != null ) {
             LOGGER.info( "createContext: alreadying loaded context " + contextName + ", will unload first" );
             shutdownContext( contextName );
         }
         LOGGER.info( "createContext: loading context: " + contextName );
         BoxContext context = contextFactory.create(this,language,contextName) ;
+        
+        if( properties != null ) {
+        	Lookup beans = context.getBeans();
+        	for( Map.Entry<String,Object> entry : properties.entrySet() ) {
+        		beans.put(entry.getKey(), entry.getValue());
+        	}
+        }
+        
         context.setListeners( contextListeners );
         context.start();
         contexts.put( contextName, context );

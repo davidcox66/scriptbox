@@ -82,7 +82,7 @@ public class UtilGroovyInjector implements UtilInjector {
 	}
 
 	private Map<String,Object> getProperties() {
-		return BoxContext.getCurrentContext().getBeans().get("Properties", HashMap.class);
+		return BoxContext.getCurrentContext().getBeans().get("util.properties", HashMap.class);
 	}
 	
 	public DateTime toDate( String format, String text ) {

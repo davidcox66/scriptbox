@@ -1,19 +1,26 @@
 package org.scriptbox.panopticon.gauntlet;
 
+import java.util.UUID;
 import org.joda.time.DateTime;
 
 public class Message {
 
+	private String uuid;
 	private DateTime time;
 	private String source;
 	private int priority;
 	private Object data;
 	
 	public Message( String source, int priority, Object data ) {
+		uuid = UUID.randomUUID().toString();
 		this.time = new DateTime();
 		this.source = source;
 		this.priority = priority;
 		this.data = data;
+	}
+	
+	public String getUuid() {
+		return uuid;
 	}
 	
 	public DateTime getTime() {
@@ -40,6 +47,6 @@ public class Message {
 	}
 	
 	public String toString() {
-		return "Message{ time=" + time + ", source=" + source + ", priority=" + priority + ", data=" + data + "}";
+		return "Message{ uuid=" + uuid + ", time=" + time + ", source=" + source + ", priority=" + priority + ", data=" + data + "}";
 	}
 }

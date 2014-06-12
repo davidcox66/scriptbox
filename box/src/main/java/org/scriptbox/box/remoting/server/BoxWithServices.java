@@ -48,7 +48,7 @@ public class BoxWithServices implements BoxInterface {
 	}
 	
 	@Override
-	public void createContext(String language, String contextName) throws Exception {
+	public void createContext(String language, String contextName, Map<String,Object> properties ) throws Exception {
 		if( LOGGER.isDebugEnabled() ) { 
 			LOGGER.debug( "createContext: box=" + box + ", language=" + language + ", contextName=" + contextName); 
 		}
@@ -57,7 +57,7 @@ public class BoxWithServices implements BoxInterface {
 			Collection<BoxServiceListener> listeners = existing.getBeans().getAll(BoxServiceListener.class);
 			BoxServices.shutdown(getContextServices(contextName),listeners).raiseException( "Error shutting down services");
 		}
-		box.createContext( language, contextName );
+		box.createContext( language, contextName, properties );
 	}
 
 	@Override

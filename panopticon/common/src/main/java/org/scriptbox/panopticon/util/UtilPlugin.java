@@ -23,7 +23,7 @@ public class UtilPlugin extends BoxContextInjectingListener {
 	@Override
 	public void contextCreated(BoxContext context) throws Exception {
 		setInjectors(context.getBox().getInjectorsOfType(UtilInjector.class));
-		context.getBeans().put( "Properties", new HashMap<String,Object>() );
+		context.getBeans().put( "util.properties", new HashMap<String,Object>() );
 		super.contextCreated(context);
 	}
 

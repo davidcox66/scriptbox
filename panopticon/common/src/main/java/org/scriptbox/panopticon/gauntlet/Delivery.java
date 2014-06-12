@@ -1,5 +1,6 @@
 package org.scriptbox.panopticon.gauntlet;
 
+import java.util.UUID;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -7,11 +8,20 @@ import org.joda.time.DateTime;
 
 public class Delivery {
 
+	private String uuid;
 	private DateTime time;
 	private int minPriority;
 	private int maxPriority;
 	private int count;
 	private LinkedList<Message> messages = new LinkedList<Message>();
+	
+	public Delivery() {
+		uuid = UUID.randomUUID().toString();
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
 	
 	public DateTime getTime() {
 		return time;
@@ -44,5 +54,8 @@ public class Delivery {
 		this.count = count;
 	}
 	
+	public String toString() {
+		return "Delivery{ uuid=" + uuid + ", time=" + time + ", min=" + minPriority + ", max=" + maxPriority + ", count=" + count + " }";
+	}
 	
 }

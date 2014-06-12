@@ -1,11 +1,12 @@
 package org.scriptbox.box.remoting.client;
 
 import java.io.File;
-import org.springframework.beans.factory.InitializingBean;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.scriptbox.box.remoting.server.BoxInterface;
 import org.scriptbox.util.common.args.CommandLineException;
@@ -17,6 +18,7 @@ import org.scriptbox.util.remoting.endpoint.Endpoint;
 import org.scriptbox.util.remoting.endpoint.EndpointConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
 public class BoxAgentHelper implements InitializingBean {
 
@@ -30,6 +32,19 @@ public class BoxAgentHelper implements InitializingBean {
 	
 	private List<Thread> threads = new ArrayList<Thread>();
 	private List<Connection<BoxInterface>> connections = Collections.synchronizedList( new ArrayList<Connection<BoxInterface>>());
+	private Map<Endpoint,Exception> errors = new HashMap<Endpoint,Exception>();
+
+	public static class BoxAgentExceptions extends Exception {
+		private Map<Endpoint,Exception> errors;
+		
+		public BoxAgentExceptions( String msg, Map<Endpoint,Exception> errors ) {
+			super( msg );
+		}
+
+		public Map<Endpoint, Exception> getErrors() {
+			return errors;
+		}
+	}
 	
 	public BoxAgentHelper() {
 	}
@@ -84,6 +99,12 @@ public class BoxAgentHelper implements InitializingBean {
             }
             threads.clear();
             close();
+            
+            if( errors.size() > 0 ) {
+            	Exception ex = new BoxAgentExceptions( "Error issuing commands", errors );
+            	this.errors = new HashMap<Endpoint,Exception>();
+            	throw ex;
+            }
 		}
 	}
 	public void close() {
@@ -97,10 +118,10 @@ public class BoxAgentHelper implements InitializingBean {
         }
 	}
 	
-	public void createContext( final String language, final String contextName ) throws Exception {
+	public void createContext( final String language, final String contextName, final Map<String,Object> properties ) throws Exception {
 		forEachAgent( "Creating context", "Context created", new ParameterizedRunnable<Connection<BoxInterface>>() {
 			public void run( Connection<BoxInterface> conn ) throws Exception {
-				conn.getProxy().createContext( language, contextName );
+				conn.getProxy().createContext( language, contextName, properties );
 			}
 		} );
 	}
@@ -149,7 +170,7 @@ public class BoxAgentHelper implements InitializingBean {
 		forEachAgent( "Starting script", "Script started", new ParameterizedRunnable<Connection<BoxInterface>>() {
 			public void run( Connection<BoxInterface> conn ) throws Exception {
 				BoxInterface box = conn.getProxy();
-				box.createContext( language, contextName );
+				box.createContext( language, contextName, new HashMap<String,Object>() );
 				box.loadScript( contextName, scriptName, IoUtil.readFile(new File(fileName)), arguments  );
 				box.startContext( contextName, arguments );
 			}
@@ -199,6 +220,9 @@ public class BoxAgentHelper implements InitializingBean {
 	                }
 	            }
 	            catch( Exception ex ) {
+	            	synchronized( BoxAgentHelper.this ) {
+	            		errors.put( endpoint, ex );
+	            	}
 	                LOGGER.error( "Error from " + endpoint.getIdentifier(), ex );
 	                String exstr = ExceptionHelper.toString( ex );
 	                stream.println( exstr );
