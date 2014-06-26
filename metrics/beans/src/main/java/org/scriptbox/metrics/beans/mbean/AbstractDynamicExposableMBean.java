@@ -8,6 +8,7 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
@@ -37,8 +38,11 @@ public abstract class AbstractDynamicExposableMBean implements DynamicMBean {
         ObjectName objName = getObjectName();
         LOGGER.debug( "register: registering mbean objectName=" + objName + ", class=" + getClass());
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        mbs.registerMBean(this, objName);
-        
+        if( mbs.isRegistered(objName) ) {
+            LOGGER.warn( "register: unregistering existing mbean objectName=" + objName + ", class=" + getClass());
+	        mbs.unregisterMBean( objName );
+        }
+	    mbs.registerMBean(this, objName);
     }    
 
     public void unregister() throws Exception {    
