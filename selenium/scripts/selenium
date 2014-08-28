@@ -1,0 +1,19 @@
+dir=$(dirname $0)
+
+export CLASSPATH="$dir/../build/distributions/selenium-1.0-SNAPSHOT-standalone.jar"
+export CLASSPATH="$CLASSPATH:."
+
+JAVA_OPTS="\
+        -Dlogback.configurationFile=console-logback.xml"
+
+
+if [[ "$@" = *--trace* ]] ; then
+    JAVA_OPTS="$JAVA_OPTS -Dlogback.level=DEBUG"
+    JAVA_OPTS="$JAVA_OPTS -Dlogback.level=DEBUG"
+elif [[ "$@" = *--debug* ]] ; then
+    JAVA_OPTS="$JAVA_OPTS -Dlogback.level=DEBUG"
+fi
+
+set -x
+java $JAVA_OPTS org.scriptbox.selenium.GroovySeleniumCli "$@"
+

@@ -152,6 +152,10 @@ ext {
 	jmockitDepend = "mockit:jmockit:0.999.10"
 	junitDepend = "junit:junit:4.8.2"
 	testNgDepend = "org.testng:testng:5.13.1"
+    seleniumDepend = [ "org.seleniumhq.selenium:selenium-java:2.40.0", {
+            exclude group: "commons-logging", module: "commons-logging"
+        }
+    ]
 
 	// Logging
 	slf4jApiDepend = "org.slf4j:slf4j-api:${slf4jVersion}"

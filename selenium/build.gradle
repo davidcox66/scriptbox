@@ -1,0 +1,33 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+apply plugin: 'shadow'
+
+apply plugin: 'java'
+
+shadow {
+    baseName = 'selenium'
+    classifier = "standalone"
+
+ 	exclude 'META-INF/*.SF'
+ 	exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    transformer(AppendingTransformer) {
+        resource = 'META-INF/spring.handlers'
+    }
+    transformer(AppendingTransformer) {
+        resource = 'META-INF/spring.schemas'
+    }
+}
+
+
+dependencies {
+	compile project(":deps:logging")
+	compile project(":util:common")
+	compile project(":util:remoting")
+	compile seleniumDepend
+	compile commonsLangDepend
+	compile jodaDepend
+	compile groovyDepend
+
+	testCompile junitDepend
+} 
