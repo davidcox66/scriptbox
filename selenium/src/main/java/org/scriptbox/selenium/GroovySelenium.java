@@ -202,6 +202,7 @@ public class GroovySelenium {
 		bind( binding, "byTagName" );
 		bind( binding, "byXpath" );
 		bind( binding, "byAll" );
+		bind( binding, "byAny" );
 		bind( binding, "byChained" );
 		
 		bind( binding, "presenceOf" );
@@ -212,6 +213,8 @@ public class GroovySelenium {
 		bind( binding, "textPresent" );
 		bind( binding, "valuePresent" );
 		bind( binding, "clickable" );
+		bind( binding, "clickableAny" );
+		bind( binding, "clickableAll" );
 		bind( binding, "selected" );
 		
 		ClosureMethods methods = new ClosureMethods(driver,selenium);

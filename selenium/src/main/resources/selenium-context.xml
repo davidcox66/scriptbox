@@ -12,7 +12,7 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
         http://scriptbox.org/spring/conditional http://scriptbox.org/spring/conditional.xsd">
     
-    <bean id="serviceErrorHandler" class="com.lrd.spring.aop.ServiceErrorHandler" />
+    <bean id="serviceErrorHandler" class="org.scriptbox.util.spring.aop.ServiceErrorHandler" />
  
     <bean id="selenium" class="org.springframework.aop.framework.ProxyFactoryBean">
         <property name="target" ref="seleniumImpl" />
@@ -23,10 +23,10 @@
         </property>
     </bean>
     
-    <bean id="seleniumImpl" class="com.lrd.selenium.GroovySeleniumRemoteImpl" />
+    <bean id="seleniumImpl" class="org.scriptbox.selenium.GroovySeleniumRemoteImpl" />
      
     <bean name="/selenium/" class="org.springframework.remoting.caucho.HessianServiceExporter"
         p:service-ref="selenium"
-        p:serviceInterface="com.lrd.selenium.GroovySeleniumRemote" />
+        p:serviceInterface="org.scriptbox.selenium.GroovySeleniumRemote" />
  
 </beans>

@@ -52,12 +52,12 @@ public class GroovySeleniumCli {
         		parameters = cmd.getParameters();
     		}
     		if( client == null ) {
-        		String include = cmd.consumeArgValue("include", true);
+        		String include = cmd.consumeArgValue("include", false);
         		includeText = include != null ? getText(new File(include)) : null;
 
         		selenium = new GroovySelenium();
         		selenium.setType( getDriverType(cmd) );
-        		selenium.setTimeout( cmd.consumeArgValueAsInt( "include", false) );
+        		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
         		selenium.setQuit( cmd.consumeArg("quit") );
         		selenium.setProfile( cmd.consumeArgValue("profile", false) );
         		

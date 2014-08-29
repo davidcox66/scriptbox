@@ -2,13 +2,16 @@ package org.scriptbox.selenium;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -306,6 +309,9 @@ public class SeleniumMethods {
     public By byChained( By... val ) {
     	return new ByChained(val);
     }
+    public By byAny( By... val ) {
+    	return new ByAny(val);
+    }
     
     public ExpectedCondition<WebElement> presenceOf( By by ) {
     	return ExpectedConditions.presenceOfElementLocated( by );
@@ -395,5 +401,49 @@ public class SeleniumMethods {
     			return "any clickable {" + by + "}";
     		}
     	};
+    }
+    
+    public class ByAny extends By implements Serializable {
+
+    	  private static final long serialVersionUID = 1563769051170172451L;
+
+    	  private By[] bys;
+
+    	  public ByAny(By... bys) {
+    	    this.bys = bys;
+    	  }
+
+    	  @Override
+    	  public WebElement findElement(SearchContext context) {
+    	    List<WebElement> elements = findElements(context);
+    	    if (elements.isEmpty())
+    	      throw new NoSuchElementException("Cannot locate an element using " + toString());
+    	    return elements.get(0);
+    	  }
+
+    	  @Override
+    	  public List<WebElement> findElements(SearchContext context) {
+    	    for (By by : bys) {
+    	      List<WebElement> elems = by.findElements(context);
+    	      if( elems != null && elems.size() > 0 ) {
+    	    	  return elems;
+    	      }
+    	    }
+    	    return new ArrayList<WebElement>();
+    	  }
+
+    	  @Override
+    	  public String toString() {
+    	    StringBuilder stringBuilder = new StringBuilder("By.any(");
+    	    stringBuilder.append("{");
+
+    	    boolean first = true;
+    	    for (By by : bys) {
+    	      stringBuilder.append((first ? "" : ",")).append(by);
+    	      first = false;
+    	    }
+    	    stringBuilder.append("})");
+    	    return stringBuilder.toString();
+    	  }
     }
 }
