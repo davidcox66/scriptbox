@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
-import org.scriptbox.selenium.SeleniumHelper;
+import org.scriptbox.selenium.SeleniumMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +21,13 @@ public class BaseSeleniumTest {
 
     @Rule public TestName methodNameRule = new TestName();
     
-    protected SeleniumHelper selenium;
+    protected SeleniumMethods selenium;
 
-    public SeleniumHelper getSelenium() {
+    public SeleniumMethods getSelenium() {
         return selenium;
     }
 
-    public void setSelenium(SeleniumHelper selenium) {
+    public void setSelenium(SeleniumMethods selenium) {
         this.selenium = selenium;
     }
 

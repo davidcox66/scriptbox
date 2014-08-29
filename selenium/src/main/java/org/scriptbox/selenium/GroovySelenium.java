@@ -31,7 +31,7 @@ public class GroovySelenium {
     private int timeout;
     
     private RemoteWebDriver driver;
-    private SeleniumHelper selenium;
+    private SeleniumMethods selenium;
     private Binding binding;
     
     public enum DriverType {
@@ -148,7 +148,7 @@ public class GroovySelenium {
     public void init() {
 		driver = type.create( url, profile );
 		driver.manage().timeouts().implicitlyWait(timeout > 0 ? timeout : 30, TimeUnit.SECONDS);
-		selenium = new SeleniumHelper( type.getName(), driver );
+		selenium = new SeleniumMethods( type.getName(), driver );
 		binding = new Binding();
     	
     	binding.setVariable("log", LOGGER);
@@ -161,19 +161,58 @@ public class GroovySelenium {
 		bind( binding, "screenshot" );
 		bind( binding, "execute" );
 		bind( binding, "executeAsync" );
-		bind( binding, "isElementExistsById" );
-		bind( binding, "isElementExistsByXpath" );
+		
 		bind( binding, "isElementExists" );
+		bind( binding, "isElementExistsById" );
+		bind( binding, "isElementExistsByName" );
+		bind( binding, "isElementExistsByXpath" );
+		bind( binding, "isElementExistsByCssSelector" );
+		
+		bind( binding, "getElement" );
+		bind( binding, "getElements" );
 		bind( binding, "getElementById" );
+		bind( binding, "getElementByName" );
 		bind( binding, "getElementByXpath" );
 		bind( binding, "getElementsByXpath" );
-		bind( binding, "getElementBySelector" );
-		bind( binding, "getElementsBySelector" );
+		bind( binding, "getElementByCssSelector" );
+		bind( binding, "getElementsByCssSelector" );
+		
+		bind( binding, "waitFor" );
+		bind( binding, "waitForElement" );
 		bind( binding, "waitForElementById" );
+		bind( binding, "waitForElementByName" );
 		bind( binding, "waitForElementByXpath" );
-		bind( binding, "waitForElementBySelector" );
+		bind( binding, "waitForElementByCssSelector" );
+		
+		bind( binding, "clickElement" );
+		bind( binding, "clickElementById" );
+		bind( binding, "clickElementByName" );
+		bind( binding, "clickElementByXpath" );
+		bind( binding, "clickElementByCssSelector" );
+		
 		bind( binding, "mouseDown" );
 		bind( binding, "mouseUp" );
+		
+		bind( binding, "byId" );
+		bind( binding, "byName" );
+		bind( binding, "byIdOrName" );
+		bind( binding, "byCssSelector" );
+		bind( binding, "byLinkText" );
+		bind( binding, "byPartialLinkText" );
+		bind( binding, "byTagName" );
+		bind( binding, "byXpath" );
+		bind( binding, "byAll" );
+		bind( binding, "byChained" );
+		
+		bind( binding, "presenceOf" );
+		bind( binding, "presenceOfAll" );
+		bind( binding, "visibilityOf" );
+		bind( binding, "visibilityOfAll" );
+		bind( binding, "invisibilityOf" );
+		bind( binding, "textPresent" );
+		bind( binding, "valuePresent" );
+		bind( binding, "clickable" );
+		bind( binding, "selected" );
 		
 		ClosureMethods methods = new ClosureMethods(driver,selenium);
 		binding.setVariable( "sleep", new MethodClosure(methods,"sleep") );
@@ -191,9 +230,9 @@ public class GroovySelenium {
     public static class ClosureMethods
     {
     	RemoteWebDriver driver;
-    	SeleniumHelper selenium;
+    	SeleniumMethods selenium;
     	
-    	public ClosureMethods( RemoteWebDriver driver, SeleniumHelper selenium ) {
+    	public ClosureMethods( RemoteWebDriver driver, SeleniumMethods selenium ) {
     		this.driver = driver;
     		this.selenium = selenium;
     	}

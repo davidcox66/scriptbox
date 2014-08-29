@@ -101,9 +101,12 @@ public class GroovySeleniumCli {
         		}
     		}
         }
+    	catch( CommandLineException ex ) {
+            usage();
+            ex.printStackTrace( System.err );
+    	}
         catch(Exception ex ) {
             ex.printStackTrace( System.err );
-            usage();
         }
     }
     

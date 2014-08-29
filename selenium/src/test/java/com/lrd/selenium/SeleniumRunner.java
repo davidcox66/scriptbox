@@ -27,7 +27,7 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.scriptbox.selenium.SeleniumHelper;
+import org.scriptbox.selenium.SeleniumMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,14 +219,14 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 
         private final DriverFactory factory;
         private RemoteWebDriver driver;
-        private SeleniumHelper selenium;
+        private SeleniumMethods selenium;
         
         BrowserRunner(Class<?> type, DriverFactory factory ) throws InitializationError {
             super(type);
             this.factory = factory;
             try {
 	            driver = factory.create( HOST ); 
-	            selenium = new SeleniumHelper( factory.getName(), driver );
+	            selenium = new SeleniumMethods( factory.getName(), driver );
             }
             catch( Exception ex ) {
                 LOGGER.error( "Error initializing driver: " + factory.getName(), ex );
@@ -367,7 +367,7 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 		}
 		
 	    private void injectAttributes( Object test ) throws Exception {
-	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { SeleniumHelper.class } );
+	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { SeleniumMethods.class } );
 	        method.invoke( test, new Object[] { selenium } );
 	    }
 	  

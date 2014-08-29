@@ -87,7 +87,7 @@ public class WebDriverCliRunner {
     public boolean execute( WebDriverTemplate template ) {
         boolean ret = true;
         RemoteWebDriver driver = null;
-        SeleniumHelper selenium = null;
+        SeleniumMethods selenium = null;
         try {
         	System.err.println( "Using profile: " + profile );
 	       // DesiredCapabilities cap = DesiredCapabilities.firefox();
@@ -108,7 +108,7 @@ public class WebDriverCliRunner {
         	// }
         
         	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        	selenium = new SeleniumHelper( factory.getName(), driver );
+        	selenium = new SeleniumMethods( factory.getName(), driver );
         
         	template.execute( selenium );
         }
