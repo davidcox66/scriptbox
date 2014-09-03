@@ -39,19 +39,35 @@ public class SeleniumMethods {
     
     private String name;
     private WebDriver driver;
+    private int wait = DEFAULT_WAIT;
     
-    public SeleniumMethods( String name, WebDriver driver )  {
+    public SeleniumMethods( String name )  {
         this.name = name;
-        this.driver = driver;
     }
-   
+
     public String getName() {
         return name;
     }
 
-    public void get( String url ) {
+    public int getWait() {
+		return wait;
+	}
+
+	public void setWait(int wait) {
+		this.wait = wait;
+	}
+
+	public WebDriver getDriver() {
+		return driver;
+	}
+
+	public void setDriver(WebDriver driver) {
+		this.driver = driver;
+	}
+
+	public void get( String url ) {
     	LOGGER.debug( "get: url='" + url + "'" );
-    	getRemoteWebDriver().get( url );;
+    	getRemoteWebDriver().get( url );
     }
     
     public void execute( String script, Object... args ) {
@@ -126,34 +142,34 @@ public class SeleniumMethods {
     }
     
     public WebElement waitForElementById( final String id ) {
-    	return waitForElementById( id, DEFAULT_WAIT ) ;
+    	return waitForElementById( id, wait ) ;
     }
     public WebElement waitForElementById( final String id, final int seconds ) {
     	return waitForElement( By.id(id), seconds ) ;
     }
     public WebElement waitForElementByName( final String name ) {
-    	return waitForElementByName( name, DEFAULT_WAIT ) ;
+    	return waitForElementByName( name, wait ) ;
     }
     public WebElement waitForElementByName( final String name, final int seconds ) {
     	return waitForElement( By.name(name), seconds ) ;
     }
     
     public WebElement waitForElementByXpath( final String xpath ) {
-    	return waitForElementByXpath( xpath, DEFAULT_WAIT ) ;
+    	return waitForElementByXpath( xpath, wait ) ;
     }
     public WebElement waitForElementByXpath( final String xpath, final int seconds ) {
     	return waitForElement( By.xpath(xpath), seconds ) ;
     }
     
     public WebElement waitForElementByCssSelector( final String selector ) {
-    	return waitForElementByCssSelector( selector, DEFAULT_WAIT ) ;
+    	return waitForElementByCssSelector( selector, wait ) ;
     }
     public WebElement waitForElementByCssSelector( final String selector, final int seconds ) {
     	return waitForElement( By.cssSelector(selector), seconds ) ;
     }
     
     public WebElement waitForElement( final By by ) {
-    	return waitForElement( by, DEFAULT_WAIT );
+    	return waitForElement( by, wait );
     }
     public WebElement waitForElement( final By by, final int seconds ) {
     	LOGGER.debug( "waitForElement: by='" + by + "', seconds=" + seconds );
@@ -161,7 +177,7 @@ public class SeleniumMethods {
     }
 
     public <X> X waitFor( final By by, ExpectedCondition<X> cond ) {
-    	return waitFor( by, cond, DEFAULT_WAIT );
+    	return waitFor( by, cond, wait );
     }
     
     public <X> X waitFor( final By by, ExpectedCondition<X> cond, final int seconds ) {
@@ -170,27 +186,27 @@ public class SeleniumMethods {
     }
     
     public WebElement clickElementById( final String id ) {
-    	return clickElementById( id, DEFAULT_WAIT ) ;
+    	return clickElementById( id, wait ) ;
     }
     public WebElement clickElementById( final String id, final int seconds ) {
     	return clickElement( By.id(id), seconds ) ;
     }
     public WebElement clickElementByName( final String name ) {
-    	return clickElementByName( name, DEFAULT_WAIT ) ;
+    	return clickElementByName( name, wait ) ;
     }
     public WebElement clickElementByName( final String name, final int seconds ) {
     	return clickElement( By.name(name), seconds ) ;
     }
     
     public WebElement clickElementByXpath( final String xpath ) {
-    	return clickElementByXpath( xpath, DEFAULT_WAIT ) ;
+    	return clickElementByXpath( xpath, wait ) ;
     }
     public WebElement clickElementByXpath( final String xpath, final int seconds ) {
     	return clickElement( By.xpath(xpath), seconds ) ;
     }
     
     public WebElement clickElementByCssSelector( final String selector ) {
-    	return clickElementByCssSelector( selector, DEFAULT_WAIT ) ;
+    	return clickElementByCssSelector( selector, wait ) ;
     }
     public WebElement clickElementByCssSelector( final String selector, final int seconds ) {
     	return clickElement( By.cssSelector(selector), seconds ) ;
@@ -369,14 +385,20 @@ public class SeleniumMethods {
     public ExpectedCondition<List<WebElement>> clickableAll( final By by ) {
     	return new ExpectedCondition<List<WebElement>>() {
     		public List<WebElement> apply(WebDriver driver) {
-    			List<WebElement> ret = new ArrayList<WebElement>();
-    			List<WebElement> elements = driver.findElements( by );
-    			for(WebElement element : elements){
-    				if( element.isDisplayed() ) {
-    					ret.add( element );
-    				}
+    			try {
+	    			List<WebElement> ret = new ArrayList<WebElement>();
+	    			List<WebElement> elements = driver.findElements( by );
+	    			for(WebElement element : elements){
+	    				if( element.isDisplayed() ) {
+	    					ret.add( element );
+	    				}
+	    			}
+	    			return ret.size() > 0 ? ret : null;
     			}
-    			return ret.size() > 0 ? ret : null;
+    			catch( RuntimeException ex ) {
+    				LOGGER.error( "clickableAll: error evaluating: " + by, ex );
+    				throw ex;
+    			}
     		}
 
     		public String toString() {
@@ -388,13 +410,19 @@ public class SeleniumMethods {
     public ExpectedCondition<WebElement> clickableAny( final By by ) {
     	return new ExpectedCondition<WebElement>() {
     		public WebElement apply(WebDriver driver) {
-    			List<WebElement> elements = driver.findElements( by );
-    			for(WebElement element : elements){
-    				if( element.isDisplayed() ) {
-    					return element;
-    				}
+    			try {
+	    			List<WebElement> elements = driver.findElements( by );
+	    			for(WebElement element : elements){
+	    				if( element.isDisplayed() ) {
+	    					return element;
+	    				}
+	    			}
+	    			return null;
     			}
-    			return null;
+    			catch( RuntimeException ex ) {
+    				LOGGER.error( "clickableAny: error evaluating: " + by, ex );
+    				throw ex;
+    			}
     		}
 
     		public String toString() {

@@ -45,7 +45,7 @@ public class GroovySeleniumCli {
     		List<String> parameters = null;
     		int server = cmd.consumeArgValueAsInt("server",false);
     		String client = cmd.consumeArgValue("client",false);
-
+    				
     		if( server == 0 ) {
         		String script = cmd.consumeArgValue("script", true);
         		scriptText = getText( new File(script) );
@@ -58,7 +58,7 @@ public class GroovySeleniumCli {
         		selenium = new GroovySelenium();
         		selenium.setType( getDriverType(cmd) );
         		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
-        		selenium.setQuit( cmd.consumeArg("quit") );
+        		selenium.setExe( cmd.consumeArgValue("exe",false) );
         		selenium.setProfile( cmd.consumeArgValue("profile", false) );
         		
         		String ru = cmd.consumeArgValue( "url", true);
@@ -81,24 +81,24 @@ public class GroovySeleniumCli {
                 remote.run( scriptText, parameters ); 
     		}
     		else {
-        		try {
-        			selenium.init();
-        			if( server != 0 ) {
-        				JettyService jetty = new JettyService("classpath:selenium-context.xml");
-        				jetty.setHttpPort( server );
-        				jetty.start();
-        				while( true ) {
-        					System.out.print(".");
-        					Thread.sleep( 60*1000 );
-        				}
-        			}
-        			else {
+    			selenium.init();
+    			if( server != 0 ) {
+    				JettyService jetty = new JettyService("classpath:selenium-context.xml");
+    				jetty.setHttpPort( server );
+    				jetty.start();
+    				while( true ) {
+    					System.out.print(".");
+    					Thread.sleep( 60*1000 );
+    				}
+    			}
+    			else {
+    				try {
             			selenium.run( scriptText, includeText, parameters);
-        			}
-        		}
-        		finally {
-        			selenium.quit();
-        		}
+    				}
+    				finally {
+        				selenium.disconnect();
+    				}
+    			}
     		}
         }
     	catch( CommandLineException ex ) {

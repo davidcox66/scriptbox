@@ -108,8 +108,8 @@ public class WebDriverCliRunner {
         	// }
         
         	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        	selenium = new SeleniumMethods( factory.getName(), driver );
-        
+        	selenium = new SeleniumMethods( factory.getName() );
+        	selenium.setDriver( driver );
         	template.execute( selenium );
         }
         catch(Exception ex ) {
