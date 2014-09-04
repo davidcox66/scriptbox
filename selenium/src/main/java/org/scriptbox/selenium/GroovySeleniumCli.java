@@ -21,15 +21,20 @@ public class GroovySeleniumCli {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumCli.class );
 	
-    private static GroovySelenium selenium;
+    private static SeleniumController selenium;
     private static String includeText;
+    private static GroovySeleniumMethods methods;
     
-    public static GroovySelenium getSelenium() {
+    public static SeleniumController getSelenium() {
     	return selenium;
     }
    
     public static String getIncludeText() {
     	return includeText;
+    }
+    
+    public static GroovySeleniumMethods getMethods() {
+    	return methods;
     }
     
     public static void main( String[] args ) {
@@ -55,11 +60,12 @@ public class GroovySeleniumCli {
         		String include = cmd.consumeArgValue("include", false);
         		includeText = include != null ? getText(new File(include)) : null;
 
-        		selenium = new GroovySelenium();
-        		selenium.setType( getDriverType(cmd) );
+        		selenium = new SeleniumController( getDriverType(cmd) );
         		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
         		selenium.setExe( cmd.consumeArgValue("exe",false) );
         		selenium.setProfile( cmd.consumeArgValue("profile", false) );
+        		
+        		methods = new GroovySeleniumMethods( selenium );
         		
         		String ru = cmd.consumeArgValue( "url", true);
         		try {
@@ -81,7 +87,6 @@ public class GroovySeleniumCli {
                 remote.run( scriptText, parameters ); 
     		}
     		else {
-    			selenium.init();
     			if( server != 0 ) {
     				JettyService jetty = new JettyService("classpath:selenium-context.xml");
     				jetty.setHttpPort( server );
@@ -93,7 +98,7 @@ public class GroovySeleniumCli {
     			}
     			else {
     				try {
-            			selenium.run( scriptText, includeText, parameters);
+            			methods.run( scriptText, includeText, parameters);
     				}
     				finally {
         				selenium.disconnect();
@@ -117,9 +122,9 @@ public class GroovySeleniumCli {
         System.exit( 1 );
     }
 
-    private static GroovySelenium.DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
-    	GroovySelenium.DriverType[] types = GroovySelenium.DriverType.values(); 
-    	for( GroovySelenium.DriverType type : types ) {
+    private static SeleniumController.DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
+    	SeleniumController.DriverType[] types = SeleniumController.DriverType.values(); 
+    	for( SeleniumController.DriverType type : types ) {
     		if( cmd.consumeArg(type.getName()) ) {
     			return type;
     		}

@@ -1,5 +1,8 @@
 package org.scriptbox.selenium;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -7,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -30,24 +35,27 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SeleniumMethods {
+public class GroovySeleniumMethods {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( SeleniumMethods.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumMethods.class );
     
     private static final int DEFAULT_WAIT = 30;
     private static final int RETRY_SECONDS = 1;
     
-    private String name;
-    private WebDriver driver;
     private int wait = DEFAULT_WAIT;
+    private SeleniumController controller;
+    private Binding binding;
     
-    public SeleniumMethods( String name )  {
-        this.name = name;
+    public GroovySeleniumMethods( SeleniumController controller )  {
+        this.controller = controller;
+        bind();
     }
 
-    public String getName() {
-        return name;
-    }
+	public void run( String scriptText, String includeText, List<String> parameters ) {
+		String text = StringUtils.isNotEmpty(includeText) ? includeText + "\n" + scriptText : scriptText;
+		GroovyShell engine = new GroovyShell( binding );
+		engine.run(text, "SeleniumScript", parameters );
+	}
 
     public int getWait() {
 		return wait;
@@ -58,13 +66,115 @@ public class SeleniumMethods {
 	}
 
 	public WebDriver getDriver() {
-		return driver;
+		return controller.getDriver();
 	}
 
-	public void setDriver(WebDriver driver) {
-		this.driver = driver;
-	}
-
+    public RemoteWebDriver getRemoteWebDriver() {
+        return (RemoteWebDriver)getDriver();
+    }
+   
+    private void bind() {
+		binding = new Binding();
+    	
+    	binding.setVariable("log", LOGGER);
+    	binding.setVariable("logger", LOGGER);
+    	binding.setVariable("LOGGER", LOGGER);
+    	
+		//binding.setVariable("driver", driver);
+		//binding.setVariable("selenium", selenium);
+		
+		bind( "get" );
+		bind( "screenshot" );
+		bind( "execute" );
+		bind( "executeAsync" );
+		
+		bind( "isElementExists" );
+		bind( "isElementExistsById" );
+		bind( "isElementExistsByName" );
+		bind( "isElementExistsByXpath" );
+		bind( "isElementExistsByCssSelector" );
+		
+		bind( "getElement" );
+		bind( "getElements" );
+		bind( "getElementById" );
+		bind( "getElementByName" );
+		bind( "getElementByXpath" );
+		bind( "getElementsByXpath" );
+		bind( "getElementByCssSelector" );
+		bind( "getElementsByCssSelector" );
+		
+		bind( "waitFor" );
+		bind( "waitForElement" );
+		bind( "waitForElementById" );
+		bind( "waitForElementByName" );
+		bind( "waitForElementByXpath" );
+		bind( "waitForElementByCssSelector" );
+		
+		bind( "clickElement" );
+		bind( "clickElementById" );
+		bind( "clickElementByName" );
+		bind( "clickElementByXpath" );
+		bind( "clickElementByCssSelector" );
+		
+		bind( "mouseDown" );
+		bind( "mouseUp" );
+		
+		bind( "byId" );
+		bind( "byName" );
+		bind( "byIdOrName" );
+		bind( "byCssSelector" );
+		bind( "byLinkText" );
+		bind( "byPartialLinkText" );
+		bind( "byTagName" );
+		bind( "byXpath" );
+		bind( "byAll" );
+		bind( "byAny" );
+		bind( "byChained" );
+		
+		bind( "presenceOf" );
+		bind( "presenceOfAll" );
+		bind( "visibilityOf" );
+		bind( "visibilityOfAll" );
+		bind( "invisibilityOf" );
+		bind( "textPresent" );
+		bind( "valuePresent" );
+		bind( "clickable" );
+		bind( "clickableAny" );
+		bind( "clickableAll" );
+		bind( "selected" );
+		
+		bind( "connect" );
+		bind( "disconnect" );
+		bind( "quit" );
+		
+		bind( "sleep" );
+		bind( "pause" );
+    }
+    
+    public void connect() {
+    	controller.connect();
+    }
+    public void disconnect() {
+    	controller.disconnect();
+    }
+    public void quit() {
+    	controller.quit();
+    }
+    public void sleep( int millis ) {
+    	controller.sleep( millis );
+    }
+    public void pause( int seconds ) {
+    	controller.pause( seconds );
+    }
+    
+    private void bind( String name ) {
+    	binding.setVariable( name, new MethodClosure(this, name) );
+    }
+    
+    private void bind( String alias, String name ) {
+    	binding.setVariable( alias, new MethodClosure(this, name) );
+    }
+    
 	public void get( String url ) {
     	LOGGER.debug( "get: url='" + url + "'" );
     	getRemoteWebDriver().get( url );
@@ -104,7 +214,7 @@ public class SeleniumMethods {
     public boolean isElementExists( By by ) {
     	try {
 	    	LOGGER.debug( "isElementExistsBy: by='" + by + "'" );
-	        List<WebElement> elements = driver.findElements( by );
+	        List<WebElement> elements = getDriver().findElements( by );
 	        return elements != null && elements.size() > 0; 
     	}
     	catch( Exception ex ) {
@@ -134,11 +244,11 @@ public class SeleniumMethods {
     
     public WebElement getElement( By by ) {
     	LOGGER.debug( "getElement: by='" + by + "'" );
-        return driver.findElement( by );
+        return getDriver().findElement( by );
     }
     public List<WebElement> getElements( By by ) {
     	LOGGER.debug( "getElements: by='" + by + "'" );
-        return driver.findElements( by );
+        return getDriver().findElements( by );
     }
     
     public WebElement waitForElementById( final String id ) {
@@ -182,7 +292,7 @@ public class SeleniumMethods {
     
     public <X> X waitFor( final By by, ExpectedCondition<X> cond, final int seconds ) {
     	LOGGER.debug( "waitForElement: by='" + by + "', seconds=" + seconds );
-        return (new WebDriverWait(driver, seconds)).until(cond);
+        return (new WebDriverWait(getDriver(), seconds)).until(cond);
     }
     
     public WebElement clickElementById( final String id ) {
@@ -252,14 +362,6 @@ public class SeleniumMethods {
         mouse.mouseDown( coord );
     }
    
-    public WebDriver getWebDriver() {
-        return driver;
-    }
-   
-    public RemoteWebDriver getRemoteWebDriver() {
-        return (RemoteWebDriver)driver;
-    }
-   
     public void screenshot( File directory, String fullClassName, String methodName, String driverName, String ext ) 
         throws IOException
     {
@@ -279,7 +381,7 @@ public class SeleniumMethods {
     
 	public void screenshot( File file ) throws IOException {
         LOGGER.info( "screenshot: file=" + file );
-        File srcFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);    
+        File srcFile = ((TakesScreenshot)getDriver()).getScreenshotAs(OutputType.FILE);    
         File parent = file.getParentFile();
         if( !parent.exists() ) {
             parent.mkdirs();

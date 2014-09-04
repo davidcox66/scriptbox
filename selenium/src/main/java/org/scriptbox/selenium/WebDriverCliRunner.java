@@ -20,7 +20,7 @@ public class WebDriverCliRunner {
     private String name;
     private String screenshotFileName;
     private String profile;
-    private DriverFactory factory;
+    private SeleniumController.DriverType type;
     private URL remoteUrl;
      
     public WebDriverCliRunner(String name, String[] args) {
@@ -38,13 +38,13 @@ public class WebDriverCliRunner {
                        }
                    }
                    else if( "--firefox".equals(args[i]) )  {
-                     factory = FIREFOX; 
+                     type = SeleniumController.DriverType.FIREFOX; 
                    }
                    else if( "--chrome".equals(args[i]) ) {
-                      factory = CHROME; 
+                     type = SeleniumController.DriverType.CHROME; 
                    }
                    else if( "--ie".equals(args[i]) ) {
-                      factory = IE; 
+                     type = SeleniumController.DriverType.IE; 
                    }
                    else if( "--screenshot".equals(args[i]) ) {
                        if( args.length > i+1 ) {
@@ -78,7 +78,7 @@ public class WebDriverCliRunner {
                }
         }
           
-    	if( factory == null ) {
+    	if( type == null ) {
     	    usage();
     	}
         	
@@ -87,7 +87,7 @@ public class WebDriverCliRunner {
     public boolean execute( WebDriverTemplate template ) {
         boolean ret = true;
         RemoteWebDriver driver = null;
-        SeleniumMethods selenium = null;
+        GroovySeleniumMethods selenium = null;
         try {
         	System.err.println( "Using profile: " + profile );
 	       // DesiredCapabilities cap = DesiredCapabilities.firefox();
@@ -102,14 +102,13 @@ public class WebDriverCliRunner {
 	        // RemoteWebDriver driver = new RemoteWebDriver(new URL("http://localhost:9515"), DesiredCapabilities.chrome());
        
        
-        	driver = factory.create();
+        	// driver = factory.create();
         	// if( screenshotFile != null ) {
         	//    driver = (RemoteWebDriver)new Augmenter().augment(driver);
         	// }
         
-        	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        	selenium = new SeleniumMethods( factory.getName() );
-        	selenium.setDriver( driver );
+        	SeleniumController controller = new SeleniumController( type );
+        	selenium = new GroovySeleniumMethods( controller );
         	template.execute( selenium );
         }
         catch(Exception ex ) {
@@ -152,42 +151,4 @@ public class WebDriverCliRunner {
         public String getName();
         public RemoteWebDriver create(); 
     }
-    
-    private DriverFactory FIREFOX = new DriverFactory() {
-        public String getName() { return "firefox"; }
-        public RemoteWebDriver create() {
-            if( remoteUrl != null ) {
-	           DesiredCapabilities cap = DesiredCapabilities.firefox();
-	           if( profile != null ) {
-		           cap.setCapability(FirefoxDriver.PROFILE, profile);
-	           }
-		       RemoteWebDriver driver = new RemoteWebDriver(remoteUrl, cap);
-		       return (RemoteWebDriver)new Augmenter().augment(driver);
-            }
-            else {
-		        File profileDir = new File(profile);
-		        return new FirefoxDriver( new FirefoxProfile(profileDir) ); 
-            }
-        }
-    };
-    
-    private DriverFactory CHROME = new DriverFactory() {
-        public String getName() { return "chrome"; }
-        public RemoteWebDriver create() {
-           // return new ChromeDriver(); 
-           DesiredCapabilities cap = DesiredCapabilities.chrome();
-           cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
-	       RemoteWebDriver driver = new RemoteWebDriver(remoteUrl, cap);
-           return (RemoteWebDriver)new Augmenter().augment(driver);
-        }
-    };
-    private DriverFactory IE = new DriverFactory() {
-        public String getName() { return "ie"; }
-        public RemoteWebDriver create() {
-           DesiredCapabilities cap = DesiredCapabilities.internetExplorer();
-           cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);   
-	       RemoteWebDriver driver = new RemoteWebDriver(remoteUrl, cap);
-           return (RemoteWebDriver)new Augmenter().augment(driver);
-        }
-    };
 }

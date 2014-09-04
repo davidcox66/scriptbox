@@ -9,7 +9,7 @@ public class GroovySeleniumRemoteImpl implements GroovySeleniumRemote {
 
 	@Override
 	public void run(String scriptText, List<String> parameters) throws Exception {
-		GroovySeleniumCli.getSelenium().run( scriptText, GroovySeleniumCli.getIncludeText(), parameters);
+		GroovySeleniumCli.getMethods().run( scriptText, GroovySeleniumCli.getIncludeText(), parameters);
 	}
 
 }
