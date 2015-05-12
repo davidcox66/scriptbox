@@ -283,15 +283,15 @@ public class GroovySeleniumMethods {
     }
     public WebElement waitForElement( final By by, final int seconds ) {
     	LOGGER.debug( "waitForElement: by='" + by + "', seconds=" + seconds );
-    	return waitFor( by, visibilityOf(by), seconds );
+    	return waitFor( visibilityOf(by), seconds );
     }
 
-    public <X> X waitFor( final By by, ExpectedCondition<X> cond ) {
-    	return waitFor( by, cond, wait );
+    public <X> X waitFor( ExpectedCondition<X> cond ) {
+    	return waitFor( cond, wait );
     }
     
-    public <X> X waitFor( final By by, ExpectedCondition<X> cond, final int seconds ) {
-    	LOGGER.debug( "waitForElement: by='" + by + "', seconds=" + seconds );
+    public <X> X waitFor( final ExpectedCondition<X> cond, final int seconds ) {
+    	LOGGER.debug( "waitForElement: cond='" + cond + "', seconds=" + seconds );
         return (new WebDriverWait(getDriver(), seconds)).until(cond);
     }
     
@@ -327,7 +327,7 @@ public class GroovySeleniumMethods {
     	long timeout = System.currentTimeMillis() + (seconds * 1000);
     	while( System.currentTimeMillis() <= timeout ) {
 	    	try {
-	    		WebElement element = waitFor( by, clickableAny(by), seconds );
+	    		WebElement element = waitFor( clickableAny(by), seconds );
 	    		LOGGER.debug( "clickElement: clicking  by: " + by );
 	    		element.click();
 	    		return element;
