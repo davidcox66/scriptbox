@@ -1,14 +1,5 @@
 package com.lrd.selenium;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
@@ -28,8 +19,14 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.scriptbox.selenium.GroovySeleniumMethods;
+import org.scriptbox.selenium.SeleniumController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.*;
 
 /**
  * This controls the lifecycle (or execution) of a test which uses Selenium to drive one more
@@ -225,8 +222,8 @@ public class SeleniumRunner extends ParentRunner<Runner> {
             super(type);
             this.factory = factory;
             try {
-	            driver = factory.create( HOST ); 
-	            selenium = new GroovySeleniumMethods( factory.getName(), driver );
+				SeleniumController controller = new SeleniumController( SeleniumController.DriverType.CHROME );
+	            selenium = new GroovySeleniumMethods( controller );
             }
             catch( Exception ex ) {
                 LOGGER.error( "Error initializing driver: " + factory.getName(), ex );

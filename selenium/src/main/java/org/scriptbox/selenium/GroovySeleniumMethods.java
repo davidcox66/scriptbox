@@ -1,27 +1,12 @@
 package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.GroovyShell;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.internal.Coordinates;
 import org.openqa.selenium.internal.Locatable;
@@ -34,6 +19,12 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroovySeleniumMethods {
 
@@ -54,7 +45,7 @@ public class GroovySeleniumMethods {
 	public void run( String scriptText, String includeText, List<String> parameters ) {
 		String text = StringUtils.isNotEmpty(includeText) ? includeText + "\n" + scriptText : scriptText;
 		GroovyShell engine = new GroovyShell( binding );
-		engine.run(text, "SeleniumScript", parameters );
+		engine.run(text, "SeleniumScript", parameters);
 	}
 
     public int getWait() {
@@ -92,7 +83,7 @@ public class GroovySeleniumMethods {
 		bind( "isElementExistsById" );
 		bind( "isElementExistsByName" );
 		bind( "isElementExistsByXpath" );
-		bind( "isElementExistsByCssSelector" );
+		bind( "isElementExistsByCss" );
 		
 		bind( "getElement" );
 		bind( "getElements" );
@@ -100,29 +91,35 @@ public class GroovySeleniumMethods {
 		bind( "getElementByName" );
 		bind( "getElementByXpath" );
 		bind( "getElementsByXpath" );
-		bind( "getElementByCssSelector" );
-		bind( "getElementsByCssSelector" );
+		bind( "getElementByCss" );
+		bind( "getElementsByCss" );
 		
 		bind( "waitFor" );
 		bind( "waitForElement" );
 		bind( "waitForElementById" );
 		bind( "waitForElementByName" );
 		bind( "waitForElementByXpath" );
-		bind( "waitForElementByCssSelector" );
+		bind( "waitForElementByCss" );
 		
 		bind( "clickElement" );
 		bind( "clickElementById" );
 		bind( "clickElementByName" );
 		bind( "clickElementByXpath" );
-		bind( "clickElementByCssSelector" );
-		
+		bind( "clickElementByCss" );
+
+
+		bind( "switchTo" );
+		bind( "navigate" );
+		bind( "withNewWindow" );
+		bind( "waitForNewWindow" );
+
 		bind( "mouseDown" );
 		bind( "mouseUp" );
 		
 		bind( "byId" );
 		bind( "byName" );
 		bind( "byIdOrName" );
-		bind( "byCssSelector" );
+		bind( "byCss" );
 		bind( "byLinkText" );
 		bind( "byPartialLinkText" );
 		bind( "byTagName" );
@@ -142,7 +139,8 @@ public class GroovySeleniumMethods {
 		bind( "clickableAny" );
 		bind( "clickableAll" );
 		bind( "selected" );
-		
+
+		bind( "ping" );
 		bind( "connect" );
 		bind( "disconnect" );
 		bind( "quit" );
@@ -150,7 +148,11 @@ public class GroovySeleniumMethods {
 		bind( "sleep" );
 		bind( "pause" );
     }
-    
+
+	public boolean ping() {
+		return controller.ping();
+	}
+
     public void connect() {
     	controller.connect();
     }
@@ -161,29 +163,29 @@ public class GroovySeleniumMethods {
     	controller.quit();
     }
     public void sleep( int millis ) {
-    	controller.sleep( millis );
+    	controller.sleep(millis);
     }
     public void pause( int seconds ) {
-    	controller.pause( seconds );
+    	controller.pause(seconds);
     }
     
     private void bind( String name ) {
-    	binding.setVariable( name, new MethodClosure(this, name) );
+    	binding.setVariable(name, new MethodClosure(this, name));
     }
     
     private void bind( String alias, String name ) {
-    	binding.setVariable( alias, new MethodClosure(this, name) );
+    	binding.setVariable(alias, new MethodClosure(this, name));
     }
     
 	public void get( String url ) {
     	LOGGER.debug( "get: url='" + url + "'" );
-    	getRemoteWebDriver().get( url );
+    	getRemoteWebDriver().get(url);
     }
     
     public void execute( String script, Object... args ) {
     	try {
     		LOGGER.debug( "execute: script='" + script + "', args=" + args );
-	    	((JavascriptExecutor) getRemoteWebDriver()).executeScript( script, args );
+	    	((JavascriptExecutor) getRemoteWebDriver()).executeScript(script, args);
     	}
     	catch( Exception ex ) {
     		throw new RuntimeException( "Failed execute('" + script + "'," + args + ")", ex );
@@ -192,7 +194,7 @@ public class GroovySeleniumMethods {
     public void executeAsync( String script, Object... args ) {
     	try {
 	    	LOGGER.debug( "executeAsync: script='" + script + "', args=" + args );
-	    	((JavascriptExecutor) getRemoteWebDriver()).executeAsyncScript( script, args );
+	    	((JavascriptExecutor) getRemoteWebDriver()).executeAsyncScript(script, args);
     	}
     	catch( Exception ex ) {
     		throw new RuntimeException( "Failed executeAsync('" + script + "'," + args + ")", ex );
@@ -207,7 +209,7 @@ public class GroovySeleniumMethods {
     public boolean isElementExistsByXpath( String xpath ) {
         return isElementExists( By.xpath(xpath) ); 
     }
-    public boolean isElementExistsByCssSelector( String xpath ) {
+    public boolean isElementExistsByCss( String xpath ) {
         return isElementExists( By.cssSelector(xpath) ); 
     }
     
@@ -229,68 +231,143 @@ public class GroovySeleniumMethods {
     	return getElement( By.name(name) );
     }
     public WebElement getElementByXpath( final String xpath ) {
-    	return getElement( By.xpath(xpath) );
+    	return getElement(By.xpath(xpath));
     }
     public List<WebElement> getElementsByXpath( final String xpath ) {
-    	return getElements( By.xpath(xpath) );
+    	return getElements(By.xpath(xpath));
     }
 
-    public WebElement getElementByCssSelector( String selector ) {
-    	return getElement( By.cssSelector(selector) );
+    public WebElement getElementByCss( String selector ) {
+    	return getElement(By.cssSelector(selector));
     }
-    public List<WebElement> getElementsByCssSelector( String selector ) {
-    	return getElements( By.cssSelector(selector) );
+    public List<WebElement> getElementsByCss( String selector ) {
+    	return getElements(By.cssSelector(selector));
     }
     
     public WebElement getElement( By by ) {
     	LOGGER.debug( "getElement: by='" + by + "'" );
-        return getDriver().findElement( by );
+        return getDriver().findElement(by);
     }
     public List<WebElement> getElements( By by ) {
     	LOGGER.debug( "getElements: by='" + by + "'" );
-        return getDriver().findElements( by );
+        return getDriver().findElements(by);
     }
     
     public WebElement waitForElementById( final String id ) {
-    	return waitForElementById( id, wait ) ;
+    	return waitForElementById(id, wait) ;
     }
     public WebElement waitForElementById( final String id, final int seconds ) {
-    	return waitForElement( By.id(id), seconds ) ;
+    	return waitForElement(By.id(id), seconds) ;
     }
     public WebElement waitForElementByName( final String name ) {
-    	return waitForElementByName( name, wait ) ;
+    	return waitForElementByName(name, wait) ;
     }
     public WebElement waitForElementByName( final String name, final int seconds ) {
-    	return waitForElement( By.name(name), seconds ) ;
+    	return waitForElement(By.name(name), seconds) ;
     }
     
     public WebElement waitForElementByXpath( final String xpath ) {
-    	return waitForElementByXpath( xpath, wait ) ;
+    	return waitForElementByXpath(xpath, wait) ;
     }
     public WebElement waitForElementByXpath( final String xpath, final int seconds ) {
-    	return waitForElement( By.xpath(xpath), seconds ) ;
+    	return waitForElement(By.xpath(xpath), seconds) ;
     }
     
-    public WebElement waitForElementByCssSelector( final String selector ) {
-    	return waitForElementByCssSelector( selector, wait ) ;
+    public WebElement waitForElementByCss( final String selector ) {
+    	return waitForElementByCss(selector, wait) ;
     }
-    public WebElement waitForElementByCssSelector( final String selector, final int seconds ) {
-    	return waitForElement( By.cssSelector(selector), seconds ) ;
+    public WebElement waitForElementByCss( final String selector, final int seconds ) {
+    	return waitForElement(By.cssSelector(selector), seconds) ;
     }
     
     public WebElement waitForElement( final By by ) {
-    	return waitForElement( by, wait );
+    	return waitForElement(by, wait);
     }
     public WebElement waitForElement( final By by, final int seconds ) {
-    	LOGGER.debug( "waitForElement: by='" + by + "', seconds=" + seconds );
-    	return waitFor( visibilityOf(by), seconds );
+    	LOGGER.debug("waitForElement: by='" + by + "', seconds=" + seconds);
+    	return waitFor(seconds, visibilityOf(by));
     }
 
+	public void withNewWindow( boolean close, Closure closure ) {
+		withNewWindow(wait, close, closure);
+	}
+
+	public void withNewWindow( int seconds, boolean close, Closure closure ) {
+		WebDriver d = getDriver();
+		String mainWindowHandle = d.getWindowHandle();
+		String handle = waitForNewWindow( seconds );
+		if( handle != null ) {
+			LOGGER.debug( "withNewWindow: new window - handle: " + handle );
+			switchTo().window( handle );
+			try {
+				closure.call();
+			}
+			finally {
+				if( close ) {
+					try {
+						d.close();
+					}
+					catch (Exception ex) {
+						LOGGER.error("Error closing popup window: " + handle);
+					}
+				}
+				LOGGER.debug( "withNewWindow: returning to main window - handle: " + mainWindowHandle );
+				switchTo().window(mainWindowHandle);
+			}
+		}
+		else {
+			throw new RuntimeException( "Timed out waiting for new window");
+		}
+	}
+
+	public void waitForNewWindow() {
+		waitForNewWindow( wait );
+	}
+
+	public String waitForNewWindow( int seconds ) {
+		WebDriver d = getDriver();
+		String mainWindowHandle = d.getWindowHandle();
+		waitFor(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				return (d.getWindowHandles().size() != 1);
+			}
+		});
+
+		for (String handle : d.getWindowHandles()) {
+			if (!handle.equals(mainWindowHandle)) {
+				LOGGER.debug( "waitForNewWindow: found new window - handle: " + mainWindowHandle );
+				return handle;
+			}
+		}
+		LOGGER.debug( "waitForNewWindow: did not find new window" );
+		return null;
+	}
+
+	public WebDriver.TargetLocator switchTo() {
+		return getDriver().switchTo();
+	}
+
+	public WebDriver.Navigation navigate() {
+		return getDriver().navigate();
+	}
+
+	public Boolean waitFor( Closure closure ) {
+		return waitFor( wait, closure );
+	}
+
+	public Boolean waitFor( int seconds, Closure closure ) {
+		return waitFor( seconds, new ExpectedCondition<Boolean>() {
+			public Boolean apply( WebDriver driver ) {
+				return (Boolean)closure.call( driver );
+			}
+		} );
+	}
+
     public <X> X waitFor( ExpectedCondition<X> cond ) {
-    	return waitFor( cond, wait );
+    	return waitFor( wait, cond );
     }
     
-    public <X> X waitFor( final ExpectedCondition<X> cond, final int seconds ) {
+    public <X> X waitFor( final int seconds, final ExpectedCondition<X> cond ) {
     	LOGGER.debug( "waitForElement: cond='" + cond + "', seconds=" + seconds );
         return (new WebDriverWait(getDriver(), seconds)).until(cond);
     }
@@ -315,10 +392,10 @@ public class GroovySeleniumMethods {
     	return clickElement( By.xpath(xpath), seconds ) ;
     }
     
-    public WebElement clickElementByCssSelector( final String selector ) {
-    	return clickElementByCssSelector( selector, wait ) ;
+    public WebElement clickElementByCss( final String selector ) {
+    	return clickElementByCss( selector, wait ) ;
     }
-    public WebElement clickElementByCssSelector( final String selector, final int seconds ) {
+    public WebElement clickElementByCss( final String selector, final int seconds ) {
     	return clickElement( By.cssSelector(selector), seconds ) ;
     }
     
@@ -327,8 +404,8 @@ public class GroovySeleniumMethods {
     	long timeout = System.currentTimeMillis() + (seconds * 1000);
     	while( System.currentTimeMillis() <= timeout ) {
 	    	try {
-	    		WebElement element = waitFor( clickableAny(by), seconds );
-	    		LOGGER.debug( "clickElement: clicking  by: " + by );
+	    		WebElement element = waitFor( seconds, clickableAny(by) );
+	    		LOGGER.debug("clickElement: clicking  by: " + by);
 	    		element.click();
 	    		return element;
 	    	}
@@ -406,7 +483,7 @@ public class GroovySeleniumMethods {
     public By byClassName( String val ) {
     	return By.className(val);
     }
-    public By byCssSelector( String val ) {
+    public By byCss( String val ) {
     	return By.cssSelector(val);
     }
     public By byLinkText( String val ) {

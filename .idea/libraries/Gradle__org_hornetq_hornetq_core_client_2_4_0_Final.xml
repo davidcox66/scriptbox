@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.hornetq:hornetq-core-client:2.4.0.Final">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.hornetq/hornetq-core-client/2.4.0.Final/33af96590154e1b37d7da7e268582eabc31125c0/hornetq-core-client-2.4.0.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.hornetq/hornetq-core-client/2.4.0.Final/bfb0dcd30d3078446049234bcece1ee9c7e4f52/hornetq-core-client-2.4.0.Final-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

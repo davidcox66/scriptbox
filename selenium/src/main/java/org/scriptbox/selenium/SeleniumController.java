@@ -1,16 +1,5 @@
 package org.scriptbox.selenium;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -22,17 +11,23 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 public class SeleniumController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( SeleniumController.class );
 
 	private static final int DRIVER_RETRIES = 5;
 	
-	private DriverType type;
-	private URL url;
-	private String profile;
     private int timeout;
-    
+
+	private DriverType type;
+	private DriverOptions options = new DriverOptions();
     private RemoteWebDriver driver;
     
     private String exe;
@@ -41,34 +36,36 @@ public class SeleniumController {
     
     public enum DriverType {
     	FIREFOX("firefox") {
-            public RemoteWebDriver create( URL url, String profile ) {
-                if( url != null ) {
+            public RemoteWebDriver create( DriverOptions options ) {
+                if( options.getUrl() != null ) {
     	           DesiredCapabilities cap = DesiredCapabilities.firefox();
-    	           if( profile != null ) {
-    		           cap.setCapability(FirefoxDriver.PROFILE, profile);
+    	           if( options.getProfile() != null ) {
+    		           cap.setCapability(FirefoxDriver.PROFILE, options.getProfile());
     	           }
-    		       RemoteWebDriver driver = new RemoteWebDriver(url, cap);
+    		       RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
     		       return (RemoteWebDriver)new Augmenter().augment(driver);
                 }
                 else {
-    		        File profileDir = new File(profile);
+    		        File profileDir = new File(options.getProfile());
     		        return new FirefoxDriver( new FirefoxProfile(profileDir) ); 
                 }
             }
     	},
     	CHROME("chrome") {
-    		public RemoteWebDriver create( URL url, String profile ) {
-               DesiredCapabilities cap = DesiredCapabilities.chrome();
-               cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
-    	       RemoteWebDriver driver = new RemoteWebDriver(url, cap);
-               return (RemoteWebDriver)new Augmenter().augment(driver);
+    		public RemoteWebDriver create( DriverOptions options ) {
+				DesiredCapabilities cap = DesiredCapabilities.chrome();
+				if (options.isIgnoreCertificateErrors()) {
+					cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
+				}
+    	       	RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
+               	return (RemoteWebDriver)new Augmenter().augment(driver);
             }
     	},
     	IE("ie") {
-            public RemoteWebDriver create( URL url, String profile ) {
+            public RemoteWebDriver create( DriverOptions options ) {
                DesiredCapabilities cap = DesiredCapabilities.internetExplorer();
-               cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);   
-    	       RemoteWebDriver driver = new RemoteWebDriver(url, cap);
+               cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, options.isAcceptCertificates());
+    	       RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
                return (RemoteWebDriver)new Augmenter().augment(driver);
             }
     	};
@@ -83,10 +80,50 @@ public class SeleniumController {
     		return name;
     	}
     	
-    	public RemoteWebDriver create( URL url, String profile ) {
+    	public RemoteWebDriver create( DriverOptions options ) {
     		return null;
     	}
     };
+
+	public static class DriverOptions
+	{
+		private URL url;
+		private String profile;
+		private boolean acceptCertificates;
+		private boolean ignoreCertificateErrors;
+
+		public URL getUrl() {
+			return url;
+		}
+
+		public void setUrl(URL url) {
+			this.url = url;
+		}
+
+		public String getProfile() {
+			return profile;
+		}
+
+		public void setProfile(String profile) {
+			this.profile = profile;
+		}
+
+		public boolean isAcceptCertificates() {
+			return acceptCertificates;
+		}
+
+		public void setAcceptCertificates(boolean acceptCertificates) {
+			this.acceptCertificates = acceptCertificates;
+		}
+
+		public boolean isIgnoreCertificateErrors() {
+			return ignoreCertificateErrors;
+		}
+
+		public void setIgnoreCertificateErrors(boolean ignoreCertificateErrors) {
+			this.ignoreCertificateErrors = ignoreCertificateErrors;
+		}
+	}
 
     public SeleniumController( DriverType type ) {
     	this.type = type;
@@ -96,20 +133,24 @@ public class SeleniumController {
 		return type;
 	}
 
+	public DriverOptions getOptions() {
+		return options;
+	}
+
 	public URL getUrl() {
-		return url;
+		return options.getUrl();
 	}
 
 	public void setUrl(URL url) {
-		this.url = url;
+		options.setUrl( url );
 	}
 
 	public String getProfile() {
-		return profile;
+		return options.getProfile();
 	}
 
 	public void setProfile(String profile) {
-		this.profile = profile;
+		options.setProfile( profile );
 	}
 
 	public int getTimeout() {
@@ -148,7 +189,7 @@ public class SeleniumController {
 	    			pause( delay );
 	    		}
 			}
-    		throw new RuntimeException( "Error connecting to: " + url, last );
+    		throw new RuntimeException( "Error connecting to: " + getUrl(), last );
     	}
     }
     
@@ -160,7 +201,31 @@ public class SeleniumController {
     public void quit() {
     	stopDriver();
     }
-    
+
+	public boolean ping() {
+		if( !isAvailable() ) {
+			if( isConnected() ) {
+				quit();
+			}
+			connect();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isAvailable() {
+		if( isConnected() ) {
+			try {
+				driver.getCurrentUrl();
+				return true;
+			}
+			catch( Exception ex ) {
+				LOGGER.error( "isAvailable: error getting current url", ex );
+			}
+		}
+		return false;
+	}
+
     public boolean isConnected() {
     	return driver != null;
     }
@@ -174,8 +239,8 @@ public class SeleniumController {
     
     private void startDriver() {
     	if( !isConnected() ) {
-    		LOGGER.debug( "startDriver: starting url: " + url + ", profile: " + profile );
-			driver = type.create( url, profile );
+    		LOGGER.debug( "startDriver: starting url: " + options.getUrl() + ", profile: " + options.getProfile() );
+			driver = type.create( options );
 			driver.manage().timeouts().implicitlyWait(timeout > 0 ? timeout : 30, TimeUnit.SECONDS);
     	}
     }
@@ -220,7 +285,7 @@ public class SeleniumController {
 	private void stopDriver() {
         if( driver != null ) {
             try {
-            	LOGGER.debug( "stopDriver: stopping driver url: " + url );
+            	LOGGER.debug( "stopDriver: stopping driver url: " + getUrl() );
 	            driver.quit();
             }
             catch( Exception ex ) {

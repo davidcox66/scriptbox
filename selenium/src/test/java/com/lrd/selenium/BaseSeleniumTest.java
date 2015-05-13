@@ -1,9 +1,5 @@
 package com.lrd.selenium;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateMidnight;
 import org.joda.time.format.DateTimeFormat;
@@ -14,6 +10,10 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.scriptbox.selenium.GroovySeleniumMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class BaseSeleniumTest {
 
@@ -81,7 +81,7 @@ public class BaseSeleniumTest {
     }
     
     public List<String> getElementValuesBySelector( String selector ) {
-       List<WebElement> elements = selenium.getElementsBySelector( selector );
+       List<WebElement> elements = selenium.getElementsByCss( selector );
        List<String> ret = new ArrayList<String>();
        for( WebElement elem : elements ) {
            String text = elem.getText();
@@ -104,7 +104,7 @@ public class BaseSeleniumTest {
     }
     public void screenshot( String ext ) {
         try {
-	        selenium.screenshot( SeleniumRunner.SCREEN_SHOT_DIR, getClass().getName(), methodNameRule.getMethodName(), selenium.getName(), ext );
+	        selenium.screenshot( SeleniumRunner.SCREEN_SHOT_DIR, getClass().getName(), methodNameRule.getMethodName(), "driver", ext );
         }
         catch( Exception ex ) {
             LOGGER.error( "Error taking screenshot", ex );
