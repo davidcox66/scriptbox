@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.internal.Coordinates;
 import org.openqa.selenium.internal.Locatable;
@@ -16,6 +17,7 @@ import org.openqa.selenium.support.pagefactory.ByAll;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,12 @@ public class GroovySeleniumMethods {
     private int wait = DEFAULT_WAIT;
     private SeleniumController controller;
     private Binding binding;
-    
+
+	public interface WebElementAction
+	{
+		WebElement run( int seconds );
+	}
+
     public GroovySeleniumMethods( SeleniumController controller )  {
         this.controller = controller;
         bind();
@@ -107,9 +114,17 @@ public class GroovySeleniumMethods {
 		bind( "clickElementByXpath" );
 		bind( "clickElementByCss" );
 
+		bind( "moveToElement" );
+		bind( "moveToElementById" );
+		bind( "moveToElementByName" );
+		bind( "moveToElementByXpath" );
+		bind( "moveToElementByCss" );
 
 		bind( "switchTo" );
 		bind( "navigate" );
+		bind( "actions" );
+		bind( "select" );
+
 		bind( "withNewWindow" );
 		bind( "waitForNewWindow" );
 
@@ -321,7 +336,7 @@ public class GroovySeleniumMethods {
 	}
 
 	public void waitForNewWindow() {
-		waitForNewWindow( wait );
+		waitForNewWindow(wait);
 	}
 
 	public String waitForNewWindow( int seconds ) {
@@ -339,7 +354,7 @@ public class GroovySeleniumMethods {
 				return handle;
 			}
 		}
-		LOGGER.debug( "waitForNewWindow: did not find new window" );
+		LOGGER.debug("waitForNewWindow: did not find new window");
 		return null;
 	}
 
@@ -349,6 +364,14 @@ public class GroovySeleniumMethods {
 
 	public WebDriver.Navigation navigate() {
 		return getDriver().navigate();
+	}
+
+	public Actions actions() {
+		return new Actions(getDriver());
+	}
+
+	public Select select( WebElement element ) {
+		return new Select( element );
 	}
 
 	public Boolean waitFor( Closure closure ) {
@@ -364,7 +387,7 @@ public class GroovySeleniumMethods {
 	}
 
     public <X> X waitFor( ExpectedCondition<X> cond ) {
-    	return waitFor( wait, cond );
+    	return waitFor(wait, cond);
     }
     
     public <X> X waitFor( final int seconds, final ExpectedCondition<X> cond ) {
@@ -373,60 +396,123 @@ public class GroovySeleniumMethods {
     }
     
     public WebElement clickElementById( final String id ) {
-    	return clickElementById( id, wait ) ;
+    	return clickElementById(id, wait) ;
     }
     public WebElement clickElementById( final String id, final int seconds ) {
-    	return clickElement( By.id(id), seconds ) ;
+    	return clickElement(By.id(id), seconds) ;
     }
     public WebElement clickElementByName( final String name ) {
-    	return clickElementByName( name, wait ) ;
+    	return clickElementByName(name, wait) ;
     }
     public WebElement clickElementByName( final String name, final int seconds ) {
-    	return clickElement( By.name(name), seconds ) ;
+    	return clickElement(By.name(name), seconds) ;
     }
     
     public WebElement clickElementByXpath( final String xpath ) {
-    	return clickElementByXpath( xpath, wait ) ;
+    	return clickElementByXpath(xpath, wait) ;
     }
     public WebElement clickElementByXpath( final String xpath, final int seconds ) {
-    	return clickElement( By.xpath(xpath), seconds ) ;
+    	return clickElement(By.xpath(xpath), seconds) ;
     }
     
     public WebElement clickElementByCss( final String selector ) {
-    	return clickElementByCss( selector, wait ) ;
+    	return clickElementByCss(selector, wait) ;
     }
     public WebElement clickElementByCss( final String selector, final int seconds ) {
-    	return clickElement( By.cssSelector(selector), seconds ) ;
+    	return clickElement(By.cssSelector(selector), seconds) ;
     }
     
     public WebElement clickElement( final By by, final int seconds ) {
-    	Exception last = null;
-    	long timeout = System.currentTimeMillis() + (seconds * 1000);
-    	while( System.currentTimeMillis() <= timeout ) {
-	    	try {
-	    		WebElement element = waitFor( seconds, clickableAny(by) );
-	    		LOGGER.debug("clickElement: clicking  by: " + by);
-	    		element.click();
-	    		return element;
-	    	}
-	    	catch( WebDriverException ex ) {
-	    		if( !isRetryableException(ex) ) {
-	    			throw ex;
-	    		}
-	    		last = ex;
-	    		LOGGER.debug( "clickElement: retrying: " + by, ex );
-	    		try {
-		    		Thread.sleep( RETRY_SECONDS * 1000 );
-	    		}
-	    		catch( InterruptedException ex2 ) {
-	    			LOGGER.debug( "clickElement: interrupted", ex2 );
-	    		}
-	    	}
-    	}
-    	throw new RuntimeException( "Element was never visible to click - by: " + by, last );
+		return actionWithRetry(seconds, new WebElementAction() {
+			public WebElement run(int seconds) {
+				WebElement element = waitFor(seconds, clickableAny(by));
+				LOGGER.debug("clickElement: clicking  by: " + by);
+				element.click();
+				return element;
+			}
+		});
     }
-    
-    public void mouseDown( WebElement element ) {
+
+	public WebElement moveToElementById( final String id ) {
+		return moveToElementById(id, wait) ;
+	}
+	public WebElement moveToElementById( final String id, final int seconds ) {
+		return moveToElement(By.id(id), seconds) ;
+	}
+	public WebElement moveToElementByName( final String name ) {
+		return moveToElementByName(name, wait) ;
+	}
+	public WebElement moveToElementByName( final String name, final int seconds ) {
+		return clickElement(By.name(name), seconds) ;
+	}
+
+	public WebElement moveToElementByXpath( final String xpath ) {
+		return clickElementByXpath(xpath, wait) ;
+	}
+	public WebElement moveToElementByXpath( final String xpath, final int seconds ) {
+		return moveToElement(By.xpath(xpath), seconds) ;
+	}
+
+	public WebElement moveToElementByCss( final String selector ) {
+		return clickElementByCss(selector, wait) ;
+	}
+	public WebElement moveToElementByCss( final String selector, final int seconds ) {
+		return clickElement(By.cssSelector(selector), seconds) ;
+	}
+
+	public WebElement moveToElement( final By by, final int seconds ) {
+		return actionWithRetry(seconds, new WebElementAction() {
+			public WebElement run(int seconds) {
+				WebElement element = waitFor(seconds, clickableAny(by));
+				LOGGER.debug("moveToElement: moving  by: " + by);
+				actions().moveToElement(element);
+				return element;
+			}
+		});
+	}
+
+	public WebElement moveToElement( WebElement element ) {
+		return moveToElement(element, wait);
+	}
+
+	public WebElement moveToElement( WebElement element, final int seconds ) {
+		return actionWithRetry( seconds, new WebElementAction() {
+			public WebElement run( int seconds ) {
+				LOGGER.debug("moveToElement: moving  to: " + element);
+				actions().moveToElement( element );
+				return element;
+			}
+		});
+	}
+
+	public WebElement actionWithRetry( final int seconds, WebElementAction action ) {
+		Exception last = null;
+		long timeout = System.currentTimeMillis() + (seconds * 1000);
+		while( System.currentTimeMillis() <= timeout ) {
+			try {
+				int sec = (int)(timeout - System.currentTimeMillis())  / 1000;
+				if( sec > 0 ) {
+					return action.run(sec);
+				}
+			}
+			catch( WebDriverException ex ) {
+				if( !isRetryableException(ex) ) {
+					throw ex;
+				}
+				last = ex;
+				LOGGER.debug( "actionWithRetry: retrying...", ex );
+				try {
+					Thread.sleep( RETRY_SECONDS * 1000 );
+				}
+				catch( InterruptedException ex2 ) {
+					LOGGER.debug( "actionWithRetry: interrupted", ex2 );
+				}
+			}
+		}
+		throw new RuntimeException( "Unable to complete action", last );
+	}
+
+	public void mouseDown( WebElement element ) {
     	LOGGER.debug( "mouseDown: element=" + element );
         Coordinates coord = ((Locatable)element).getCoordinates();
         Mouse mouse = getRemoteWebDriver().getMouse();
