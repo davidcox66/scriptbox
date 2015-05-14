@@ -378,7 +378,7 @@ public class GroovySeleniumMethods {
 		return waitFor( wait, closure );
 	}
 
-	public Boolean waitFor( int seconds, Closure closure ) {
+	public Boolean waitFor( int seconds, final Closure closure ) {
 		return waitFor( seconds, new ExpectedCondition<Boolean>() {
 			public Boolean apply( WebDriver driver ) {
 				return (Boolean)closure.call( driver );
@@ -475,7 +475,7 @@ public class GroovySeleniumMethods {
 		return moveToElement(element, wait);
 	}
 
-	public WebElement moveToElement( WebElement element, final int seconds ) {
+	public WebElement moveToElement( final WebElement element, final int seconds ) {
 		return actionWithRetry( seconds, new WebElementAction() {
 			public WebElement run( int seconds ) {
 				LOGGER.debug("moveToElement: moving  to: " + element);

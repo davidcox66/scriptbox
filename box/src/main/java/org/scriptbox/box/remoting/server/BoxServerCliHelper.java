@@ -18,7 +18,7 @@ public class BoxServerCliHelper {
 		return jetty;
 	}
 	
-	public static JettyService consumeMainArgs( CommandLine cmd, String baseName, int defaultPort ) throws CommandLineException {
+	private static JettyService consumeMainArgs( CommandLine cmd, String baseName, int defaultPort ) throws CommandLineException {
 		
 		// handled by shell wrapper script		
 		cmd.consumeArg( "debug" );
@@ -35,45 +35,21 @@ public class BoxServerCliHelper {
 		String tags = cmd.consumeArgValue( "tags", "local" );
 		System.setProperty( "heartbeat.tags", tags );
 		
-		int jmxport = cmd.consumeArgValueAsInt( "jmxport", port+1 );
+		int jmxport = cmd.consumeArgValueAsInt( "jmxport", port+2 );
 		System.setProperty( "com.sun.management.jmxremote.port", ""+jmxport );
 		
 		String user = cmd.consumeArgValue( "user", false );
 		String password = null;
 		if( user != null ) {
-			password = cmd.consumeArgValue( "password", false );
-			if( password == null ) {
-				Console cons = System.console();
-				if( cons == null ) {
-					throw new CommandLineException( "Unable to read password from console" );
-				}
-				char[] passwd;
-				if ((passwd = cons.readPassword("%s", "Password:")) != null) {
-					password = new String( passwd );
-				}
-				if( StringUtils.isBlank(password) ) {
-					throw new CommandLineException( "Must specify a password");
-				}
-			}
+			password = getPassword( cmd );
 			System.setProperty( "box.user", user );
 			System.setProperty( "box.password", password );
 		}
 		
-		String springContext = cmd.consumeArgValue( "spring-context", false );
-		if( springContext == null ) {
-			springContext = "classpath:" + baseName + "-context.xml";
-		}
-		String springSecurityContext = cmd.consumeArgValue( "spring-security-context", false );
-		if( springSecurityContext != null ) {
-			if( springSecurityContext.equals("default") ) {
-				springSecurityContext = "classpath:" + baseName + "-security-context.xml";
-				if( user == null || password == null ) {
-					throw new CommandLineException( "Must specify user and password when using default security context");
-				}
-			}
-		}
+		JettyService jetty = new JettyService( 
+			getSpringContextLocation(cmd,baseName), 
+			getSecurityContextLocation(cmd,baseName,user,password) );
 		
-		JettyService jetty = new JettyService( springContext, springSecurityContext );
 		jetty.setHostname( address );
 		jetty.setKeyStorePath( cmd.consumeArgValue("keystore-path", false) );
 		jetty.setKeyStorePassword(cmd.consumeArgValue("keystore-password", false) );
@@ -97,7 +73,7 @@ public class BoxServerCliHelper {
 		return jetty;
 	}
 	
-	public static void consumeDatabaseArgs( CommandLine cmd ) throws CommandLineException {
+	private static void consumeDatabaseArgs( CommandLine cmd ) throws CommandLineException {
 		String db = cmd.consumeArgValue( "db", "localhost" );
 		System.setProperty( "cassandra.host", db );
 		
@@ -115,8 +91,8 @@ public class BoxServerCliHelper {
 		System.setProperty("cassandra.tunnel.user", dbTunnelUser );
 		System.setProperty("cassandra.tunnel.password", dbTunnelPassword );
 	}
-	
-	public static void consumeTunnelArgs( CommandLine cmd ) throws CommandLineException { 
+
+	private static void consumeTunnelArgs( CommandLine cmd ) throws CommandLineException { 
 		String sshHost = cmd.consumeArgValue( "ssh-host", "" );
 		int sshPort = 0;
 		String user = "";
@@ -131,14 +107,56 @@ public class BoxServerCliHelper {
 		System.setProperty( "ssh.port", ""+sshPort );
 		System.setProperty( "ssh.user", user );
 		System.setProperty( "ssh.password", password );
-	
 	}
+	
+	private static String getPassword( CommandLine cmd ) throws CommandLineException {
+		
+		String password = cmd.consumeArgValue( "password", false );
+		if( password == null ) {
+			Console cons = System.console();
+			if( cons == null ) {
+				throw new CommandLineException( "Unable to read password from console" );
+			}
+			char[] passwd;
+			if ((passwd = cons.readPassword("%s", "Password:")) != null) {
+				password = new String( passwd );
+			}
+			if( StringUtils.isBlank(password) ) {
+				throw new CommandLineException( "Must specify a password");
+			}
+		}
+		return password;
+	}
+	
+	private static String getSpringContextLocation( CommandLine cmd, String baseName ) throws CommandLineException {
+		String springContext = cmd.consumeArgValue( "spring-context", false );
+		if( springContext == null ) {
+			springContext = "classpath:" + baseName + "-context.xml";
+		}
+		return springContext;
+	}
+	
+	private static String getSecurityContextLocation( CommandLine cmd, String baseName, String user, String password ) 
+		throws CommandLineException
+	{
+		String springSecurityContext = cmd.consumeArgValue( "spring-security-context", false );
+		if( springSecurityContext != null ) {
+			if( springSecurityContext.equals("default") ) {
+				springSecurityContext = "classpath:" + baseName + "-security-context.xml";
+				if( user == null || password == null ) {
+					throw new CommandLineException( "Must specify user and password when using default security context");
+				}
+			}
+		}
+		return springSecurityContext;
+	}
+	
 	public static void usage( String name, int defaultPort ) {
 		System.err.println( "Usage: " + name + " \n" +
 			"\t--instance=<instance> [--address=[localhost]] [--port=[" + defaultPort + "]] \n" +
 			"\t[--db=[localhost] [--db-tunnel-host=<host> --db-tunnel-port=<port>] [-db-tunnel-user=<user> -db-tunnel-password=<password>] \n" +
 			"\t[--tags=<tag1,tag2,...>] [--ssh-host=<host> [--ssh-port=[22]] [--ssh-user=<user> --ssh-password=<password>]\n" +
-			"\t[--jmxport=[port+1]]\n" +
+			"\t[--jmxport=[port+2]]\n" +
 			"\t[--spring-context=<context file>]\n"  +
 			"\t[--spring-security-context=<context file>|'default']\n" +
 			"\t[--user=<user> {--password=<password>|(prompts for password)}]\n" +
