@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class SeleniumController {
 
@@ -202,8 +203,8 @@ public class SeleniumController {
     	stopDriver();
     }
 
-	public boolean ping() {
-		if( !isAvailable() ) {
+	public boolean activate() {
+		if( !isResponsive() ) {
 			if( isConnected() ) {
 				quit();
 			}
@@ -213,20 +214,82 @@ public class SeleniumController {
 		return true;
 	}
 
-	public boolean isAvailable() {
+	public boolean activate( String baseUrl ) {
+		if( !isAtUrlBase(baseUrl) ) {
+			if( !isResponsive() ) {
+				quit();
+			}
+            connect();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean activate( Pattern pattern ) {
+		if( !isAtUrlPattern(pattern) ) {
+			if( !isResponsive() ) {
+				quit();
+			}
+			connect();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isAtUrlBase( String baseUrl ) {
 		if( isConnected() ) {
 			try {
-				driver.getCurrentUrl();
-				return true;
+				String current = driver.getCurrentUrl();
+				LOGGER.debug("isAtUrlBase: base: " + baseUrl + ", current: " + current);
+				return current != null && current.startsWith(baseUrl);
 			}
-			catch( Exception ex ) {
-				LOGGER.error( "isAvailable: error getting current url", ex );
+			catch (Exception ex) {
+				LOGGER.error("isAtUrlBase: error getting current url", ex);
 			}
 		}
 		return false;
 	}
 
-    public boolean isConnected() {
+	public boolean isAtUrlPattern( Pattern pattern ) {
+		if( isConnected() ) {
+			try {
+				String current = driver.getCurrentUrl();
+				LOGGER.debug("isAtUrlPattern: pattern: " + pattern + ", current: " + current);
+				return current != null && pattern.matcher(current).matches();
+			}
+			catch (Exception ex) {
+				LOGGER.error("isAtUrlPattern: error getting current url", ex);
+			}
+		}
+		return false;
+	}
+
+	public String getCurrentUrl() {
+		if( isConnected() ) {
+			try {
+				return driver.getCurrentUrl();
+			}
+			catch (Exception ex) {
+				LOGGER.error("getCurrentUrl: error getting current url", ex);
+			}
+		}
+		return null;
+	}
+
+	public boolean isResponsive() {
+		if( isConnected() ) {
+			try {
+				driver.getCurrentUrl();
+				return true;
+			}
+			catch (Exception ex) {
+				LOGGER.error("isResponsive: error getting current url", ex);
+			}
+		}
+        return false;
+	}
+
+	public boolean isConnected() {
     	return driver != null;
     }
     

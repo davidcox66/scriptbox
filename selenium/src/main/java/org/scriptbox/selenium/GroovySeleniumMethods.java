@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class GroovySeleniumMethods {
 
@@ -155,7 +156,7 @@ public class GroovySeleniumMethods {
 		bind( "clickableAll" );
 		bind( "selected" );
 
-		bind( "ping" );
+		bind( "activate" );
 		bind( "connect" );
 		bind( "disconnect" );
 		bind( "quit" );
@@ -164,8 +165,16 @@ public class GroovySeleniumMethods {
 		bind( "pause" );
     }
 
-	public boolean ping() {
-		return controller.ping();
+	public boolean activate() {
+		return controller.activate();
+	}
+
+	public boolean activate( String baseUrl ) {
+		return controller.activate(baseUrl);
+	}
+
+	public boolean activate( Pattern pattern ) {
+		return controller.activate(pattern);
 	}
 
     public void connect() {
