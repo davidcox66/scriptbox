@@ -1,5 +1,6 @@
 package org.scriptbox.selenium;
 
+import groovy.lang.Closure;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -215,7 +216,7 @@ public class SeleniumController {
 	}
 
 	public boolean activate( String baseUrl ) {
-		if( !isAtUrlBase(baseUrl) ) {
+		if( !isAtLocation(baseUrl) ) {
 			if( !isResponsive() ) {
 				quit();
 			}
@@ -226,7 +227,7 @@ public class SeleniumController {
 	}
 
 	public boolean activate( Pattern pattern ) {
-		if( !isAtUrlPattern(pattern) ) {
+		if( !isAtLocation(pattern) ) {
 			if( !isResponsive() ) {
 				quit();
 			}
@@ -236,34 +237,69 @@ public class SeleniumController {
 		return true;
 	}
 
-	public boolean isAtUrlBase( String baseUrl ) {
+	public boolean activate( Closure closure ) {
+		if( !isAtLocation(closure) ) {
+			if( !isResponsive() ) {
+				quit();
+			}
+			connect();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isAtLocation( String baseUrl ) {
 		if( isConnected() ) {
 			try {
 				String current = driver.getCurrentUrl();
-				LOGGER.debug("isAtUrlBase: base: " + baseUrl + ", current: " + current);
+				LOGGER.debug("isAtLocation: base: " + baseUrl + ", current: " + current);
 				return current != null && current.startsWith(baseUrl);
 			}
 			catch (Exception ex) {
-				LOGGER.error("isAtUrlBase: error getting current url", ex);
+				LOGGER.error("isAtLocation: error getting current url", ex);
 			}
 		}
 		return false;
 	}
 
-	public boolean isAtUrlPattern( Pattern pattern ) {
+	public boolean isAtLocation( Pattern pattern ) {
 		if( isConnected() ) {
 			try {
 				String current = driver.getCurrentUrl();
-				LOGGER.debug("isAtUrlPattern: pattern: " + pattern + ", current: " + current);
+				LOGGER.debug("isAtLocation: pattern: " + pattern + ", current: " + current);
 				return current != null && pattern.matcher(current).matches();
 			}
 			catch (Exception ex) {
-				LOGGER.error("isAtUrlPattern: error getting current url", ex);
+				LOGGER.error("isAtLocation: error getting current url", ex);
 			}
 		}
 		return false;
 	}
 
+	public boolean isAtLocation( Closure closure ) {
+		if( isConnected() ) {
+			try {
+				String current = driver.getCurrentUrl();
+				LOGGER.debug("isAtLocation: current: " + current);
+				if( current != null ) {
+					int max = closure.getMaximumNumberOfParameters();
+					if( max == 1 ) {
+						return (Boolean)closure.call( current );
+					}
+					else if( max == 2 ) {
+						return (Boolean)closure.call( current, this );
+					}
+					else {
+						throw new RuntimeException( "Too many parameters to closure" );
+					}
+				}
+			}
+			catch (Exception ex) {
+				LOGGER.error("isAtLocation: error getting current url", ex);
+			}
+		}
+		return false;
+	}
 	public String getCurrentUrl() {
 		if( isConnected() ) {
 			try {

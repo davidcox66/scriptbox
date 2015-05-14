@@ -177,6 +177,10 @@ public class GroovySeleniumMethods {
 		return controller.activate(pattern);
 	}
 
+	public boolean activate( Closure closure ) {
+		return controller.activate(closure);
+	}
+
     public void connect() {
     	controller.connect();
     }
@@ -390,7 +394,16 @@ public class GroovySeleniumMethods {
 	public Boolean waitFor( int seconds, final Closure closure ) {
 		return waitFor( seconds, new ExpectedCondition<Boolean>() {
 			public Boolean apply( WebDriver driver ) {
-				return (Boolean)closure.call( driver );
+				int max = closure.getMaximumNumberOfParameters();
+				if (max == 1) {
+					return (Boolean) closure.call(controller);
+				}
+				else if( max == 2 ) {
+					return (Boolean) closure.call(controller,driver);
+				}
+				else {
+					throw new RuntimeException( "Too many parameters to closure" );
+				}
 			}
 		} );
 	}
