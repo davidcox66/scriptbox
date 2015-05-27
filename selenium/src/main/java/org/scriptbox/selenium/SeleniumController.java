@@ -27,6 +27,7 @@ public class SeleniumController {
     private RemoteWebDriver driver;
     
     private String exe;
+	private int port;
     private Process process;
     private List<Thread> readers;
 
@@ -57,7 +58,7 @@ public class SeleniumController {
 	}
 
 	public void setUrl(URL url) {
-		options.setUrl( url );
+		options.setUrl(url);
 	}
 
 	public String getProfile() {
@@ -84,7 +85,15 @@ public class SeleniumController {
 		this.exe = exe;
 	}
 
-    public void connect() {
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void connect() {
     	connect( DRIVER_RETRIES, 1 );
     }
     
@@ -243,7 +252,7 @@ public class SeleniumController {
     	if( StringUtils.isNotEmpty(exe) && process == null ) {
     		LOGGER.debug( "startDriverProcess: starting exe: " + exe );
     		readers = new ArrayList<Thread>();
-	    	process = Runtime.getRuntime().exec( exe );
+	    	process = Runtime.getRuntime().exec( exe + " --port=" + getPort() );
 	    	readers.add( consume(process.getInputStream()) );
 	    	readers.add( consume(process.getErrorStream()) );
 	    	Selenium.pause( delay );

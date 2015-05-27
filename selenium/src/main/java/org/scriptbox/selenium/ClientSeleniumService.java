@@ -3,6 +3,7 @@ package org.scriptbox.selenium;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,14 @@ import java.util.List;
 public class ClientSeleniumService extends DelegatingSeleniumService {
 
     public ClientSeleniumService() {
+    }
+
+    public ClientSeleniumService( String serverHostPort ) {
+        HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
+        factory.setServiceUrl("http://" + serverHostPort + "/remoting/selenium/");
+        factory.setServiceInterface(SeleniumService.class);
+        factory.afterPropertiesSet();
+        delegate = (SeleniumService)factory.getObject();
     }
 
     public ClientSeleniumService(SeleniumService delegate) {
@@ -63,7 +72,7 @@ public class ClientSeleniumService extends DelegatingSeleniumService {
     public <X> X waitFor(final int seconds, final ExpectedCondition<X> cond) {
         Object ret = super.waitFor( seconds, cond ) ;
         if( ret != null && ret instanceof WebElement) {
-            ret = toLocal( (WebElement)ret );
+            ret = toLocal((WebElement) ret);
         }
         return (X)ret;
     }

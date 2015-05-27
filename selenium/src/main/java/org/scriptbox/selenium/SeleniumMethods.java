@@ -444,7 +444,7 @@ public class SeleniumMethods {
 
 	public class ByAny extends By implements Serializable {
 
-    	  private static final long serialVersionUID = 1563769051170172451L;
+    	  private static final long serialVersionUID = 1L;
 
     	  private By[] bys;
 

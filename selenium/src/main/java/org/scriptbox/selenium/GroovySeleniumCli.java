@@ -5,7 +5,6 @@ import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.jetty.JettyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 
 import java.io.*;
 import java.net.URL;
@@ -49,13 +48,14 @@ public class GroovySeleniumCli {
 		selenium.setExe( cmd.consumeArgValue("exe",false) );
 		selenium.setProfile( cmd.consumeArgValue("profile", false) );
 
-		String ru = cmd.consumeArgValue( "url", true);
-		try {
-			selenium.setUrl( new URL(ru) );
+		if( selenium.getExe() != null ) {
+			selenium.setPort( port + 1 );
+			setUrl(selenium, "http://localhost:" + (port + 1));
 		}
-		catch( Exception ex ) {
-			throw new RuntimeException( "Invalid remote url: '" + ru + "'", ex );
-		}
+        else {
+            String ru = cmd.consumeArgValue( "url", true);
+            setUrl(selenium, ru);
+        }
 
 		SeleniumController.setInstance( selenium );
 
@@ -68,6 +68,15 @@ public class GroovySeleniumCli {
         }
 	}
 
+	private static void setUrl( SeleniumController controller, String url ) {
+		try {
+			controller.setUrl(new URL(url));
+		}
+		catch( Exception ex ) {
+			throw new RuntimeException( "Invalid remote url: '" + url + "'", ex );
+		}
+	}
+
 	private static void client( String serverHostPort, CommandLine cmd ) throws Exception {
 		String include = cmd.consumeArgValue("include", false);
 		String includeText = include != null ? getText(new File(include)) : null;
@@ -78,13 +87,7 @@ public class GroovySeleniumCli {
 
 		cmd.checkUnusedArgs();
 
-        HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-        factory.setServiceUrl("http://" + serverHostPort + "/remoting/selenium/");
-        factory.setServiceInterface(SeleniumService.class);
-        factory.afterPropertiesSet();
-
-        SeleniumService service = (SeleniumService)factory.getObject();
-		ClientSeleniumService client = new ClientSeleniumService( service );
+		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
         GroovySeleniumMethods methods = new GroovySeleniumMethods( client );
 
         methods.run( includeText, scriptText, parameters );

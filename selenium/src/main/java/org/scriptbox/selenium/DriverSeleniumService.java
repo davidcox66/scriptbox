@@ -52,6 +52,7 @@ public class DriverSeleniumService implements SeleniumService {
 	public void connect() {
     	getController().connect();
     }
+
     @Override
 	public void disconnect() {
     	getController().disconnect();
@@ -60,13 +61,7 @@ public class DriverSeleniumService implements SeleniumService {
 	public void quit() {
     	getController().quit();
     }
-    public void sleep( int millis ) {
-    	Selenium.sleep(millis);
-    }
-    public void pause( int seconds ) {
-    	Selenium.pause(seconds);
-    }
-    
+
 	@Override
 	public void get(String url) {
     	LOGGER.debug( "get: url='" + url + "'" );
@@ -380,7 +375,7 @@ public class DriverSeleniumService implements SeleniumService {
 				LOGGER.error( "actionWithRetry: unexpected exception", ex );
 			}
 		}
-		throw new RuntimeException( "Unable to complete action with " + seconds + " seconds" );
+		throw new RuntimeException( "Unable to complete action within " + seconds + " seconds" );
 	}
 
 }
