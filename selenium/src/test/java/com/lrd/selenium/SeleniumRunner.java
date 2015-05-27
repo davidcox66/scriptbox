@@ -19,7 +19,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.scriptbox.selenium.DriverType;
-import org.scriptbox.selenium.GroovySeleniumMethods;
+import org.scriptbox.selenium.GroovySeleniumShell;
 import org.scriptbox.selenium.SeleniumController;
 import org.scriptbox.selenium.SeleniumService;
 import org.slf4j.Logger;
@@ -225,7 +225,7 @@ public class SeleniumRunner extends ParentRunner<Runner> {
             this.factory = factory;
             try {
 				SeleniumController controller = new SeleniumController( DriverType.CHROME );
-	            selenium = new GroovySeleniumMethods( controller );
+	            selenium = new GroovySeleniumShell( controller );
             }
             catch( Exception ex ) {
                 LOGGER.error( "Error initializing driver: " + factory.getName(), ex );
@@ -366,7 +366,7 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 		}
 		
 	    private void injectAttributes( Object test ) throws Exception {
-	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { GroovySeleniumMethods.class } );
+	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { GroovySeleniumShell.class } );
 	        method.invoke( test, new Object[] { selenium } );
 	    }
 	  

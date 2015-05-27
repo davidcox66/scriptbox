@@ -1,5 +1,6 @@
 package org.scriptbox.selenium;
 
+import org.apache.commons.lang.StringUtils;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.jetty.JettyService;
@@ -82,15 +83,16 @@ public class GroovySeleniumCli {
 		String includeText = include != null ? getText(new File(include)) : null;
 
 		String script = cmd.consumeArgValue("script", true);
-		String scriptText = getText( new File(script) );
+		String scriptText = getText(new File(script));
 		List<String> parameters = cmd.getParameters();
 
 		cmd.checkUnusedArgs();
 
 		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
-        GroovySeleniumMethods methods = new GroovySeleniumMethods( client );
+        GroovySeleniumShell methods = new GroovySeleniumShell( client );
 
-        methods.run( includeText, scriptText, parameters );
+		String text = StringUtils.isNotEmpty(includeText) ? includeText + "\n" + scriptText : scriptText;
+        methods.run( text, parameters );
 	}
 
     private static void usage() {

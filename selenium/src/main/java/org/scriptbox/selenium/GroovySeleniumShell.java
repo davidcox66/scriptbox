@@ -2,27 +2,25 @@ package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class GroovySeleniumMethods extends SeleniumMethods {
+public class GroovySeleniumShell extends SeleniumMethods {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumMethods.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumShell.class );
 
     private Binding binding;
 
-    public GroovySeleniumMethods( SeleniumService service )  {
+    public GroovySeleniumShell(SeleniumService service)  {
 		super( service );
         bind();
     }
 
-	public void run( String includeText, String scriptText, List<String> parameters ) {
-		String text = StringUtils.isNotEmpty(includeText) ? includeText + "\n" + scriptText : scriptText;
+	public void run( String script, List<String> parameters ) {
 		GroovyShell engine = new GroovyShell( binding );
-		engine.run(text, "SeleniumScript", parameters);
+		engine.run(script, "SeleniumScript", parameters);
 	}
 
     private void bind() {
