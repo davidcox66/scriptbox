@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface SeleniumService {
 
-    boolean activate( SeleniumPing sp );
+    boolean activate( ExpectedCondition<Boolean> cond );
 
     void connect();
 

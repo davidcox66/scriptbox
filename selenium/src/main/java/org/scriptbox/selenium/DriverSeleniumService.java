@@ -44,8 +44,8 @@ public class DriverSeleniumService implements SeleniumService {
     }
    
 	@Override
-	public boolean activate( SeleniumPing ping ) {
-		return getController().activate(ping);
+	public boolean activate( ExpectedCondition<Boolean> cond ) {
+		return getController().activate(cond);
 	}
 
     @Override

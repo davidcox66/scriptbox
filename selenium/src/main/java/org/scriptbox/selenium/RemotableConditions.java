@@ -8,8 +8,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by david on 5/19/15.
@@ -270,4 +272,33 @@ public class RemotableConditions {
             };
         }
     }
+
+    public static class AtBaseUrl implements ExpectedCondition<Boolean>, Serializable {
+        private String url;
+
+        public AtBaseUrl( String url ) {
+            this.url = url;
+        }
+
+        public Boolean apply(WebDriver driver) {
+            String current = driver.getCurrentUrl();
+            LOGGER.debug("AtBaseUrl.apply: base: " + url + ", current: " + current);
+            return current != null && current.startsWith(url);
+        }
+    }
+
+    public static class AtUrlPattern implements ExpectedCondition<Boolean>, Serializable {
+        private Pattern pattern;
+
+        public AtUrlPattern( Pattern pattern ) {
+            this.pattern = pattern;
+        }
+
+        public Boolean apply(WebDriver driver) {
+            String current = driver.getCurrentUrl();
+            LOGGER.debug("isAtLocation: pattern: " + pattern + ", current: " + current);
+            return current != null && pattern.matcher(current).matches();
+        }
+    }
+
 }

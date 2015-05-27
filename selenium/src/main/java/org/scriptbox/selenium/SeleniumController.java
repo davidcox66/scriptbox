@@ -1,18 +1,20 @@
 package org.scriptbox.selenium;
 
-import groovy.lang.Closure;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 public class SeleniumController {
 
@@ -110,7 +112,7 @@ public class SeleniumController {
 	    			LOGGER.error( "startDriver: failed connecting to driver", ex );
 	    			last = ex;
 		    		disconnect();
-	    			Selenium.pause( delay );
+					pause( delay );
 	    		}
 			}
     		throw new RuntimeException( "Error connecting to: " + getUrl(), last );
@@ -126,11 +128,14 @@ public class SeleniumController {
     	stopDriver();
     }
 
-	public boolean ping( SeleniumPing sp ) {
-		if (sp != null) {
+	public boolean ping( ExpectedCondition<Boolean> cond ) {
+		if (cond != null) {
 			try {
-				return sp.ping(this);
-			} catch (Exception ex) {
+				if( isConnected() ) {
+					return cond.apply(getDriver());
+				}
+			}
+			catch (Exception ex) {
 				LOGGER.error("Error pinging", ex);
 			}
 			return false;
@@ -138,8 +143,8 @@ public class SeleniumController {
 		return true;
 	}
 
-	public boolean activate( SeleniumPing sp ) {
-		if ( !ping(sp) ) {
+	public boolean activate( ExpectedCondition<Boolean> cond ) {
+		if ( !ping(cond) ) {
 			if (!isResponsive()) {
 				if (isConnected()) {
 					quit();
@@ -151,58 +156,6 @@ public class SeleniumController {
         return true;
 	}
 
-	public boolean isAtLocation( String baseUrl ) {
-		if( isConnected() ) {
-			try {
-				String current = driver.getCurrentUrl();
-				LOGGER.debug("isAtLocation: base: " + baseUrl + ", current: " + current);
-				return current != null && current.startsWith(baseUrl);
-			}
-			catch (Exception ex) {
-				LOGGER.error("isAtLocation: error getting current url", ex);
-			}
-		}
-		return false;
-	}
-
-	public boolean isAtLocation( Pattern pattern ) {
-		if( isConnected() ) {
-			try {
-				String current = driver.getCurrentUrl();
-				LOGGER.debug("isAtLocation: pattern: " + pattern + ", current: " + current);
-				return current != null && pattern.matcher(current).matches();
-			}
-			catch (Exception ex) {
-				LOGGER.error("isAtLocation: error getting current url", ex);
-			}
-		}
-		return false;
-	}
-
-	public boolean isAtLocation( Closure closure ) {
-		if( isConnected() ) {
-			try {
-				String current = driver.getCurrentUrl();
-				LOGGER.debug("isAtLocation: current: " + current);
-				if( current != null ) {
-					int max = closure.getMaximumNumberOfParameters();
-					if( max == 1 ) {
-						return (Boolean)closure.call( current );
-					}
-					else if( max == 2 ) {
-						return (Boolean)closure.call( current, this );
-					}
-					else {
-						throw new RuntimeException( "Too many parameters to closure" );
-					}
-				}
-			}
-			catch (Exception ex) {
-				LOGGER.error("isAtLocation: error getting current url", ex);
-			}
-		}
-		return false;
-	}
 	public String getCurrentUrl() {
 		if( isConnected() ) {
 			try {
@@ -255,7 +208,7 @@ public class SeleniumController {
 	    	process = Runtime.getRuntime().exec( exe + " --port=" + getPort() );
 	    	readers.add( consume(process.getInputStream()) );
 	    	readers.add( consume(process.getErrorStream()) );
-	    	Selenium.pause( delay );
+	    	pause( delay );
     	}
     }
     
@@ -303,6 +256,15 @@ public class SeleniumController {
         thread.start();
         return thread;
     }
+
+	private void pause( int seconds ) {
+		try {
+			Thread.sleep(seconds * 1000);
+		}
+		catch( Exception ex2 ) {
+			LOGGER.error( "Error while pausing", ex2 );
+		}
+	}
 
     private static class LogDumper implements Runnable {
         InputStream in;

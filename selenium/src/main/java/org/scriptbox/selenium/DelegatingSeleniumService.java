@@ -26,8 +26,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public boolean activate(SeleniumPing sp) {
-        return delegate.activate( sp );
+    public boolean activate( ExpectedCondition<Boolean> cond ) {
+        return delegate.activate( cond );
     }
 
     @Override

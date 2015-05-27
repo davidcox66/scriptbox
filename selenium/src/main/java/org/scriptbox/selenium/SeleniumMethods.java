@@ -42,16 +42,16 @@ public class SeleniumMethods {
 		this.wait = wait;
 	}
 
-	public boolean activate( SeleniumPing ping ) {
-		return service.activate( ping );
+	public boolean activate( ExpectedCondition<Boolean> cond ) {
+		return service.activate( cond );
 	}
 
-	public SeleniumPing baseUrl( String url ) {
-		return new SeleniumPings.AtBaseUrl(url);
+	public ExpectedCondition<Boolean> baseUrl( String url ) {
+		return new RemotableConditions.AtBaseUrl(url);
 	}
 
-	public SeleniumPing urlPattern( Pattern pattern ) {
-		return new SeleniumPings.AtUrlPattern(pattern);
+	public ExpectedCondition<Boolean> urlPattern( Pattern pattern ) {
+		return new RemotableConditions.AtUrlPattern(pattern);
 	}
 
 	public void connect() {
@@ -65,10 +65,16 @@ public class SeleniumMethods {
     	service.quit();
     }
     public void sleep( int millis ) {
-    	Selenium.sleep(millis);
+		LOGGER.debug( "waiting " + millis + " milliseconds");
+		try {
+			Thread.sleep( millis );
+		}
+		catch( InterruptedException ex ) {
+			return;
+		}
     }
     public void pause( int seconds ) {
-    	Selenium.pause(seconds);
+		sleep( seconds * 1000 );
     }
     
 	public void get(String url) {
@@ -231,7 +237,7 @@ public class SeleniumMethods {
 		}
 	}
 	public void to(URL url) {
-		service.to( url );
+		service.to(url);
 	}
 	public void refresh() {
 		service.refresh();
@@ -277,7 +283,7 @@ public class SeleniumMethods {
     }
     
 	public WebElement clickElement(final By by, final int seconds) {
-		return service.clickElement( by, seconds );
+		return service.clickElement(by, seconds);
     }
 
 	public WebElement moveToElementById(final String id) {
@@ -306,7 +312,7 @@ public class SeleniumMethods {
 	}
 
 	public WebElement moveToElement(final By by, final int seconds) {
-		return service.moveToBy( by, seconds );
+		return service.moveToBy(by, seconds);
 	}
 
 	public WebElement moveToElement(WebElement element) {
@@ -314,7 +320,7 @@ public class SeleniumMethods {
 	}
 
 	public WebElement moveToElement(final WebElement element, final int seconds) {
-		return service.moveToElement( element, seconds );
+		return service.moveToElement(element, seconds);
 	}
 
 	public void mouseDown(WebElement element) {
@@ -338,11 +344,11 @@ public class SeleniumMethods {
 	    }
         fileName += ".png";
         
-        screenshot( new File(directory,fileName) );
+        screenshot(new File(directory, fileName));
     }
     
 	public void screenshot(File file) throws IOException {
-		service.screenshot( file );
+		service.screenshot(file);
     }
 
 	public ExpectedCondition<WebElement> presenceOf(By by) {
