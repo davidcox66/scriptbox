@@ -3,11 +3,6 @@ package org.scriptbox.selenium;
 import groovy.lang.Closure;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.remote.Augmenter;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -35,99 +29,18 @@ public class SeleniumController {
     private String exe;
     private Process process;
     private List<Thread> readers;
-    
-    public enum DriverType {
-    	FIREFOX("firefox") {
-            public RemoteWebDriver create( DriverOptions options ) {
-                if( options.getUrl() != null ) {
-    	           DesiredCapabilities cap = DesiredCapabilities.firefox();
-    	           if( options.getProfile() != null ) {
-    		           cap.setCapability(FirefoxDriver.PROFILE, options.getProfile());
-    	           }
-    		       RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
-    		       return (RemoteWebDriver)new Augmenter().augment(driver);
-                }
-                else {
-    		        File profileDir = new File(options.getProfile());
-    		        return new FirefoxDriver( new FirefoxProfile(profileDir) ); 
-                }
-            }
-    	},
-    	CHROME("chrome") {
-    		public RemoteWebDriver create( DriverOptions options ) {
-				DesiredCapabilities cap = DesiredCapabilities.chrome();
-				if (options.isIgnoreCertificateErrors()) {
-					cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
-				}
-    	       	RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
-               	return (RemoteWebDriver)new Augmenter().augment(driver);
-            }
-    	},
-    	IE("ie") {
-            public RemoteWebDriver create( DriverOptions options ) {
-               DesiredCapabilities cap = DesiredCapabilities.internetExplorer();
-               cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, options.isAcceptCertificates());
-    	       RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
-               return (RemoteWebDriver)new Augmenter().augment(driver);
-            }
-    	};
-    	
-    	private String name;
-    	
-    	private DriverType( String name ) {
-    		this.name = name;
-    	}
-    	
-    	public String getName() {
-    		return name;
-    	}
-    	
-    	public RemoteWebDriver create( DriverOptions options ) {
-    		return null;
-    	}
-    };
 
-	public static class DriverOptions
-	{
-		private URL url;
-		private String profile;
-		private boolean acceptCertificates;
-		private boolean ignoreCertificateErrors;
+	private static SeleniumController instance;
 
-		public URL getUrl() {
-			return url;
-		}
-
-		public void setUrl(URL url) {
-			this.url = url;
-		}
-
-		public String getProfile() {
-			return profile;
-		}
-
-		public void setProfile(String profile) {
-			this.profile = profile;
-		}
-
-		public boolean isAcceptCertificates() {
-			return acceptCertificates;
-		}
-
-		public void setAcceptCertificates(boolean acceptCertificates) {
-			this.acceptCertificates = acceptCertificates;
-		}
-
-		public boolean isIgnoreCertificateErrors() {
-			return ignoreCertificateErrors;
-		}
-
-		public void setIgnoreCertificateErrors(boolean ignoreCertificateErrors) {
-			this.ignoreCertificateErrors = ignoreCertificateErrors;
-		}
+	public static SeleniumController getInstance() {
+		return instance;
 	}
 
-    public SeleniumController( DriverType type ) {
+	public static void setInstance(SeleniumController instance) {
+		SeleniumController.instance = instance;
+	}
+
+	public SeleniumController( DriverType type ) {
     	this.type = type;
     }
     
@@ -188,7 +101,7 @@ public class SeleniumController {
 	    			LOGGER.error( "startDriver: failed connecting to driver", ex );
 	    			last = ex;
 		    		disconnect();
-	    			pause( delay );
+	    			Selenium.pause( delay );
 	    		}
 			}
     		throw new RuntimeException( "Error connecting to: " + getUrl(), last );
@@ -204,48 +117,29 @@ public class SeleniumController {
     	stopDriver();
     }
 
-	public boolean activate() {
-		if( !isResponsive() ) {
-			if( isConnected() ) {
-				quit();
+	public boolean ping( SeleniumPing sp ) {
+		if (sp != null) {
+			try {
+				return sp.ping(this);
+			} catch (Exception ex) {
+				LOGGER.error("Error pinging", ex);
 			}
-			connect();
 			return false;
 		}
 		return true;
 	}
 
-	public boolean activate( String baseUrl ) {
-		if( !isAtLocation(baseUrl) ) {
-			if( !isResponsive() ) {
-				quit();
+	public boolean activate( SeleniumPing sp ) {
+		if ( !ping(sp) ) {
+			if (!isResponsive()) {
+				if (isConnected()) {
+					quit();
+				}
+				connect();
+				return false;
 			}
-            connect();
-			return false;
 		}
-		return true;
-	}
-
-	public boolean activate( Pattern pattern ) {
-		if( !isAtLocation(pattern) ) {
-			if( !isResponsive() ) {
-				quit();
-			}
-			connect();
-			return false;
-		}
-		return true;
-	}
-
-	public boolean activate( Closure closure ) {
-		if( !isAtLocation(closure) ) {
-			if( !isResponsive() ) {
-				quit();
-			}
-			connect();
-			return false;
-		}
-		return true;
+        return true;
 	}
 
 	public boolean isAtLocation( String baseUrl ) {
@@ -352,7 +246,7 @@ public class SeleniumController {
 	    	process = Runtime.getRuntime().exec( exe );
 	    	readers.add( consume(process.getInputStream()) );
 	    	readers.add( consume(process.getErrorStream()) );
-	    	pause( delay );
+	    	Selenium.pause( delay );
     	}
     }
     
@@ -395,20 +289,6 @@ public class SeleniumController {
 	}
 	
 
-	public void sleep( int millis ) {
-		LOGGER.debug( "waiting " + millis + " milliseconds");
-		try {
-    		Thread.sleep( millis );
-		}
-		catch( InterruptedException ex ) {
-			return;
-		}
-	}
-    	
-	public void pause( int seconds ) {
-		sleep( seconds * 1000 );
-	}
-    
     private static Thread consume(InputStream input) {
         Thread thread = new Thread(new LogDumper(input));
         thread.start();

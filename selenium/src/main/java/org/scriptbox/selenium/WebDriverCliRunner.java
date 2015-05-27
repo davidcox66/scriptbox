@@ -1,26 +1,16 @@
 package org.scriptbox.selenium;
 
+import org.openqa.selenium.remote.RemoteWebDriver;
+
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.remote.Augmenter;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class WebDriverCliRunner {
 
     private String name;
     private String screenshotFileName;
     private String profile;
-    private SeleniumController.DriverType type;
+    private DriverType type;
     private URL remoteUrl;
      
     public WebDriverCliRunner(String name, String[] args) {
@@ -38,13 +28,13 @@ public class WebDriverCliRunner {
                        }
                    }
                    else if( "--firefox".equals(args[i]) )  {
-                     type = SeleniumController.DriverType.FIREFOX; 
+                     type = DriverType.FIREFOX;
                    }
                    else if( "--chrome".equals(args[i]) ) {
-                     type = SeleniumController.DriverType.CHROME; 
+                     type = DriverType.CHROME;
                    }
                    else if( "--ie".equals(args[i]) ) {
-                     type = SeleniumController.DriverType.IE; 
+                     type = DriverType.IE;
                    }
                    else if( "--screenshot".equals(args[i]) ) {
                        if( args.length > i+1 ) {
@@ -87,7 +77,7 @@ public class WebDriverCliRunner {
     public boolean execute( WebDriverTemplate template ) {
         boolean ret = true;
         RemoteWebDriver driver = null;
-        GroovySeleniumMethods selenium = null;
+        SeleniumService selenium = null;
         try {
         	System.err.println( "Using profile: " + profile );
 	       // DesiredCapabilities cap = DesiredCapabilities.firefox();
@@ -107,8 +97,8 @@ public class WebDriverCliRunner {
         	//    driver = (RemoteWebDriver)new Augmenter().augment(driver);
         	// }
         
-        	SeleniumController controller = new SeleniumController( type );
-        	selenium = new GroovySeleniumMethods( controller );
+            SeleniumController.setInstance( new SeleniumController(type) );
+            selenium = new DriverSeleniumService();
         	template.execute( selenium );
         }
         catch(Exception ex ) {

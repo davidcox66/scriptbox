@@ -23,10 +23,10 @@
         </property>
     </bean>
     
-    <bean id="seleniumImpl" class="org.scriptbox.selenium.GroovySeleniumRemoteImpl" />
-     
+    <bean id="seleniumImpl" class="org.scriptbox.selenium.ServerSeleniumService" />
+
     <bean name="/selenium/" class="org.springframework.remoting.caucho.HessianServiceExporter"
         p:service-ref="selenium"
-        p:serviceInterface="org.scriptbox.selenium.GroovySeleniumRemote" />
+        p:serviceInterface="org.scriptbox.selenium.SeleniumService" />
  
 </beans>

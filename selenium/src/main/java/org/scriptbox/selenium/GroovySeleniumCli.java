@@ -1,15 +1,5 @@
 package org.scriptbox.selenium;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.util.List;
-
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.jetty.JettyService;
@@ -17,26 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 
+import java.io.*;
+import java.net.URL;
+import java.util.List;
+
 public class GroovySeleniumCli {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumCli.class );
 	
-    private static SeleniumController selenium;
-    private static String includeText;
-    private static GroovySeleniumMethods methods;
-    
-    public static SeleniumController getSelenium() {
-    	return selenium;
-    }
-   
-    public static String getIncludeText() {
-    	return includeText;
-    }
-    
-    public static GroovySeleniumMethods getMethods() {
-    	return methods;
-    }
-    
     public static void main( String[] args ) {
 
     	try {
@@ -46,64 +24,14 @@ public class GroovySeleniumCli {
     		cmd.consumeArg("debug"); 
     		cmd.consumeArg("trace"); 
     		
-    		String scriptText = null;
-    		List<String> parameters = null;
-    		int server = cmd.consumeArgValueAsInt("server",false);
-    		String client = cmd.consumeArgValue("client",false);
-    				
-    		if( server == 0 ) {
-        		String script = cmd.consumeArgValue("script", true);
-        		scriptText = getText( new File(script) );
-        		parameters = cmd.getParameters();
-    		}
-    		if( client == null ) {
-        		String include = cmd.consumeArgValue("include", false);
-        		includeText = include != null ? getText(new File(include)) : null;
+    		int serverPort = cmd.consumeArgValueAsInt("server",false);
+    		String serverUrl = cmd.consumeArgValue("client",false);
 
-        		selenium = new SeleniumController( getDriverType(cmd) );
-        		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
-        		selenium.setExe( cmd.consumeArgValue("exe",false) );
-        		selenium.setProfile( cmd.consumeArgValue("profile", false) );
-        		
-        		methods = new GroovySeleniumMethods( selenium );
-        		
-        		String ru = cmd.consumeArgValue( "url", true);
-        		try {
-        			selenium.setUrl( new URL(ru) ); 
-                }
-                catch( Exception ex ) {
-                	throw new RuntimeException( "Invalid remote url: '" + ru + "'", ex );
-        		}
+    		if( serverPort == 0 ) {
+				client( serverUrl, cmd );
     		}
-    	
-    		cmd.checkUnusedArgs();
-
-    		if( client != null ) {
-    			HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-                factory.setServiceUrl("http://" + client  + "/remoting/selenium/");
-                factory.setServiceInterface(GroovySeleniumRemote.class);
-                factory.afterPropertiesSet();
-                GroovySeleniumRemote remote = (GroovySeleniumRemote)factory.getObject();
-                remote.run( scriptText, parameters ); 
-    		}
-    		else {
-    			if( server != 0 ) {
-    				JettyService jetty = new JettyService("classpath:selenium-context.xml");
-    				jetty.setHttpPort( server );
-    				jetty.start();
-    				while( true ) {
-    					System.out.print(".");
-    					Thread.sleep( 60*1000 );
-    				}
-    			}
-    			else {
-    				try {
-            			methods.run( scriptText, includeText, parameters);
-    				}
-    				finally {
-        				selenium.disconnect();
-    				}
-    			}
+			else {
+				server( serverPort, cmd );
     		}
         }
     	catch( CommandLineException ex ) {
@@ -114,7 +42,54 @@ public class GroovySeleniumCli {
             ex.printStackTrace( System.err );
         }
     }
-    
+
+	private static void server( int port, CommandLine cmd ) throws Exception {
+		SeleniumController selenium = new SeleniumController( getDriverType(cmd) );
+		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
+		selenium.setExe( cmd.consumeArgValue("exe",false) );
+		selenium.setProfile( cmd.consumeArgValue("profile", false) );
+
+		String ru = cmd.consumeArgValue( "url", true);
+		try {
+			selenium.setUrl( new URL(ru) );
+		}
+		catch( Exception ex ) {
+			throw new RuntimeException( "Invalid remote url: '" + ru + "'", ex );
+		}
+
+		SeleniumController.setInstance( selenium );
+
+        JettyService jetty = new JettyService("classpath:selenium-context.xml");
+        jetty.setHttpPort( port );
+        jetty.start();
+        while( true ) {
+            System.out.print(".");
+            Thread.sleep( 60*1000 );
+        }
+	}
+
+	private static void client( String serverHostPort, CommandLine cmd ) throws Exception {
+		String include = cmd.consumeArgValue("include", false);
+		String includeText = include != null ? getText(new File(include)) : null;
+
+		String script = cmd.consumeArgValue("script", true);
+		String scriptText = getText( new File(script) );
+		List<String> parameters = cmd.getParameters();
+
+		cmd.checkUnusedArgs();
+
+        HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
+        factory.setServiceUrl("http://" + serverHostPort + "/remoting/selenium/");
+        factory.setServiceInterface(SeleniumService.class);
+        factory.afterPropertiesSet();
+
+        SeleniumService service = (SeleniumService)factory.getObject();
+		ClientSeleniumService client = new ClientSeleniumService( service );
+        GroovySeleniumMethods methods = new GroovySeleniumMethods( client );
+
+        methods.run( includeText, scriptText, parameters );
+	}
+
     private static void usage() {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
@@ -122,9 +97,9 @@ public class GroovySeleniumCli {
         System.exit( 1 );
     }
 
-    private static SeleniumController.DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
-    	SeleniumController.DriverType[] types = SeleniumController.DriverType.values(); 
-    	for( SeleniumController.DriverType type : types ) {
+    private static DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
+    	DriverType[] types = DriverType.values();
+    	for( DriverType type : types ) {
     		if( cmd.consumeArg(type.getName()) ) {
     			return type;
     		}

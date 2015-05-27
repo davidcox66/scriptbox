@@ -18,8 +18,10 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.scriptbox.selenium.DriverType;
 import org.scriptbox.selenium.GroovySeleniumMethods;
 import org.scriptbox.selenium.SeleniumController;
+import org.scriptbox.selenium.SeleniumService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,13 +218,13 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 
         private final DriverFactory factory;
         private RemoteWebDriver driver;
-        private GroovySeleniumMethods selenium;
+        private SeleniumService selenium;
         
         BrowserRunner(Class<?> type, DriverFactory factory ) throws InitializationError {
             super(type);
             this.factory = factory;
             try {
-				SeleniumController controller = new SeleniumController( SeleniumController.DriverType.CHROME );
+				SeleniumController controller = new SeleniumController( DriverType.CHROME );
 	            selenium = new GroovySeleniumMethods( controller );
             }
             catch( Exception ex ) {
