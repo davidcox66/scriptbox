@@ -121,6 +121,9 @@ public class SeleniumMethods {
 	public WebElement getElementByCss(String selector) {
     	return getElement(byCss(selector));
     }
+	public List<WebElement> getElementsByCss(String selector) {
+		return getElements(byCss(selector));
+	}
 	public List<WebElement> getElements(String selector) {
     	return getElements(byCss(selector));
     }
@@ -329,7 +332,19 @@ public class SeleniumMethods {
 	public void mouseUp(WebElement element) {
 		service.mouseUp( element );
     }
-   
+	public void mouseMove(WebElement element) {
+		service.mouseMove( element );
+	}
+	public void mouseClick(WebElement element) {
+		service.mouseClick( element );
+	}
+	public void mouseDoubleClick(WebElement element) {
+		service.mouseDoubleClick( element );
+	}
+	public void mouseContextClick(WebElement element) {
+		service.mouseContextClick( element );
+	}
+
 	public void screenshot(File directory, String fullClassName, String methodName, String driverName, String ext)
         throws IOException
     {

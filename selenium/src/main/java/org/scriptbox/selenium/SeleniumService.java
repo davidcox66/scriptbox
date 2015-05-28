@@ -49,8 +49,11 @@ public interface SeleniumService {
     WebElement moveToElement(WebElement element, int seconds);
 
     void mouseDown(WebElement element);
-
     void mouseUp(WebElement element);
+    void mouseMove(WebElement element);
+    void mouseClick(WebElement element);
+    void mouseDoubleClick(WebElement element);
+    void mouseContextClick(WebElement element);
 
     void screenshot(File file) throws IOException;
 

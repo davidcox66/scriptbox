@@ -23,6 +23,8 @@ public class DriverSeleniumService implements SeleniumService {
     private static final Logger LOGGER = LoggerFactory.getLogger( DriverSeleniumService.class );
     private static final int RETRY_SECONDS = 1;
 
+	private SeleniumController controller;
+
 	public interface WebElementAction
 	{
 		WebElement run(int seconds);
@@ -31,8 +33,13 @@ public class DriverSeleniumService implements SeleniumService {
 	public DriverSeleniumService()  {
 	}
 
+	public DriverSeleniumService( SeleniumController controller )  {
+		this.controller = controller;
+	}
+
 	public SeleniumController getController() {
-		return SeleniumController.getInstance();
+		// support initialization from cli
+		return controller != null ? controller : SeleniumController.getInstance();
 	}
 
 	public WebDriver getDriver() {
@@ -182,18 +189,38 @@ public class DriverSeleniumService implements SeleniumService {
 	@Override
 	public void mouseDown(WebElement element) {
     	LOGGER.debug( "mouseDown: element=" + element );
-        Coordinates coord = ((Locatable)element).getCoordinates();
-        Mouse mouse = getRemoteWebDriver().getMouse();
-        mouse.mouseDown( coord );
+		getMouse().mouseDown(getCoordinates(element));
     }
     @Override
 	public void mouseUp(WebElement element) {
     	LOGGER.debug( "mouseUp: element=" + element );
-        Coordinates coord = ((Locatable)element).getCoordinates();
-        Mouse mouse = getRemoteWebDriver().getMouse();
-        mouse.mouseDown(coord);
+		getMouse().mouseUp(getCoordinates(element));
     }
-   
+
+	@Override
+	public void mouseMove(WebElement element) {
+		LOGGER.debug( "mouseMove: element=" + element );
+		getMouse().mouseMove(getCoordinates(element));
+	}
+
+	@Override
+	public void mouseClick(WebElement element) {
+		LOGGER.debug( "mouseClick: element=" + element );
+		getMouse().click(getCoordinates(element));
+	}
+
+	@Override
+	public void mouseDoubleClick(WebElement element) {
+		LOGGER.debug( "mouseDoubleClick: element=" + element );
+		getMouse().doubleClick( getCoordinates(element) );
+	}
+
+	@Override
+	public void mouseContextClick(WebElement element) {
+		LOGGER.debug( "mouseContextClick: element=" + element );
+		getMouse().contextClick(getCoordinates(element));
+	}
+
 	@Override
 	public void screenshot(File file) throws IOException {
         LOGGER.info("screenshot: file=" + file);
@@ -257,21 +284,25 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public void click(WebElement element) {
+		LOGGER.debug( "click: element=" + element );
 		element.click();
 	}
 
 	@Override
 	public void submit(WebElement element) {
+		LOGGER.debug( "submit: element=" + element );
 		element.submit();
 	}
 
 	@Override
 	public void sendKeys(WebElement element, CharSequence... keysToSend) {
+		LOGGER.debug( "sendKeys: element=" + element + ", keysToSend=" + keysToSend );
 		element.sendKeys( keysToSend );
 	}
 
 	@Override
 	public void clear(WebElement element) {
+		LOGGER.debug( "clear: element=" + element );
 		element.clear();
 	}
 
@@ -328,6 +359,16 @@ public class DriverSeleniumService implements SeleniumService {
 	@Override
 	public Dimension getSize(WebElement element) {
 		return element.getSize();
+	}
+
+	private Coordinates getCoordinates( WebElement element ) {
+		Coordinates ret = ((Locatable) element).getCoordinates();
+		LOGGER.debug( "getCoordinates: element=" + element + ", coordinates=" + ret );
+		return ret;
+	}
+
+	private Mouse getMouse() {
+		return getRemoteWebDriver().getMouse();
 	}
 
 

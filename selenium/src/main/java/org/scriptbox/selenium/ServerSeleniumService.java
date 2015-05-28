@@ -77,6 +77,26 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     @Override
+    public void mouseMove(WebElement element) {
+        super.mouseMove(toLocal(element));
+    }
+
+    @Override
+    public void mouseClick(WebElement element) {
+        super.mouseClick(toLocal(element));
+    }
+
+    @Override
+    public void mouseDoubleClick(WebElement element) {
+        super.mouseDoubleClick(toLocal(element));
+    }
+
+    @Override
+    public void mouseContextClick(WebElement element) {
+        super.mouseContextClick(toLocal(element));
+    }
+
+    @Override
     public void click(WebElement element) {
         super.click(toLocal(element));
     }

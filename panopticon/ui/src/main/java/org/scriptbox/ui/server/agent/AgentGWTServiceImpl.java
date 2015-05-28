@@ -109,7 +109,7 @@ public class AgentGWTServiceImpl implements AgentGWTService, InitializingBean {
 	{
 		return runAgents( endpoints, new ParameterizedRunnable<BoxAgentHelper>() {
 			public void run( BoxAgentHelper helper ) throws Exception {
-				helper.createContext( language, contextName );
+				helper.createContext( language, contextName, new HashMap<String, Object>() );
 			}
 		} );
 	}
