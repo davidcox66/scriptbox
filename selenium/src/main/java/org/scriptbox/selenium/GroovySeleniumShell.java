@@ -26,9 +26,10 @@ public class GroovySeleniumShell extends SeleniumMethods {
     private void bind() {
 		binding = new Binding();
 
-    	binding.setVariable("log", LOGGER);
-    	binding.setVariable("logger", LOGGER);
-    	binding.setVariable("LOGGER", LOGGER);
+		Logger logger = LoggerFactory.getLogger( "SeleniumScript" );
+    	binding.setVariable("log", logger);
+    	binding.setVariable("logger", logger);
+    	binding.setVariable("LOGGER", logger);
 
 		new GroovySeleniumBinder( binding, this ).bind();
     }
