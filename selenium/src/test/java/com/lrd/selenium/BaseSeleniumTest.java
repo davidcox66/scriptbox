@@ -6,6 +6,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.openqa.selenium.WebElement;
+import org.scriptbox.selenium.SeleniumMethods;
 import org.scriptbox.selenium.SeleniumService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,13 @@ public class BaseSeleniumTest {
 
     @Rule public TestName methodNameRule = new TestName();
     
-    protected SeleniumService selenium;
+    protected SeleniumMethods selenium;
 
-    public SeleniumService getSelenium() {
+    public SeleniumMethods getSelenium() {
         return selenium;
     }
 
-    public void setSelenium(SeleniumService selenium) {
+    public void setSelenium(SeleniumMethods selenium) {
         this.selenium = selenium;
     }
 

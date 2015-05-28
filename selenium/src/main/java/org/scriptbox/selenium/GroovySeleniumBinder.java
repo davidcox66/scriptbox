@@ -61,6 +61,10 @@ public class GroovySeleniumBinder {
 
         bind( "mouseDown" );
         bind( "mouseUp" );
+        bind( "mouseMove" );
+        bind( "mouseClick" );
+        bind( "mouseDoubleClick" );
+        bind( "mouseContextClick" );
 
         bind( "byId" );
         bind( "byName" );

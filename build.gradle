@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'idea'
 
 defaultTasks 'build'
 
@@ -486,6 +487,13 @@ subprojects {
 	}
 	configurations {
 		provided
+		provided.extendsFrom( compile )
+	}
+
+	idea {
+		module {
+			scopes.PROVIDED.plus += configurations.provided
+		}
 	}
 
 	configurations.all {

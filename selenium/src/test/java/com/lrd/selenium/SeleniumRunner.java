@@ -18,10 +18,7 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.scriptbox.selenium.DriverType;
-import org.scriptbox.selenium.GroovySeleniumShell;
-import org.scriptbox.selenium.SeleniumController;
-import org.scriptbox.selenium.SeleniumService;
+import org.scriptbox.selenium.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,56 +106,6 @@ public class SeleniumRunner extends ParentRunner<Runner> {
             ", firefox_binary: " + FIREFOX_BINARY );
     }
     
-    private static DriverFactory FIREFOX = new DriverFactory() {
-        public String getName() { return "firefox"; }
-        public RemoteWebDriver create( String host ) throws Exception {
-            if( FIREFOX_LOCAL ) {
-		        File profileDir = new File(FIREFOX_PROFILE_NAME);
-                LOGGER.debug( "SeleniumRunner.FIREFOX.create: running firefox locally with profile=" + profileDir );
-                if( FIREFOX_BINARY != null ) {
-                    LOGGER.debug( "SeleniumRunner.FIREFOX.create: using custom binary=" + FIREFOX_BINARY );
-                    FirefoxBinary firefoxBinary = new FirefoxBinary(new File(FIREFOX_BINARY) );
-			        return new FirefoxDriver( firefoxBinary, new FirefoxProfile(profileDir) ); 
-                }
-                else {
-                    LOGGER.debug( "SeleniumRunner.FIREFOX.create: using default binary" );
-			        return new FirefoxDriver( new FirefoxProfile(profileDir) ); 
-                }
-            }
-            else {
-	            URL url = new URL("http://" + host + ":" + (BASE_PORT+1) + "/wd/hub");
-	            DesiredCapabilities cap = DesiredCapabilities.firefox();
-	            cap.setCapability(FirefoxDriver.PROFILE, FIREFOX_PROFILE_NAME);
-	            RemoteWebDriver driver = new RemoteWebDriver(url, cap);
-	            return (RemoteWebDriver)new Augmenter().augment(driver);
-            }
-       }
-    };
-       
-    private static DriverFactory CHROME = new DriverFactory() {
-        public String getName() { return "chrome"; }
-        public RemoteWebDriver create( String host )  throws Exception {
-            URL url = new URL("http://" + host + ":" + BASE_PORT );
-            DesiredCapabilities cap = DesiredCapabilities.chrome();
-            cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
-            RemoteWebDriver driver = new RemoteWebDriver(url, cap);
-            return (RemoteWebDriver)new Augmenter().augment(driver);
-        }
-    };
-    private static DriverFactory IE = new DriverFactory() {
-        public String getName() { return "ie"; }
-        public RemoteWebDriver create( String host ) throws Exception {
-            URL url = new URL("http://" + host + ":" + (BASE_PORT+1) + "/wd/hub");
-            DesiredCapabilities cap = DesiredCapabilities.internetExplorer();
-            cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);   
-            RemoteWebDriver driver = new RemoteWebDriver(url, cap);
-            return (RemoteWebDriver)new Augmenter().augment(driver);
-        }
-    };
-    
-    public static final DriverFactory[] FACTORIES = { FIREFOX, CHROME, IE };
-   
-    
     private List<Runner> runners = new ArrayList<Runner>();
 
     public SeleniumRunner( Class<?> testClass ) throws InitializationError {
@@ -167,9 +114,9 @@ public class SeleniumRunner extends ParentRunner<Runner> {
         // Construct test runners for all the specified browser types
         //
         Set<String> browsers = new HashSet<String>( Arrays.asList(BROWSERS.split(",")) );
-        for( DriverFactory factory : FACTORIES ) {
-            if( browsers.contains(factory.getName()) ) {
-                runners.add( new BrowserRunner(testClass,factory) );
+		for( DriverType dt : DriverType.values() ) {
+            if( browsers.contains(dt.getName()) ) {
+                runners.add( new BrowserRunner(testClass,dt.getName()) );
             }
         }
     }
@@ -216,32 +163,31 @@ public class SeleniumRunner extends ParentRunner<Runner> {
     
     private class BrowserRunner extends BlockJUnit4ClassRunner {
 
-        private final DriverFactory factory;
-        private RemoteWebDriver driver;
-        private SeleniumService selenium;
+		private String driver;
+        private SeleniumMethods selenium;
         
-        BrowserRunner(Class<?> type, DriverFactory factory ) throws InitializationError {
+        BrowserRunner(Class<?> type, String driver ) throws InitializationError {
             super(type);
-            this.factory = factory;
+			this.driver = driver;
             try {
-				SeleniumController controller = new SeleniumController( DriverType.CHROME );
-	            selenium = new GroovySeleniumShell( controller );
+				SeleniumController controller = new SeleniumController( DriverType.getByName(driver) );
+				DriverSeleniumService service = new DriverSeleniumService( controller );
+	            selenium = new SeleniumMethods( service );
             }
             catch( Exception ex ) {
-                LOGGER.error( "Error initializing driver: " + factory.getName(), ex );
+                LOGGER.error( "Error initializing driver: " + driver, ex );
                 throw new InitializationError( ex );
             }
         }
 
 		@Override
 		protected String getName() {
-		    return String.format("[%s]", factory.getName() );
+		    return String.format("[%s]", driver );
 		}
 		
 		@Override
 		protected String testName(final FrameworkMethod method) {
-		    return String.format("%s[%s]", method.getName(),
-		            factory.getName() );
+		    return String.format("%s[%s]", method.getName(), driver );
 		}
 		
 		@Override
@@ -345,7 +291,7 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 	            annotation = getTestClass().getJavaClass().getAnnotation( Browser.class );
 	        }
 	        if( annotation != null ) {
-	            String browserName = factory.getName();
+	            String browserName = driver;
 	            if( annotation.only().length > 0 ) {
 	                for( String name : annotation.only() ) {
 	                    if( browserName.equals(name) ) {
@@ -399,12 +345,12 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 	            clsName = clsName.substring(ext+1);
 	        }
 	        try {
-	            LOGGER.info( "takeScreenshot: driver=" + factory.getName() + ", method=" + method.getName() );
-	            selenium.screenshot( SCREEN_SHOT_DIR, getTestClass().getName(), method.getName(), factory.getName(), null );
+	            LOGGER.info( "takeScreenshot: driver=" + driver + ", method=" + method.getName() );
+	            selenium.screenshot( SCREEN_SHOT_DIR, getTestClass().getName(), method.getName(), driver, null );
 	        }
 	        catch( Exception ex ) {
 	            LOGGER.error( "Unable to take screenshot: " +
-	                "driver=" + factory.getName() + 
+	                "driver=" + driver +
 	                ", class=" + getTestClass().getName() + 
 	                ", method=" + method.getName(), ex );
 	        }
@@ -413,11 +359,11 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 		private void dispose() {
 		    try {
 		        if( !NO_QUIT ) {
-			        driver.quit();
+			        selenium.quit();
 		        }
 		    }
 		    catch( Exception ex ) {
-		        LOGGER.error( "Error quitting browser: " + factory.getName(), ex );
+		        LOGGER.error( "Error quitting browser: " + driver, ex );
 		    }
 		}
     }

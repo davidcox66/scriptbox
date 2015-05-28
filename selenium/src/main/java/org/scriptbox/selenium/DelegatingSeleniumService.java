@@ -116,6 +116,26 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
+    public void mouseMove(WebElement element) {
+        delegate.mouseMove( element );
+    }
+
+    @Override
+    public void mouseClick(WebElement element) {
+        delegate.mouseClick( element );
+    }
+
+    @Override
+    public void mouseDoubleClick(WebElement element) {
+        delegate.mouseDoubleClick( element );
+    }
+
+    @Override
+    public void mouseContextClick(WebElement element) {
+        delegate.mouseContextClick( element );
+    }
+
+    @Override
     public void screenshot(File file) throws IOException {
         delegate.screenshot( file );
     }

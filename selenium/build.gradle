@@ -28,6 +28,7 @@ dependencies {
 	compile commonsLangDepend
 	compile jodaDepend
 	compile groovyDepend
+	compile slf4jApiDepend
 
 	testCompile junitDepend
 } 
