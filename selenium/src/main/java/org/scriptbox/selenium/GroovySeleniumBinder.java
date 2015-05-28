@@ -112,11 +112,11 @@ public class GroovySeleniumBinder {
         bind( "pause" );
     }
 
-    private void bind( String name ) {
+    public void bind( String name ) {
         binding.setVariable(name, new MethodClosure(instance, name));
     }
 
-    private void bind( String alias, String name ) {
+    public void bind( String alias, String name ) {
         binding.setVariable(alias, new MethodClosure(instance, name));
     }
 

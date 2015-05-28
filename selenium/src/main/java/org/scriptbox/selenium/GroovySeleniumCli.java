@@ -1,6 +1,8 @@
 package org.scriptbox.selenium;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.jetty.JettyService;
@@ -9,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GroovySeleniumCli {
@@ -35,8 +39,8 @@ public class GroovySeleniumCli {
     		}
         }
     	catch( CommandLineException ex ) {
-            usage();
             ex.printStackTrace( System.err );
+            usage();
     	}
         catch(Exception ex ) {
             ex.printStackTrace( System.err );
@@ -79,20 +83,63 @@ public class GroovySeleniumCli {
 	}
 
 	private static void client( String serverHostPort, CommandLine cmd ) throws Exception {
-		String include = cmd.consumeArgValue("include", false);
-		String includeText = include != null ? getText(new File(include)) : null;
 
+        String include = cmd.consumeArgValue("include", false);
 		String script = cmd.consumeArgValue("script", true);
-		String scriptText = getText(new File(script));
-		List<String> parameters = cmd.getParameters();
+        if( !script.endsWith(".groovy") ) {
+            script += ".groovy";
+        }
 
+		List<String> parameters = cmd.getParameters();
 		cmd.checkUnusedArgs();
 
 		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
         GroovySeleniumShell methods = new GroovySeleniumShell( client );
 
-		String text = StringUtils.isNotEmpty(includeText) ? includeText + "\n" + scriptText : scriptText;
-        methods.run( text, parameters );
+		if( include != null ) {
+            List<File> includes = getFileList( include );
+            for (File file : includes) {
+                LOGGER.trace( "client: running include=" + file );
+                methods.run(file, parameters);
+            }
+        }
+        File file = new File( script );
+        LOGGER.debug( "trace: running script=" + file );
+        methods.run( file, parameters );
+	}
+
+	private static List<File> getFileList( String filespec ) {
+		List<File> ret = new ArrayList<File>();
+        String[] specs = filespec.split(",");
+        for( String spec : specs ) {
+            File file = new File( spec );
+            String name = file.getName();
+            if( name.indexOf("*") == -1 && name.indexOf("?") == -1 )	 {
+                if( file.isDirectory() ) {
+                    ret.addAll( Arrays.asList(file.listFiles((FileFilter)new SuffixFileFilter(".groovy"))) );
+                }
+                else {
+                    if( !name.endsWith(".groovy") ) {
+                        file = new File( spec + ".groovy" );
+                    }
+                    if( file.exists() ) {
+                        ret.add(file);
+                    }
+                    else {
+                        throw new RuntimeException( "Could not find file: " + file );
+                    }
+                }
+            }
+            else {
+                File parent = file.getParentFile();
+                if( parent == null ) {
+                    parent = new File( "." );
+                }
+                ret.addAll( Arrays.asList(parent.listFiles(
+                    (FileFilter)new AndFileFilter(new WildcardFileFilter(name),new SuffixFileFilter(".groovy")))) );
+            }
+        }
+		return ret;
 	}
 
     private static void usage() {
