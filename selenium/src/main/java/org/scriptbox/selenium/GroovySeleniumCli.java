@@ -6,6 +6,7 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.scriptbox.selenium.bind.CsvBinder;
 import org.scriptbox.selenium.bind.DownloadsBinder;
+import org.scriptbox.selenium.bind.MongoBinder;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
 import org.scriptbox.selenium.remoting.ClientSeleniumService;
@@ -109,6 +110,7 @@ public class GroovySeleniumCli {
         if( !script.endsWith(".groovy") ) {
             script += ".groovy";
         }
+        String mongo = cmd.consumeArgValue("mongo",false);
 
 		List<String> parameters = cmd.getParameters();
 		cmd.checkUnusedArgs();
@@ -116,7 +118,7 @@ public class GroovySeleniumCli {
 		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
         GroovySeleniumShell shell = new GroovySeleniumShell( client );
 
-        bind( client, shell );
+        bind( client, shell, mongo );
 
 		if( include != null ) {
             List<File> includes = getFileList( include );
@@ -130,14 +132,18 @@ public class GroovySeleniumCli {
         shell.run( file, parameters );
 	}
 
-    private static void bind( SeleniumService service, GroovySeleniumShell shell ) {
+    private static void bind( SeleniumService service, GroovySeleniumShell shell, String mongo ) {
         Binding binding = new Binding();
         shell.bind( binding );
-        new CsvBinder().bind( binding );
+        new CsvBinder().bind(binding);
 
-        File dir = service.getDownloadsDirectory();
+        File dir = service.getOptions().getDownloadDirectory();
         if( dir != null ) {
-            new DownloadsBinder(dir).bind(binding);
+            new DownloadsBinder(dir).bind( binding );
+        }
+
+        if( mongo != null ) {
+            new MongoBinder(mongo).bind( binding );
         }
     }
 
@@ -178,7 +184,8 @@ public class GroovySeleniumCli {
     private static void usage() {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
-        	"[--include=<include file>] --script=<script file> [--quit] [--timeout={<seconds>|30}] [{--client=<server url>|--server=<port>}] <arg>..." );
+        	"[--include=<include file>] --script=<script file> [--quit] [--timeout={<seconds>|30}] " +
+            "{--client=<server url> [--mongo=<address>]|--server=<port> [--download-dir=<dir>]} <arg>..." );
         System.exit( 1 );
     }
 

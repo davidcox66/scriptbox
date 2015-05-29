@@ -263,6 +263,13 @@ ext {
 	googleCollectionsDepend = "com.google.collections:google-collections:1.0"
 	xbeanDepend = "org.apache.xbean:xbean-spring:3.5"
 
+
+	mongoDriverDepend = "org.mongodb:mongo-java-driver:2.12.3"
+	mongoJackDepend = [ "org.mongojack:mongojack:2.0.0", {
+            exclude group: "javax.persistence", module: "persistence-api"
+        }
+	]
+
 	hectorObjectMapperDepend = "org.hectorclient:hector-object-mapper:3.1-09"
 	hectorCoreOnlyDepend = "org.hectorclient:hector-core:${hectorVersion}"
 	hectorCoreDepend = [ hectorCoreOnlyDepend, {

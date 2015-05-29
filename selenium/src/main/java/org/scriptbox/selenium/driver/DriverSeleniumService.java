@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.scriptbox.selenium.remoting.RemotableConditions;
 import org.scriptbox.selenium.SeleniumService;
+import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -377,8 +378,10 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 	@Override
-	public File getDownloadsDirectory() {
-		return getController().getOptions().getDownloadDirectory();
+	public SeleniumServiceOptions getOptions() {
+		SeleniumServiceOptions ret = new SeleniumServiceOptions();
+		ret.setDownloadDirectory( getController().getOptions().getDownloadDirectory() );
+		return ret;
 	}
 
 	private Coordinates getCoordinates( WebElement element ) {

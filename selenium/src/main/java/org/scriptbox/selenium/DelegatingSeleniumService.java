@@ -5,6 +5,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,17 +93,17 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public WebElement clickElement(By by, int seconds) {
-        return delegate.clickElement( by, seconds );
+        return delegate.clickElement(by, seconds);
     }
 
     @Override
     public WebElement moveToBy(By by, int seconds) {
-        return delegate.moveToBy( by, seconds );
+        return delegate.moveToBy(by, seconds);
     }
 
     @Override
     public WebElement moveToElement(WebElement element, int seconds) {
-        return delegate.moveToElement( element, seconds );
+        return delegate.moveToElement(element, seconds);
     }
 
     @Override
@@ -137,27 +138,27 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public void screenshot(File file) throws IOException {
-        delegate.screenshot( file );
+        delegate.screenshot(file);
     }
 
     @Override
     public void click(WebElement element) {
-        delegate.click( element );
+        delegate.click(element);
     }
 
     @Override
     public void submit(WebElement element) {
-        delegate.submit( element );
+        delegate.submit(element);
     }
 
     @Override
     public void sendKeys(WebElement element, CharSequence... keysToSend) {
-        delegate.sendKeys( element, keysToSend );
+        delegate.sendKeys(element, keysToSend);
     }
 
     @Override
     public void clear(WebElement element) {
-        delegate.clear( element );
+        delegate.clear(element);
     }
 
     @Override
@@ -172,47 +173,47 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public String getText(WebElement element) {
-        return delegate.getText( element );
+        return delegate.getText(element);
     }
 
     @Override
     public List<WebElement> findElements(WebElement element, By by) {
-        return delegate.findElements( element, by );
+        return delegate.findElements(element, by);
     }
 
     @Override
     public WebElement findElement(WebElement element, By by) {
-        return delegate.findElement( element, by );
+        return delegate.findElement(element, by);
     }
 
     @Override
     public String getCssValue(WebElement element, String propertyName) {
-        return delegate.getCssValue( element, propertyName );
+        return delegate.getCssValue(element, propertyName);
     }
 
     @Override
     public boolean isDisplayed(WebElement element) {
-        return delegate.isDisplayed( element );
+        return delegate.isDisplayed(element);
     }
 
     @Override
     public boolean isSelected(WebElement element) {
-        return delegate.isSelected( element );
+        return delegate.isSelected(element);
     }
 
     @Override
     public boolean isEnabled(WebElement element) {
-        return delegate.isEnabled( element );
+        return delegate.isEnabled(element);
     }
 
     @Override
     public Point getLocation(WebElement element) {
-        return delegate.getLocation( element );
+        return delegate.getLocation(element);
     }
 
     @Override
     public Dimension getSize(WebElement element) {
-        return delegate.getSize( element );
+        return delegate.getSize(element);
     }
 
     @Override
@@ -237,17 +238,17 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public void switchToFrameByNameOrId(String nameOrId) {
-        delegate.switchToFrameByNameOrId( nameOrId );
+        delegate.switchToFrameByNameOrId(nameOrId);
     }
 
     @Override
     public void switchToFrameByElement(WebElement element) {
-        delegate.switchToFrameByElement( element );
+        delegate.switchToFrameByElement(element);
     }
 
     @Override
     public void switchToWindow(String nameOrHandle) {
-        delegate.switchToWindow( nameOrHandle );
+        delegate.switchToWindow(nameOrHandle);
     }
 
     @Override
@@ -272,7 +273,7 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public void to(URL url) {
-        delegate.to( url );
+        delegate.to(url);
     }
 
     @Override
@@ -281,8 +282,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public File getDownloadsDirectory() {
-        return delegate.getDownloadsDirectory();
+    public SeleniumServiceOptions getOptions() {
+        return delegate.getOptions();
     }
 
     @Override

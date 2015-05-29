@@ -5,6 +5,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public interface SeleniumService {
     Point getLocation( WebElement element );
     Dimension getSize( WebElement element );
 
-    File getDownloadsDirectory();
+    SeleniumServiceOptions getOptions();
     String getCurrentUrl();
     String getWindowHandle();
 
