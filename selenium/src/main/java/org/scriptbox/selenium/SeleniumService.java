@@ -73,6 +73,7 @@ public interface SeleniumService {
     Point getLocation( WebElement element );
     Dimension getSize( WebElement element );
 
+    File getDownloadsDirectory();
     String getCurrentUrl();
     String getWindowHandle();
 

@@ -39,10 +39,11 @@ public enum DriverType implements Serializable {
 				// cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
                 cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
             }
-			if( options.getDownloadDirectory() != null ) {
+			File dir = options.getDownloadDirectory();
+			if( dir != null ) {
 				HashMap<String, Object> prefs = new HashMap<String, Object>();
 				prefs.put("profile.default_content_settings.popups", 0);
-				prefs.put("download.default_directory", options.getDownloadDirectory().getAbsolutePath());
+				prefs.put("download.default_directory", dir.getAbsolutePath());
 
 				ChromeOptions co = new ChromeOptions();
 				co.setExperimentalOption("prefs", prefs);

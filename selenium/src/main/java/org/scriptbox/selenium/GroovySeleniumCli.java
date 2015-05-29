@@ -1,8 +1,11 @@
 package org.scriptbox.selenium;
 
+import groovy.lang.Binding;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.scriptbox.selenium.bind.CsvBinder;
+import org.scriptbox.selenium.bind.DownloadsBinder;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
 import org.scriptbox.util.remoting.jetty.JettyService;
@@ -57,7 +60,12 @@ public class GroovySeleniumCli {
         if( dir != null ) {
             File fd = new File( dir );
             if( !fd.exists() ) {
-                throw new RuntimeException( "Download directory '" + dir + "' does not exist");
+                if( !fd.mkdirs() ) {
+                    throw new RuntimeException( "Download directory '" + dir + "' does not exist and could not be created");
+                }
+                else if( !fd.canWrite() ) {
+                    throw new RuntimeException( "Download directory '" + dir + "' is not writable");
+                }
             }
             selenium.getOptions().setDownloadDirectory( fd );
         }
@@ -103,19 +111,32 @@ public class GroovySeleniumCli {
 		cmd.checkUnusedArgs();
 
 		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
-        GroovySeleniumShell methods = new GroovySeleniumShell( client );
+        GroovySeleniumShell shell = new GroovySeleniumShell( client );
+
+        bind( client, shell );
 
 		if( include != null ) {
             List<File> includes = getFileList( include );
             for (File file : includes) {
                 LOGGER.trace( "client: running include=" + file );
-                methods.run(file, parameters);
+                shell.run(file, parameters);
             }
         }
         File file = new File( script );
         LOGGER.debug( "trace: running script=" + file );
-        methods.run( file, parameters );
+        shell.run( file, parameters );
 	}
+
+    private static void bind( SeleniumService service, GroovySeleniumShell shell ) {
+        Binding binding = new Binding();
+        shell.bind( binding );
+        new CsvBinder().bind( binding );
+
+        File dir = service.getDownloadsDirectory();
+        if( dir != null ) {
+            new DownloadsBinder(dir).bind(binding);
+        }
+    }
 
 	private static List<File> getFileList( String filespec ) {
 		List<File> ret = new ArrayList<File>();

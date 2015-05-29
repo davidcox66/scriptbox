@@ -26,6 +26,7 @@ dependencies {
 	compile project(":util:remoting")
 	compile seleniumDepend
 	compile commonsLangDepend
+	compile commonsCsvDepend
 	compile jodaDepend
 	compile groovyDepend
 	compile slf4jApiDepend

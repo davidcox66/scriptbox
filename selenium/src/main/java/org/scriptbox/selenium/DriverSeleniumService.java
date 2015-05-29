@@ -374,6 +374,11 @@ public class DriverSeleniumService implements SeleniumService {
 		}
 	}
 
+	@Override
+	public File getDownloadsDirectory() {
+		return getController().getOptions().getDownloadDirectory();
+	}
+
 	private Coordinates getCoordinates( WebElement element ) {
 		Coordinates ret = ((Locatable) element).getCoordinates();
 		LOGGER.debug( "getCoordinates: element=" + element + ", coordinates=" + ret );

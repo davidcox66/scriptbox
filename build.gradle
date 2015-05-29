@@ -202,6 +202,7 @@ ext {
 	commonsFileUploadDepend = "commons-fileupload:commons-fileupload:1.2.2"
 	commonsCliDepend = "commons-cli:commons-cli:1.0"
 	commonsSslDepend = "commons-ssl:not-yet-commons-ssl:0.3.10"
+	commonsCsvDepend = "org.apache.commons:commons-csv:1.1"
 
 	commonsBeanutilsOnlyDepend = "commons-beanutils:commons-beanutils:1.8.3"
 	commonsBeanutilsDepend = [ commonsBeanutilsOnlyDepend, {

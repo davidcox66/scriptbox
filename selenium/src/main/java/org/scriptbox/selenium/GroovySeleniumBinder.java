@@ -1,7 +1,7 @@
 package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
-import org.codehaus.groovy.runtime.MethodClosure;
+import org.scriptbox.selenium.bind.BindUtils;
 
 /**
  * Created by david on 5/18/15.
@@ -118,11 +118,11 @@ public class GroovySeleniumBinder {
     }
 
     public void bind( String name ) {
-        binding.setVariable(name, new MethodClosure(instance, name));
+         BindUtils.bind(binding, instance, name);
     }
 
     public void bind( String alias, String name ) {
-        binding.setVariable(alias, new MethodClosure(instance, name));
+         BindUtils.bind( binding, instance, alias, name );
     }
 
 }

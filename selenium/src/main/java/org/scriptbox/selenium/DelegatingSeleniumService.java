@@ -281,6 +281,11 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
+    public File getDownloadsDirectory() {
+        return delegate.getDownloadsDirectory();
+    }
+
+    @Override
     public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
         return delegate.download( element, attribute, path, redirects, cookies );
     }
