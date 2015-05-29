@@ -10,6 +10,7 @@ import org.openqa.selenium.support.pagefactory.ByAll;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Select;
+import org.scriptbox.selenium.remoting.RemotableConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -333,16 +334,16 @@ public class SeleniumMethods {
 		service.mouseUp( element );
     }
 	public void mouseMove(WebElement element) {
-		service.mouseMove( element );
+		service.mouseMove(element);
 	}
 	public void mouseClick(WebElement element) {
-		service.mouseClick( element );
+		service.mouseClick(element);
 	}
 	public void mouseDoubleClick(WebElement element) {
-		service.mouseDoubleClick( element );
+		service.mouseDoubleClick(element);
 	}
 	public void mouseContextClick(WebElement element) {
-		service.mouseContextClick( element );
+		service.mouseContextClick(element);
 	}
 
 	public void screenshot(File directory, String fullClassName, String methodName, String driverName, String ext)

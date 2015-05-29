@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.driver;
 
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;

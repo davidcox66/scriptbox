@@ -23,7 +23,7 @@
         </property>
     </bean>
     
-    <bean id="seleniumImpl" class="org.scriptbox.selenium.ServerSeleniumService" />
+    <bean id="seleniumImpl" class="org.scriptbox.selenium.remoting.ServerSeleniumService" />
 
     <bean name="/selenium/" class="org.springframework.remoting.caucho.HessianServiceExporter"
         p:service-ref="selenium"

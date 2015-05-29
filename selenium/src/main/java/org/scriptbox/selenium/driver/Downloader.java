@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.driver;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;

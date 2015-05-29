@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.driver;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
@@ -10,6 +10,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.scriptbox.selenium.remoting.RemotableConditions;
+import org.scriptbox.selenium.SeleniumService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

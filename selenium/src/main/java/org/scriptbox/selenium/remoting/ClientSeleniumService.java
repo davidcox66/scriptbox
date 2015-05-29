@@ -1,8 +1,10 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.remoting;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.scriptbox.selenium.DelegatingSeleniumService;
+import org.scriptbox.selenium.SeleniumService;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 
 import java.util.ArrayList;

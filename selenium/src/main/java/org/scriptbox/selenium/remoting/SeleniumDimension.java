@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.remoting;
 
 import org.openqa.selenium.Dimension;
 

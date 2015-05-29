@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.driver;
 
 import java.io.File;
 import java.io.Serializable;

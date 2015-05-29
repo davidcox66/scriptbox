@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.remoting;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -6,6 +6,11 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.scriptbox.selenium.DelegatingSeleniumService;
+import org.scriptbox.selenium.SeleniumService;
+import org.scriptbox.selenium.driver.DriverSeleniumService;
+import org.scriptbox.selenium.remoting.RemotableCondition;
+import org.scriptbox.selenium.remoting.SeleniumWebElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,7 +212,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     public WebElement toLocal( WebElement element ) {
         WebElement ret = null;
         if( element != null ) {
-            if( element instanceof SeleniumWebElement ) {
+            if( element instanceof SeleniumWebElement) {
                 SeleniumWebElement sel = (SeleniumWebElement)element;
                 String id = sel.getId();
                 ret = elementsById.get( id );
@@ -226,7 +231,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     public <X> ExpectedCondition<X> toLocal( ExpectedCondition<X> cond ) {
-        if( cond != null && cond instanceof RemotableCondition ) {
+        if( cond != null && cond instanceof RemotableCondition) {
             return ((RemotableCondition)cond).getLocal(this);
         }
         return cond;

@@ -11,20 +11,16 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-import org.openqa.selenium.firefox.FirefoxBinary;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.remote.Augmenter;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.scriptbox.selenium.*;
+import org.scriptbox.selenium.driver.DriverSeleniumService;
+import org.scriptbox.selenium.driver.DriverType;
+import org.scriptbox.selenium.driver.SeleniumController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 
 /**

@@ -19,7 +19,6 @@ public class GroovySeleniumShell extends SeleniumMethods implements Bindable {
 	private static final AtomicInteger counter = new AtomicInteger();
 
     private Binding binding;
-	private GroovySeleniumBinder binder;
 	private GroovyShell engine;
 
     public GroovySeleniumShell(SeleniumService service)  {

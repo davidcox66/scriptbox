@@ -1,4 +1,4 @@
-package org.scriptbox.selenium;
+package org.scriptbox.selenium.remoting;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
