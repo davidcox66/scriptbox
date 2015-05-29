@@ -1,5 +1,6 @@
 package org.scriptbox.selenium;
 
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.Augmenter;
@@ -10,6 +11,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by david on 5/18/15.
@@ -34,8 +36,20 @@ public enum DriverType implements Serializable {
 		public RemoteWebDriver create(DriverOptions options) {
             DesiredCapabilities cap = DesiredCapabilities.chrome();
             if (options.isIgnoreCertificateErrors()) {
+				// cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
                 cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
             }
+			if( options.getDownloadDirectory() != null ) {
+				HashMap<String, Object> prefs = new HashMap<String, Object>();
+				prefs.put("profile.default_content_settings.popups", 0);
+				prefs.put("download.default_directory", options.getDownloadDirectory().getAbsolutePath());
+
+				ChromeOptions co = new ChromeOptions();
+				co.setExperimentalOption("prefs", prefs);
+				// co.addArguments("--test-type");
+				cap.setCapability(ChromeOptions.CAPABILITY, co);
+			}
+
 			RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
 			return (RemoteWebDriver) new Augmenter().augment(driver);
 		}

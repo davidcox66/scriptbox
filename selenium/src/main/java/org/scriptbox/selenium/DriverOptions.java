@@ -1,5 +1,6 @@
 package org.scriptbox.selenium;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 
@@ -12,6 +13,7 @@ public class DriverOptions implements Serializable {
     private String profile;
     private boolean acceptCertificates;
     private boolean ignoreCertificateErrors;
+    private File downloadDirectory;
 
     public URL getUrl() {
         return url;
@@ -43,5 +45,13 @@ public class DriverOptions implements Serializable {
 
     public void setIgnoreCertificateErrors(boolean ignoreCertificateErrors) {
         this.ignoreCertificateErrors = ignoreCertificateErrors;
+    }
+
+    public File getDownloadDirectory() {
+        return downloadDirectory;
+    }
+
+    public void setDownloadDirectory(File downloadDirectory) {
+        this.downloadDirectory = downloadDirectory;
     }
 }

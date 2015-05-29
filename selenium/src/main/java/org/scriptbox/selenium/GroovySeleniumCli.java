@@ -53,6 +53,15 @@ public class GroovySeleniumCli {
 		selenium.setExe( cmd.consumeArgValue("exe",false) );
 		selenium.setProfile( cmd.consumeArgValue("profile", false) );
 
+        String dir = cmd.consumeArgValue("download-dir",false);
+        if( dir != null ) {
+            File fd = new File( dir );
+            if( !fd.exists() ) {
+                throw new RuntimeException( "Download directory '" + dir + "' does not exist");
+            }
+            selenium.getOptions().setDownloadDirectory( fd );
+        }
+
 		if( selenium.getExe() != null ) {
 			selenium.setPort( port + 1 );
 			setUrl(selenium, "http://localhost:" + (port + 1));

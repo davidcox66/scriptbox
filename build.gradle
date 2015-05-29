@@ -243,7 +243,7 @@ ext {
 	jettyUtilDepend = "org.eclipse.jetty:jetty-util:${jettyVersion}"
 	jettyClientDepend = "org.eclipse.jetty:jetty-client:${jettyVersion}"
 	jettyJmxDepend = "org.eclipse.jetty:jetty-jmx:${jettyVersion}"
-	
+
 	// Tomcat
 
 	tomcatPluginDepend = "org.gradle.api.plugins:gradle-tomcat-plugin:1.0"	
