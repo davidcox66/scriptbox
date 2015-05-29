@@ -31,9 +31,20 @@ public class SeleniumMethods {
 	protected int wait = DEFAULT_WAIT;
     protected SeleniumService service;
 
+	public SeleniumMethods()  {
+	}
+
     public SeleniumMethods(SeleniumService service)  {
         this.service = service;
     }
+
+	public SeleniumService getService() {
+		return service;
+	}
+
+	public void setService(SeleniumService service) {
+		this.service = service;
+	}
 
 	public int getWait() {
 		return wait;

@@ -1,20 +1,28 @@
-package org.scriptbox.selenium.bind;
+package org.scriptbox.selenium.ext;
 
 import com.mongodb.*;
 import groovy.lang.Binding;
 import org.mongojack.JacksonDBCollection;
 import org.mongojack.internal.stream.JacksonDBObject;
+import org.scriptbox.selenium.bind.BindUtils;
+import org.scriptbox.selenium.bind.Bindable;
 
 import java.util.Map;
 
 /**
  * Created by david on 5/29/15.
  */
-public class MongoBinder implements Bindable {
+public class MongoExtension implements Bindable, SeleniumExtension {
 
     private MongoClient client;
 
-    public MongoBinder( String address ) {
+    public MongoExtension() {
+    }
+    public MongoExtension(String address) {
+        setAddress( address );
+    }
+
+    public void setAddress( String address ) {
         try {
             int pos = address.indexOf(":");
             if (pos != -1) {
@@ -28,9 +36,17 @@ public class MongoBinder implements Bindable {
         }
     }
 
+    public void init( SeleniumExtensionContext ctx ) throws Exception {
+        String address = ctx.getCommandLine().consumeArgValue("mongo", false);
+        if( address != null ) {
+            setAddress( address );
+            bind( ctx.getBinding() );
+        }
+
+    }
     @Override
     public void bind(Binding binding) {
-        BindUtils.bind( binding, this, "getDbCollection" );
+        BindUtils.bind(binding, this, "getDbCollection");
         BindUtils.bind( binding, this, "bdo" );
         BindUtils.bind( binding, this, "jbdo" );
         BindUtils.bind( binding, this, "bdl" );
@@ -38,6 +54,10 @@ public class MongoBinder implements Bindable {
 
     public MongoClient getMongoClient() {
         return client;
+    }
+
+    public BasicDBObject bdo() {
+        return new BasicDBObject();
     }
 
     public BasicDBObject bdo( int size ) {

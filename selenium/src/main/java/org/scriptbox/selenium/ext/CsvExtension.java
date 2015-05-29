@@ -1,4 +1,4 @@
-package org.scriptbox.selenium.bind;
+package org.scriptbox.selenium.ext;
 
 import groovy.lang.Binding;
 import org.apache.commons.csv.CSVFormat;
@@ -14,7 +14,11 @@ import java.nio.charset.Charset;
 /**
  * Created by david on 5/28/15.
  */
-public class CsvBinder implements Bindable {
+public class CsvExtension implements Bindable, SeleniumExtension {
+
+    public void init( SeleniumExtensionContext ctx ) {
+        bind( ctx.getBinding() );
+    }
 
     @Override
     public void bind(Binding binding) {

@@ -1,4 +1,4 @@
-package org.scriptbox.selenium.bind;
+package org.scriptbox.selenium.ext;
 
 import groovy.lang.Binding;
 import org.scriptbox.selenium.bind.BindUtils;
@@ -13,14 +13,25 @@ import java.util.Comparator;
 /**
  * Created by david on 5/28/15.
  */
-public class DownloadsBinder implements Bindable {
+public class DownloadsExtension implements Bindable, SeleniumExtension {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadsBinder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadsExtension.class);
 
-    private File downloads;
+    private File downloadDirectory;
 
-    public DownloadsBinder( File downloads ) {
-        this.downloads = downloads;
+    public DownloadsExtension() {
+    }
+
+    public DownloadsExtension(File downloadDirectory) {
+        this.downloadDirectory = downloadDirectory;
+    }
+
+    public void init( SeleniumExtensionContext ctx ) {
+        File dir = ctx.getService().getOptions().getDownloadDirectory();
+        if( dir != null ) {
+            downloadDirectory = dir;
+            bind(ctx.getBinding());
+        }
     }
 
     @Override
@@ -32,8 +43,8 @@ public class DownloadsBinder implements Bindable {
     }
 
     public File[] getDownloads() {
-        File[] ret = downloads.listFiles();
-        LOGGER.debug( "getDownloads: dir=" + downloads + ", files=" + ret );
+        File[] ret = downloadDirectory.listFiles();
+        LOGGER.debug( "getDownloads: dir=" + downloadDirectory + ", files=" + ret );
         return ret;
     }
 
@@ -44,7 +55,7 @@ public class DownloadsBinder implements Bindable {
     public File getLatestDownload( int wait, int quiet ) {
         if( waitForAnyFileToAppear(wait) ) {
             File ret = waitForQuiet( quiet );
-            LOGGER.debug( "getLatestDownload: dir=" + downloads + ", latest=" + ret );
+            LOGGER.debug( "getLatestDownload: dir=" + downloadDirectory + ", latest=" + ret );
             return ret;
         }
         else {
@@ -53,8 +64,8 @@ public class DownloadsBinder implements Bindable {
     }
 
     public void purge() {
-        LOGGER.debug( "purge: cleaning downloads directory - dir=" + downloads );
-        for( File file : downloads.listFiles() ) {
+        LOGGER.debug( "purge: cleaning downloadDirectory directory - dir=" + downloadDirectory );
+        for( File file : downloadDirectory.listFiles() ) {
             LOGGER.debug( "purge: removing file=" + file );
             file.delete();
         }
@@ -80,7 +91,7 @@ public class DownloadsBinder implements Bindable {
     }
 
     private boolean waitForAnyFileToAppear( int seconds ) {
-        LOGGER.debug( "waitForAnyFileToAppear: waiting for " + seconds + " seconds for a file to appear in '" + downloads + "'");
+        LOGGER.debug( "waitForAnyFileToAppear: waiting for " + seconds + " seconds for a file to appear in '" + downloadDirectory + "'");
         long timeout = System.currentTimeMillis() + (seconds * 1000);
         boolean found = false;
         do {
@@ -104,11 +115,11 @@ public class DownloadsBinder implements Bindable {
     }
 
     private boolean isAnyFiles() {
-        return downloads.listFiles().length > 0;
+        return downloadDirectory.listFiles().length > 0;
     }
 
     private File getLatestFile() {
-        File[] files = downloads.listFiles();
+        File[] files = downloadDirectory.listFiles();
         File ret = null;
         if( files.length > 0 ) {
             Arrays.sort(files, new Comparator<File>() {

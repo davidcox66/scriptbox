@@ -1,14 +1,10 @@
 package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
-import org.apache.commons.io.filefilter.AndFileFilter;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.scriptbox.selenium.bind.CsvBinder;
-import org.scriptbox.selenium.bind.DownloadsBinder;
-import org.scriptbox.selenium.bind.MongoBinder;
+import groovy.lang.GroovyClassLoader;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
+import org.scriptbox.selenium.ext.*;
 import org.scriptbox.selenium.remoting.ClientSeleniumService;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
@@ -19,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GroovySeleniumCli {
@@ -105,87 +100,79 @@ public class GroovySeleniumCli {
 
 	private static void client( String serverHostPort, CommandLine cmd ) throws Exception {
 
-        String include = cmd.consumeArgValue("include", false);
-		String script = cmd.consumeArgValue("script", true);
+        Binding binding = new Binding();
+		ClientSeleniumService service = new ClientSeleniumService( serverHostPort );
+        GroovySeleniumMethods methods = new GroovySeleniumMethods( service );
+        GroovySeleniumShell shell = new GroovySeleniumShell( binding );
+
+        SeleniumExtensionContext ctx = new SeleniumExtensionContext();
+        ctx.setService( service );
+        ctx.setCommandLine( cmd );
+        ctx.setBinding( binding );
+        ctx.setShell( shell );
+        ctx.setMethods( methods );
+
+        initExtensions(ctx);
+
+        List<String> parameters = cmd.getParameters();
+        String script = cmd.consumeArgValue("script", true);
         if( !script.endsWith(".groovy") ) {
             script += ".groovy";
         }
-        String mongo = cmd.consumeArgValue("mongo",false);
 
-		List<String> parameters = cmd.getParameters();
-		cmd.checkUnusedArgs();
+        cmd.checkUnusedArgs();
 
-		ClientSeleniumService client = new ClientSeleniumService( serverHostPort );
-        GroovySeleniumShell shell = new GroovySeleniumShell( client );
-
-        bind( client, shell, mongo );
-
-		if( include != null ) {
-            List<File> includes = getFileList( include );
-            for (File file : includes) {
-                LOGGER.trace( "client: running include=" + file );
-                shell.run(file, parameters);
-            }
-        }
         File file = new File( script );
-        LOGGER.debug( "trace: running script=" + file );
+        LOGGER.trace("client: running script=" + file);
         shell.run( file, parameters );
 	}
 
-    private static void bind( SeleniumService service, GroovySeleniumShell shell, String mongo ) {
-        Binding binding = new Binding();
-        shell.bind( binding );
-        new CsvBinder().bind(binding);
+    private static void initExtensions( SeleniumExtensionContext ctx ) throws Exception {
 
-        File dir = service.getOptions().getDownloadDirectory();
-        if( dir != null ) {
-            new DownloadsBinder(dir).bind( binding );
-        }
+        List<SeleniumExtension> exts = new ArrayList<SeleniumExtension>();
+        addUserDefinedExtensions( ctx, exts );
+        addPreDefinedExtensions( ctx, exts );
+        ctx.setExtensions( exts );
 
-        if( mongo != null ) {
-            new MongoBinder(mongo).bind( binding );
+        for( SeleniumExtension ext : exts )  {
+            ext.init( ctx );
         }
     }
 
-	private static List<File> getFileList( String filespec ) {
-		List<File> ret = new ArrayList<File>();
-        String[] specs = filespec.split(",");
-        for( String spec : specs ) {
-            File file = new File( spec );
-            String name = file.getName();
-            if( name.indexOf("*") == -1 && name.indexOf("?") == -1 )	 {
-                if( file.isDirectory() ) {
-                    ret.addAll( Arrays.asList(file.listFiles((FileFilter)new SuffixFileFilter(".groovy"))) );
-                }
-                else {
-                    if( !name.endsWith(".groovy") ) {
-                        file = new File( spec + ".groovy" );
+    private static void addPreDefinedExtensions( SeleniumExtensionContext ctx, List<SeleniumExtension> exts ) throws Exception {
+        exts.add(new CsvExtension() );
+        exts.add(new DownloadsExtension());
+        exts.add(new MongoExtension());
+        exts.add(ctx.getMethods());
+        exts.add(new LibsExtension());
+    }
+
+    private static void addUserDefinedExtensions( SeleniumExtensionContext ctx, List<SeleniumExtension> exts ) throws Exception {
+        String spec = ctx.getCommandLine().consumeArgValue( "exts", false );
+        if( spec != null ) {
+            List<File> files = CommandLineUtil.resolveFiles( spec, ".groovy" );
+            if( !files.isEmpty() ) {
+                GroovyClassLoader gcl = ctx.getShell().getEngine().getClassLoader();
+                for( File file : files ) {
+                    Class cls = gcl.parseClass( file );
+                    if( !SeleniumExtension.class.isAssignableFrom(cls) ) {
+                        throw new RuntimeException( "File does not contain and extension: '" + file.getAbsolutePath() + "'");
                     }
-                    if( file.exists() ) {
-                        ret.add(file);
-                    }
-                    else {
-                        throw new RuntimeException( "Could not find file: " + file );
-                    }
+                    SeleniumExtension instance = (SeleniumExtension)cls.newInstance();
+                    LOGGER.debug("initExtensions: adding extension - class: " + cls + ", instance=" + instance);
+                    exts.add(instance);
                 }
-            }
-            else {
-                File parent = file.getParentFile();
-                if( parent == null ) {
-                    parent = new File( "." );
-                }
-                ret.addAll( Arrays.asList(parent.listFiles(
-                    (FileFilter)new AndFileFilter(new WildcardFileFilter(name),new SuffixFileFilter(".groovy")))) );
             }
         }
-		return ret;
-	}
+    }
+
 
     private static void usage() {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
-        	"[--include=<include file>] --script=<script file> [--quit] [--timeout={<seconds>|30}] " +
-            "{--client=<server url> [--mongo=<address>]|--server=<port> [--download-dir=<dir>]} <arg>..." );
+        	"--script=<script file>  " +
+            "{--client=<server url> [--mongo=<address>] [--libs=<files>] [--exts=<files>] | " +
+             "--server=<port> [--download-dir=<dir>] [--timeout={<seconds>|30}]} <arg>..." );
         System.exit( 1 );
     }
 

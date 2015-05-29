@@ -80,7 +80,50 @@ public class CommandLine {
 		String value = map.get( name );
 		return checkArgValue( name, value );
 	}
-	
+
+	public String getArgValue( String name, boolean required ) throws CommandLineException {
+		String value = map.get(name);
+		checkArgValue( name, value );
+		if( value == null && required ) {
+			throw new CommandLineException( "Argument is required: '" + name + "'" );
+		}
+		return value;
+	}
+
+	public String getArgValue( String name, String defaultValue ) throws CommandLineException {
+		String val = getArgValue( name, false );
+		if( isBlank(val) ) {
+			val = defaultValue;
+		}
+		return val;
+	}
+
+	public int getArgValueAsInt( String name, int defaultValue ) throws CommandLineException {
+		String value = getArgValue( name, false );
+		if( !isBlank(value) ) {
+			try {
+				return Integer.parseInt( value );
+			}
+			catch( Exception ex ) {
+				throw new CommandLineException( "Invalid integer parameter: '" + value + "'");
+			}
+		}
+		return defaultValue;
+	}
+
+	public int getArgArgValueAsInt( String name, boolean required ) throws CommandLineException {
+		String value = getArgValue( name, required );
+		if( !isBlank(value) ) {
+			try {
+				return Integer.parseInt( value );
+			}
+			catch( Exception ex ) {
+				throw new CommandLineException( "Invalid integer parameter: '" + value + "'");
+			}
+		}
+		return 0;
+	}
+
 	public boolean consumeArg( String name ) throws CommandLineException {
 		String value = map.remove(name);
 		return checkArg( name, value );
@@ -130,7 +173,7 @@ public class CommandLine {
 		}
 		return 0;
 	}
-	
+
 	public String consumeArgValue( String name, String defaultValue ) throws CommandLineException {
 		String val = consumeArgValue( name, false );
 		if( isBlank(val) ) {

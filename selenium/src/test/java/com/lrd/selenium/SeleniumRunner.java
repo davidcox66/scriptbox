@@ -308,7 +308,7 @@ public class SeleniumRunner extends ParentRunner<Runner> {
 		}
 		
 	    private void injectAttributes( Object test ) throws Exception {
-	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { GroovySeleniumShell.class } );
+	        Method method = test.getClass().getMethod( "setSelenium", new Class[] { GroovySeleniumMethods.class } );
 	        method.invoke( test, new Object[] { selenium } );
 	    }
 	  
