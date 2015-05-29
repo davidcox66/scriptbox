@@ -83,6 +83,7 @@ public class GroovySeleniumBinder {
         bind( "visibilityOf" );
         bind( "visibilityOfAll" );
         bind( "invisibilityOf" );
+        bind( "invisibilityOfAll" );
         bind( "textPresent" );
         bind( "valuePresent" );
         bind( "clickable" );

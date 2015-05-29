@@ -28,6 +28,11 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     @Override
+    public boolean activate( ExpectedCondition<Boolean> cond ) {
+        return super.activate( toLocal(cond) );
+    }
+
+    @Override
     public WebElement getElement(By by) {
         return toSerializable(super.getElement(by));
     }
@@ -58,7 +63,8 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     @Override
-    public <X> X waitFor(final int seconds, final ExpectedCondition<X> cond) {
+    public <X> X waitFor(final int seconds, ExpectedCondition<X> cond) {
+        cond = toLocal(cond);
         Object ret = super.waitFor( seconds, cond ) ;
         if( ret != null && ret instanceof RemoteWebElement ) {
             ret = toSerializable( (WebElement)ret );
@@ -181,7 +187,13 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         return toSerializable(super.switchToActiveElement());
     }
 
-    private List<WebElement> toLocal( List<WebElement> elements ) {
+
+    @Override
+    public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
+        return super.download( toLocal(element), attribute, path, redirects, cookies );
+    }
+
+    public List<WebElement> toLocal( List<WebElement> elements ) {
         if( elements != null ) {
             List<WebElement> ret = new ArrayList<WebElement>(elements.size());
             for (WebElement el : elements) {
@@ -192,7 +204,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         return null;
     }
 
-    private WebElement toLocal( WebElement element ) {
+    public WebElement toLocal( WebElement element ) {
         WebElement ret = null;
         if( element != null ) {
             if( element instanceof SeleniumWebElement ) {
@@ -213,7 +225,14 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         return ret;
     }
 
-    private List<WebElement> toSerializable( List<WebElement> elements ) {
+    public <X> ExpectedCondition<X> toLocal( ExpectedCondition<X> cond ) {
+        if( cond != null && cond instanceof RemotableCondition ) {
+            return ((RemotableCondition)cond).getLocal(this);
+        }
+        return cond;
+    }
+
+    public List<WebElement> toSerializable( List<WebElement> elements ) {
         if( elements != null ) {
             List<WebElement> ret = new ArrayList<WebElement>(elements.size());
             for (WebElement el : elements) {
@@ -224,7 +243,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         return null;
     }
 
-    private WebElement toSerializable( WebElement element ) {
+    public WebElement toSerializable( WebElement element ) {
         WebElement ret = null;
         if( element != null ) {
             if( element instanceof SeleniumWebElement ) {

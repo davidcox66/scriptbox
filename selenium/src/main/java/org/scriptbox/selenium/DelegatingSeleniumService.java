@@ -117,22 +117,22 @@ public class DelegatingSeleniumService implements SeleniumService {
 
     @Override
     public void mouseMove(WebElement element) {
-        delegate.mouseMove( element );
+        delegate.mouseMove(element);
     }
 
     @Override
     public void mouseClick(WebElement element) {
-        delegate.mouseClick( element );
+        delegate.mouseClick(element);
     }
 
     @Override
     public void mouseDoubleClick(WebElement element) {
-        delegate.mouseDoubleClick( element );
+        delegate.mouseDoubleClick(element);
     }
 
     @Override
     public void mouseContextClick(WebElement element) {
-        delegate.mouseContextClick( element );
+        delegate.mouseContextClick(element);
     }
 
     @Override
@@ -278,5 +278,10 @@ public class DelegatingSeleniumService implements SeleniumService {
     @Override
     public void refresh() {
         delegate.refresh();
+    }
+
+    @Override
+    public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
+        return delegate.download( element, attribute, path, redirects, cookies );
     }
 }

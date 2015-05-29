@@ -88,4 +88,6 @@ public interface SeleniumService {
     void forward();
     void to(URL url);
     void refresh();
+
+    String download( WebElement element, String attribute, String path, boolean redirects, boolean cookies );
 }

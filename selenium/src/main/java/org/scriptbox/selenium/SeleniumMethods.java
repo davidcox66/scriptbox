@@ -372,6 +372,7 @@ public class SeleniumMethods {
 	public ExpectedCondition<List<WebElement>> presenceOfAll(By by) {
 		return new RemotableConditions.PresenceOfAll( by );
     }
+
 	public ExpectedCondition<WebElement> visibilityOf(By by) {
 		return new RemotableConditions.VisibilityOf( by );
     }
@@ -381,11 +382,18 @@ public class SeleniumMethods {
 	public ExpectedCondition<WebElement> visibilityOf(WebElement element) {
 		return new RemotableConditions.VisibilityOfElement( element );
     }
+
 	public ExpectedCondition<Boolean> invisibilityOf(By by) {
 		return new RemotableConditions.InvisibilityOf( by );
     }
 	public ExpectedCondition<Boolean> invisibilityOf(By by, String text) {
 		return new RemotableConditions.InvisibilityOfWithText( by, text );
+	}
+	public ExpectedCondition<Boolean> invisibilityOf(WebElement element) {
+		return new RemotableConditions.InvisibilityOfElement( element );
+	}
+	public ExpectedCondition<Boolean> invisibilityOfAll(By by) {
+		return new RemotableConditions.InvisibilityOfAll( by );
 	}
 	public ExpectedCondition<Boolean> textPresent(By by, String text) {
 		return new RemotableConditions.TextPresent( by, text );

@@ -361,6 +361,19 @@ public class DriverSeleniumService implements SeleniumService {
 		return element.getSize();
 	}
 
+	@Override
+	public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
+		try {
+			Downloader dl = new Downloader(getDriver());
+			dl.setFollowRedirects(redirects);
+			dl.setUseCookies(cookies);
+			return dl.downloader(element, attribute);
+		}
+		catch( Exception ex ) {
+			throw new RuntimeException( "Failed downloading: element=" + element + ", path=" + path );
+		}
+	}
+
 	private Coordinates getCoordinates( WebElement element ) {
 		Coordinates ret = ((Locatable) element).getCoordinates();
 		LOGGER.debug( "getCoordinates: element=" + element + ", coordinates=" + ret );

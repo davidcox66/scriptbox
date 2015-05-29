@@ -1,8 +1,6 @@
 package org.scriptbox.selenium;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.slf4j.Logger;
@@ -49,10 +47,11 @@ public class RemotableConditions {
     public static class PresenceOf extends ByCondition<WebElement,Object> {
 
         public PresenceOf( By by ) {
+
             super( by );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
             return ExpectedConditions.presenceOfElementLocated(by);
         }
     }
@@ -62,7 +61,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<List<WebElement>> create() {
+        public ExpectedCondition<List<WebElement>> localize( ServerSeleniumService service ) {
             return ExpectedConditions.presenceOfAllElementsLocatedBy(by);
         }
     }
@@ -73,7 +72,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
             return ExpectedConditions.visibilityOfElementLocated(by);
         }
     }
@@ -84,7 +83,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<List<WebElement>> create() {
+        public ExpectedCondition<List<WebElement>> localize( ServerSeleniumService service ) {
             return ExpectedConditions.visibilityOfAllElementsLocatedBy(by);
         }
     }
@@ -95,8 +94,8 @@ public class RemotableConditions {
             super( element );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
-            return ExpectedConditions.visibilityOf(element);
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
+            return ExpectedConditions.visibilityOf(service.toLocal(element));
         }
     }
 
@@ -106,7 +105,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
             return ExpectedConditions.invisibilityOfElementLocated(by);
         }
     }
@@ -117,8 +116,62 @@ public class RemotableConditions {
             super( by, text );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
             return ExpectedConditions.invisibilityOfElementWithText(by, param);
+        }
+    }
+
+    public static class InvisibilityOfElement extends WebElementCondition<Boolean,Object> {
+
+        public InvisibilityOfElement( WebElement element ) {
+            super( element );
+        }
+        public Boolean apply(WebDriver driver) {
+            try {
+                return !element.isDisplayed();
+            }
+            catch (NoSuchElementException e) {
+                // Returns true because the element is not present in DOM. The
+                // try block checks if the element is present but is invisible.
+                return true;
+            }
+            catch (StaleElementReferenceException e) {
+                // Returns true because stale element reference implies that element
+                // is no longer visible.
+                return true;
+            }
+        }
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
+            element = service.toLocal(element);
+            return super.localize( service );
+        }
+    }
+
+    public static class InvisibilityOfAll implements ExpectedCondition<Boolean>, Serializable {
+
+        private By by;
+
+        public InvisibilityOfAll( By by ) {
+            this.by = by;
+        }
+        public Boolean apply(WebDriver driver) {
+                List<WebElement> elements = driver.findElements(by);
+                for(WebElement element : elements){
+                    try {
+                        if (element.isDisplayed()) {
+                            return false;
+                        }
+                    }
+                    catch (NoSuchElementException e) {
+                        // Returns true because the element is not present in DOM. The
+                        // try block checks if the element is present but is invisible.
+                    }
+                    catch (StaleElementReferenceException e) {
+                        // Returns true because stale element reference implies that element
+                        // is no longer visible.
+                    }
+            }
+            return true;
         }
     }
 
@@ -128,7 +181,7 @@ public class RemotableConditions {
             super( by, text );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
             return ExpectedConditions.textToBePresentInElementLocated(by, param);
         }
     }
@@ -139,8 +192,8 @@ public class RemotableConditions {
             super( element, text );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
-            return ExpectedConditions.textToBePresentInElement(element, param);
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
+            return ExpectedConditions.textToBePresentInElement(service.toLocal(element), param);
         }
     }
 
@@ -150,7 +203,7 @@ public class RemotableConditions {
             super( by, text );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
             return ExpectedConditions.textToBePresentInElementValue(by, param);
         }
     }
@@ -161,8 +214,8 @@ public class RemotableConditions {
             super( element, text );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
-            return ExpectedConditions.textToBePresentInElementValue(element, param);
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
+            return ExpectedConditions.textToBePresentInElementValue(service.toLocal(element), param);
         }
     }
 
@@ -172,7 +225,7 @@ public class RemotableConditions {
             super( by, sel );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
             return ExpectedConditions.elementSelectionStateToBe(by, param);
         }
     }
@@ -183,8 +236,8 @@ public class RemotableConditions {
             super( element );
         }
         @Override
-        protected ExpectedCondition<Boolean> create() {
-            return ExpectedConditions.elementToBeSelected(element);
+        public ExpectedCondition<Boolean> localize( ServerSeleniumService service ) {
+            return ExpectedConditions.elementToBeSelected(service.toLocal(element));
         }
     }
 
@@ -194,7 +247,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
             return ExpectedConditions.elementToBeClickable(by);
         }
     }
@@ -205,8 +258,8 @@ public class RemotableConditions {
             super( element );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
-            return ExpectedConditions.elementToBeClickable(element);
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
+            return ExpectedConditions.elementToBeClickable(service.toLocal(element));
         }
     }
 
@@ -216,7 +269,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<List<WebElement>> create() {
+        public ExpectedCondition<List<WebElement>> localize( ServerSeleniumService service ) {
             return new ExpectedCondition<List<WebElement>>() {
                 public List<WebElement> apply(WebDriver driver) {
                     try {
@@ -248,7 +301,7 @@ public class RemotableConditions {
             super( by );
         }
         @Override
-        protected ExpectedCondition<WebElement> create() {
+        public ExpectedCondition<WebElement> localize( ServerSeleniumService service ) {
             return new ExpectedCondition<WebElement>() {
                 public WebElement apply(WebDriver driver) {
                     try {

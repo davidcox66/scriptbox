@@ -10,34 +10,50 @@ import java.io.Serializable;
  */
 public abstract class RemotableCondition<X> implements ExpectedCondition<X>, Serializable {
 
-    protected transient ExpectedCondition<X> delegate;
+    protected transient ExpectedCondition<X> localized;
 
     @Override
     public boolean equals(Object obj) {
-        return getDelegate().equals(obj);
+        ExpectedCondition<X> d = getLocal();
+        return d != this ? d.equals(obj) : super.equals(obj);
     }
 
     @Override
     public int hashCode() {
-        return getDelegate().hashCode();
+        ExpectedCondition<X> d = getLocal();
+        return d != this ? d.hashCode() : super.hashCode();
     }
 
     @Override
     public String toString() {
-        return getDelegate().toString();
+        ExpectedCondition<X> d = getLocal();
+        return d != this ? d.toString() : super.toString();
     }
 
     @Override
     public X apply(WebDriver input) {
-        return getDelegate().apply( input );
-    }
-
-    public ExpectedCondition<X> getDelegate() {
-        if( delegate == null )  {
-            delegate = create();
+        ExpectedCondition<X> d = getLocal();
+        if( d == this ) {
+            throw new RuntimeException("Must localize() new instance or override apply()");
         }
-        return delegate;
+        return d.apply( input );
     }
 
-    protected abstract ExpectedCondition<X> create();
+    public ExpectedCondition<X> getLocal() {
+        if( localized == null )  {
+            localized = localize( null );
+        }
+        return localized;
+    }
+
+    public ExpectedCondition<X> getLocal( ServerSeleniumService service ) {
+        if( localized == null )  {
+            localized = localize( service );
+        }
+        return localized;
+    }
+
+    public ExpectedCondition<X> localize( ServerSeleniumService service ) {
+        return this;
+    }
 }
