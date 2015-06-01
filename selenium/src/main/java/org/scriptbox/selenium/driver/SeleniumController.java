@@ -130,28 +130,36 @@ public class SeleniumController {
 
 	public boolean ping( ExpectedCondition<Boolean> cond ) {
 		if (cond != null) {
+			boolean ret = false;
 			try {
 				if( isConnected() ) {
-					return cond.apply(getDriver());
+					LOGGER.debug( "ping: is connected, trying condition");
+					ret = cond.apply(getDriver());
+					LOGGER.debug( "ping: condition returned: " + ret );
+				}
+				else {
+					LOGGER.debug( "ping: not connected" );
 				}
 			}
 			catch (Exception ex) {
 				LOGGER.error("Error pinging", ex);
 			}
-			return false;
+			return ret;
 		}
-		return true;
+		LOGGER.debug( "ping: no condition, returning false");
+		return false;
 	}
 
 	public boolean activate( ExpectedCondition<Boolean> cond ) {
 		if ( !ping(cond) ) {
 			if (!isResponsive()) {
 				if (isConnected()) {
+					LOGGER.debug( "activate: not responsive, but connected, so quitting" );
 					quit();
 				}
 				connect();
-				return false;
 			}
+			return false;
 		}
         return true;
 	}

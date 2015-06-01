@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by david on 5/18/15.
@@ -27,7 +28,7 @@ public interface SeleniumService {
 
     void get(String url);
 
-    void execute(String script, Object... args);
+    Object execute(String script, Object... args);
 
     void executeAsync(String script, Object... args);
 
@@ -39,7 +40,7 @@ public interface SeleniumService {
 
     WebElement waitForElement(By by, int seconds);
 
-    String waitForNewWindow(int seconds);
+    String waitForNewWindow( Windows windows, int seconds);
 
     <X> X waitFor(int seconds, ExpectedCondition<X> cond);
 
@@ -74,11 +75,12 @@ public interface SeleniumService {
     Point getLocation( WebElement element );
     Dimension getSize( WebElement element );
 
-    SeleniumServiceOptions getOptions();
     String getCurrentUrl();
-    String getWindowHandle();
+    Windows getWindows();
+    String openWindow( String url );
+    void closeWindow( String handle );
+    void closeCurrentWindow();
 
-    void closeWindow();
     void switchToFrameByIndex( int index );
     void switchToFrameByNameOrId( String nameOrId );
     void switchToFrameByElement( WebElement element );
@@ -92,4 +94,7 @@ public interface SeleniumService {
     void refresh();
 
     String download( WebElement element, String attribute, String path, boolean redirects, boolean cookies );
+
+    SeleniumServiceOptions getOptions();
+
 }

@@ -78,7 +78,7 @@ public class CommandLine {
 	
 	public boolean hasArgValue( String name ) throws CommandLineException {
 		String value = map.get( name );
-		return checkArgValue( name, value );
+		return !isBlank( value );
 	}
 
 	public String getArgValue( String name, boolean required ) throws CommandLineException {

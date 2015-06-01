@@ -125,7 +125,11 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "switchToWindow" );
 		bind( "switchToDefaultContent" );
 		bind( "switchToActiveElement" );
+
+		bind( "getWindows" );
+		bind( "openWindow" );
 		bind( "closeWindow" );
+		bind( "closeCurrentWindow" );
 
 		bind( "back" );
 		bind( "forward" );

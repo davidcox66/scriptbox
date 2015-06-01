@@ -143,6 +143,7 @@ public class GroovySeleniumCli {
         exts.add(new CsvExtension() );
         exts.add(new DownloadsExtension());
         exts.add(new MongoExtension());
+        exts.add(new QuartzExtension());
         exts.add(ctx.getMethods());
         exts.add(new LibsExtension());
     }
@@ -171,7 +172,7 @@ public class GroovySeleniumCli {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
         	"--script=<script file>  " +
-            "{--client=<server url> [--mongo=<address>] [--libs=<files>] [--exts=<files>] | " +
+            "{--client=<server url> [--mongo=[<address>]] [--quartz] [--libs=<files>] [--exts=<files>] | " +
              "--server=<port> [--download-dir=<dir>] [--timeout={<seconds>|30}]} <arg>..." );
         System.exit( 1 );
     }
@@ -185,36 +186,5 @@ public class GroovySeleniumCli {
     	}
     	usage();
     	return null;
-    }
-
-    public static String getText( File file ) throws IOException {
-    	return getText( new FileInputStream(file) );
-    }
-    
-    public static String getText( InputStream is ) throws IOException {
-    	 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    	 return getText( reader );
-    }
-    
-    public static String getText(BufferedReader reader) throws IOException {
-        StringBuilder answer = new StringBuilder();
-        // reading the content of the file within a char buffer
-        // allow to keep the correct line endings
-        char[] charBuffer = new char[8192];
-        int nbCharRead /* = 0*/;
-        try {
-            while ((nbCharRead = reader.read(charBuffer)) != -1) {
-                // appends buffer
-                answer.append(charBuffer, 0, nbCharRead);
-            }
-            Reader temp = reader;
-            reader = null;
-            temp.close();
-        } finally {
-        	if( reader != null ) {
-        		reader.close();
-        	}
-        }
-        return answer.toString();
     }
 }

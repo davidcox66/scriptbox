@@ -10,6 +10,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.scriptbox.selenium.Windows;
 import org.scriptbox.selenium.remoting.RemotableConditions;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 public class DriverSeleniumService implements SeleniumService {
 
@@ -79,10 +81,10 @@ public class DriverSeleniumService implements SeleniumService {
     }
     
     @Override
-	public void execute(String script, Object... args) {
+	public Object execute(String script, Object... args) {
     	try {
     		LOGGER.debug( "execute: script='" + script + "', args=" + args );
-	    	((JavascriptExecutor) getDriver()).executeScript(script, args);
+	    	return ((JavascriptExecutor) getDriver()).executeScript(script, args);
     	}
     	catch( Exception ex ) {
     		throw new RuntimeException( "Failed execute('" + script + "'," + args + ")", ex );
@@ -129,20 +131,22 @@ public class DriverSeleniumService implements SeleniumService {
     }
 
 	@Override
-	public String waitForNewWindow(int seconds) {
+	public String waitForNewWindow( final Windows windows, int seconds) {
 		WebDriver d = getDriver();
-		String mainWindowHandle = d.getWindowHandle();
-		waitFor( seconds, new ExpectedCondition<Boolean>() {
+		LOGGER.debug( "waitForNewWindow: existing=" + windows.getAll() );
+		waitFor(seconds, new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver d) {
-				return (d.getWindowHandles().size() != 1);
+				return (d.getWindowHandles().size() > windows.getAll().size());
 			}
-		} );
+		});
+		Set<String> handles = d.getWindowHandles();
+		LOGGER.debug("waitForNewWindow: handles=" + handles);
 
-		for (String handle : d.getWindowHandles()) {
-			if (!handle.equals(mainWindowHandle)) {
-				LOGGER.debug( "waitForNewWindow: found new window - handle: " + mainWindowHandle );
-				return handle;
-			}
+		handles.removeAll( windows.getAll() );
+		if( handles.size() > 0 ) {
+			String handle = handles.iterator().next();
+            LOGGER.debug( "waitForNewWindow: found new window - handle=" + handle );
+            return handle;
 		}
 		LOGGER.debug("waitForNewWindow: did not find new window");
 		return null;
@@ -242,8 +246,53 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 	@Override
-	public String getWindowHandle() {
-		return getDriver().getWindowHandle();
+	public Windows getWindows() {
+
+		Windows ret = new Windows();
+		WebDriver d = getDriver();
+        ret.setCurrent(d.getWindowHandle());
+		ret.setAll( d.getWindowHandles() );
+		return ret;
+	}
+
+	@Override
+	public void closeWindow(String handle) {
+		Windows win = getWindows();
+		LOGGER.debug( "closeWindow: handle=" + handle + ", windows=" + win );
+		if( !win.isCurrentWindow(handle) ) {
+			switchToWindow( handle );
+			getDriver().close();
+			switchToAnyOtherWindow( win );
+		}
+		else {
+			closeCurrentWindow();
+		}
+	}
+
+	@Override
+	public void closeCurrentWindow() {
+		Windows windows = getWindows();
+		getDriver().close();
+        switchToAnyOtherWindow( windows );
+	}
+
+	@Override
+	public String openWindow( String url ) {
+		activate( null );
+
+		Windows windows = getWindows();
+		String script = "var d=document,a=d.createElement('a');a.target='_blank';a.href='%s';a.innerHTML='.';d.body.appendChild(a);return a";
+		Object element = execute(String.format(script, url));
+		if (element instanceof WebElement) {
+			WebElement anchor = (WebElement) element; anchor.click();
+			execute("var a=arguments[0];a.parentNode.removeChild(a);", anchor);
+			String handle = waitForNewWindow( windows, getController().getTimeout() );
+			LOGGER.debug( "openWindow: new window handle=" + handle );
+			return handle;
+		}
+		else {
+			throw new RuntimeException("Unable to open window: '" + url + "'" );
+		}
 	}
 
 	public void switchToFrameByIndex( int index ) {
@@ -258,6 +307,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	}
 	public void switchToWindow( String nameOrHandle ) {
+		LOGGER.debug( "switchToWindow: window=" + nameOrHandle );
 		switchTo().window(nameOrHandle);
 
 	}
@@ -281,9 +331,6 @@ public class DriverSeleniumService implements SeleniumService {
 	public void refresh() {
 		navigate().refresh();
 	}
-	public void closeWindow() {
-		getDriver().close();
-	}
 
 	@Override
 	public void click(WebElement element) {
@@ -299,7 +346,16 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public void sendKeys(WebElement element, CharSequence... keysToSend) {
-		LOGGER.debug( "sendKeys: element=" + element + ", keysToSend=" + keysToSend );
+		if( LOGGER.isDebugEnabled() ) {
+			StringBuilder builder = new StringBuilder();
+			for( CharSequence ks : keysToSend ) {
+				if( builder.length() > 0 ) {
+					builder.append( "," );
+				}
+				builder.append( "'" + ks + "'" );
+			}
+			LOGGER.debug("sendKeys: element=" + element + ", keysToSend=" + builder );
+		}
 		element.sendKeys( keysToSend );
 	}
 
@@ -395,6 +451,19 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 
+	private String switchToAnyOtherWindow( Windows win ) {
+		for( String handle : win.getNonCurrentWindows() ) {
+			try {
+				switchToWindow( handle );
+				return handle;
+			}
+			catch( NoSuchWindowException ex ) {
+				LOGGER.debug( "switchToAnyOtherWindow: window does not exist: " + handle );
+			}
+		}
+		return null;
+	}
+
 	private Actions actions() {
 		return new Actions(getDriver());
 	}
@@ -441,5 +510,4 @@ public class DriverSeleniumService implements SeleniumService {
 		}
 		throw new RuntimeException( "Unable to complete action within " + seconds + " seconds" );
 	}
-
 }

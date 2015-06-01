@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by david on 5/27/15.
@@ -52,8 +53,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public void execute(String script, Object... args) {
-        delegate.execute( script, args );
+    public Object execute(String script, Object... args) {
+        return delegate.execute( script, args );
     }
 
     @Override
@@ -82,8 +83,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public String waitForNewWindow(int seconds) {
-        return delegate.waitForNewWindow( seconds );
+    public String waitForNewWindow( Windows windows, int seconds) {
+        return delegate.waitForNewWindow( windows, seconds );
     }
 
     @Override
@@ -222,13 +223,23 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public String getWindowHandle() {
-        return delegate.getWindowHandle();
+    public Windows getWindows() {
+        return delegate.getWindows();
     }
 
     @Override
-    public void closeWindow() {
-        delegate.closeWindow();
+    public String openWindow( String url ) {
+        return delegate.openWindow(url);
+    }
+
+    @Override
+    public void closeWindow( String handle ) {
+        delegate.closeWindow( handle );
+    }
+
+    @Override
+    public void closeCurrentWindow() {
+        delegate.closeCurrentWindow();
     }
 
     @Override

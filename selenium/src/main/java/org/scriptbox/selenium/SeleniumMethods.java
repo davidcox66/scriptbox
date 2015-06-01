@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class SeleniumMethods {
@@ -179,13 +180,12 @@ public class SeleniumMethods {
     	return waitFor(seconds, visibilityOf(by));
     }
 
-	public void withNewWindow( boolean close, Closure closure ) {
-		withNewWindow(wait, close, closure);
+	public void withNewWindow( Windows windows, boolean close, Closure closure ) {
+		withNewWindow(windows, close, wait, closure);
 	}
 
-	public void withNewWindow( int seconds, boolean close, Closure closure ) {
-		String mainWindowHandle = service.getWindowHandle();
-		String handle = waitForNewWindow( seconds );
+	public void withNewWindow( Windows windows, boolean close, int seconds, Closure closure ) {
+		String handle = waitForNewWindow( windows, seconds );
 		if( handle != null ) {
 			LOGGER.debug( "withNewWindow: new window - handle: " + handle );
 			switchToWindow( handle );
@@ -195,14 +195,14 @@ public class SeleniumMethods {
 			finally {
 				if( close ) {
 					try {
-						service.closeWindow();
+						service.closeWindow( handle );
 					}
 					catch (Exception ex) {
 						LOGGER.error("Error closing popup window: " + handle);
 					}
 				}
-				LOGGER.debug( "withNewWindow: returning to main window - handle: " + mainWindowHandle );
-				switchToWindow(mainWindowHandle);
+				LOGGER.debug( "withNewWindow: returning to main window - handle: " + windows.getCurrent() );
+				switchToWindow(windows.getCurrent());
 			}
 		}
 		else {
@@ -210,12 +210,12 @@ public class SeleniumMethods {
 		}
 	}
 
-	public void waitForNewWindow() {
-		waitForNewWindow(wait);
+	public void waitForNewWindow( Windows windows ) {
+		waitForNewWindow( windows, wait );
 	}
 
-	public String waitForNewWindow(int seconds) {
-		return service.waitForNewWindow( seconds );
+	public String waitForNewWindow( Windows windows, int seconds) {
+		return service.waitForNewWindow( windows, seconds );
 	}
 
 	public void switchToFrameByIndex( int index ) {
@@ -235,6 +235,19 @@ public class SeleniumMethods {
 	}
 	public WebElement switchToActiveElement() {
 		return service.switchToActiveElement();
+	}
+
+	public Windows getWindows() {
+		return service.getWindows();
+	}
+	public String openWindow( String url ) {
+		return service.openWindow(url);
+	}
+	public void closeWindow( String handle ) {
+		service.closeWindow( handle );
+	}
+	public void closeCurrentWindow() {
+		service.closeCurrentWindow();
 	}
 
 	public void back() {

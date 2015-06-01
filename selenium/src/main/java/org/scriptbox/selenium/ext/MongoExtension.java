@@ -6,6 +6,7 @@ import org.mongojack.JacksonDBCollection;
 import org.mongojack.internal.stream.JacksonDBObject;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.util.common.args.CommandLine;
 
 import java.util.Map;
 
@@ -37,10 +38,18 @@ public class MongoExtension implements Bindable, SeleniumExtension {
     }
 
     public void init( SeleniumExtensionContext ctx ) throws Exception {
-        String address = ctx.getCommandLine().consumeArgValue("mongo", false);
-        if( address != null ) {
-            setAddress( address );
-            bind( ctx.getBinding() );
+        CommandLine cmd = ctx.getCommandLine();
+        if( cmd.hasArgValue("mongo") ) {
+            String address = cmd.consumeArgValue("mongo", false);
+            if (address != null) {
+                setAddress(address);
+                bind(ctx.getBinding());
+            }
+        }
+        else if( cmd.hasArg("mongo") ) {
+            cmd.consumeArg("mongo");
+            setAddress("localhost:27017");
+            bind(ctx.getBinding());
         }
 
     }

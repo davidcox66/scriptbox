@@ -32,6 +32,16 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         super( delegate );
     }
 
+
+    @Override
+    public Object execute(String script, Object... args) {
+        Object ret = super.execute(script, args);
+        if( ret != null && ret instanceof WebElement ) {
+            ret = toSerializable( (WebElement)ret );
+        }
+        return ret;
+    }
+
     @Override
     public boolean activate( ExpectedCondition<Boolean> cond ) {
         return super.activate( toLocal(cond) );
