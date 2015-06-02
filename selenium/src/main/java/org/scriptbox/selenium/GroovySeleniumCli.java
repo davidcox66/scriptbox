@@ -130,22 +130,21 @@ public class GroovySeleniumCli {
     private static void initExtensions( SeleniumExtensionContext ctx ) throws Exception {
 
         List<SeleniumExtension> exts = new ArrayList<SeleniumExtension>();
-        addUserDefinedExtensions( ctx, exts );
-        addPreDefinedExtensions( ctx, exts );
-        ctx.setExtensions( exts );
-
-        for( SeleniumExtension ext : exts )  {
-            ext.init( ctx );
-        }
-    }
-
-    private static void addPreDefinedExtensions( SeleniumExtensionContext ctx, List<SeleniumExtension> exts ) throws Exception {
         exts.add(new CsvExtension() );
         exts.add(new DownloadsExtension());
         exts.add(new MongoExtension());
         exts.add(new QuartzExtension());
         exts.add(ctx.getMethods());
+
+        addUserDefinedExtensions( ctx, exts );
+
         exts.add(new LibsExtension());
+
+        ctx.setExtensions( exts );
+
+        for( SeleniumExtension ext : exts )  {
+            ext.init( ctx );
+        }
     }
 
     private static void addUserDefinedExtensions( SeleniumExtensionContext ctx, List<SeleniumExtension> exts ) throws Exception {
@@ -172,7 +171,7 @@ public class GroovySeleniumCli {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
         	"--script=<script file>  " +
-            "{--client=<server url> [--mongo=[<address>]] [--quartz] [--libs=<files>] [--exts=<files>] | " +
+            "{--client=<server url> [--mongo=[<address>]] [--libs=<files>] [--exts=<files>] | " +
              "--server=<port> [--download-dir=<dir>] [--timeout={<seconds>|30}]} <arg>..." );
         System.exit( 1 );
     }
