@@ -1,14 +1,24 @@
 package org.scriptbox.selenium.ext;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.*;
 import groovy.lang.Binding;
+import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
+import org.mongojack.internal.MongoJackModule;
 import org.mongojack.internal.stream.JacksonDBObject;
+import org.mongojack.internal.util.SerializationUtils;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
 import org.scriptbox.util.common.args.CommandLine;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Created by david on 5/29/15.
@@ -16,10 +26,18 @@ import java.util.Map;
 public class MongoExtension implements Bindable, SeleniumExtension {
 
     private MongoClient client;
+    private ObjectMapper objectMapper;
+    private JavaType type;
+    private Module module = new MongoJackModule();
 
     public MongoExtension() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(module);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        type = objectMapper.constructType( Object.class );
     }
     public MongoExtension(String address) {
+        this();
         setAddress( address );
     }
 
@@ -59,6 +77,24 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         BindUtils.bind( binding, this, "bdo" );
         BindUtils.bind( binding, this, "jbdo" );
         BindUtils.bind( binding, this, "bdl" );
+
+        BindUtils.bind( binding, this, "qEmpty" );
+        BindUtils.bind( binding, this, "qIs" );
+        BindUtils.bind( binding, this, "qLessThan" );
+        BindUtils.bind( binding, this, "qLessThanEquals" );
+        BindUtils.bind( binding, this, "qGreaterThan" );
+        BindUtils.bind( binding, this, "qGreaterThanEquals" );
+        BindUtils.bind( binding, this, "qNotEquals" );
+        BindUtils.bind( binding, this, "qIn" );
+        BindUtils.bind( binding, this, "qNotIn" );
+        BindUtils.bind( binding, this, "qAll" );
+        BindUtils.bind( binding, this, "qSize" );
+        BindUtils.bind( binding, this, "qExists" );
+        BindUtils.bind( binding, this, "qNotExists" );
+        BindUtils.bind( binding, this, "qOr" );
+        BindUtils.bind( binding, this, "qAnd" );
+        BindUtils.bind( binding, this, "qRegex" );
+        BindUtils.bind( binding, this, "qElemMatch" );
     }
 
     public MongoClient getMongoClient() {
@@ -87,6 +123,94 @@ public class MongoExtension implements Bindable, SeleniumExtension {
 
     public BasicDBList bdl() {
         return new BasicDBList();
+    }
+
+    public DBQuery.Query qEmpty() {
+        return DBQuery.empty();
+    }
+
+    public DBQuery.Query qIs( String field, Object value ) {
+        return DBQuery.is( field, value );
+    }
+
+    public DBQuery.Query qLessThan( String field, Object value ) {
+        return DBQuery.lessThan(field, value);
+    }
+
+    public DBQuery.Query qLessThanEquals( String field, Object value ) {
+        return DBQuery.lessThanEquals( field, value );
+    }
+
+    public DBQuery.Query qGreaterThan( String field, Object value ) {
+        return DBQuery.greaterThan(field, value);
+    }
+
+    public DBQuery.Query qGreaterThanEquals( String field, Object value ) {
+        return DBQuery.greaterThanEquals( field, value );
+    }
+
+    public DBQuery.Query qNotEquals( String field, Object value ) {
+        return DBQuery.notEquals(field, value);
+    }
+
+    public DBQuery.Query qIn( String field, Object... values ) {
+        return DBQuery.in(field, values);
+    }
+
+    public DBQuery.Query qIn( String field, Collection<?> values ) {
+        return DBQuery.in( field, values );
+    }
+
+    public DBQuery.Query qNotIn( String field, Object... values ) {
+        return DBQuery.notIn(field, values);
+    }
+
+    public DBQuery.Query qNotIn( String field, Collection<?> values ) {
+        return DBQuery.notIn(field, values);
+    }
+
+    public DBQuery.Query qAll( String field, Object... values ) {
+        return DBQuery.all(field, values);
+    }
+
+    public DBQuery.Query qAll( String field, Collection<?> values ) {
+        return DBQuery.all(field, values);
+    }
+
+    public DBQuery.Query qSize( String field, int size ) {
+        return DBQuery.size(field, size);
+    }
+
+    public DBQuery.Query qExists( String field ) {
+        return DBQuery.in( field );
+    }
+
+    public DBQuery.Query qNotExists( String field ) {
+        return DBQuery.in( field );
+    }
+
+    public DBQuery.Query qOr( DBQuery.Query... queries ) {
+        return DBQuery.or( queries);
+    }
+
+    public DBQuery.Query qAnd( DBQuery.Query... queries ) {
+        return DBQuery.and(queries);
+    }
+
+    public DBQuery.Query qNor( DBQuery.Query... queries ) {
+        return DBQuery.nor(queries);
+    }
+
+    public DBQuery.Query qRegex( String field, Pattern pattern ) {
+        return DBQuery.regex(field, pattern);
+    }
+
+    public DBQuery.Query qElemMatch( String field, DBQuery.Query query ) {
+        return DBQuery.elemMatch(field, query);
+    }
+
+    public DBObject qSerialize( DBQuery.Query query ) {
+        return SerializationUtils.serializeQuery(objectMapper, type, query);
     }
 
     public DBCollection getDbCollection( String dbName, String collectionName ) {

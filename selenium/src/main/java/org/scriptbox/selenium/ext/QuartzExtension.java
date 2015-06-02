@@ -29,15 +29,7 @@ public class QuartzExtension implements Bindable, SeleniumExtension {
     private Scheduler scheduler;
 
     public void init( SeleniumExtensionContext ctx ) {
-        try {
-            if (ctx.getCommandLine().consumeArg("quartz")) {
-                bind(ctx.getBinding());
-                start();
-            }
-        }
-        catch( Exception ex ) {
-            throw new RuntimeException( "Failed initializing Quartz plugin", ex );
-        }
+        bind(ctx.getBinding());
     }
 
     @Override
@@ -67,30 +59,36 @@ public class QuartzExtension implements Bindable, SeleniumExtension {
         schedule(cnt, trigger, closure);
     }
 
-    public void shutdown() {
+    synchronized public void shutdown() {
         try {
-            scheduler.shutdown();
+            if( scheduler != null ) {
+                scheduler.shutdown();
+                scheduler = null;
+            }
         }
         catch( Exception ex ) {
             throw new RuntimeException( "Error shutting down scheduler", ex );
         }
     }
 
-    private void start() {
-        try {
-            Properties props = new Properties();
-            props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID);
-            props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "selenium");
-            props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
-            props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore");
-            props.put("org.quartz.threadPool.threadCount", "" + 1);
+    synchronized private Scheduler getScheduler() {
+        if (scheduler == null) {
+            try {
+                Properties props = new Properties();
+                props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID);
+                props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "selenium");
+                props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
+                props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore");
+                props.put("org.quartz.threadPool.threadCount", "" + 1);
 
-            scheduler = new StdSchedulerFactory(props).getScheduler();
-            scheduler.start();
+                scheduler = new StdSchedulerFactory(props).getScheduler();
+                scheduler.start();
+            }
+            catch (Exception ex) {
+                throw new RuntimeException("Error starting scheduler", ex);
+            }
         }
-        catch( Exception ex ) {
-            throw new RuntimeException( "Error starting scheduler", ex );
-        }
+        return scheduler;
     }
 
     public void schedule( int cnt, Trigger trigger, Closure block ) throws SchedulerException {
@@ -102,7 +100,7 @@ public class QuartzExtension implements Bindable, SeleniumExtension {
         if( LOGGER.isDebugEnabled() ) {
             LOGGER.debug( "schedule: id=" + cnt + ", trigger=" + trigger + ", block=" + block );
         }
-        scheduler.scheduleJob(detail, trigger);
+        getScheduler().scheduleJob(detail, trigger);
     }
 
 }
