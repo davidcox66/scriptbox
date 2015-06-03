@@ -1,16 +1,16 @@
 package org.scriptbox.selenium.ext;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.mongodb.*;
 import groovy.lang.Binding;
 import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
 import org.mongojack.internal.MongoJackModule;
+import org.mongojack.internal.query.QueryCondition;
 import org.mongojack.internal.stream.JacksonDBObject;
+import org.mongojack.internal.util.JacksonAccessor;
 import org.mongojack.internal.util.SerializationUtils;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
@@ -207,10 +207,6 @@ public class MongoExtension implements Bindable, SeleniumExtension {
 
     public DBQuery.Query qElemMatch( String field, DBQuery.Query query ) {
         return DBQuery.elemMatch(field, query);
-    }
-
-    public DBObject qSerialize( DBQuery.Query query ) {
-        return SerializationUtils.serializeQuery(objectMapper, type, query);
     }
 
     public DBCollection getDbCollection( String dbName, String collectionName ) {
