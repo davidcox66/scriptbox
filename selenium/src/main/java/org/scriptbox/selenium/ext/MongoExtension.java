@@ -75,8 +75,9 @@ public class MongoExtension implements Bindable, SeleniumExtension {
     public void bind(Binding binding) {
         BindUtils.bind(binding, this, "getDbCollection");
         BindUtils.bind( binding, this, "bdo" );
-        BindUtils.bind( binding, this, "jbdo" );
+        BindUtils.bind( binding, this, "bdoj" );
         BindUtils.bind( binding, this, "bdl" );
+        BindUtils.bind( binding, this, "bdf" );
 
         BindUtils.bind( binding, this, "qEmpty" );
         BindUtils.bind( binding, this, "qIs" );
@@ -117,12 +118,20 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         return new BasicDBObject( map );
     }
 
-    public <T> JacksonDBObject<T> jbdo( T instance, Class<T> cls ) {
+    public <T> JacksonDBObject<T> bdoj( T instance, Class<T> cls ) {
         return new JacksonDBObject( instance, cls );
     }
 
     public BasicDBList bdl() {
         return new BasicDBList();
+    }
+
+    public DBObject bdf( String... fields ) {
+        BasicDBObject ret = new BasicDBObject( fields.length );
+        for( String field : fields ) {
+            ret.put( field, 1 );
+        }
+        return ret;
     }
 
     public DBQuery.Query qEmpty() {
