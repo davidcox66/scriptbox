@@ -69,6 +69,17 @@ public class GroovySeleniumCli {
             selenium.getOptions().setDownloadDirectory( fd );
         }
 
+        String extdir = cmd.consumeArgValue( "browser-ext-dir", false );
+        if( extdir != null ) {
+            List<File> files = new ArrayList<File>();
+            String extarg = cmd.consumeArgValue("browser-exts", true );
+            String[] exts = extarg.split(",");
+            for( String ext : exts ) {
+                files.add( new File(extdir,ext) );
+            }
+            selenium.getOptions().setExtensions( files );
+        }
+
 		if( selenium.getExe() != null ) {
 			selenium.setPort( port + 1 );
 			setUrl(selenium, "http://localhost:" + (port + 1));
