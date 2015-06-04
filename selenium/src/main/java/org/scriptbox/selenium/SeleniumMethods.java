@@ -67,6 +67,10 @@ public class SeleniumMethods {
 		return new RemotableConditions.AtUrlPattern(pattern);
 	}
 
+	public String getCurrentUrl() {
+		return service.getCurrentUrl();
+	}
+
 	public void connect() {
     	service.connect();
     }

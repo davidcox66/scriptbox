@@ -3,6 +3,7 @@ package org.scriptbox.selenium.driver;
 import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created by david on 5/18/15.
@@ -14,6 +15,7 @@ public class DriverOptions implements Serializable {
     private boolean acceptCertificates;
     private boolean ignoreCertificateErrors;
     private File downloadDirectory;
+    private List<File> extensions;
 
     public URL getUrl() {
         return url;
@@ -53,5 +55,13 @@ public class DriverOptions implements Serializable {
 
     public void setDownloadDirectory(File downloadDirectory) {
         this.downloadDirectory = downloadDirectory;
+    }
+
+    public List<File> getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(List<File> extensions) {
+        this.extensions = extensions;
     }
 }

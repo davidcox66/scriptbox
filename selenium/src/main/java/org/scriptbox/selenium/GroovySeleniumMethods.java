@@ -30,11 +30,6 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( ctx.getBinding() );
 	}
 
-	public void define( String name, Object value ) {
-		LOGGER.trace( "define: name=" + name + ", value=" + value );
-		binding.setVariable(name, value);
-	}
-
 	public void bind( Binding binding ) {
 		this.binding = binding;
 
@@ -126,6 +121,7 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "switchToDefaultContent" );
 		bind( "switchToActiveElement" );
 
+		bind( "getCurrentUrl" );
 		bind( "getWindows" );
 		bind( "openWindow" );
 		bind( "closeWindow" );
@@ -140,8 +136,6 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 
 		bind( "sleep" );
 		bind( "pause" );
-
-		bind("define");
 
 		Logger logger = LoggerFactory.getLogger( "SeleniumScript" );
 		binding.setVariable("log", logger);

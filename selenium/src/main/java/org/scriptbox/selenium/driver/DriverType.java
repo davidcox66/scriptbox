@@ -7,11 +7,15 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by david on 5/18/15.
@@ -35,21 +39,51 @@ public enum DriverType implements Serializable {
 	CHROME("chrome") {
 		public RemoteWebDriver create(DriverOptions options) {
             DesiredCapabilities cap = DesiredCapabilities.chrome();
-            if (options.isIgnoreCertificateErrors()) {
-				// cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-                cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors"));
-            }
+			ChromeOptions co = new ChromeOptions();
+
+			/*
+            if( options.isIgnoreCertificateErrors() ) {
+				cap.setCapability("chrome.switches", Arrays.asList("--ignore-certificate-errors") );
+			}
+			*/
+
+			if( options.isIgnoreCertificateErrors() ) {
+				co.addArguments("ignore-certificate-errors" );
+			}
+
 			File dir = options.getDownloadDirectory();
 			if( dir != null ) {
 				HashMap<String, Object> prefs = new HashMap<String, Object>();
 				prefs.put("profile.default_content_settings.popups", 0);
 				prefs.put("download.default_directory", dir.getAbsolutePath());
 
-				ChromeOptions co = new ChromeOptions();
 				co.setExperimentalOption("prefs", prefs);
+
 				// co.addArguments("--test-type");
-				cap.setCapability(ChromeOptions.CAPABILITY, co);
 			}
+
+			List<File> exts = options.getExtensions();
+			if( exts != null ) {
+				Logger logger = LoggerFactory.getLogger( DriverType.class );
+
+				for (File file : exts) {
+					if (file.exists()) {
+						if (file.isDirectory()) {
+							logger.debug( "chrome: adding extension directory: '" + file.getAbsolutePath() + "'");
+							co.addArguments("load-extension=" + file.getAbsolutePath());
+						}
+						else {
+							logger.debug( "chrome: adding extension file: '" + file.getAbsolutePath() + "'");
+							co.addExtensions(file);
+						}
+					}
+					else {
+						logger.error("chrome: browser extension does not exist: '" + file.getAbsolutePath() + "'");
+					}
+				}
+			}
+
+            cap.setCapability(ChromeOptions.CAPABILITY, co);
 
 			RemoteWebDriver driver = new RemoteWebDriver(options.getUrl(), cap);
 			return (RemoteWebDriver) new Augmenter().augment(driver);
