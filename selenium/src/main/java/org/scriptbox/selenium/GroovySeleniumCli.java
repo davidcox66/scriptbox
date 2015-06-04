@@ -156,7 +156,7 @@ public class GroovySeleniumCli {
                 for( File file : files ) {
                     Class cls = gcl.parseClass( file );
                     if( !SeleniumExtension.class.isAssignableFrom(cls) ) {
-                        throw new RuntimeException( "File does not contain and extension: '" + file.getAbsolutePath() + "'");
+                        throw new RuntimeException( "File does not contain an extension: '" + file.getAbsolutePath() + "'");
                     }
                     SeleniumExtension instance = (SeleniumExtension)cls.newInstance();
                     LOGGER.debug("initExtensions: adding extension - class: " + cls + ", instance=" + instance);
