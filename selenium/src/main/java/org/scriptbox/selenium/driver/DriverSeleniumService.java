@@ -10,9 +10,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.Windows;
 import org.scriptbox.selenium.remoting.RemotableConditions;
-import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +219,7 @@ public class DriverSeleniumService implements SeleniumService {
 	@Override
 	public void mouseDoubleClick(WebElement element) {
 		LOGGER.debug( "mouseDoubleClick: element=" + element );
-		getMouse().doubleClick( getCoordinates(element) );
+		getMouse().doubleClick(getCoordinates(element));
 	}
 
 	@Override
@@ -258,7 +258,7 @@ public class DriverSeleniumService implements SeleniumService {
 	@Override
 	public void closeWindow(String handle) {
 		Windows win = getWindows();
-		LOGGER.debug( "closeWindow: handle=" + handle + ", windows=" + win );
+		LOGGER.debug("closeWindow: handle=" + handle + ", windows=" + win);
 		if( !win.isCurrentWindow(handle) ) {
 			switchToWindow( handle );
 			getDriver().close();
@@ -273,7 +273,7 @@ public class DriverSeleniumService implements SeleniumService {
 	public void closeCurrentWindow() {
 		Windows windows = getWindows();
 		getDriver().close();
-        switchToAnyOtherWindow( windows );
+        switchToAnyOtherWindow(windows);
 	}
 
 	@Override
@@ -356,7 +356,7 @@ public class DriverSeleniumService implements SeleniumService {
 			}
 			LOGGER.debug("sendKeys: element=" + element + ", keysToSend=" + builder );
 		}
-		element.sendKeys( keysToSend );
+		element.sendKeys(keysToSend);
 	}
 
 	@Override
@@ -372,7 +372,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public String getAttribute(WebElement element, String name) {
-		return element.getAttribute( name );
+		return element.getAttribute(name);
 	}
 
 	@Override
@@ -392,7 +392,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public String getCssValue(WebElement element, String propertyName) {
-		return element.getCssValue( propertyName );
+		return element.getCssValue(propertyName);
 	}
 
 	@Override
@@ -421,16 +421,33 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 	@Override
-	public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
-		try {
-			Downloader dl = new Downloader(getDriver());
-			dl.setFollowRedirects(redirects);
-			dl.setUseCookies(cookies);
-			return dl.downloader(element, attribute);
-		}
-		catch( Exception ex ) {
-			throw new RuntimeException( "Failed downloading: element=" + element + ", path=" + path );
-		}
+	public void addCookie(Cookie cookie) {
+		manage().addCookie( cookie );
+	}
+
+	@Override
+	public void deleteCookieNamed(String name) {
+		manage().deleteCookieNamed( name );
+	}
+
+	@Override
+	public void deleteCookie(Cookie cookie) {
+		manage().deleteCookie( cookie );
+	}
+
+	@Override
+	public void deleteAllCookies() {
+		manage().deleteAllCookies();
+	}
+
+	@Override
+	public Cookie getCookieNamed(String name) {
+		return manage().getCookieNamed( name );
+	}
+
+	@Override
+	public Set<Cookie> getCookies() {
+		return manage().getCookies();
 	}
 
 	@Override
@@ -442,7 +459,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	private Coordinates getCoordinates( WebElement element ) {
 		Coordinates ret = ((Locatable) element).getCoordinates();
-		LOGGER.debug( "getCoordinates: element=" + element + ", coordinates=" + ret );
+		LOGGER.debug("getCoordinates: element=" + element + ", coordinates=" + ret);
 		return ret;
 	}
 
@@ -464,6 +481,9 @@ public class DriverSeleniumService implements SeleniumService {
 		return null;
 	}
 
+	private WebDriver.Options manage() {
+		return getDriver().manage();
+	}
 	private Actions actions() {
 		return new Actions(getDriver());
 	}

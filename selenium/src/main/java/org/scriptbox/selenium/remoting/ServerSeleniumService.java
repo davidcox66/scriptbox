@@ -9,8 +9,6 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.scriptbox.selenium.DelegatingSeleniumService;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.driver.DriverSeleniumService;
-import org.scriptbox.selenium.remoting.RemotableCondition;
-import org.scriptbox.selenium.remoting.SeleniumWebElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,12 +198,6 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     @Override
     public WebElement switchToActiveElement() {
         return toSerializable(super.switchToActiveElement());
-    }
-
-
-    @Override
-    public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
-        return super.download( toLocal(element), attribute, path, redirects, cookies );
     }
 
     public List<WebElement> toLocal( List<WebElement> elements ) {

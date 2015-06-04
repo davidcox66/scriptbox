@@ -54,31 +54,8 @@ public class GroovySeleniumCli {
 		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
 		selenium.setExe( cmd.consumeArgValue("exe",false) );
 		selenium.setProfile( cmd.consumeArgValue("profile", false) );
-
-        String dir = cmd.consumeArgValue("download-dir",false);
-        if( dir != null ) {
-            File fd = new File( dir );
-            if( !fd.exists() ) {
-                if( !fd.mkdirs() ) {
-                    throw new RuntimeException( "Download directory '" + dir + "' does not exist and could not be created");
-                }
-                else if( !fd.canWrite() ) {
-                    throw new RuntimeException( "Download directory '" + dir + "' is not writable");
-                }
-            }
-            selenium.getOptions().setDownloadDirectory( fd );
-        }
-
-        String extdir = cmd.consumeArgValue( "browser-ext-dir", false );
-        if( extdir != null ) {
-            List<File> files = new ArrayList<File>();
-            String extarg = cmd.consumeArgValue("browser-exts", true );
-            String[] exts = extarg.split(",");
-            for( String ext : exts ) {
-                files.add( new File(extdir,ext) );
-            }
-            selenium.getOptions().setExtensions( files );
-        }
+        selenium.getOptions().setDownloadDirectory( getDownloadDirectory(cmd) );
+        selenium.getOptions().setExtensions( getBrowserExtensions(cmd) );
 
 		if( selenium.getExe() != null ) {
 			selenium.setPort( port + 1 );
@@ -100,6 +77,39 @@ public class GroovySeleniumCli {
         }
 	}
 
+    private static List<File> getBrowserExtensions( CommandLine cmd ) throws CommandLineException {
+        String extdir = cmd.consumeArgValue( "browser-ext-dir", false );
+        if( extdir != null ) {
+            List<File> files = new ArrayList<File>();
+            String extarg = cmd.consumeArgValue("browser-exts", true );
+            String[] exts = extarg.split(",");
+            for( String ext : exts ) {
+                files.add( new File(extdir,ext) );
+            }
+            return files;
+        }
+        return null;
+
+    }
+    private static File getDownloadDirectory( CommandLine cmd ) throws CommandLineException
+    {
+        String dir = cmd.consumeArgValue("download-dir",false);
+        if( dir != null ) {
+            File fd = new File( dir );
+            if( !fd.exists() ) {
+                if( !fd.mkdirs() ) {
+                    throw new RuntimeException( "Download directory '" + dir + "' does not exist and could not be created");
+                }
+                else if( !fd.canWrite() ) {
+                    throw new RuntimeException( "Download directory '" + dir + "' is not writable");
+                }
+            }
+            return fd;
+        }
+        return null;
+
+    }
+
 	private static void setUrl( SeleniumController controller, String url ) {
 		try {
 			controller.setUrl(new URL(url));
@@ -120,8 +130,8 @@ public class GroovySeleniumCli {
         ctx.setService( service );
         ctx.setCommandLine( cmd );
         ctx.setBinding( binding );
-        ctx.setShell( shell );
-        ctx.setMethods( methods );
+        ctx.setShell(shell);
+        ctx.setMethods(methods);
 
         initExtensions(ctx);
 
@@ -135,7 +145,7 @@ public class GroovySeleniumCli {
 
         File file = new File( script );
         LOGGER.trace("client: running script=" + file);
-        shell.run( file, parameters );
+        shell.run(file, parameters);
 	}
 
     private static void initExtensions( SeleniumExtensionContext ctx ) throws Exception {

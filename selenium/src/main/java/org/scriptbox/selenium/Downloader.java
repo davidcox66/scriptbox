@@ -1,4 +1,4 @@
-package org.scriptbox.selenium.driver;
+package org.scriptbox.selenium;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
@@ -11,13 +11,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.BasicHttpContext;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -28,33 +28,36 @@ public class Downloader implements Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Downloader.class);
 
     private String localDownloadPath = System.getProperty("java.io.tmpdir");
-    private WebDriver driver;
+    private SeleniumService service;
     private boolean followRedirects = true;
     private boolean useCookies = true;
     private int httpStatus = 0;
 
-    public Downloader( WebDriver driver ) {
-        this.driver = driver;
+    public Downloader( SeleniumService service ) {
+        this.service = service;
     }
 
-    public void setFollowRedirects(boolean value) {
+    public Downloader setFollowRedirects(boolean value) {
         this.followRedirects = value;
+        return this;
     }
 
     public String getLocalDownloadPath() {
         return this.localDownloadPath;
     }
 
-    public void setLocalDownloadPath(String filePath) {
+    public Downloader setLocalDownloadPath(String filePath) {
         this.localDownloadPath = filePath;
+        return this;
     }
 
     public int getHttpStatus() {
         return this.httpStatus;
     }
 
-    public void setUseCookies(boolean value) {
+    public Downloader setUseCookies(boolean value) {
         this.useCookies = value;
+        return this;
     }
 
     /**
@@ -102,11 +105,11 @@ public class Downloader implements Serializable {
 
         LOGGER.info("Mimic WebDriver cookie state: " + this.useCookies);
         if (this.useCookies) {
-            localContext.setAttribute(HttpClientContext.COOKIE_STORE, mimicCookieState(this.driver.manage().getCookies()));
+            localContext.setAttribute(HttpClientContext.COOKIE_STORE, mimicCookieState(service.getCookies()));
         }
 
         RequestConfig.Builder builder = RequestConfig.custom();
-        builder.setRedirectsEnabled( true );
+        builder.setRedirectsEnabled(true);
 
         HttpGet httpget = new HttpGet(fileToDownload.toURI());
         httpget.setConfig( builder.build() );
@@ -115,9 +118,11 @@ public class Downloader implements Serializable {
         HttpResponse response = client.execute(httpget, localContext);
         this.httpStatus = response.getStatusLine().getStatusCode();
         LOGGER.info("HTTP GET request status: " + this.httpStatus);
+
         LOGGER.info("Downloading file: " + downloadedFile.getName());
-        FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
-        response.getEntity().getContent().close();
+        InputStream content = response.getEntity().getContent();
+        FileUtils.copyInputStreamToFile(content, downloadedFile);
+        content.close();
 
         String downloadedFileAbsolutePath = downloadedFile.getAbsolutePath();
         LOGGER.info("File downloaded to '" + downloadedFileAbsolutePath + "'");

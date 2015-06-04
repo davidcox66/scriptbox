@@ -1,9 +1,6 @@
 package org.scriptbox.selenium;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 
@@ -93,8 +90,12 @@ public interface SeleniumService {
     void to(URL url);
     void refresh();
 
-    String download( WebElement element, String attribute, String path, boolean redirects, boolean cookies );
+    void addCookie(Cookie cookie);
+    void deleteCookieNamed(String name);
+    void deleteCookie(Cookie cookie);
+    void deleteAllCookies();
+    Cookie getCookieNamed(String name);
+    Set<Cookie> getCookies();
 
     SeleniumServiceOptions getOptions();
-
 }

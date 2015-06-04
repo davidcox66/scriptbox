@@ -1,9 +1,6 @@
 package org.scriptbox.selenium;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
 
@@ -297,8 +294,32 @@ public class DelegatingSeleniumService implements SeleniumService {
         return delegate.getOptions();
     }
 
+    public void addCookie(Cookie cookie) {
+        delegate.addCookie( cookie );
+    }
+
     @Override
-    public String download(WebElement element, String attribute, String path, boolean redirects, boolean cookies) {
-        return delegate.download( element, attribute, path, redirects, cookies );
+    public void deleteCookieNamed(String name) {
+        delegate.deleteCookieNamed( name );
+    }
+
+    @Override
+    public void deleteCookie(Cookie cookie) {
+        delegate.deleteCookie( cookie );
+    }
+
+    @Override
+    public void deleteAllCookies() {
+        delegate.deleteAllCookies();
+    }
+
+    @Override
+    public Cookie getCookieNamed(String name) {
+        return delegate.getCookieNamed( name );
+    }
+
+    @Override
+    public Set<Cookie> getCookies() {
+        return delegate.getCookies();
     }
 }
