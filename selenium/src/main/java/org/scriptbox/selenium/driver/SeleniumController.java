@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.scriptbox.selenium.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ public class SeleniumController {
 
 	private static final int DRIVER_RETRIES = 5;
 	
-    private int timeout;
+    private Timeout timeout = new Timeout();
 
 	private DriverType type;
 	private DriverOptions options = new DriverOptions();
@@ -71,12 +72,15 @@ public class SeleniumController {
 		options.setProfile( profile );
 	}
 
-	public int getTimeout() {
+	public Timeout getTimeout() {
 		return timeout;
 	}
 
-	public void setTimeout(int timeout) {
+	public void setTimeout( Timeout timeout ) {
 		this.timeout = timeout;
+		if( driver != null ) {
+			applyTimeout();
+		}
 	}
 
 	public String getExe() {
@@ -204,10 +208,10 @@ public class SeleniumController {
     	if( !isConnected() ) {
     		LOGGER.debug( "startDriver: starting url: " + options.getUrl() + ", profile: " + options.getProfile() );
 			driver = type.create( options );
-			driver.manage().timeouts().implicitlyWait(timeout > 0 ? timeout : 30, TimeUnit.SECONDS);
+			applyTimeout();
     	}
     }
-    
+
     private void startDriverProcess( int delay ) throws Exception
     {
     	if( StringUtils.isNotEmpty(exe) && process == null ) {
@@ -257,7 +261,22 @@ public class SeleniumController {
         	driver = null;
         }
 	}
-	
+
+	private void applyTimeout() {
+		if( driver != null ) {
+			WebDriver.Timeouts tm = driver.manage().timeouts();
+			if (timeout.getWait() != 0) {
+				tm.implicitlyWait(timeout.getWait(), TimeUnit.SECONDS);
+			}
+			if (timeout.getScript() != 0) {
+				tm.setScriptTimeout(timeout.getScript(), TimeUnit.SECONDS);
+			}
+			if (timeout.getLoad() != 0) {
+				tm.pageLoadTimeout(timeout.getLoad(), TimeUnit.SECONDS);
+			}
+		}
+	}
+
 
     private static Thread consume(InputStream input) {
         Thread thread = new Thread(new LogDumper(input));

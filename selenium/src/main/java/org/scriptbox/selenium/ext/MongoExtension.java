@@ -17,6 +17,7 @@ import java.util.Map;
 public class MongoExtension implements Bindable, SeleniumExtension {
 
     private MongoClient client;
+    private String address;
 
     public MongoExtension() {
     }
@@ -27,33 +28,14 @@ public class MongoExtension implements Bindable, SeleniumExtension {
     }
 
     public void setAddress( String address ) {
-        try {
-            int pos = address.indexOf(":");
-            if (pos != -1) {
-                client = new MongoClient(address.substring(0, pos), Integer.parseInt(address.substring(pos + 1)));
-            } else {
-                client = new MongoClient(address);
-            }
-        }
-        catch (Exception ex) {
-            throw new RuntimeException("Failed connecting to mongo at: '" + address + "'", ex);
-        }
+        this.address = address;
     }
 
     public void init( SeleniumExtensionContext ctx ) throws Exception {
         CommandLine cmd = ctx.getCommandLine();
-        if( cmd.hasArgValue("mongo") ) {
-            String address = cmd.consumeArgValue("mongo", false);
-            if (address != null) {
-                setAddress(address);
-                bind(ctx.getBinding());
-            }
-        }
-        else if( cmd.hasArg("mongo") ) {
-            cmd.consumeArg("mongo");
-            setAddress("localhost:27017");
-            bind(ctx.getBinding());
-        }
+        String addr = cmd.consumeArgValue("mongo", false);
+        setAddress( addr != null ? addr : "localhost:27017");
+        bind(ctx.getBinding());
 
     }
     @Override
@@ -67,10 +49,6 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         // mongojack stuff
         BindUtils.bind( binding, this, "dboj" );
         BindUtils.bind( binding, this, "dbqj" );
-    }
-
-    public MongoClient getMongoClient() {
-        return client;
     }
 
     public BasicDBObject dbo() {
@@ -118,7 +96,7 @@ public class MongoExtension implements Bindable, SeleniumExtension {
     }
 
     public DBCollection dbcoll( String dbName, String collectionName ) {
-        DB db = client.getDB(dbName);
+        DB db = getClient().getDB(dbName);
         return db.getCollection(collectionName);
     }
 
@@ -137,4 +115,21 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         }
         return jack;
     }
+
+    synchronized private MongoClient getClient() {
+        if( client == null ) {
+            try {
+                int pos = address.indexOf(":");
+                if (pos != -1) {
+                    client = new MongoClient(address.substring(0, pos), Integer.parseInt(address.substring(pos + 1)));
+                } else {
+                    client = new MongoClient(address);
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed connecting to mongo at: '" + address + "'", ex);
+            }
+        }
+        return client;
+    }
+
 }

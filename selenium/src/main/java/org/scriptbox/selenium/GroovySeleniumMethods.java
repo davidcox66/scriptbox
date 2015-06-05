@@ -37,6 +37,7 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "screenshot" );
 		bind( "execute" );
 		bind( "executeAsync" );
+		bind( "setTimeout" );
 
 		bind( "isElementExists" );
 		bind( "isElementExistsById" );
@@ -121,7 +122,12 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "switchToDefaultContent" );
 		bind( "switchToActiveElement" );
 
-		bind( "getCurrentUrl" );
+        bind( "alertGetText" );
+        bind( "alertDismiss" );
+        bind( "alertAccept" );
+        bind( "alertSendKeys" );
+
+        bind( "getCurrentUrl" );
 		bind( "getWindows" );
 		bind( "openWindow" );
 		bind( "closeWindow" );

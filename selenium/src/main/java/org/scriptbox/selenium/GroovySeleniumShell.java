@@ -69,13 +69,12 @@ public class GroovySeleniumShell {
 	public void usage( int count, String msg ) {
 		String[] args = (String[])binding.getVariable( "args" );
 		if( args == null || args.length < count ) {
-			System.err.println(msg);
-			System.exit(1);
+            usage( msg );
 		}
 	}
 
 	public void usage( String msg ) {
-		System.err.println( msg );
+		System.err.println( "Usage: " + binding.getVariable("scriptName") + " " + msg );
 		System.exit( 1 );
 	}
 

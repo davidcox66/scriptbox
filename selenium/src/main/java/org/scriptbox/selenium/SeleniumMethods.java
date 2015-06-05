@@ -90,6 +90,14 @@ public class SeleniumMethods {
 			return;
 		}
     }
+
+	public void setTimeout( int load, int wait, int script ) {
+		Timeout tm = new Timeout();
+		tm.setWait( wait );
+		tm.setLoad( load );
+		tm.setScript( script );
+		service.setTimeout( tm );
+	}
     public void pause( int seconds ) {
 		sleep( seconds * 1000 );
     }
@@ -279,7 +287,20 @@ public class SeleniumMethods {
 		return new Select( element );
 	}
 
-	public <X> X waitFor(ExpectedCondition<X> cond) {
+    public String alertGetText() {
+        return service.alertGetText();
+    }
+    public void alertDismiss() {
+        service.alertDismiss();
+    }
+    public void alertAccept() {
+        service.alertAccept();
+    }
+    public void alertSendKeys( String keysToSend ) {
+        service.alertSendKeys( keysToSend );
+    }
+
+    public <X> X waitFor(ExpectedCondition<X> cond) {
     	return waitFor(wait, cond);
     }
     

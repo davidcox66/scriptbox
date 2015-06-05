@@ -50,6 +50,11 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
+    public void setTimeout(Timeout timeout) {
+        delegate.setTimeout( timeout );
+    }
+
+    @Override
     public Object execute(String script, Object... args) {
         return delegate.execute( script, args );
     }
@@ -175,8 +180,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public List<WebElement> findElements(WebElement element, By by) {
-        return delegate.findElements(element, by);
+    public List<WebElement> findElements(WebElement element, By by, int seconds) {
+        return delegate.findElements(element, by, seconds);
     }
 
     @Override
@@ -321,5 +326,25 @@ public class DelegatingSeleniumService implements SeleniumService {
     @Override
     public Set<Cookie> getCookies() {
         return delegate.getCookies();
+    }
+
+    @Override
+    public String alertGetText() {
+        return delegate.alertGetText();
+    }
+
+    @Override
+    public void alertDismiss() {
+        delegate.alertDismiss();
+    }
+
+    @Override
+    public void alertAccept() {
+        delegate.alertAccept();
+    }
+
+    @Override
+    public void alertSendKeys(String keysToSend) {
+        delegate.alertSendKeys( keysToSend );
     }
 }

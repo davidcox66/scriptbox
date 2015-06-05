@@ -2,6 +2,7 @@ package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
+import org.codehaus.groovy.tools.shell.Command;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
 import org.scriptbox.selenium.ext.*;
@@ -50,9 +51,14 @@ public class GroovySeleniumCli {
     }
 
 	private static void server( int port, CommandLine cmd ) throws Exception {
+        Timeout timeout = new Timeout();
+        timeout.setWait( cmd.consumeArgValueAsInt( "timeout", false) );
+        timeout.setWait( cmd.consumeArgValueAsInt( "script-timeout", false) );
+        timeout.setWait(cmd.consumeArgValueAsInt("load-timeout", false));
+
 		SeleniumController selenium = new SeleniumController( getDriverType(cmd) );
-		selenium.setTimeout( cmd.consumeArgValueAsInt( "timeout", false) );
-		selenium.setExe( cmd.consumeArgValue("exe",false) );
+		selenium.setTimeout( timeout );
+		selenium.setExe(cmd.consumeArgValue("exe", false));
 		selenium.setProfile( cmd.consumeArgValue("profile", false) );
         selenium.getOptions().setDownloadDirectory( getDownloadDirectory(cmd) );
         selenium.getOptions().setExtensions( getBrowserExtensions(cmd) );
@@ -126,6 +132,11 @@ public class GroovySeleniumCli {
         GroovySeleniumMethods methods = new GroovySeleniumMethods( service );
         GroovySeleniumShell shell = new GroovySeleniumShell( binding );
 
+        int wait = cmd.consumeArgValueAsInt( "timeout", false );
+        if( wait > 0 ) {
+            methods.setWait( wait );
+        }
+
         SeleniumExtensionContext ctx = new SeleniumExtensionContext();
         ctx.setService( service );
         ctx.setCommandLine( cmd );
@@ -136,17 +147,31 @@ public class GroovySeleniumCli {
         initExtensions(ctx);
 
         List<String> parameters = cmd.getParameters();
-        String script = cmd.consumeArgValue("script", true);
-        if( !script.endsWith(".groovy") ) {
-            script += ".groovy";
-        }
-
+        File file = getScriptFile( cmd );
         cmd.checkUnusedArgs();
 
-        File file = new File( script );
+        setScriptName( binding, file );
+
         LOGGER.trace("client: running script=" + file);
         shell.run(file, parameters);
 	}
+
+    private static File getScriptFile( CommandLine cmd ) throws CommandLineException {
+        String script = cmd.consumeArgValue("script", true);
+        if (!script.endsWith(".groovy")) {
+            script += ".groovy";
+        }
+        return new File(script);
+    }
+
+    private static void setScriptName( Binding binding, File file ) {
+        String scriptName = file.getName();
+        int pos = scriptName.lastIndexOf(".");
+        if( pos != -1 ) {
+            scriptName = scriptName.substring(0,pos);
+        }
+        binding.setVariable( "scriptName", scriptName );
+    }
 
     private static void initExtensions( SeleniumExtensionContext ctx ) throws Exception {
 
@@ -193,7 +218,8 @@ public class GroovySeleniumCli {
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
         	"--script=<script file>  " +
             "{--client=<server url> [--mongo=[<address>]] [--libs=<files>] [--exts=<files>] | " +
-             "--server=<port> [--download-dir=<dir>] [--timeout={<seconds>|30}]} <arg>..." );
+             "--server=<port> [--download-dir=<dir>] [--timeout={<seconds>|30}] [--script-timeout=<seconds>] [--load-timeout=<seconds>] " +
+            "[--browser-ext-dir=<directory> --browser-exts=<ext...>] } <arg>..." );
         System.exit( 1 );
     }
 

@@ -1,14 +1,16 @@
 package org.scriptbox.selenium.remoting;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
+import org.eclipse.jetty.server.Server;
+import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.scriptbox.selenium.DelegatingSeleniumService;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.driver.DriverSeleniumService;
+import org.scriptbox.selenium.driver.RetryableAction;
+import org.scriptbox.selenium.driver.ServiceHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.WeakHashMap;
  * Created by david on 5/27/15.
  */
 public class ServerSeleniumService extends DelegatingSeleniumService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerSeleniumService.class);
 
     private Map<String,WebElement> elementsById = new WeakHashMap<String,WebElement>();
 
@@ -47,7 +51,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
 
     @Override
     public WebElement getElement(By by) {
-        return toSerializable(super.getElement(by));
+        return toSerializable(super.getElement(by), by);
     }
 
     @Override
@@ -57,17 +61,17 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
 
     @Override
     public WebElement waitForElement(By by, int seconds) {
-        return toSerializable(super.waitForElement(by, seconds));
+        return toSerializable(super.waitForElement(by, seconds), by);
     }
 
     @Override
     public WebElement clickElement(By by, int seconds) {
-        return toSerializable(super.clickElement(by, seconds));
+        return toSerializable(super.clickElement(by, seconds), by);
     }
 
     @Override
     public WebElement moveToBy(By by, int seconds) {
-        return toSerializable(super.moveToBy(by, seconds));
+        return toSerializable(super.moveToBy(by, seconds), by);
     }
 
     @Override
@@ -151,8 +155,32 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     @Override
-    public List<WebElement> findElements(WebElement element, By by) {
-        return toSerializable(super.findElements(toLocal(element), by));
+    public List<WebElement> findElements( final WebElement element, final By by, final int seconds ) {
+        class Holder
+        {
+            public WebElement element;
+        }
+        final Holder holder = new Holder();
+        holder.element = toLocal(element);
+        return ServiceHelper.actionWithRetry(30, new RetryableAction<List<WebElement>>() {
+            public List<WebElement> run(int seconds) {
+                try {
+                    return toSerializable( ServerSeleniumService.super.findElements(holder.element, by, seconds) );
+                }
+                catch (WebDriverException ex) {
+                    if (ServiceHelper.isRetryableException(ex)) {
+                        SeleniumWebElement sel = (SeleniumWebElement)element;
+                        elementsById.remove( sel.getId() );
+                        if( sel.getBy() != null ) {
+                            LOGGER.debug("findElements: refetching element by='" + sel.getBy() + "'");
+                            holder.element = ServerSeleniumService.super.getElement(sel.getBy());
+                            addToCache( holder.element );
+                        }
+                    }
+                    throw ex;
+                }
+            }
+        });
     }
 
     @Override
@@ -221,6 +249,9 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
                 if( ret == null ) {
                     ret = delegate.getElement(By.id(id));
                 }
+                if( sel.getBy() != null ) {
+                    ret = delegate.getElement(sel.getBy());
+                }
             }
             else if( element instanceof RemoteWebElement) {
                 ret = element;
@@ -251,16 +282,21 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
     }
 
     public WebElement toSerializable( WebElement element ) {
+        return toSerializable( element, null );
+    }
+
+    public WebElement toSerializable( WebElement element, By by ) {
         WebElement ret = null;
         if( element != null ) {
             if( element instanceof SeleniumWebElement ) {
                 ret = element;
             }
             else if( element instanceof RemoteWebElement) {
-                RemoteWebElement rel = (RemoteWebElement)element;
-                String id = rel.getId();
-                ret = new SeleniumWebElement(id, this );
-                elementsById.put( id, rel );
+                SeleniumWebElement sel = new SeleniumWebElement(addToCache(element), this );
+                if( by != null ) {
+                    sel.setBy( by );
+                }
+                ret = sel;
             }
             else {
                 throw new RuntimeException( "Unknown web element type: " + element );
@@ -269,4 +305,10 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         return ret;
     }
 
+    private String addToCache( WebElement element ) {
+        RemoteWebElement rel = (RemoteWebElement)element;
+        String id = rel.getId();
+        elementsById.put( id, rel );
+        return id;
+    }
 }

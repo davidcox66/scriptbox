@@ -7,10 +7,12 @@ import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.internal.Coordinates;
 import org.openqa.selenium.internal.Locatable;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.scriptbox.selenium.SeleniumService;
+import org.scriptbox.selenium.Timeout;
 import org.scriptbox.selenium.Windows;
 import org.scriptbox.selenium.remoting.RemotableConditions;
 import org.scriptbox.selenium.remoting.SeleniumServiceOptions;
@@ -22,20 +24,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class DriverSeleniumService implements SeleniumService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( DriverSeleniumService.class );
-    private static final int RETRY_SECONDS = 1;
-
 	private SeleniumController controller;
 
-	public interface WebElementAction
-	{
-		WebElement run(int seconds);
-	}
-
-	public DriverSeleniumService()  {
+    public DriverSeleniumService()  {
 	}
 
 	public DriverSeleniumService( SeleniumController controller )  {
@@ -73,6 +69,20 @@ public class DriverSeleniumService implements SeleniumService {
 	public void quit() {
     	getController().quit();
     }
+
+	@Override
+	public void setTimeout(Timeout timeout) {
+		WebDriver.Timeouts tm = getDriver().manage().timeouts();
+		if( timeout.getWait() != 0 ) {
+			tm.implicitlyWait( timeout.getWait(), TimeUnit.SECONDS);
+		}
+		if( timeout.getScript() != 0 ) {
+			tm.setScriptTimeout(timeout.getScript(), TimeUnit.SECONDS);
+		}
+		if( timeout.getLoad() != 0 ) {
+			tm.pageLoadTimeout(timeout.getLoad(), TimeUnit.SECONDS);
+		}
+	}
 
 	@Override
 	public void get(String url) {
@@ -160,7 +170,7 @@ public class DriverSeleniumService implements SeleniumService {
     
     @Override
 	public WebElement clickElement(final By by, final int seconds) {
-		return actionWithRetry(seconds, new WebElementAction() {
+		return ServiceHelper.actionWithRetry(seconds, new RetryableAction<WebElement>() {
 			public WebElement run(int seconds) {
 				WebElement element = waitFor(seconds, new RemotableConditions.ClickableAny(by));
 				LOGGER.debug("clickElement: clicking  by: " + by);
@@ -172,7 +182,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public WebElement moveToBy(final By by, final int seconds) {
-		return actionWithRetry(seconds, new WebElementAction() {
+		return ServiceHelper.actionWithRetry(seconds, new RetryableAction<WebElement>() {
 			public WebElement run(int seconds) {
 				WebElement element = waitFor(seconds, new RemotableConditions.ClickableAny(by));
 				LOGGER.debug("moveToElement: moving  by: " + by);
@@ -184,7 +194,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public WebElement moveToElement(final WebElement element, final int seconds) {
-		return actionWithRetry(seconds, new WebElementAction() {
+		return ServiceHelper.actionWithRetry(seconds, new RetryableAction<WebElement>() {
 			public WebElement run(int seconds) {
 				LOGGER.debug("moveToElement: moving  to: " + element);
 				actions().moveToElement(element);
@@ -278,7 +288,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public String openWindow( String url ) {
-		activate( null );
+		activate(null);
 
 		Windows windows = getWindows();
 		String script = "var d=document,a=d.createElement('a');a.target='_blank';a.href='%s';a.innerHTML='.';d.body.appendChild(a);return a";
@@ -286,7 +296,8 @@ public class DriverSeleniumService implements SeleniumService {
 		if (element instanceof WebElement) {
 			WebElement anchor = (WebElement) element; anchor.click();
 			execute("var a=arguments[0];a.parentNode.removeChild(a);", anchor);
-			String handle = waitForNewWindow( windows, getController().getTimeout() );
+			Timeout tm = getController().getTimeout();
+			String handle = waitForNewWindow( windows, getDefaultWait() );
 			LOGGER.debug( "openWindow: new window handle=" + handle );
 			return handle;
 		}
@@ -303,7 +314,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	}
 	public void switchToFrameByElement( WebElement element ) {
-		switchTo().frame( element );
+		switchTo().frame(element);
 
 	}
 	public void switchToWindow( String nameOrHandle ) {
@@ -381,8 +392,8 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 	@Override
-	public List<WebElement> findElements(WebElement element, By by) {
-		return  element.findElements(by);
+	public List<WebElement> findElements( final WebElement element, final By by, int seconds ) {
+        return element.findElements(by);
 	}
 
 	@Override
@@ -442,7 +453,7 @@ public class DriverSeleniumService implements SeleniumService {
 
 	@Override
 	public Cookie getCookieNamed(String name) {
-		return manage().getCookieNamed( name );
+		return manage().getCookieNamed(name);
 	}
 
 	@Override
@@ -450,7 +461,32 @@ public class DriverSeleniumService implements SeleniumService {
 		return manage().getCookies();
 	}
 
-	@Override
+    @Override
+    public String alertGetText() {
+        String ret = alert().getText();
+        LOGGER.debug( "alertGetText: text=" + ret );
+        return ret;
+    }
+
+    @Override
+    public void alertDismiss() {
+        LOGGER.debug( "alertDismiss: entered" );
+        alert().dismiss();
+    }
+
+    @Override
+    public void alertAccept() {
+        LOGGER.debug( "alertAccept: entered" );
+        alert().accept();
+    }
+
+    @Override
+    public void alertSendKeys(String keysToSend) {
+        LOGGER.debug( "alertSendKeys: keysToSend=" + keysToSend );
+        alert().sendKeys( keysToSend );
+    }
+
+    @Override
 	public SeleniumServiceOptions getOptions() {
 		SeleniumServiceOptions ret = new SeleniumServiceOptions();
 		ret.setDownloadDirectory( getController().getOptions().getDownloadDirectory() );
@@ -492,42 +528,23 @@ public class DriverSeleniumService implements SeleniumService {
 		return getDriver().navigate();
 	}
 
+    private Alert alert() {
+        return switchTo().alert();
+    }
+
 	private WebDriver.TargetLocator switchTo() {
 		return getDriver().switchTo();
 	}
 
-	private boolean isRetryableException( WebDriverException ex ) {
-		return (ex.getMessage() != null && ex.getMessage().indexOf( "Element is not clickable") >= 0) ||
-				ex instanceof StaleElementReferenceException;
-	}
-
-	private WebElement actionWithRetry( final int seconds, WebElementAction action ) {
-		Exception last = null;
-		long timeout = System.currentTimeMillis() + (seconds * 1000);
-		while( System.currentTimeMillis() <= timeout ) {
-			try {
-				int sec = (int)(timeout - System.currentTimeMillis())  / 1000;
-				if( sec > 0 ) {
-					return action.run(sec);
-				}
-			}
-			catch( WebDriverException ex ) {
-				if( !isRetryableException(ex) ) {
-					throw ex;
-				}
-				last = ex;
-				LOGGER.debug( "actionWithRetry: retrying...", ex );
-				try {
-					Thread.sleep( RETRY_SECONDS * 1000 );
-				}
-				catch( InterruptedException ex2 ) {
-					LOGGER.debug( "actionWithRetry: interrupted", ex2 );
-				}
-			}
-			catch( Exception ex ) {
-				LOGGER.error( "actionWithRetry: unexpected exception", ex );
-			}
-		}
-		throw new RuntimeException( "Unable to complete action within " + seconds + " seconds" );
-	}
+    private int getDefaultWait() {
+        Timeout tm = getController().getTimeout();
+        int wait = tm.getLoad();
+        if (wait == 0) {
+            wait = tm.getWait();
+        }
+        if (wait == 0) {
+            wait = 30;
+        }
+        return wait;
+    }
 }

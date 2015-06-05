@@ -15,6 +15,7 @@ import java.util.List;
 public class SeleniumWebElement implements WebElement, Serializable {
 
     private String id;
+    private By by;
     private transient SeleniumService service;
 
     public SeleniumWebElement() {
@@ -90,7 +91,7 @@ public class SeleniumWebElement implements WebElement, Serializable {
 
     @Override
     public List<WebElement> findElements(By by) {
-        return service.findElements(this, by);
+        return service.findElements(this, by, 0);
     }
 
     @Override
@@ -116,5 +117,13 @@ public class SeleniumWebElement implements WebElement, Serializable {
     @Override
     public String getCssValue(String propertyName) {
         return service.getCssValue( this, propertyName );
+    }
+
+    public By getBy() {
+        return by;
+    }
+
+    public void setBy(By by) {
+        this.by = by;
     }
 }

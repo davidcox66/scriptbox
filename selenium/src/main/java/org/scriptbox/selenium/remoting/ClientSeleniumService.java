@@ -61,8 +61,8 @@ public class ClientSeleniumService extends DelegatingSeleniumService {
     }
 
     @Override
-    public List<WebElement> findElements(WebElement element, By by) {
-        return toLocal(super.findElements(element, by));
+    public List<WebElement> findElements(WebElement element, By by, int seconds) {
+        return toLocal(super.findElements(element, by, seconds));
     }
 
     @Override

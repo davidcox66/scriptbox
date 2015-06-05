@@ -23,6 +23,8 @@ public interface SeleniumService {
 
     void quit();
 
+    void setTimeout( Timeout timeout );
+
     void get(String url);
 
     Object execute(String script, Object... args);
@@ -63,7 +65,7 @@ public interface SeleniumService {
     String getTagName( WebElement element );
     String getAttribute( WebElement element, String name );
     String getText( WebElement element );
-    List<WebElement> findElements( WebElement element, By by );
+    List<WebElement> findElements( WebElement element, By by, int seconds );
     WebElement findElement( WebElement element, By by );
     String getCssValue( WebElement element, String propertyName );
     boolean isDisplayed( WebElement element );
@@ -96,6 +98,11 @@ public interface SeleniumService {
     void deleteAllCookies();
     Cookie getCookieNamed(String name);
     Set<Cookie> getCookies();
+
+    String alertGetText();
+    void alertDismiss();
+    void alertAccept();
+    void alertSendKeys( String keysToSend );
 
     SeleniumServiceOptions getOptions();
 }
