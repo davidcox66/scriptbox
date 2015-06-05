@@ -1,6 +1,5 @@
 package org.scriptbox.selenium.remoting;
 
-import org.eclipse.jetty.server.Server;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -311,4 +310,35 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
         elementsById.put( id, rel );
         return id;
     }
+
+    /*
+    private void actionWithRetryAndRelocate( final WebElement element ) {
+        class Holder
+        {
+            public WebElement element;
+        }
+        final Holder holder = new Holder();
+        holder.element = toLocal(element);
+        return ServiceHelper.actionWithRetry(30, new RetryableAction<List<WebElement>>() {
+            public List<WebElement> run(int seconds) {
+                try {
+                    return toSerializable( ServerSeleniumService.super.findElements(holder.element, by, seconds) );
+                }
+                catch (WebDriverException ex) {
+                    if (ServiceHelper.isRetryableException(ex)) {
+                        SeleniumWebElement sel = (SeleniumWebElement)element;
+                        elementsById.remove( sel.getId() );
+                        if( sel.getBy() != null ) {
+                            LOGGER.debug("findElements: refetching element by='" + sel.getBy() + "'");
+                            holder.element = ServerSeleniumService.super.getElement(sel.getBy());
+                            addToCache( holder.element );
+                        }
+                    }
+                    throw ex;
+                }
+            }
+        });
+
+    }
+    */
 }

@@ -18,36 +18,26 @@ public interface SeleniumService {
     boolean activate( ExpectedCondition<Boolean> cond );
 
     void connect();
-
     void disconnect();
-
     void quit();
 
-    void setTimeout( Timeout timeout );
-
     void get(String url);
+    void back();
+    void forward();
+    void to(URL url);
+    void refresh();
 
     Object execute(String script, Object... args);
-
     void executeAsync(String script, Object... args);
 
     boolean isElementExists(By by);
-
     WebElement getElement(By by);
-
     List<WebElement> getElements(By by);
-
     WebElement waitForElement(By by, int seconds);
-
-    String waitForNewWindow( Windows windows, int seconds);
-
-    <X> X waitFor(int seconds, ExpectedCondition<X> cond);
-
     WebElement clickElement(By by, int seconds);
-
     WebElement moveToBy(By by, int seconds);
-
     WebElement moveToElement(WebElement element, int seconds);
+    <X> X waitFor(int seconds, ExpectedCondition<X> cond);
 
     void mouseDown(WebElement element);
     void mouseUp(WebElement element);
@@ -79,6 +69,7 @@ public interface SeleniumService {
     String openWindow( String url );
     void closeWindow( String handle );
     void closeCurrentWindow();
+    String waitForNewWindow( Windows windows, int seconds);
 
     void switchToFrameByIndex( int index );
     void switchToFrameByNameOrId( String nameOrId );
@@ -86,11 +77,6 @@ public interface SeleniumService {
     void switchToWindow( String nameOrHandle );
     void switchToDefaultContent();
     WebElement switchToActiveElement();
-
-    void back();
-    void forward();
-    void to(URL url);
-    void refresh();
 
     void addCookie(Cookie cookie);
     void deleteCookieNamed(String name);
@@ -104,5 +90,6 @@ public interface SeleniumService {
     void alertAccept();
     void alertSendKeys( String keysToSend );
 
+    void setTimeout( Timeout timeout );
     SeleniumServiceOptions getOptions();
 }
