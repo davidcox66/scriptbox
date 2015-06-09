@@ -48,6 +48,4 @@ public class ServiceHelper {
         }
         throw new RuntimeException( "Unable to complete action within " + seconds + " seconds" );
     }
-
-
 }
