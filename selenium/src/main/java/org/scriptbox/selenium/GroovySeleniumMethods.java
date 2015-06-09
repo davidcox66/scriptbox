@@ -33,8 +33,10 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 	public void bind( Binding binding ) {
 		this.binding = binding;
 
+		BindUtils.bind( binding, this, "$", "get" );
+		bind( "get" );
+
 		bind( "load" );
-        bind( "get" );
         bind( "locate" );
         bind( "exists" );
         bind( "click" );
