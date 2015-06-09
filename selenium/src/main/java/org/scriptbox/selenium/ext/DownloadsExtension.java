@@ -1,7 +1,6 @@
 package org.scriptbox.selenium.ext;
 
 import groovy.lang.Binding;
-import org.scriptbox.selenium.HttpConnect;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
@@ -47,8 +46,8 @@ public class DownloadsExtension implements Bindable, SeleniumExtension {
 
     }
 
-    public HttpConnect http() {
-        return new HttpConnect( service );
+    public HttpConnector http() {
+        return new HttpConnector( service );
     }
 
     public File[] getDownloads() {

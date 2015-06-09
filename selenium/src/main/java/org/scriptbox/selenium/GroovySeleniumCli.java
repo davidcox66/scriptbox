@@ -2,7 +2,6 @@ package org.scriptbox.selenium;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
-import org.codehaus.groovy.tools.shell.Command;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
 import org.scriptbox.selenium.ext.*;
@@ -13,7 +12,7 @@ import org.scriptbox.util.remoting.jetty.JettyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +177,7 @@ public class GroovySeleniumCli {
         List<SeleniumExtension> exts = new ArrayList<SeleniumExtension>();
         exts.add(new CsvExtension() );
         exts.add(new DownloadsExtension());
+        exts.add(new HttpConnectorExtension());
         exts.add(new MongoExtension());
         exts.add(new QuartzExtension());
         exts.add(ctx.getMethods());
