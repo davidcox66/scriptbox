@@ -33,48 +33,17 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 	public void bind( Binding binding ) {
 		this.binding = binding;
 
-		bind( "get" );
+		bind( "load" );
+        bind( "get" );
+        bind( "locate" );
+        bind( "exists" );
+        bind( "click" );
+        bind( "move" );
 		bind( "screenshot" );
 		bind( "execute" );
 		bind( "executeAsync" );
 		bind( "setTimeout" );
-
-		bind( "isElementExists" );
-		bind( "isElementExistsById" );
-		bind( "isElementExistsByName" );
-		bind( "isElementExistsByXpath" );
-		bind( "isElementExistsByCss" );
-
-		bind( "getElement" );
-		bind( "getElements" );
-		bind( "getElementById" );
-		bind( "getElementByName" );
-		bind( "getElementByXpath" );
-		bind( "getElementsByXpath" );
-		bind( "getElementByCss" );
-		bind( "getElementsByCss" );
-
-		bind( "waitFor" );
-		bind( "waitForElement" );
-		bind( "waitForElementById" );
-		bind( "waitForElementByName" );
-		bind( "waitForElementByXpath" );
-		bind( "waitForElementByCss" );
-
-		bind( "clickElement" );
-		bind( "clickElementById" );
-		bind( "clickElementByName" );
-		bind( "clickElementByXpath" );
-		bind( "clickElementByCss" );
-
-		bind( "moveToElement" );
-		bind( "moveToElementById" );
-		bind( "moveToElementByName" );
-		bind( "moveToElementByXpath" );
-		bind( "moveToElementByCss" );
-
-		bind( "withNewWindow" );
-		bind( "waitForNewWindow" );
+        bind( "waitFor" );
 
 		bind( "mouseDown" );
 		bind( "mouseUp" );
@@ -94,6 +63,7 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "byAll" );
 		bind( "byAny" );
 		bind( "byChained" );
+        bind( "byGuess" );
 
 		bind( "presenceOf" );
 		bind( "presenceOfAll" );
@@ -121,17 +91,19 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 		bind( "switchToWindow" );
 		bind( "switchToDefaultContent" );
 		bind( "switchToActiveElement" );
+        bind( "withNewWindow" );
+        bind( "waitForNewWindow" );
+
+        bind( "getCurrentUrl" );
+        bind( "getWindows" );
+        bind( "openWindow" );
+        bind( "closeWindow" );
+        bind( "closeCurrentWindow" );
 
         bind( "alertGetText" );
         bind( "alertDismiss" );
         bind( "alertAccept" );
         bind( "alertSendKeys" );
-
-        bind( "getCurrentUrl" );
-		bind( "getWindows" );
-		bind( "openWindow" );
-		bind( "closeWindow" );
-		bind( "closeCurrentWindow" );
 
 		bind( "back" );
 		bind( "forward" );

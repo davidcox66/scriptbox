@@ -45,8 +45,8 @@ public class DelegatingSeleniumService implements SeleniumService {
     }
 
     @Override
-    public void get(String url) {
-        delegate.get( url );
+    public void load(String url) {
+        delegate.load(url);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package org.scriptbox.selenium.ext;
 
 import groovy.lang.Binding;
+import org.scriptbox.selenium.HttpConnect;
+import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ public class DownloadsExtension implements Bindable, SeleniumExtension {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadsExtension.class);
 
     private File downloadDirectory;
+    private SeleniumService service;
 
     public DownloadsExtension() {
     }
@@ -27,6 +30,7 @@ public class DownloadsExtension implements Bindable, SeleniumExtension {
     }
 
     public void init( SeleniumExtensionContext ctx ) {
+        service = ctx.getService();
         File dir = ctx.getService().getOptions().getDownloadDirectory();
         if( dir != null ) {
             downloadDirectory = dir;
@@ -39,7 +43,12 @@ public class DownloadsExtension implements Bindable, SeleniumExtension {
         BindUtils.bind(binding, this, "getLatestDownload");
         BindUtils.bind( binding, this, "getDownloads" );
         BindUtils.bind( binding, this, "purge" );
+        BindUtils.bind( binding, this, "http" );
 
+    }
+
+    public HttpConnect http() {
+        return new HttpConnect( service );
     }
 
     public File[] getDownloads() {

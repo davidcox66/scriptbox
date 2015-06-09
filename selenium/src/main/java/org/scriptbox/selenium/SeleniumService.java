@@ -25,7 +25,7 @@ public interface SeleniumService {
 
     void setTimeout( Timeout timeout );
 
-    void get(String url);
+    void load(String url);
 
     Object execute(String script, Object... args);
 

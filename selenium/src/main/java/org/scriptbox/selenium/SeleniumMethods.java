@@ -21,7 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public class SeleniumMethods {
@@ -31,6 +30,36 @@ public class SeleniumMethods {
 
 	protected int wait = DEFAULT_WAIT;
     protected SeleniumService service;
+
+    private static final String[] CSS_DELIM = {
+            "#",
+            ".",
+            ">",
+            "[",
+            " "
+    };
+
+    private static final String[] HTML_TAGS = {
+            "div",
+            "span",
+            "h1",
+            "h2",
+            "h3",
+            "body",
+            "form",
+            "input",
+            "button",
+            "img",
+            "select",
+            "table",
+            "tbody",
+            "tr",
+            "td",
+            "ul",
+            "li",
+            "a",
+            "p"
+    };
 
 	public SeleniumMethods()  {
 	}
@@ -102,8 +131,8 @@ public class SeleniumMethods {
 		sleep( seconds * 1000 );
     }
     
-	public void get(String url) {
-    	service.get(url);
+	public void load(String url) {
+    	service.load(url);
     }
     
 	public void execute(String script, Object... args) {
@@ -114,81 +143,39 @@ public class SeleniumMethods {
 		service.execute(script, args);
     }
 
-	public boolean isElementExistsById(String id) {
-        return isElementExists( byId(id) );
+    public boolean exists( String val ) {
+        return exists( byGuess(val) );
     }
-	public boolean isElementExistsByName(String name) {
-        return isElementExists( byName(name) );
-    }
-	public boolean isElementExistsByXpath(String xpath) {
-        return isElementExists( byXpath(xpath) );
-    }
-	public boolean isElementExistsByCss(String css) {
-        return isElementExists(byCss(css));
-    }
-    
-	public boolean isElementExists(By by) {
+	public boolean exists(By by) {
 		return service.isElementExists(by);
     }
     
-	public WebElement getElementById(final String id) {
-    	return getElement(byId(id));
+	public WebElement get(final String id) {
+    	return get(byGuess(id));
     }
-	public WebElement getElementByName(final String name) {
-    	return getElement(byName(name));
-    }
-	public WebElement getElementByXpath(final String xpath) {
-    	return getElement(byXpath(xpath));
-    }
-	public List<WebElement> getElementsByXpath(final String xpath) {
-    	return service.getElements(byXpath(xpath));
-    }
-	public WebElement getElementByCss(String selector) {
-    	return getElement(byCss(selector));
-    }
-	public List<WebElement> getElementsByCss(String selector) {
-		return getElements(byCss(selector));
-	}
-	public List<WebElement> getElements(String selector) {
-    	return getElements(byCss(selector));
-    }
-    
-	public WebElement getElement(By by) {
+
+	public WebElement get(By by) {
 		return service.getElement(by);
     }
-	public List<WebElement> getElements(By by) {
-		return service.getElements(by);
+
+    public List<WebElement> getAll( String val ) {
+        return getAll( byGuess(val) );
     }
-    
-	public WebElement waitForElementById(final String id) {
-    	return waitForElementById(id, wait) ;
+    public List<WebElement> getAll( By by ) {
+        return service.getElements( by );
     }
-	public WebElement waitForElementById(final String id, final int seconds) {
-    	return waitForElement(byId(id), seconds) ;
+
+    public WebElement locate( String val ) {
+        return locate( byGuess(val) );
     }
-	public WebElement waitForElementByName(final String name) {
-    	return waitForElementByName(name, wait) ;
+
+    public WebElement locate( String val, int seconds ) {
+        return locate( byGuess(val), seconds );
     }
-	public WebElement waitForElementByName(final String name, final int seconds) {
-    	return waitForElement(byName(name), seconds) ;
+	public WebElement locate(final By by) {
+    	return locate(by, wait);
     }
-	public WebElement waitForElementByXpath(final String xpath) {
-    	return waitForElementByXpath(xpath, wait) ;
-    }
-	public WebElement waitForElementByXpath(final String xpath, final int seconds) {
-    	return waitForElement(byXpath(xpath), seconds) ;
-    }
-	public WebElement waitForElementByCss(final String selector) {
-    	return waitForElementByCss(selector, wait) ;
-    }
-	public WebElement waitForElementByCss(final String selector, final int seconds) {
-    	return waitForElement(byCss(selector), seconds) ;
-    }
-    
-	public WebElement waitForElement(final By by) {
-    	return waitForElement(by, wait);
-    }
-	public WebElement waitForElement(final By by, final int seconds) {
+	public WebElement locate(final By by, final int seconds) {
     	return waitFor(seconds, visibilityOf(by));
     }
 
@@ -308,71 +295,33 @@ public class SeleniumMethods {
 		return service.waitFor(seconds, cond);
     }
     
-	public WebElement clickElementById(final String id) {
-    	return clickElementById(id, wait) ;
+    public WebElement click( String val ) {
+        return click( val, wait );
     }
-	public WebElement clickElementById(final String id, final int seconds) {
-    	return clickElement(byId(id), seconds) ;
+
+    public WebElement click( String val, int seconds ) {
+        return click( byGuess(val), seconds );
     }
-	public WebElement clickElementByName(final String name) {
-    	return clickElementByName(name, wait) ;
-    }
-	public WebElement clickElementByName(final String name, final int seconds) {
-    	return clickElement(byName(name), seconds) ;
-    }
-    
-	public WebElement clickElementByXpath(final String xpath) {
-    	return clickElementByXpath(xpath, wait) ;
-    }
-	public WebElement clickElementByXpath(final String xpath, final int seconds) {
-    	return clickElement(byXpath(xpath), seconds) ;
-    }
-    
-	public WebElement clickElementByCss(final String selector) {
-    	return clickElementByCss(selector, wait) ;
-    }
-	public WebElement clickElementByCss(final String selector, final int seconds) {
-    	return clickElement(byCss(selector), seconds) ;
-    }
-    
-	public WebElement clickElement(final By by, final int seconds) {
+
+	public WebElement click(final By by, final int seconds) {
 		return service.clickElement(by, seconds);
     }
 
-	public WebElement moveToElementById(final String id) {
-		return moveToElementById(id, wait) ;
-	}
-	public WebElement moveToElementById(final String id, final int seconds) {
-		return moveToElement(byId(id), seconds) ;
-	}
-	public WebElement moveToElementByName(final String name) {
-		return moveToElementByName(name, wait) ;
-	}
-	public WebElement moveToElementByName(final String name, final int seconds) {
-		return moveToElement(byName(name), seconds) ;
-	}
-	public WebElement moveToElementByXpath(final String xpath) {
-		return moveToElementByXpath(xpath, wait) ;
-	}
-	public WebElement moveToElementByXpath(final String xpath, final int seconds) {
-		return moveToElement(byXpath(xpath), seconds) ;
-	}
-	public WebElement moveToElementByCss(final String selector) {
-		return moveToElementByCss(selector, wait) ;
-	}
-	public WebElement moveToElementByCss(final String selector, final int seconds) {
-		return moveToElement(byCss(selector), seconds) ;
-	}
-
-	public WebElement moveToElement(final By by, final int seconds) {
+    public WebElement move(String val ) {
+        return move( byGuess(val), wait );
+    }
+    public WebElement move(String val, final int seconds) {
+        return move( byGuess(val), seconds ) ;
+    }
+	public WebElement move(final By by, final int seconds) {
 		return service.moveToBy(by, seconds);
 	}
 
-	public WebElement moveToElement(WebElement element) {
-		return moveToElement(element, wait);
+	public WebElement move(WebElement element) {
+		return move(element, wait);
 	}
 
-	public WebElement moveToElement(final WebElement element, final int seconds) {
+	public WebElement move(final WebElement element, final int seconds) {
 		return service.moveToElement(element, seconds);
 	}
 
@@ -482,6 +431,59 @@ public class SeleniumMethods {
     
 	public ExpectedCondition<WebElement> clickableAny(final By by) {
 		return new RemotableConditions.ClickableAny( by );
+    }
+
+    public By byGuess( String val ) {
+        if( isXpath(val) ) {
+           return byXpath( val );
+        }
+        else if( isCss(val) ) {
+            return byCss( val );
+        }
+        else {
+            return byId( val );
+        }
+    }
+
+    public boolean isXpath( String val ) {
+        return val.startsWith( "/" );
+    }
+
+    public boolean isCss( String val ) {
+        if( isCssDelim(val.substring(0,1)) ) {
+            return true;
+        }
+        else {
+            String tag = getHtmlTag( val );
+            if( tag != null ) {
+                int len = tag.length();
+                if( val.length() > len ) {
+                    String next = val.substring(len, len+1);
+                    return isCssDelim(next);
+                }
+                return true;
+
+            }
+            return false;
+        }
+    }
+
+    public boolean isCssDelim( String val ) {
+        for( String sym : CSS_DELIM ) {
+            if( val.equals(sym) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getHtmlTag( String val ) {
+        for( String tag : HTML_TAGS ) {
+            if( val.startsWith(tag) ) {
+                return tag;
+            }
+        }
+        return null;
     }
 
 	public By byId(String val) {

@@ -85,8 +85,8 @@ public class DriverSeleniumService implements SeleniumService {
 	}
 
 	@Override
-	public void get(String url) {
-    	LOGGER.debug( "get: url='" + url + "'" );
+	public void load(String url) {
+    	LOGGER.debug( "load: url='" + url + "'" );
     	getDriver().get(url);
     }
     
