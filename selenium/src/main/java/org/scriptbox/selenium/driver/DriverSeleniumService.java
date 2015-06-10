@@ -185,7 +185,7 @@ public class DriverSeleniumService implements SeleniumService {
 		return ServiceHelper.actionWithRetry(seconds, new RetryableAction<WebElement>() {
 			public WebElement run(int seconds) {
 				WebElement element = waitFor(seconds, new RemotableConditions.ClickableAny(by));
-				LOGGER.debug("moveToElement: moving  by: " + by);
+				LOGGER.debug("moveToElement: moving  by: " + by + ", element: " + element );
 				actions().moveToElement(element);
 				return element;
 			}

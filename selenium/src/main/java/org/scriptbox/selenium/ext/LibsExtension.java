@@ -25,7 +25,12 @@ public class LibsExtension implements SeleniumExtension {
             List<File> files = CommandLineUtil.resolveFiles(libs, ".groovy");
             for (File file : files) {
                 LOGGER.trace( "init: running lib=" + file );
-                shell.run(file, parameters);
+                try {
+                    shell.run(file, parameters);
+                }
+                catch( Exception ex ) {
+                    throw new RuntimeException( "Failed initializing library: " + file.getAbsolutePath(), ex );
+                }
             }
         }
     }

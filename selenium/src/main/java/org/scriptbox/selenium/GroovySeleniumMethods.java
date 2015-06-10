@@ -116,11 +116,6 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
 
 		bind( "sleep" );
 		bind( "pause" );
-
-		Logger logger = LoggerFactory.getLogger( "SeleniumScript" );
-		binding.setVariable("log", logger);
-		binding.setVariable("logger", logger);
-		binding.setVariable("LOGGER", logger);
 	}
 
 	public void bind( String name ) {

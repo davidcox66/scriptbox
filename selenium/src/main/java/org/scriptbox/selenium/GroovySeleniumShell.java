@@ -37,7 +37,10 @@ public class GroovySeleniumShell {
 		BindUtils.bind(binding, this, "exit");
 		BindUtils.bind(binding, this, "usage");
 
+        binding.setVariable( "binding", binding );
+
 		engine = new GroovyShell( binding );
+
 
     }
 

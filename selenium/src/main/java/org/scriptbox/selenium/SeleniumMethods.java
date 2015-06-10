@@ -278,7 +278,7 @@ public class SeleniumMethods {
     }
 
     public WebElement move(String val ) {
-        return move( byGuess(val), wait );
+        return move( val, wait );
     }
     public WebElement move(String val, final int seconds) {
         return move( byGuess(val), seconds ) ;
