@@ -184,7 +184,7 @@ public class ServerSeleniumService extends DelegatingSeleniumService {
 
     @Override
     public WebElement findElement(WebElement element, By by) {
-        return super.findElement(toLocal(element), by);
+        return toSerializable(super.findElement(toLocal(element), by));
     }
 
     @Override

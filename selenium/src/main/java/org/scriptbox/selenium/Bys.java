@@ -101,7 +101,7 @@ public class Bys {
     }
 
     public static boolean isXpath( String val ) {
-        return val.startsWith( "/" );
+        return val.startsWith( "/" ) || val.startsWith("./");
     }
 
     public static boolean isCss( String val ) {
