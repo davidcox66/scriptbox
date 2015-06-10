@@ -176,6 +176,7 @@ public class GroovySeleniumCli {
 
         List<SeleniumExtension> exts = new ArrayList<SeleniumExtension>();
         exts.add(new CsvExtension() );
+        exts.add(new JodaExtension() );
         exts.add(new DownloadsExtension());
         exts.add(new HttpConnectorExtension());
         exts.add(new MongoExtension());

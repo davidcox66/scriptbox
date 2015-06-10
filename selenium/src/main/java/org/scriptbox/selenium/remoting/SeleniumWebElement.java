@@ -1,10 +1,14 @@
 package org.scriptbox.selenium.remoting;
 
+import groovy.lang.GroovyObjectSupport;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.scriptbox.selenium.Bys;
 import org.scriptbox.selenium.SeleniumService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +16,9 @@ import java.util.List;
 /**
  * Created by david on 5/26/15.
  */
-public class SeleniumWebElement implements WebElement, Serializable {
+public class SeleniumWebElement extends GroovyObjectSupport implements WebElement, Serializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeleniumWebElement.class);
 
     private String id;
     private By by;
@@ -125,5 +131,41 @@ public class SeleniumWebElement implements WebElement, Serializable {
 
     public void setBy(By by) {
         this.by = by;
+    }
+
+    public Object propertyMissing(String name) {
+        Object ret =  getAttribute( name );
+        if( ret == null ) {
+            LOGGER.warn( "propertyMissing: attribute '" + name + "' not found");
+        }
+        return ret;
+    }
+
+    public Object methodMissing(String name, Object[] args) {
+        Object ret =  getAttribute( name );
+        if( ret == null ) {
+            LOGGER.warn( "methodMissing: attribute '" + name + "' not found");
+        }
+        return ret;
+    }
+
+    public WebElement get( String str ) {
+        return get( Bys.byGuess(str) ) ;
+    }
+    public WebElement get( By by) {
+        return service.findElement( this, by );
+    }
+
+    public List<WebElement> getAll( String str ) {
+        return getAll( Bys.byGuess(str) );
+    }
+
+    public List<WebElement> getAll( By by ) {
+        return service.findElements( this, by, 0 );
+    }
+
+    public WebElement leftShift( CharSequence val ) {
+        sendKeys( val );
+        return this;
     }
 }
