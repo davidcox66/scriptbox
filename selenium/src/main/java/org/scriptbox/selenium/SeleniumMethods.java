@@ -335,15 +335,27 @@ public class SeleniumMethods {
 		service.screenshot(file);
     }
 
+    public ExpectedCondition<WebElement> presenceOf(String val) {
+        return presenceOf( byGuess(val) );
+    }
 	public ExpectedCondition<WebElement> presenceOf(By by) {
 		return new RemotableConditions.PresenceOf( by );
+    }
+    public ExpectedCondition<List<WebElement>> presenceOfAll(String val) {
+        return presenceOfAll( byGuess(val) );
     }
 	public ExpectedCondition<List<WebElement>> presenceOfAll(By by) {
 		return new RemotableConditions.PresenceOfAll( by );
     }
 
+    public ExpectedCondition<WebElement> visibilityOf(String val) {
+        return visibilityOf( byGuess(val) );
+    }
 	public ExpectedCondition<WebElement> visibilityOf(By by) {
 		return new RemotableConditions.VisibilityOf( by );
+    }
+    public ExpectedCondition<List<WebElement>> visibilityOfAll(String val) {
+        return visibilityOfAll(byGuess(val));
     }
 	public ExpectedCondition<List<WebElement>> visibilityOfAll(By by) {
 		return new RemotableConditions.VisibilityOfAll( by );
@@ -352,8 +364,14 @@ public class SeleniumMethods {
 		return new RemotableConditions.VisibilityOfElement( element );
     }
 
+    public ExpectedCondition<Boolean> invisibilityOf(String val) {
+        return invisibilityOf(byGuess(val));
+    }
 	public ExpectedCondition<Boolean> invisibilityOf(By by) {
 		return new RemotableConditions.InvisibilityOf( by );
+    }
+    public ExpectedCondition<Boolean> invisibilityOf(String val, String text) {
+        return invisibilityOf( byGuess(val), text );
     }
 	public ExpectedCondition<Boolean> invisibilityOf(By by, String text) {
 		return new RemotableConditions.InvisibilityOfWithText( by, text );
@@ -361,14 +379,23 @@ public class SeleniumMethods {
 	public ExpectedCondition<Boolean> invisibilityOf(WebElement element) {
 		return new RemotableConditions.InvisibilityOfElement( element );
 	}
+    public ExpectedCondition<Boolean> invisibilityOfAll(String val) {
+        return invisibilityOfAll( byGuess(val) );
+    }
 	public ExpectedCondition<Boolean> invisibilityOfAll(By by) {
 		return new RemotableConditions.InvisibilityOfAll( by );
 	}
+    public ExpectedCondition<Boolean> textPresent(String val, String text) {
+        return textPresent( byGuess(val), text );
+    }
 	public ExpectedCondition<Boolean> textPresent(By by, String text) {
 		return new RemotableConditions.TextPresent( by, text );
     }
 	public ExpectedCondition<Boolean> textPresent(WebElement element, String text) {
 		return new RemotableConditions.TextPresentInElement( element, text );
+    }
+    public ExpectedCondition<Boolean> valuePresent(String val, String text) {
+        return valuePresent( byGuess(val), text );
     }
 	public ExpectedCondition<Boolean> valuePresent(By by, String text) {
 		return new RemotableConditions.ValuePresent( by, text );
@@ -376,9 +403,15 @@ public class SeleniumMethods {
 	public ExpectedCondition<Boolean> valuePresent(WebElement element, String text) {
 		return new RemotableConditions.ValuePresentInElement( element, text );
     }
-    
+
+    public ExpectedCondition<Boolean> selected( String val) {
+        return selected( byGuess(val) );
+    }
 	public ExpectedCondition<Boolean> selected(By by) {
     	return selected( by, true );
+    }
+    public ExpectedCondition<Boolean> selected(String val, boolean sel) {
+        return selected( byGuess(val), sel );
     }
 	public ExpectedCondition<Boolean> selected(By by, boolean sel) {
 		return new RemotableConditions.Selected( by, sel );
@@ -387,18 +420,27 @@ public class SeleniumMethods {
 	public ExpectedCondition<Boolean> selected(WebElement element) {
 		return new RemotableConditions.SelectedElement( element );
     }
-    
+
+    public ExpectedCondition<WebElement> clickable(String val) {
+        return clickable( byGuess(val) );
+    }
 	public ExpectedCondition<WebElement> clickable(By by) {
 		return new RemotableConditions.Clickable( by );
     }
 	public ExpectedCondition<WebElement> clickable(WebElement element) {
 		return new RemotableConditions.ClickableElement( element );
     }
-    
+
+    public ExpectedCondition<List<WebElement>> clickableAll(String val) {
+        return clickableAll( byGuess(val) );
+    }
 	public ExpectedCondition<List<WebElement>> clickableAll(final By by) {
 		return new RemotableConditions.ClickableAll( by );
     }
-    
+
+    public ExpectedCondition<WebElement> clickableAny(String val) {
+        return clickableAny( byGuess(val) );
+    }
 	public ExpectedCondition<WebElement> clickableAny(final By by) {
 		return new RemotableConditions.ClickableAny( by );
     }
