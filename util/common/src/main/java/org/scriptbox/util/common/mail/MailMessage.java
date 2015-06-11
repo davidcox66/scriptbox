@@ -1,8 +1,4 @@
-package org.scriptbox.panopticon.mail;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+package org.scriptbox.util.common.mail;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -14,15 +10,26 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 public class MailMessage {
 
 	private boolean html;
 	private Message message;
 	private List<MimeBodyPart> parts = new ArrayList<MimeBodyPart>();
-	
-	public MailMessage() {
-		Session session = Session.getDefaultInstance(System.getProperties(), null);
+
+    public MailMessage() {
+        this( System.getProperties() );
+    }
+
+    public MailMessage( Properties properties ) {
+        this( Session.getInstance(properties, null) );
+    }
+
+	public MailMessage( Session session ) {
 	    message = new MimeMessage(session);
 	}
 	
@@ -48,7 +55,7 @@ public class MailMessage {
 			throw new RuntimeException( "Failed setting FROM address: '" + from + "'", ex );
 		}
 	}
-	
+
 	public void addTo( String... tos ) {
 		addRecipients( Message.RecipientType.TO, "TO", tos );
 	}

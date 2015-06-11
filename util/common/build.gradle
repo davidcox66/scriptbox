@@ -4,6 +4,8 @@ dependencies {
 	compile project(":deps:logging")
 	compile commonsLangDepend
 	compile commonsIoDepend
+    compile javaxMailDepend
+    compile javaxActivationDepend
 	testCompile junitDepend
 }
 

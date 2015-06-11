@@ -1,9 +1,11 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.offline;
 
 import groovy.lang.Binding;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.SeleniumExtension;
+import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,12 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.offline;
 
 import groovy.lang.Binding;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.SeleniumExtension;
+import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 
 import java.io.File;
 import java.io.IOException;

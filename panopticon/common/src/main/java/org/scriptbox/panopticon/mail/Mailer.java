@@ -1,5 +1,7 @@
 package org.scriptbox.panopticon.mail;
 
+import org.scriptbox.util.common.mail.MailMessage;
+
 import javax.mail.Session;
 import java.util.Properties;
 

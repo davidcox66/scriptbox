@@ -5,6 +5,11 @@ import groovy.lang.GroovyClassLoader;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
 import org.scriptbox.selenium.ext.*;
+import org.scriptbox.selenium.ext.offline.CsvExtension;
+import org.scriptbox.selenium.ext.offline.DownloadsExtension;
+import org.scriptbox.selenium.ext.offline.HttpConnectorExtension;
+import org.scriptbox.selenium.ext.event.EventBusExtension;
+import org.scriptbox.selenium.ext.contact.ContactExtension;
 import org.scriptbox.selenium.remoting.ClientSeleniumService;
 import org.scriptbox.util.common.args.CommandLine;
 import org.scriptbox.util.common.args.CommandLineException;
@@ -175,12 +180,15 @@ public class GroovySeleniumCli {
     private static void initExtensions( SeleniumExtensionContext ctx ) throws Exception {
 
         List<SeleniumExtension> exts = new ArrayList<SeleniumExtension>();
+        exts.add(new UtilsExtension() );
         exts.add(new CsvExtension() );
         exts.add(new JodaExtension() );
         exts.add(new DownloadsExtension());
         exts.add(new HttpConnectorExtension());
         exts.add(new MongoExtension());
         exts.add(new QuartzExtension());
+        exts.add(new EventBusExtension());
+        exts.add(new ContactExtension());
         exts.add(ctx.getMethods());
 
         addUserDefinedExtensions( ctx, exts );

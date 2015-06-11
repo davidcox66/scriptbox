@@ -1,9 +1,11 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.offline;
 
 import groovy.lang.Binding;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.SeleniumExtension;
+import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,28 +41,23 @@ public class DownloadsExtension implements Bindable, SeleniumExtension {
 
     @Override
     public void bind(Binding binding) {
-        BindUtils.bind(binding, this, "getLatestDownload");
-        BindUtils.bind( binding, this, "getDownloads" );
+        BindUtils.bind( binding, this, "latest");
+        BindUtils.bind( binding, this, "downloads" );
         BindUtils.bind( binding, this, "purge" );
-        BindUtils.bind( binding, this, "http" );
 
     }
 
-    public HttpConnector http() {
-        return new HttpConnector( service );
-    }
-
-    public File[] getDownloads() {
+    public File[] downloads() {
         File[] ret = downloadDirectory.listFiles();
         LOGGER.debug( "getDownloads: dir=" + downloadDirectory + ", files=" + ret );
         return ret;
     }
 
-    public File getLatestDownload() {
-        return getLatestDownload( 10, 2 );
+    public File latest() {
+        return latest( 10, 2 );
     }
 
-    public File getLatestDownload( int wait, int quiet ) {
+    public File latest( int wait, int quiet ) {
         if( waitForAnyFileToAppear(wait) ) {
             File ret = waitForQuiet( quiet );
             LOGGER.debug( "getLatestDownload: dir=" + downloadDirectory + ", latest=" + ret );
