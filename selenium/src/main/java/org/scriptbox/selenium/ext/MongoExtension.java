@@ -1,9 +1,12 @@
 package org.scriptbox.selenium.ext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.mongodb.*;
 import groovy.lang.Binding;
 import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
+import org.mongojack.internal.MongoJackModule;
 import org.mongojack.internal.stream.JacksonDBObject;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
@@ -108,7 +111,12 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         boolean stream )
     {
         DBCollection coll = dbcoll(dbName,collectionName);
-        JacksonDBCollection<E, K> jack = JacksonDBCollection.wrap(coll, elementType, keyType);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule( new JodaModule() );
+        MongoJackModule.configure(objectMapper);
+
+        JacksonDBCollection<E, K> jack = JacksonDBCollection.wrap(coll, elementType, keyType, objectMapper);
         if( stream ) {
             jack.enable(JacksonDBCollection.Feature.USE_STREAM_SERIALIZATION);
             jack.enable(JacksonDBCollection.Feature.USE_STREAM_DESERIALIZATION);

@@ -29,6 +29,7 @@ dependencies {
 	compile commonsCsvDepend
 	compile mongoDriverDepend
 	compile mongoJackDepend
+    compile jacksonJodaDepend
 	compile quartzDepend
 	compile jodaDepend
 	compile groovyDepend

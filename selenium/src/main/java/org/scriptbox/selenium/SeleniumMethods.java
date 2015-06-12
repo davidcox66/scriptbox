@@ -485,5 +485,4 @@ public class SeleniumMethods {
     public By byGuess( String val ) {
         return Bys.byGuess( val );
     }
-
 }

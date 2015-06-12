@@ -109,14 +109,14 @@ ext {
 	// slf4jVersion = "1.6.1"
 	logbackVersion = "0.9.24"
 
-    groovyVersion = "2.0.7"
+    groovyVersion = "2.4.3"
     hibernateVersion = "4.1.10.Final"
 	// hibernateVersion = "4.1.9.Final"
     springVersion = "3.2.8.RELEASE"
     springSecurityVersion = "3.2.1.RELEASE"
 	// springVersion = "3.1.1.RELEASE"
     // springSecurityVersion = "3.1.4.RELEASE"
-    jacksonVersion = "1.9.2"
+    jacksonVersion = "2.4.0"
     spockVersion = "0.7-groovy-2.0"
 	cxfVersion = "2.6.1"
 	// jettyVersion = "8.0.0.M2"
@@ -378,9 +378,18 @@ ext {
 			exclude group: "stax", module: "stax-api"
 		}
 	]
+
+    jacksonCoreDepend = "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+    jacksonAnnotationsDepend = "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    jacksonDatabindDepend = "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    jacksonSmileDepend = "com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jacksonVersion}"
+    jacksonJaxrsDepend = "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
+    jacksonJaxbDepend = "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
+    jacksonJodaDepend = "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jacksonVersion}"
+
+    // Used by cassandra
 	jacksonCoreAslDepend = "org.codehaus.jackson:jackson-core-asl:${jacksonVersion}"
 	jacksonMapperAslDepend = "org.codehaus.jackson:jackson-mapper-asl:${jacksonVersion}"
-	jacksonDatabindDepend = "com.fasterxml.jackson.core:jackson-databind:2.3.1"
 
 	staxDepend = [ "stax:stax:1.2.0_rc2-dev", {
 			exclude group: "stax", module: "stax-api"

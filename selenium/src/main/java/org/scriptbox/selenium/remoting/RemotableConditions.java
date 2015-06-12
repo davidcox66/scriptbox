@@ -353,5 +353,4 @@ public class RemotableConditions {
             return current != null && pattern.matcher(current).matches();
         }
     }
-
 }
