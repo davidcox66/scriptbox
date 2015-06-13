@@ -16,7 +16,7 @@ import java.util.List;
 public class SeleniumExtensionContext {
 
     private SeleniumService service;
-    private Binding binding;
+    private Binding binding = new Binding();
     private CommandLine commandLine;
     private GroovySeleniumShell shell;
     private GroovySeleniumMethods methods;

@@ -11,7 +11,7 @@
   </appender>
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <File>/tmp/monitor.log</File>
+    <File>/tmp/selenium.log</File>
     <Append>false</Append>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
       <Pattern>[%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%method] [%msg]%n</Pattern>

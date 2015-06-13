@@ -4,13 +4,10 @@ import groovy.lang.GroovyClassLoader;
 import org.scriptbox.selenium.CommandLineUtil;
 import org.scriptbox.selenium.ext.contact.ContactExtension;
 import org.scriptbox.selenium.ext.event.EventBusExtension;
+import org.scriptbox.selenium.ext.misc.*;
 import org.scriptbox.selenium.ext.offline.CsvExtension;
 import org.scriptbox.selenium.ext.offline.DownloadsExtension;
 import org.scriptbox.selenium.ext.offline.HttpConnectorExtension;
-import org.scriptbox.selenium.ext.misc.UtilsExtension;
-import org.scriptbox.selenium.ext.misc.JodaExtension;
-import org.scriptbox.selenium.ext.misc.MongoExtension;
-import org.scriptbox.selenium.ext.misc.QuartzExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +35,7 @@ public class SeleniumExtensions {
         context.setExtensions(extensions);
 
         extensions.add(new ShellExtension());
+        extensions.add(new CredentialsExtension());
         extensions.add(new UtilsExtension());
         extensions.add(new CsvExtension());
         extensions.add(new JodaExtension());

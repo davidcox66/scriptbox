@@ -9,7 +9,7 @@ JAVA_OPTS="\
 
 if [[ "$@" = *--trace* ]] ; then
     JAVA_OPTS="$JAVA_OPTS -Dfine.level=DEBUG"
-    JAVA_OPTS="$JAVA_OPTS -Dfine.level=DEBUG"
+    JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
 elif [[ "$@" = *--debug* ]] ; then
     JAVA_OPTS="$JAVA_OPTS -Ddebug.level=DEBUG"
 fi

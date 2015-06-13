@@ -5,6 +5,8 @@ import groovy.lang.GroovyClassLoader;
 import org.scriptbox.selenium.driver.DriverType;
 import org.scriptbox.selenium.driver.SeleniumController;
 import org.scriptbox.selenium.ext.*;
+import org.scriptbox.selenium.ext.misc.Credentials;
+import org.scriptbox.selenium.ext.misc.CredentialsExtension;
 import org.scriptbox.selenium.ext.offline.CsvExtension;
 import org.scriptbox.selenium.ext.offline.DownloadsExtension;
 import org.scriptbox.selenium.ext.offline.HttpConnectorExtension;
@@ -41,19 +43,23 @@ public class GroovySeleniumCli {
 
             context = new SeleniumExtensionContext();
             context.setCommandLine( cmd );
-            context.setBinding( new Binding() );
 
             extensions = new SeleniumExtensions( context );
             extensions.init();
 
-    		boolean cli = cmd.hasArgValue("client");
+            if( cmd.hasArg("set-credentials") ) {
+                credentials();
+            }
+            else {
+                boolean cli = cmd.hasArgValue("client");
 
-    		if( cli ) {
-				client();
-    		}
-			else {
-				server();
-    		}
+                if (cli) {
+                    client();
+                }
+                else {
+                    server();
+                }
+            }
         }
     	catch( CommandLineException ex ) {
             ex.printStackTrace( System.err );
@@ -62,6 +68,17 @@ public class GroovySeleniumCli {
         catch(Exception ex ) {
             ex.printStackTrace( System.err );
         }
+    }
+
+    private static void credentials() throws Exception {
+        LOGGER.info( "credentials: setting credentials");
+        CredentialsExtension ext = new CredentialsExtension();
+        ext.setup( cmd );
+        String entry = cmd.consumeArgValue("entry",true);
+        String user = cmd.consumeArgValue("user",true);
+        String pass = cmd.consumeArgValue("pass",true);
+        Credentials creds = new Credentials( entry, user, pass );
+        ext.setKeystoreCredentials( creds );
     }
 
     private static void client() throws Exception {
