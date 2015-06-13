@@ -1,6 +1,7 @@
 package org.scriptbox.selenium.ext.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -131,9 +132,10 @@ public class MongoExtension extends AbstractSeleniumExtension {
         module.addSerializer(BigDecimal.class, new ToStringSerializer());
         objectMapper.registerModule(module);
 
-        objectMapper.registerModule( new JodaModule() );
-
         MongoJackModule.configure(objectMapper);
+
+        objectMapper.registerModule( new JodaModule() );
+        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         JacksonDBCollection<E, K> jack = JacksonDBCollection.wrap(coll, elementType, keyType, objectMapper);
         if( stream ) {
