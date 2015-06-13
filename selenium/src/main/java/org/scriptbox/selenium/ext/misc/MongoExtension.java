@@ -1,4 +1,4 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -9,7 +9,9 @@ import org.mongojack.JacksonDBCollection;
 import org.mongojack.internal.MongoJackModule;
 import org.mongojack.internal.stream.JacksonDBObject;
 import org.scriptbox.selenium.bind.BindUtils;
-import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
+import org.scriptbox.selenium.ext.SeleniumExtension;
+import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.scriptbox.util.common.args.CommandLine;
 
 import java.util.Map;
@@ -17,32 +19,25 @@ import java.util.Map;
 /**
  * Created by david on 5/29/15.
  */
-public class MongoExtension implements Bindable, SeleniumExtension {
+public class MongoExtension extends AbstractSeleniumExtension {
 
     private MongoClient client;
     private String address;
 
-    public MongoExtension() {
+
+    public void init( SeleniumExtensionContext context ) {
+        super.init( context );
+        context.addUsage( "[--mongo=[<address>]" );
     }
 
-    public MongoExtension(String address) {
-        this();
-        setAddress( address );
-    }
-
-    public void setAddress( String address ) {
-        this.address = address;
-    }
-
-    public void init( SeleniumExtensionContext ctx ) throws Exception {
-        CommandLine cmd = ctx.getCommandLine();
+    public void configure() throws Exception {
+        CommandLine cmd = context.getCommandLine();
         String addr = cmd.consumeArgValue("mongo", false);
         setAddress( addr != null ? addr : "localhost:27017");
-        bind(ctx.getBinding());
-
+        bind(context.getBinding());
     }
-    @Override
-    public void bind(Binding binding) {
+
+    private void bind(Binding binding) {
         BindUtils.bind(binding, this, "dbcoll");
         // com.mongo stuff
         BindUtils.bind( binding, this, "dbo" );
@@ -52,6 +47,10 @@ public class MongoExtension implements Bindable, SeleniumExtension {
         // mongojack stuff
         BindUtils.bind( binding, this, "dboj" );
         BindUtils.bind( binding, this, "dbqj" );
+    }
+
+    public void setAddress( String address ) {
+        this.address = address;
     }
 
     public BasicDBObject dbo() {

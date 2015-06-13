@@ -1,11 +1,13 @@
 package org.scriptbox.selenium.ext;
 
 import groovy.lang.Binding;
+import org.apache.commons.lang.StringUtils;
 import org.scriptbox.selenium.GroovySeleniumMethods;
 import org.scriptbox.selenium.GroovySeleniumShell;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.util.common.args.CommandLine;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +21,8 @@ public class SeleniumExtensionContext {
     private GroovySeleniumShell shell;
     private GroovySeleniumMethods methods;
     private List<SeleniumExtension> extensions;
+    private List<String> usages = new ArrayList<String>();
+
 
     public SeleniumService getService() {
         return service;
@@ -66,5 +70,22 @@ public class SeleniumExtensionContext {
 
     public void setExtensions(List<SeleniumExtension> extensions) {
         this.extensions = extensions;
+    }
+
+    public void addUsage( String usage ) {
+        usages.add( usage );
+    }
+
+    public String getUsages() {
+        StringBuilder builder = new StringBuilder();
+        for( String usage : usages ) {
+            if( StringUtils.isNotEmpty(usage) ) {
+                if( builder.length() > 0 ) {
+                   builder.append( " " );
+                }
+                builder.append( usage );
+            }
+        }
+        return builder.toString();
     }
 }

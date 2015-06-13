@@ -14,11 +14,17 @@ import java.util.List;
 public class LibsExtension implements SeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( LibsExtension.class );
-    @Override
-    public void init(SeleniumExtensionContext context) throws Exception {
+
+    private SeleniumExtensionContext context;
+
+    public void init(SeleniumExtensionContext context) {
+        this.context = context;
+        context.addUsage( "[--libs=<filespec>]");
+    }
+
+    public void configure() throws Exception {
 
         String libs = context.getCommandLine().consumeArgValue("libs", false);
-
         if( libs != null ) {
             GroovySeleniumShell shell = context.getShell();
             List<String> parameters = context.getCommandLine().getParameters();
@@ -34,4 +40,7 @@ public class LibsExtension implements SeleniumExtension {
             }
         }
     }
+
+    public void run() { }
+
 }

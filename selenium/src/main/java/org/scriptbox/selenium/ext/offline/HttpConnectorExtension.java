@@ -4,6 +4,7 @@ import groovy.lang.Binding;
 import org.scriptbox.selenium.SeleniumService;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.slf4j.Logger;
@@ -14,23 +15,20 @@ import java.io.File;
 /**
  * Created by david on 5/28/15.
  */
-public class HttpConnectorExtension implements Bindable, SeleniumExtension {
+public class HttpConnectorExtension extends AbstractSeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnectorExtension.class);
 
     private File downloadDirectory;
     private SeleniumService service;
 
-    public HttpConnectorExtension() {
+
+    public void configure() throws Exception {
+        service = context.getService();
+        downloadDirectory = context.getService().getOptions().getDownloadDirectory();
+        bind(context.getBinding());
     }
 
-    public void init( SeleniumExtensionContext ctx ) {
-        service = ctx.getService();
-        downloadDirectory = ctx.getService().getOptions().getDownloadDirectory();
-        bind(ctx.getBinding());
-    }
-
-    @Override
     public void bind(Binding binding) {
         BindUtils.bind( binding, this, "http" );
 

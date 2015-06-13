@@ -3,6 +3,7 @@ package org.scriptbox.selenium.ext.event;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import org.scriptbox.selenium.bind.BindUtils;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.slf4j.Logger;
@@ -11,17 +12,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by david on 5/29/15.
  */
-public class EventBusExtension implements SeleniumExtension {
+public class EventBusExtension extends AbstractSeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( EventBusExtension.class );
 
     private EventBus bus;
 
-    public EventBusExtension() {
-    }
-
-    public void init(SeleniumExtensionContext context) throws Exception {
-
+    public void configure() throws Exception {
         Binding binding = context.getBinding();
         BindUtils.bind(binding, this, "observe");
         BindUtils.bind(binding, this, "subscribe");

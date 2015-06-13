@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, SeleniumExtension {
+public class GroovySeleniumMethods extends SeleniumMethods implements Bindable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( GroovySeleniumMethods.class );
 
@@ -24,11 +24,6 @@ public class GroovySeleniumMethods extends SeleniumMethods implements Bindable, 
     public GroovySeleniumMethods(SeleniumService service)  {
 		super( service );
     }
-
-	public void init( SeleniumExtensionContext ctx ) {
-		setService( ctx.getService() );
-		bind( ctx.getBinding() );
-	}
 
 	public void bind( Binding binding ) {
 		this.binding = binding;

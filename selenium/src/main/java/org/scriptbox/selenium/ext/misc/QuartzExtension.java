@@ -1,38 +1,31 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.misc;
 
 import groovy.lang.Binding;
 import groovy.lang.Closure;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.scriptbox.selenium.bind.BindUtils;
-import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by david on 5/28/15.
  */
-public class QuartzExtension implements Bindable, SeleniumExtension {
+public class QuartzExtension extends AbstractSeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QuartzExtension.class);
     private static final AtomicInteger count = new AtomicInteger();
 
     private Scheduler scheduler;
 
-    public void init( SeleniumExtensionContext ctx ) {
-        bind(ctx.getBinding());
+    public void configure() {
+        bind(context.getBinding());
     }
 
-    @Override
     public void bind(Binding binding) {
         BindUtils.bind(binding, this, "at");
         BindUtils.bind(binding, this, "every");

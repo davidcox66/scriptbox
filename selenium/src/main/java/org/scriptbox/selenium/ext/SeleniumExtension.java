@@ -5,5 +5,7 @@ package org.scriptbox.selenium.ext;
  */
 public interface SeleniumExtension {
 
-    public void init( SeleniumExtensionContext context ) throws Exception;
+    public void init( SeleniumExtensionContext context );
+    public void configure() throws Exception;
+    public void run() throws Exception;
 }

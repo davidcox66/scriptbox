@@ -3,6 +3,7 @@ package org.scriptbox.selenium.ext.contact;
 import groovy.lang.Binding;
 import org.apache.commons.lang.StringUtils;
 import org.scriptbox.selenium.bind.BindUtils;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.scriptbox.util.common.args.CommandLine;
@@ -17,7 +18,7 @@ import java.util.Properties;
 /**
  * Created by david on 5/29/15.
  */
-public class ContactExtension implements SeleniumExtension {
+public class ContactExtension extends AbstractSeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( ContactExtension.class );
 
@@ -28,10 +29,12 @@ public class ContactExtension implements SeleniumExtension {
 
     private Session session;
 
-    public ContactExtension() {
+    public void init(SeleniumExtensionContext context) {
+        super.init( context );
+        context.addUsage( "[--mail-host=<hostname> [--mail-port={<port>|25}] [--mail-user=<user> --mail-password=<pass>]]");
     }
 
-    public void init(SeleniumExtensionContext context) throws Exception {
+    public void configure() throws Exception {
 
         CommandLine cmd = context.getCommandLine();
 

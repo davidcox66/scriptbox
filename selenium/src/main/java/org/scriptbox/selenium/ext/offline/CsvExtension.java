@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.scriptbox.selenium.bind.BindUtils;
 import org.scriptbox.selenium.bind.Bindable;
+import org.scriptbox.selenium.ext.AbstractSeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 
@@ -16,13 +17,12 @@ import java.nio.charset.Charset;
 /**
  * Created by david on 5/28/15.
  */
-public class CsvExtension implements Bindable, SeleniumExtension {
+public class CsvExtension extends AbstractSeleniumExtension {
 
-    public void init( SeleniumExtensionContext ctx ) {
-        bind( ctx.getBinding() );
+    public void configure() throws Exception {
+        bind(context.getBinding());
     }
 
-    @Override
     public void bind(Binding binding) {
         BindUtils.bind(binding, this, "csv");
     }

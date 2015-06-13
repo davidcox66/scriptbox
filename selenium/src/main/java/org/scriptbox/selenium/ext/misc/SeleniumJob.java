@@ -1,4 +1,4 @@
-package org.scriptbox.selenium.ext;
+package org.scriptbox.selenium.ext.misc;
 
 import groovy.lang.Closure;
 import org.quartz.Job;

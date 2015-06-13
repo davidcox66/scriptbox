@@ -16,30 +16,30 @@ import java.util.Comparator;
 /**
  * Created by david on 5/28/15.
  */
-public class DownloadsExtension implements Bindable, SeleniumExtension {
+public class DownloadsExtension implements SeleniumExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadsExtension.class);
 
     private File downloadDirectory;
     private SeleniumService service;
+    private SeleniumExtensionContext context;
 
-    public DownloadsExtension() {
+    public void init( SeleniumExtensionContext context ) {
+        this.context = context;
     }
 
-    public DownloadsExtension(File downloadDirectory) {
-        this.downloadDirectory = downloadDirectory;
-    }
-
-    public void init( SeleniumExtensionContext ctx ) {
-        service = ctx.getService();
-        File dir = ctx.getService().getOptions().getDownloadDirectory();
+    public void configure() throws Exception {
+        service = context.getService();
+        File dir = context.getService().getOptions().getDownloadDirectory();
         if( dir != null ) {
             downloadDirectory = dir;
-            bind(ctx.getBinding());
+            bind(context.getBinding());
         }
     }
 
-    @Override
+    public void run() throws Exception {
+    }
+
     public void bind(Binding binding) {
         BindUtils.bind( binding, this, "latest");
         BindUtils.bind( binding, this, "downloads" );
