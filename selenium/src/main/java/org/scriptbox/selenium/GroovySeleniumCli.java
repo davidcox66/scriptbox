@@ -162,6 +162,17 @@ public class GroovySeleniumCli {
 		}
 	}
 
+    private static DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
+        DriverType[] types = DriverType.values();
+        for( DriverType type : types ) {
+            if( cmd.consumeArg(type.getName()) ) {
+                return type;
+            }
+        }
+        usage();
+        return null;
+    }
+
     private static void usage() {
         System.err.println( "Usage: GroovySeleniumCli " +
         	"{--firefox [--profile <profile path>] | --chrome [--url <url>] | --ie} " +
@@ -171,14 +182,4 @@ public class GroovySeleniumCli {
         System.exit( 1 );
     }
 
-    private static DriverType getDriverType( CommandLine cmd ) throws CommandLineException {
-    	DriverType[] types = DriverType.values();
-    	for( DriverType type : types ) {
-    		if( cmd.consumeArg(type.getName()) ) {
-    			return type;
-    		}
-    	}
-    	usage();
-    	return null;
-    }
 }

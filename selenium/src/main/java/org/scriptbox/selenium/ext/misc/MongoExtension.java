@@ -1,6 +1,8 @@
 package org.scriptbox.selenium.ext.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.mongodb.*;
 import groovy.lang.Binding;
@@ -14,6 +16,8 @@ import org.scriptbox.selenium.ext.SeleniumExtension;
 import org.scriptbox.selenium.ext.SeleniumExtensionContext;
 import org.scriptbox.util.common.args.CommandLine;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -106,13 +110,29 @@ public class MongoExtension extends AbstractSeleniumExtension {
         String dbName,
         String collectionName,
         Class<E> elementType,
+        Class<K> keyType)
+    {
+        return dbcoll( dbName, collectionName, elementType, keyType, true );
+    }
+
+    public <E,K> JacksonDBCollection<E,K> dbcoll(
+        String dbName,
+        String collectionName,
+        Class<E> elementType,
         Class<K> keyType,
         boolean stream )
     {
         DBCollection coll = dbcoll(dbName,collectionName);
 
         ObjectMapper objectMapper = new ObjectMapper();
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(BigInteger.class, new ToStringSerializer());
+        module.addSerializer(BigDecimal.class, new ToStringSerializer());
+        objectMapper.registerModule(module);
+
         objectMapper.registerModule( new JodaModule() );
+
         MongoJackModule.configure(objectMapper);
 
         JacksonDBCollection<E, K> jack = JacksonDBCollection.wrap(coll, elementType, keyType, objectMapper);
